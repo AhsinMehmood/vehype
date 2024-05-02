@@ -1,0 +1,448 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+// import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/message_model.dart';
+import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/offers_received_details.dart';
+import 'package:path/path.dart' as p;
+import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:video_compress/video_compress.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+
+import '../Pages/repair_page.dart';
+import 'user_controller.dart';
+
+class ChatController with ChangeNotifier {
+  final DatabaseReference _chatsref =
+      FirebaseDatabase.instance.ref().child('chats');
+  final DatabaseReference _messagesRef =
+      FirebaseDatabase.instance.ref().child('messages');
+
+  Future<String> createChat(
+      UserModel currentUser,
+      UserModel secondUser,
+      String offerRequestId,
+      OffersModel offersModel,
+      String notificationTitle,
+      String notificationSubtitle,
+      String type) async {
+    DocumentReference<Map<String, dynamic>> reference =
+        await FirebaseFirestore.instance.collection('chats').add({
+      'members': [
+        currentUser.userId,
+        secondUser.userId,
+      ],
+      'lastOpen': {
+        currentUser.userId: DateTime.now().toUtc().toIso8601String(),
+        secondUser.userId: DateTime.now().toUtc().toIso8601String()
+      },
+      'offerId': offersModel.offerId,
+      'offerRequestId': offerRequestId,
+      'lastMessageMe': currentUser.userId,
+      'lastMessageAt': DateTime.now().toUtc().toIso8601String(),
+      'text': 'Start the chat with',
+    });
+
+    await _messagesRef.child(reference.id).child('systemMessage').set({
+      'sentAt': DateTime.now().toUtc().toIso8601String(),
+      'sentById': currentUser.userId,
+      'isSystemMessage': true,
+      'text': 'Start the chat with',
+      'pushToken': secondUser.pushToken,
+      'senderName': currentUser.name,
+      'chatId': currentUser.userId + secondUser.userId + offersModel.offerId,
+      'state': 0,
+    });
+
+    sendNotification(
+        secondUser.userId,
+        currentUser.name,
+        'New Message',
+        '${currentUser.name}, Sent you a message',
+        reference.id,
+        'Message',
+        'systemMessage');
+    return reference.id;
+  }
+
+  Future<ChatModel?> getChat(
+      String currentUserId, String secondUserId, String offerId) async {
+    // print(secondUser.id);
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('chats')
+          .where('members', arrayContains: currentUserId)
+          .where('offerId', isEqualTo: offerId)
+          .get();
+      if (snapshot.docs.isEmpty) {
+        return null;
+      } else {
+        List<ChatModel> chats = [];
+        for (var element in snapshot.docs) {
+          chats.add(ChatModel.fromJson(element));
+        }
+
+        ChatModel? chatModel = chats.firstWhereOrNull(
+            (element) => element.members.contains(secondUserId));
+        return chatModel;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Stream<ChatModel> getSingleChatStream(String chatId) {
+    return FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .snapshots()
+        .map((event) => ChatModel.fromJson(event));
+  }
+
+  String? lastMessageKey;
+  Stream<List<MessageModel>> paginatedMessageStream(
+    String userId,
+    String chatId,
+    int limit,
+  ) {
+    StreamController<List<MessageModel>> _streamController =
+        StreamController<List<MessageModel>>();
+
+    var query = _messagesRef.child(chatId).orderByChild('sentAt');
+
+    query.onValue.listen((event) {
+      if (event.snapshot.value == null) {
+        _streamController.add(<MessageModel>[]);
+        return;
+      }
+
+      final Map<dynamic, dynamic> messageData =
+          event.snapshot.value as Map<dynamic, dynamic>;
+      final List<MessageModel> messages = [];
+
+      messageData.forEach((key, data) {
+        final message = MessageModel(
+          isSystemMessage: data['isSystemMessage'] ?? false,
+          id: key,
+          sentAt: data['sentAt'] ?? '',
+          sentById: data['sentById'] ?? '',
+          text: data['text'] ?? "",
+          thumbnailUrl: data['thumbnailUrl'] ?? '',
+          mediaUrl: data['mediaUrl'] ?? '',
+          isVideo: data['isVideo'] ?? false,
+          state: data['state'] ?? 1,
+        );
+        messages.add(message);
+      });
+      messages.sort((a, b) => b.sentAt.compareTo(a.sentAt));
+
+      _streamController.add(messages);
+    }, onError: (error) {
+      print(error);
+    });
+
+    return _streamController.stream;
+  }
+
+  getUnread(String sentAt, String lastOpen, BuildContext context) {
+    bool unreadMessage = DateTime.parse(sentAt)
+            .toLocal()
+            .difference(DateTime.parse(lastOpen).toLocal())
+            .inSeconds >
+        0;
+    Provider.of<UserController>(context, listen: false)
+        .changeRead(unreadMessage);
+
+    // return unreadMessage;
+  }
+
+  Stream<List<ChatModel>> chatsStream(
+    String userId,
+    BuildContext context,
+  ) {
+    return FirebaseFirestore.instance
+        .collection('chats')
+        .where('members', arrayContains: userId)
+        .snapshots()
+        .map((QuerySnapshot<Map<String, dynamic>> querySnapshot) {
+      // print(chatsData.values.first['messages']);
+      List<ChatModel> chats = [];
+      for (QueryDocumentSnapshot<Map<String, dynamic>> element
+          in querySnapshot.docs) {
+        chats.add(ChatModel.fromJson(element));
+      }
+      chats.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
+      for (var element in chats) {
+        getUnread(element.lastMessageAt, element.lastOpen[userId], context);
+      }
+      return chats;
+    }).handleError((errors) {
+      print(errors);
+    });
+  }
+
+  List<MediaModel> pickedMedia = [];
+  bool uploading = false;
+  bool isVideo = false;
+
+  bool isImageOrVideo(String? filePath) {
+    if (filePath == null) {
+      return false;
+    }
+
+    String extension = p.extension(filePath).toLowerCase();
+
+    List<String> imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
+    List<String> videoExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv'];
+    if (imageExtensions.contains(extension)) {
+      return false;
+    }
+    return videoExtensions.contains(extension);
+  }
+
+  String mediaUrl = '';
+  String thumnailUrlCr = '';
+  cleanController() {
+    pickedMedia = [];
+    uploading = false;
+    isVideo = false;
+    mediaUrl = '';
+    thumnailUrlCr = '';
+    notifyListeners();
+  }
+
+  pickMediaMessage(UserModel userModel) async {
+    isVideo = false;
+    notifyListeners();
+    final ImagePicker picker = ImagePicker();
+
+    // final XFile? media = await picker.pickMedia();
+    List<XFile> medias = await picker.pickMultipleMedia(
+      imageQuality: 50,
+    );
+    if (medias.isNotEmpty) {
+      for (var i = 0; i < medias.length; i++) {
+        XFile element = medias[i];
+        pickedMedia.add(MediaModel(
+            uploading: true,
+            id: i,
+            thumbnailUrl: '',
+            uploadedUrl: '',
+            isVideo: isImageOrVideo(element.path),
+            file: File(element.path)));
+        notifyListeners();
+      }
+
+      for (var i = 0; i < pickedMedia.length; i++) {
+        MediaModel mediaModel = pickedMedia[i];
+
+        if (isImageOrVideo(mediaModel.file.path)) {
+          MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+            mediaModel.file.path,
+            quality: VideoQuality.MediumQuality,
+            deleteOrigin: false, // It's false by default
+          );
+          String url = await uploadMedia(mediaInfo!.file!, userModel.userId);
+
+          final Directory tempDir = await getTemporaryDirectory();
+          final String tempPath = tempDir.path;
+
+          final String thumbnailPath =
+              '$tempPath/${DateTime.now().microsecondsSinceEpoch}.png';
+
+          // Generate thumbnail
+          await FFmpegKit.execute(
+              '-i ${mediaModel.file.path} -ss 00:00:01.000 -vframes 1 $thumbnailPath');
+
+          String thumnailUrl =
+              await uploadMedia(File(thumbnailPath), userModel.userId);
+
+          pickedMedia.removeAt(i);
+          pickedMedia.insert(
+              i,
+              MediaModel(
+                  id: i,
+                  thumbnailUrl: thumnailUrl,
+                  uploading: false,
+                  uploadedUrl: url,
+                  isVideo: true,
+                  file: mediaModel.file));
+
+          notifyListeners();
+        } else {
+          String url =
+              await uploadMedia(File(mediaModel.file.path), userModel.userId);
+          pickedMedia.removeAt(i);
+          pickedMedia.insert(
+              i,
+              MediaModel(
+                  id: i,
+                  thumbnailUrl: '',
+                  uploading: false,
+                  uploadedUrl: url,
+                  isVideo: false,
+                  file: mediaModel.file));
+          notifyListeners();
+        }
+      }
+    }
+  }
+
+  removeMedia(MediaModel mediaModel) {
+    pickedMedia.remove(mediaModel);
+    notifyListeners();
+  }
+
+  Future<String> uploadMedia(File file, String userId) async {
+    final storageRef = FirebaseStorage.instance.ref();
+    final extension = p.extension(file.path); // '.dart'
+    print(extension);
+    final poiImageRef = storageRef.child(
+        "users/$userId/${DateTime.now().microsecondsSinceEpoch}$extension");
+    await poiImageRef.putData(file.readAsBytesSync());
+    // uploadTaskOne!.
+    String imageUrl = await poiImageRef.getDownloadURL();
+
+    // uploading = false;
+    // notifyListeners();
+    print(imageUrl);
+    return imageUrl;
+  }
+
+  updateChatTime(
+    UserModel currentUser,
+    ChatModel chatModel,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatModel.id)
+        .update({
+      'lastOpen.${currentUser.userId}':
+          DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
+  sendMessage(
+      UserModel currentUser,
+      ChatModel chatModel,
+      String message,
+      UserModel secondUser,
+      String mediaUrls,
+      String thumbnailUrl,
+      bool isVide) async {
+    DatabaseReference reference = _messagesRef.child(chatModel.id).push();
+    await reference.set({
+      'sentAt': DateTime.now().toUtc().toIso8601String(),
+      'sentById': currentUser.userId,
+      'text': message,
+      'mediaUrl': mediaUrls,
+      'isVideo': isVide,
+      'thumbnailUrl': thumbnailUrl,
+      'senderName': currentUser.name,
+      'pushToken': secondUser.pushToken,
+      'chatId': chatModel.id,
+      'state': 0,
+    });
+
+    // notifyListeners();
+    sendNotification(
+      secondUser.userId,
+      currentUser.name,
+      'New Message',
+      '${currentUser.name}, Sent you a message',
+      chatModel.id,
+      'Message',
+      reference.key!,
+    );
+
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatModel.id)
+        .update({
+      'lastMessageAt': DateTime.now().toUtc().toIso8601String(),
+      'text': message,
+      'lastMessageMe': currentUser.userId,
+    });
+  }
+
+  Future<File?> saveVideoAndGetFile(String videoUrl) async {
+    String fileName = videoUrl.split('/').last;
+
+    try {
+      Dio dio = Dio();
+
+      String savePath = Platform.isIOS
+          ? '${(await getLibraryDirectory()).path}/$fileName'
+          : '${(await getApplicationDocumentsDirectory()).path}/$fileName';
+      FirebaseFirestore.instance.collection('videoPaths').add({
+        'path': savePath,
+        'at': DateTime.now().toUtc(),
+      });
+      File file = File(savePath);
+      print(savePath);
+      if (await file.exists()) {
+        return file;
+      } else {
+        await dio.download(videoUrl, savePath);
+        file = File(savePath);
+        return file;
+      }
+    } catch (exception) {
+      FirebaseFirestore.instance.collection('errors').add({
+        'error': exception.toString(),
+        'at': DateTime.now().toUtc(),
+      });
+      // await Sentry.captureException(
+      //   exception,
+      //   stackTrace: stackTrace,
+      // );
+      return null;
+    }
+  }
+
+  deleteChat(String chatId) async {
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+    Get.close(1);
+  }
+
+  updateMessage(String chatId, String messageId, int state) async {
+    await _messagesRef.child(chatId).child(messageId).update({
+      'state': 1,
+    });
+  }
+}
+
+class MediaModel {
+  final bool uploading;
+  final String uploadedUrl;
+  final bool isVideo;
+  final File file;
+  final int id;
+  final String thumbnailUrl;
+
+  MediaModel(
+      {required this.id,
+      required this.thumbnailUrl,
+      required this.uploading,
+      required this.uploadedUrl,
+      required this.isVideo,
+      required this.file});
+}

@@ -1,0 +1,87 @@
+{
+  "project_info": {
+    "project_number": "832920203889",
+    "firebase_url": "https://vehype-386313-default-rtdb.firebaseio.com",
+    "project_id": "vehype-386313",
+    "storage_bucket": "vehype-386313.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:832920203889:android:200544c1b271499bcce1d0",
+        "android_client_info": {
+          "package_name": "com.nomadllc.vehype"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "832920203889-a3l0oj4m2pnc1210ogbstqg9gb1dtugq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "f43b74dda8c93ac8f74e58494a937f2d387a1810"
+          }
+        },
+        {
+          "client_id": "832920203889-ckpspsf99keuu8p6kaelpa4vma3t922j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "97bd52bca221dfae3053f96f68bb9fe9167dc854"
+          }
+        },
+        {
+          "client_id": "832920203889-jje3aor6o1hscgl3rbkhdmk1080e24iv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "6811075d9e57b7f7466ae8aff4939d3296c64943"
+          }
+        },
+        {
+          "client_id": "832920203889-kvokjh8rsudtjfp06th9vjoupqosnjag.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "4795237618203dfd825721f35ca50598aea9cc37"
+          }
+        },
+        {
+          "client_id": "832920203889-tgcmc17hohmobp38s7qhphao3m8u1k91.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "eeed3970e7b140f239bfdb366a35eec3d605c916"
+          }
+        },
+        {
+          "client_id": "832920203889-gu6jpo31ng9j06175mhnkkj1665ub1lt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUX7TVUM2XOZJwv7GQ_2sTeZOj4SseDzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "832920203889-gu6jpo31ng9j06175mhnkkj1665ub1lt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nomadllc.vehype"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
