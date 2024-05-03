@@ -14,6 +14,7 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
+import 'choose_account_type.dart';
 import 'full_image_view_page.dart';
 import 'offers_received_details.dart';
 
@@ -339,12 +340,39 @@ class NewOfferWidget extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      await FirebaseFirestore.instance
-                          .collection('offers')
-                          .doc(offersModel.offerId)
-                          .update({
-                        'ignoredBy': FieldValue.arrayUnion([userModel.userId]),
-                      });
+                      if (userModel.email == 'No email set') {
+                        Get.showSnackbar(GetSnackBar(
+                          message: 'Login to continue',
+                          duration: const Duration(
+                            seconds: 3,
+                          ),
+                          backgroundColor: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          mainButton: TextButton(
+                            onPressed: () {
+                              Get.to(() => ChooseAccountTypePage());
+                              Get.closeCurrentSnackbar();
+                            },
+                            child: Text(
+                              'Login Page',
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                              ),
+                            ),
+                          ),
+                        ));
+                      } else {
+                        await FirebaseFirestore.instance
+                            .collection('offers')
+                            .doc(offersModel.offerId)
+                            .update({
+                          'ignoredBy':
+                              FieldValue.arrayUnion([userModel.userId]),
+                        });
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: userController.isDark
@@ -365,9 +393,35 @@ class NewOfferWidget extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => OfferReceivedDetails(
-                            offersModel: offersModel,
-                          ));
+                      if (userModel.email == 'No email set') {
+                        Get.showSnackbar(GetSnackBar(
+                          message: 'Login to continue',
+                          duration: const Duration(
+                            seconds: 3,
+                          ),
+                          backgroundColor: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          mainButton: TextButton(
+                            onPressed: () {
+                              Get.to(() => ChooseAccountTypePage());
+                              Get.closeCurrentSnackbar();
+                            },
+                            child: Text(
+                              'Login Page',
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                              ),
+                            ),
+                          ),
+                        ));
+                      } else {
+                        Get.to(() => OfferReceivedDetails(
+                              offersModel: offersModel,
+                            ));
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
