@@ -25,6 +25,7 @@ exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
 
         // Devel@per1@@
         // Vehype@pp01
+
         /////
         // offersReceived
         const querySnapshot = await userFirestorePurchasesRef.get();
