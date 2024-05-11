@@ -286,6 +286,11 @@ class MyGarage extends StatelessWidget {
                                             },
                                             child: Text(
                                               'View Requests',
+                                              style: TextStyle(
+                                                color: userController.isDark
+                                                    ? primaryColor
+                                                    : Colors.white,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(
