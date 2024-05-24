@@ -466,10 +466,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return MapLocationPicker(
+                                    return GoogleMapLocationPicker(
                                       apiKey:
                                           'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                      popOnNextButtonTaped: true,
                                       currentLatLng: LatLng(lat, long),
                                       onNext: (GeocodingResult? result) async {
                                         if (result != null) {
@@ -488,15 +487,15 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                         }
                                       },
                                       onSuggestionSelected:
-                                          (PlacesDetailsResponse?
-                                              result) async {
+                                          (Prediction? result) async {
                                         if (result != null) {
-                                          setState(() {
-                                            lat = result
-                                                .result.geometry!.location.lat;
-                                            long = result
-                                                .result.geometry!.location.lng;
-                                          });
+                                          // setState(() {
+
+                                          //   lat = result.
+                                          //       .geometry!.location.lat;
+                                          //   long = result
+                                          //       .result.geometry!.location.lng;
+                                          // });
                                           final GoogleMapController controller =
                                               await _controller.future;
                                           await controller.animateCamera(
@@ -543,7 +542,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               ),
               InkWell(
                 onTap: () {
-                  // completeProfileProvider.selectImages(0, context);
+                  // garageController.selectImage(0, context);
                   garageController.selectImage(context, userModel, 0);
                 },
                 child: Container(
