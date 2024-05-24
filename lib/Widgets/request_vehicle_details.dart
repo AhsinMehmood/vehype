@@ -8,6 +8,7 @@ import 'package:vehype/const.dart';
 import '../Controllers/user_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/offers_model.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class VehicleDetailsRequest extends StatelessWidget {
   const VehicleDetailsRequest({
@@ -31,6 +32,8 @@ class VehicleDetailsRequest extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final createdAt = DateTime.parse(offersModel.createdAt);
+
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: Column(
@@ -157,6 +160,30 @@ class VehicleDetailsRequest extends StatelessWidget {
                 ),
                 Text(
                   vehicleModle,
+                  style: TextStyle(
+                    fontFamily: 'Avenir',
+                    fontWeight: FontWeight.w400,
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  'Time Ago',
+                  style: TextStyle(
+                    fontFamily: 'Avenir',
+                    fontWeight: FontWeight.w400,
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  timeago.format(createdAt),
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,

@@ -12,6 +12,7 @@ import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 import '../Widgets/loading_dialog.dart';
 import 'choose_account_type.dart';
@@ -58,6 +59,7 @@ class NewOffers extends StatelessWidget {
                 .toList();
             List<OffersModel> offers = userController.filterOffers(
                 blockedUsers, userModel.lat, userModel.long, 100);
+
             if (offers.isEmpty) {
               return Center(
                 child: Text(
@@ -118,6 +120,8 @@ class NewOfferWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final createdAt = DateTime.parse(offersModel.createdAt);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
@@ -273,6 +277,34 @@ class NewOfferWidget extends StatelessWidget {
                         ),
                         Text(
                           vehicleModle,
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'Time Ago',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          timeago.format(createdAt),
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,

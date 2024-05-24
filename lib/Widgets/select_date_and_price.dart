@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
@@ -352,14 +353,36 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                       const SizedBox(
                         width: 15,
                       ),
-                      Text(
-                        'I Agree to VEHYPE Ratings Policy.',
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w400,
-                          // color: Colors.black,
-                          fontSize: 16,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'I agree to VEHYPE ratings policy.',
+                            style: TextStyle(
+                              fontFamily: 'Avenir',
+                              fontWeight: FontWeight.w400,
+                              // color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              await launchUrl(
+                                  Uri.parse('https://vehype.com/help#'));
+                            },
+                            child: Text(
+                              ' See how rating works.',
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.red,
+                                fontFamily: 'Avenir',
+                                color: Colors.red,
+                                fontWeight: FontWeight.w400,
+                                // color: Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

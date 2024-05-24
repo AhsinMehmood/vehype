@@ -36,6 +36,7 @@ class VehicleOwnerRequestWidget extends StatelessWidget {
     final String vehicleMake = vehicleInfo[1];
     final String vehicleYear = vehicleInfo[2];
     final String vehicleModle = vehicleInfo[3];
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(

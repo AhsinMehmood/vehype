@@ -15,6 +15,7 @@ class OffersModel {
   final List offersReceived;
   final List ignoredBy;
   final String status;
+  final String createdAt;
   final String garageId;
 
   OffersModel(
@@ -31,6 +32,7 @@ class OffersModel {
       required this.lat,
       required this.long,
       required this.description,
+      required this.createdAt,
       required this.imageOne});
 
   factory OffersModel.fromJson(
@@ -40,6 +42,7 @@ class OffersModel {
     String id = snapshot.id;
     return OffersModel(
         offerId: id,
+        createdAt: data['createdAt'] ?? DateTime.now().toIso8601String(),
         garageId: data['garageId'] ?? '',
         ignoredBy: data['ignoredBy'] ?? [],
         offersReceived: data['offersReceived'] ?? [],

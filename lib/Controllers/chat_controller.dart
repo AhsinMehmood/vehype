@@ -382,33 +382,29 @@ class ChatController with ChangeNotifier {
     });
   }
 
+  Dio dio = Dio();
+
   Future<File?> saveVideoAndGetFile(String videoUrl) async {
     String fileName = videoUrl.split('/').last;
 
     try {
-      Dio dio = Dio();
-
       String savePath = Platform.isIOS
-          ? '${(await getLibraryDirectory()).path}/$fileName'
+          ? '${(await getApplicationDocumentsDirectory()).path}/$fileName'
           : '${(await getApplicationDocumentsDirectory()).path}/$fileName';
-      FirebaseFirestore.instance.collection('videoPaths').add({
-        'path': savePath,
-        'at': DateTime.now().toUtc(),
-      });
-      File file = File(savePath);
-      print(savePath);
+
+      File file = File.fromUri(Uri.parse(savePath));
       if (await file.exists()) {
+        print('savePath');
+
         return file;
       } else {
         await dio.download(videoUrl, savePath);
-        file = File(savePath);
+        print('new diqb');
+
+        file = File.fromUri(Uri.parse(savePath));
         return file;
       }
     } catch (exception) {
-      FirebaseFirestore.instance.collection('errors').add({
-        'error': exception.toString(),
-        'at': DateTime.now().toUtc(),
-      });
       // await Sentry.captureException(
       //   exception,
       //   stackTrace: stackTrace,

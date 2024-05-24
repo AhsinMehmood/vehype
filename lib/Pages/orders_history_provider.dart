@@ -29,6 +29,7 @@ import 'full_image_view_page.dart';
 import 'offers_received_details.dart';
 import 'offers_tab_page.dart';
 import 'received_offers_seeker.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class OrdersHistoryProvider extends StatefulWidget {
   const OrdersHistoryProvider({super.key});
@@ -127,15 +128,19 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                       userController: userController, userModel: userModel),
                   Offers(
                       userController: userController,
+                      emptyText: 'No Pending Offers',
                       offersPending: offersPending),
                   Offers(
                       userController: userController,
+                      emptyText: 'No Upcoming Offers',
                       offersPending: upcomingOffers),
                   Offers(
                       userController: userController,
+                      emptyText: 'No Completed Offers',
                       offersPending: offersCompleted),
                   Offers(
                       userController: userController,
+                      emptyText: 'No Cancelled Offers',
                       offersPending: offersCencelled),
                 ],
               );
@@ -150,7 +155,10 @@ class Offers extends StatelessWidget {
     super.key,
     required this.userController,
     required this.offersPending,
+    required this.emptyText,
   });
+
+  final String emptyText;
 
   final UserController userController;
   final List<OffersReceivedModel> offersPending;

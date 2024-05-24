@@ -120,12 +120,27 @@ class _VideoPlayerNetworkState extends State<VideoPlayerNetwork> {
       });
       Future.delayed(const Duration(seconds: 0)).then((value) async {
         if (Platform.isIOS) {
-          flickManager = FlickManager(
-              videoPlayerController:
-                  VideoPlayerController.networkUrl(Uri.parse(widget.url)));
-          setState(() {
-            loading = false;
-          });
+          file = await ChatController().saveVideoAndGetFile(widget.url);
+          if (file != null) {
+            flickManager = FlickManager(
+                videoPlayerController: VideoPlayerController.file(file!));
+            setState(() {
+              loading = false;
+            });
+          } else {
+            flickManager = FlickManager(
+                videoPlayerController:
+                    VideoPlayerController.networkUrl(Uri.parse(widget.url)));
+            setState(() {
+              loading = false;
+            });
+          }
+          // flickManager = FlickManager(
+          //     videoPlayerController:
+          //         VideoPlayerController.networkUrl(Uri.parse(widget.url)));
+          // setState(() {
+          //   loading = false;
+          // });
         } else {
           file = await ChatController().saveVideoAndGetFile(widget.url);
           if (file != null) {

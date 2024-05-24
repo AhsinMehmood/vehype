@@ -17,7 +17,7 @@ exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
         const userFirestorePurchasesRef = admin.firestore().collection('offers').where('ownerId', '==', uid);
 
         // const offersReceived = admin.firestore().collection('offers').doc().collection('offersReceived').where('ownerId', '==', uid);
-
+        /// 35116023
         //////
 
 

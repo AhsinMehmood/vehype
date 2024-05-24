@@ -6,17 +6,21 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Controllers/vehicle_data.dart';
+import '../Models/garage_model.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import 'select_vehicle_crv.dart';
 
 class SelectServiceCreateVehicle extends StatelessWidget {
   final OffersModel? offersModel;
-  const SelectServiceCreateVehicle({super.key, required this.offersModel});
+  final GarageModel? garageModel;
+  const SelectServiceCreateVehicle(
+      {super.key, required this.offersModel, this.garageModel});
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +157,19 @@ class SelectServiceCreateVehicle extends StatelessWidget {
             ? null
             : ElevatedButton(
                 onPressed: () async {
-                  Get.to(() => SelectVehicleCreateRequest(
-                        offersModel: offersModel,
-                      ));
+                  if (garageModel == null) {
+                    Get.to(() => SelectVehicleCreateRequest(
+                          offersModel: offersModel,
+                        ));
+                  } else {
+                    garageController.selectVehicle(
+                        '${garageModel!.bodyStyle}, ${garageModel!.make}, ${garageModel!.year}, ${garageModel!.model}',
+                        garageModel!.imageOne,
+                        garageModel!.garageId);
+                    Get.to(() => CreateRequestPage(
+                          offersModel: offersModel,
+                        ));
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                     backgroundColor:
