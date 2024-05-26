@@ -171,7 +171,8 @@ Future<String> getJwtToken() async {
 }
 
 List<Service> getServices() {
-  return [
+  List<Service> services = [
+    Service(name: "AC (Air conditioning)", image: icAc),
     Service(name: "Diagnostics", image: icDiagnostic),
     Service(name: "Detailing", image: icDetailing),
     Service(name: "Towing", image: icTowing),
@@ -191,10 +192,12 @@ List<Service> getServices() {
     Service(name: "Engine", image: icEngine),
     Service(name: "Brake system", image: icBreakSystem),
     Service(name: "Emission", image: icEmissions),
-    Service(name: "AC (Air conditioning)", image: icAc),
     Service(name: "Suspension/Chassis", image: icSuspenssionChassis),
     Service(name: "Drivetrain", image: icDrivetrain),
   ];
+
+  services.sort((a, b) => a.name.compareTo(b.name));
+  return services;
 }
 
 class Service {

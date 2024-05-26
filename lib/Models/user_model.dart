@@ -18,7 +18,9 @@ class UserModel {
   final List blockedUsers;
   final List blockedBy;
   final String secondId;
-
+  final String businessInfo;
+  final String contactInfo;
+  final String website;
   UserModel(
     this.userId,
     this.profileUrl,
@@ -37,6 +39,9 @@ class UserModel {
     this.blockedUsers,
     this.blockedBy,
     this.secondId,
+    this.businessInfo,
+    this.contactInfo,
+    this.website,
   );
 
   factory UserModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -65,6 +70,9 @@ class UserModel {
       data['blockedUsers'] ?? [],
       data['blockedBy'] ?? [],
       data['secondId'] ?? '',
+      data['businessInfo'] ?? '',
+      data['contactInfo'] ?? '',
+      data['website'] ?? '',
     );
   }
 

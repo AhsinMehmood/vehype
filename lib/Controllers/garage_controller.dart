@@ -330,7 +330,7 @@ class GarageController with ChangeNotifier {
   }
 
   bool saveButtonValidation2() {
-    if (selectedVehicle != '' && selectedIssue != '') {
+    if (selectedVehicle != '' && selectedIssue != '' && !imageTwoLoading) {
       return true;
     } else {
       return false;

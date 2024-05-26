@@ -42,10 +42,10 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
     final GarageController garageController =
         Provider.of<GarageController>(context);
     List<String> vehicleInfo = widget.offersModel.vehicleId.split(',');
-    final String vehicleType = vehicleInfo[0];
-    final String vehicleMake = vehicleInfo[1];
-    final String vehicleYear = vehicleInfo[2];
-    final String vehicleModle = vehicleInfo[3];
+    final String vehicleType = vehicleInfo[0].trim();
+    final String vehicleMake = vehicleInfo[1].trim();
+    final String vehicleYear = vehicleInfo[2].trim();
+    final String vehicleModle = vehicleInfo[3].trim();
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(

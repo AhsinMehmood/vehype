@@ -586,7 +586,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.29',
+                        'App Version: 3.0.3.30',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

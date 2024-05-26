@@ -26,22 +26,28 @@ import 'comments_page.dart';
 import 'full_image_view_page.dart';
 import 'message_page.dart';
 
-class OfferReceivedDetails extends StatelessWidget {
+class OfferReceivedDetails extends StatefulWidget {
   final OffersModel offersModel;
   final bool isChat;
   const OfferReceivedDetails(
       {super.key, required this.offersModel, this.isChat = false});
 
   @override
+  State<OfferReceivedDetails> createState() => _OfferReceivedDetailsState();
+}
+
+class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
+  PageController pageController = PageController();
+  int currentInde = 0;
+  @override
   Widget build(BuildContext context) {
-    final PageController imagePageController = PageController();
     final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = userController.userModel!;
     final GarageController garageController =
         Provider.of<GarageController>(context);
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      appBar: isChat
+      appBar: widget.isChat
           ? null
           : AppBar(
               backgroundColor:
@@ -58,7 +64,7 @@ class OfferReceivedDetails extends StatelessWidget {
                     color: userController.isDark ? Colors.white : primaryColor,
                   )),
               title: Text(
-                offersModel.vehicleId,
+                widget.offersModel.vehicleId,
                 style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
                   fontSize: 18,
@@ -70,11 +76,11 @@ class OfferReceivedDetails extends StatelessWidget {
         child: StreamBuilder<UserModel>(
             stream: FirebaseFirestore.instance
                 .collection('users')
-                .doc(offersModel.ownerId)
+                .doc(widget.offersModel.ownerId)
                 .snapshots()
                 .map((event) => UserModel.fromJson(event)),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (!snapshot.hasData) {
                 return Column(
                   children: [
                     SizedBox(
@@ -97,45 +103,106 @@ class OfferReceivedDetails extends StatelessWidget {
                     const SizedBox(
                       height: 20,
                     ),
-                    if (offersModel.imageOne != '')
-                      SizedBox(
-                        width: Get.width * 0.9,
-                        height: Get.width * 0.35,
-                        child: Stack(
+                    SizedBox(
+                        width: Get.width,
+                        height: Get.width * 0.3,
+                        child: PageView(
+                          controller: pageController,
+                          onPageChanged: (value) {
+                            setState(() {
+                              currentInde = value;
+                            });
+                          },
                           children: [
-                            PageView(
-                              controller: imagePageController,
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    Get.to(() => FullImagePageView(
-                                          url: offersModel.imageOne,
-                                        ));
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: ExtendedImage.network(
-                                      offersModel.imageOne,
-                                      width: Get.width * 0.9,
-                                      height: Get.width * 0.35,
-                                      fit: BoxFit.cover,
-                                      cache: true,
-                                      // border: Border.all(color: Colors.red, width: 1.0),
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10.0)),
-                                      //cancelToken: cancellationToken,
-                                    ),
+                            if (widget.offersModel.imageOne != '')
+                              InkWell(
+                                onTap: () {
+                                  Get.to(() => FullImagePageView(
+                                        url: widget.offersModel.imageOne,
+                                      ));
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: ExtendedImage.network(
+                                    widget.offersModel.imageOne,
+                                    width: Get.width,
+                                    height: Get.width * 0.3,
+                                    fit: BoxFit.cover,
+                                    cache: true,
+                                    // border: Border.all(color: Colors.red, width: 1.0),
+                                    shape: BoxShape.rectangle,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10.0)),
+                                    //cancelToken: cancellationToken,
                                   ),
                                 ),
-                              ],
+                              ),
+                            if (widget.offersModel.imageTwo != '')
+                              InkWell(
+                                onTap: () {
+                                  Get.to(() => FullImagePageView(
+                                        url: widget.offersModel.imageTwo,
+                                      ));
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: ExtendedImage.network(
+                                    widget.offersModel.imageTwo,
+                                    width: Get.width,
+                                    height: Get.width * 0.3,
+                                    fit: BoxFit.cover,
+                                    cache: true,
+                                    // border: Border.all(color: Colors.red, width: 1.0),
+                                    shape: BoxShape.rectangle,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10.0)),
+                                    //cancelToken: cancellationToken,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        )),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: 15,
+                      width: Get.width,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 12,
+                              width: 12,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(200),
+                                color: currentInde == 0
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              height: 12,
+                              width: 12,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(200),
+                                color: currentInde == 1
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
                             ),
                           ],
                         ),
                       ),
+                    ),
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.center,
@@ -229,7 +296,7 @@ class OfferReceivedDetails extends StatelessWidget {
                             height: 5,
                           ),
                           Text(
-                            offersModel.vehicleId,
+                            widget.offersModel.vehicleId,
                             style: TextStyle(
                               fontFamily: 'Avenir',
                               fontWeight: FontWeight.w400,
@@ -261,7 +328,8 @@ class OfferReceivedDetails extends StatelessWidget {
                               SvgPicture.asset(
                                   getServices()
                                       .firstWhere((element) =>
-                                          element.name == offersModel.issue)
+                                          element.name ==
+                                          widget.offersModel.issue)
                                       .image,
                                   color: userController.isDark
                                       ? Colors.white
@@ -272,7 +340,7 @@ class OfferReceivedDetails extends StatelessWidget {
                                 width: 8,
                               ),
                               Text(
-                                offersModel.issue,
+                                widget.offersModel.issue,
                                 style: TextStyle(
                                   fontFamily: 'Avenir',
                                   fontWeight: FontWeight.w400,
@@ -311,9 +379,9 @@ class OfferReceivedDetails extends StatelessWidget {
                             height: 10,
                           ),
                           Text(
-                            offersModel.description == ''
+                            widget.offersModel.description == ''
                                 ? 'Details will be provided on Chat.'
-                                : offersModel.description,
+                                : widget.offersModel.description,
                             style: TextStyle(
                               fontFamily: 'Avenir',
                               fontWeight: FontWeight.w400,
@@ -356,9 +424,9 @@ class OfferReceivedDetails extends StatelessWidget {
                               height: 10,
                             ),
                             Text(
-                              offersModel.additionalService == ''
+                              widget.offersModel.additionalService == ''
                                   ? 'No Additional Service'
-                                  : offersModel.additionalService,
+                                  : widget.offersModel.additionalService,
                               style: TextStyle(
                                 fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w400,
@@ -411,13 +479,13 @@ class OfferReceivedDetails extends StatelessWidget {
                                 markers: {
                                   Marker(
                                     markerId: MarkerId('current'),
-                                    position: LatLng(
-                                        offersModel.lat, offersModel.long),
+                                    position: LatLng(widget.offersModel.lat,
+                                        widget.offersModel.long),
                                   ),
                                 },
                                 initialCameraPosition: CameraPosition(
-                                  target:
-                                      LatLng(offersModel.lat, offersModel.long),
+                                  target: LatLng(widget.offersModel.lat,
+                                      widget.offersModel.long),
                                   zoom: 16.0,
                                 ),
                               ),
@@ -440,7 +508,7 @@ class OfferReceivedDetails extends StatelessWidget {
                     const SizedBox(
                       height: 40,
                     ),
-                    if (isChat == false)
+                    if (widget.isChat == false)
                       ElevatedButton(
                         onPressed: () async {
                           Get.dialog(LoadingDialog(),
@@ -448,20 +516,20 @@ class OfferReceivedDetails extends StatelessWidget {
                           ChatModel? chatModel = await ChatController().getChat(
                               userModel.userId,
                               ownerDetails.userId,
-                              offersModel.offerId);
+                              widget.offersModel.offerId);
                           if (chatModel == null) {
                             await ChatController().createChat(
                                 userModel,
                                 ownerDetails,
                                 '',
-                                offersModel,
+                                widget.offersModel,
                                 'New Message',
-                                '${userModel.name} started a chat for ${offersModel.vehicleId}',
+                                '${userModel.name} started a chat for ${widget.offersModel.vehicleId}',
                                 'chat');
                             ChatModel? newchat = await ChatController().getChat(
                               userModel.userId,
                               ownerDetails.userId,
-                              offersModel.offerId,
+                              widget.offersModel.offerId,
                             );
                             // ChatController(). updateOfferId(newchat!, userModel.userId);
 
@@ -507,13 +575,13 @@ class OfferReceivedDetails extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () {
                             // applyToJob(userModel);
-                            Get.bottomSheet(
-                                SelectDateAndPrice(
-                                  offersModel: offersModel,
-                                  ownerModel: ownerDetails,
-                                  offersReceivedModel: null,
-                                ),
-                                isScrollControlled: true);
+                            Get.to(
+                              () => SelectDateAndPrice(
+                                offersModel: widget.offersModel,
+                                ownerModel: ownerDetails,
+                                offersReceivedModel: null,
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -547,13 +615,13 @@ class OfferReceivedDetails extends StatelessWidget {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
     await FirebaseFirestore.instance
         .collection('offers')
-        .doc(offersModel.offerId)
+        .doc(widget.offersModel.offerId)
         .update({
       'offersReceived': FieldValue.arrayUnion([userModel.userId]),
     });
     await FirebaseFirestore.instance
         .collection('offers')
-        .doc(offersModel.offerId)
+        .doc(widget.offersModel.offerId)
         .collection('offersReceived')
         .add({
       'offerBy': userModel.userId,

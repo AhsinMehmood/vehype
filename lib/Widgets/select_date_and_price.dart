@@ -31,399 +31,419 @@ class SelectDateAndPrice extends StatefulWidget {
 }
 
 class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
+  TextEditingController comment = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    if (widget.offersReceivedModel != null) {
+      final GarageController garageController =
+          Provider.of<GarageController>(context, listen: false);
+      garageController.agreement = true;
+      garageController.startDate =
+          DateTime.parse(widget.offersReceivedModel!.startDate);
+      garageController.endDate =
+          DateTime.parse(widget.offersReceivedModel!.endDate);
+      comment =
+          TextEditingController(text: widget.offersReceivedModel!.comment);
+      garageController.price = widget.offersReceivedModel!.price;
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController comment = TextEditingController();
-
     final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = userController.userModel!;
     final GarageController garageController =
         Provider.of<GarageController>(context);
 
-    return BottomSheet(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+    return Scaffold(
+      backgroundColor: userController.isDark ? primaryColor : Colors.white,
+      appBar: AppBar(
+        elevation: 0.0,
+        leading: IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              color: userController.isDark ? Colors.white : primaryColor,
+            )),
+        title: Text(
+          'Send Offer',
+          style: TextStyle(
+            color: userController.isDark ? Colors.white : primaryColor,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Avenir',
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
       ),
-      onClosing: () {},
-      builder: (context) {
-        return Container(
-          height: Get.height * 0.8,
+      body: SingleChildScrollView(
+        child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: userController.isDark ? primaryColor : Colors.white,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(
-                  'Offer Details',
-                  style: TextStyle(
-                    color: userController.isDark ? Colors.white : primaryColor,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Avenir',
-                  ),
-                ),
-                const SizedBox(
-                  height: 25,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Price',
-                      style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
-                        // color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 1,
-                    ),
-                    TextFormField(
-                      onTapOutside: (s) {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                      },
-
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          prefixText: '\$ ',
-                          hintText: '0.0'
-                          // counter: const SizedBox.shrink(),
-                          ),
-                      initialValue: garageController.price == 0.0
-                          ? null
-                          : garageController.price.toString(),
-
-                      textCapitalization: TextCapitalization.sentences,
-                      keyboardType: TextInputType.number,
-                      // maxLines: 1,
-                      style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
-                        // color: changeColor(color: '7B7B7B'),
-                        fontSize: 16,
-                      ),
-                      // maxLength: 25,
-                      onChanged: (String value) =>
-                          garageController.selectPrcie(double.parse(value)),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 1,
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 1,
-                    width: Get.width,
-                    color: changeColor(color: 'D9D9D9'),
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Offer Details',
-                      style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
-                        // color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 1,
-                    ),
-                    TextFormField(
-                      onTapOutside: (s) {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                      },
-                      controller: comment,
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          hintText: 'Explain the details. e.g. Service, Parts'
-                          // counter: const SizedBox.shrink(),
-                          ),
-                      // initialValue: '',
-
-                      textCapitalization: TextCapitalization.sentences,
-                      maxLines: 3,
-                      style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
-                        // color: changeColor(color: '7B7B7B'),
-                        fontSize: 16,
-                      ),
-                      // maxLength: 25,
-                      // onChanged: (String value) => editProfileProvider
-                      //     .updateTexts(userModel, 'name', value),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 1,
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 1,
-                    width: Get.width,
-                    color: changeColor(color: 'D9D9D9'),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Select Start Date',
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w400,
-                          // color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          showDatePicker(
-                                  context: context,
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(DateTime.now().year,
-                                      DateTime.now().month + 2))
-                              .then((value) {
-                            if (value != null) {
-                              showTimePicker(
-                                      context: context,
-                                      initialTime:
-                                          TimeOfDay.fromDateTime(value))
-                                  .then((time) {
-                                if (time != null) {
-                                  DateTime newDate = DateTime(
-                                      value.year,
-                                      value.month,
-                                      value.day,
-                                      time.hour,
-                                      time.minute);
-                                  garageController.selectStartDate(newDate);
-                                }
-                              });
-                            }
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: userController.isDark
-                                ? Colors.white54
-                                : Colors.grey.shade300,
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            garageController.startDate == null
-                                ? 'Tap To Select'
-                                : formatDateTime(garageController.startDate!),
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              // color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Select End Date',
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w400,
-                          // color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          showDatePicker(
-                                  context: context,
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(DateTime.now().year,
-                                      DateTime.now().month + 2))
-                              .then((value) {
-                            if (value != null) {
-                              showTimePicker(
-                                      context: context,
-                                      initialTime:
-                                          TimeOfDay.fromDateTime(value))
-                                  .then((time) {
-                                if (time != null) {
-                                  DateTime newDate = DateTime(
-                                      value.year,
-                                      value.month,
-                                      value.day,
-                                      time.hour,
-                                      time.minute);
-                                  garageController.selectEndDate(newDate);
-                                }
-                              });
-                            }
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: userController.isDark
-                                ? Colors.white54
-                                : Colors.grey.shade300,
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            garageController.endDate == null
-                                ? 'Tap To Select'
-                                : formatDateTime(garageController.endDate!),
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              // color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                InkWell(
-                  onTap: () {
-                    garageController.changeAgree();
-                  },
-                  child: Row(
-                    children: [
-                      Transform.scale(
-                        scale: 1.2,
-                        child: Checkbox(
-                            activeColor: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            checkColor: userController.isDark
-                                ? Colors.green
-                                : Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            value: garageController.agreement,
-                            onChanged: (s) {
-                              garageController.changeAgree();
-                              // appProvider.selectPrefs(pref);
-                            }),
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            'I agree to VEHYPE ratings policy.',
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              // color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              await launchUrl(
-                                  Uri.parse('https://vehype.com/help#'));
-                            },
-                            child: Text(
-                              ' See how rating works.',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.red,
-                                fontFamily: 'Avenir',
-                                color: Colors.red,
-                                fontWeight: FontWeight.w400,
-                                // color: Colors.black,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 35,
-                ),
-                ElevatedButton(
-                  onPressed: garageController.startDate == null ||
-                          garageController.endDate == null ||
-                          garageController.price == 0.0 ||
-                          !garageController.agreement
-                      ? null
-                      : () {
-                          Get.close(1);
-
-                          applyToJob(userModel, garageController, comment);
-                        },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      elevation: 0.0,
-                      fixedSize: Size(Get.width * 0.8, 55),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3),
-                      )),
-                  child: Text(
-                    widget.offersReceivedModel == null ? 'Apply' : 'Update',
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 25,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Price',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w400,
+                      // color: Colors.black,
+                      fontSize: 16,
                     ),
                   ),
+                  const SizedBox(
+                    height: 1,
+                  ),
+                  TextFormField(
+                    onTapOutside: (s) {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
+
+                    decoration: InputDecoration(
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        prefixText: '\$ ',
+                        hintText: '0.0'
+                        // counter: const SizedBox.shrink(),
+                        ),
+                    initialValue: garageController.price == 0.0
+                        ? null
+                        : garageController.price.toString(),
+
+                    textCapitalization: TextCapitalization.sentences,
+                    keyboardType: TextInputType.number,
+                    // maxLines: 1,
+                    style: TextStyle(
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w400,
+                      // color: changeColor(color: '7B7B7B'),
+                      fontSize: 16,
+                    ),
+                    // maxLength: 25,
+                    onChanged: (String value) =>
+                        garageController.selectPrcie(double.parse(value)),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 1,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: 1,
+                  width: Get.width,
+                  color: changeColor(color: 'D9D9D9'),
                 ),
-                const SizedBox(
-                  height: 35,
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Offer Details',
+                    style: TextStyle(
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w400,
+                      // color: Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 1,
+                  ),
+                  TextFormField(
+                    onTapOutside: (s) {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
+                    controller: comment,
+                    decoration: InputDecoration(
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        hintText: 'Explain the details. e.g. Service, Parts'
+                        // counter: const SizedBox.shrink(),
+                        ),
+                    // initialValue: '',
+
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: 3,
+                    style: TextStyle(
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w400,
+                      // color: changeColor(color: '7B7B7B'),
+                      fontSize: 16,
+                    ),
+                    // maxLength: 25,
+                    // onChanged: (String value) => editProfileProvider
+                    //     .updateTexts(userModel, 'name', value),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 1,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: 1,
+                  width: Get.width,
+                  color: changeColor(color: 'D9D9D9'),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select Start Date',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        // color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(DateTime.now().year,
+                                    DateTime.now().month + 2))
+                            .then((value) {
+                          if (value != null) {
+                            showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(value))
+                                .then((time) {
+                              if (time != null) {
+                                DateTime newDate = DateTime(
+                                    value.year,
+                                    value.month,
+                                    value.day,
+                                    time.hour,
+                                    time.minute);
+                                garageController.selectStartDate(newDate);
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: userController.isDark
+                              ? Colors.white54
+                              : Colors.grey.shade300,
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          garageController.startDate == null
+                              ? 'Tap To Select'
+                              : formatDateTime(garageController.startDate!),
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            // color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select End Date',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        // color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(DateTime.now().year,
+                                    DateTime.now().month + 2))
+                            .then((value) {
+                          if (value != null) {
+                            showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(value))
+                                .then((time) {
+                              if (time != null) {
+                                DateTime newDate = DateTime(
+                                    value.year,
+                                    value.month,
+                                    value.day,
+                                    time.hour,
+                                    time.minute);
+                                garageController.selectEndDate(newDate);
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: userController.isDark
+                              ? Colors.white54
+                              : Colors.grey.shade300,
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          garageController.endDate == null
+                              ? 'Tap To Select'
+                              : formatDateTime(garageController.endDate!),
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            // color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                onTap: () {
+                  garageController.changeAgree();
+                },
+                child: Row(
+                  children: [
+                    Transform.scale(
+                      scale: 1.2,
+                      child: Checkbox(
+                          activeColor: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          checkColor: userController.isDark
+                              ? Colors.green
+                              : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          value: garageController.agreement,
+                          onChanged: (s) {
+                            garageController.changeAgree();
+                            // appProvider.selectPrefs(pref);
+                          }),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'I agree to VEHYPE ratings policy.',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            // color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            await launchUrl(
+                                Uri.parse('https://vehype.com/help#'));
+                          },
+                          child: Text(
+                            ' See how rating works.',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.red,
+                              fontFamily: 'Avenir',
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              // color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 35,
+              ),
+              ElevatedButton(
+                onPressed: garageController.startDate == null ||
+                        garageController.endDate == null ||
+                        garageController.price == 0.0 ||
+                        !garageController.agreement
+                    ? null
+                    : () {
+                        Get.close(1);
+
+                        applyToJob(userModel, garageController, comment);
+                      },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    elevation: 0.0,
+                    fixedSize: Size(Get.width * 0.8, 55),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    )),
+                child: Text(
+                  widget.offersReceivedModel == null ? 'Apply' : 'Update',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 35,
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

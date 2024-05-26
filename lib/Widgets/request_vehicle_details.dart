@@ -10,7 +10,7 @@ import '../Controllers/vehicle_data.dart';
 import '../Models/offers_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class VehicleDetailsRequest extends StatelessWidget {
+class VehicleDetailsRequest extends StatefulWidget {
   const VehicleDetailsRequest({
     super.key,
     required this.userController,
@@ -31,44 +31,117 @@ class VehicleDetailsRequest extends StatelessWidget {
   final OffersModel offersModel;
 
   @override
+  State<VehicleDetailsRequest> createState() => _VehicleDetailsRequestState();
+}
+
+class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
+  PageController pageController = PageController();
+  int currentInde = 0;
+  @override
   Widget build(BuildContext context) {
-    final createdAt = DateTime.parse(offersModel.createdAt);
+    final createdAt = DateTime.parse(widget.offersModel.createdAt);
 
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (offersModel.imageOne != '' && isShowImage)
-            SizedBox(
-              // width: Get.width * 0.9,
-              // height: Get.width * 0.9,
-              child: InkWell(
-                onTap: () {
-                  Get.to(() => FullImagePageView(
-                        url: offersModel.imageOne,
-                      ));
+          SizedBox(
+              width: Get.width,
+              height: Get.width * 0.3,
+              child: PageView(
+                controller: pageController,
+                onPageChanged: (value) {
+                  setState(() {
+                    currentInde = value;
+                  });
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: ExtendedImage.network(
-                    offersModel.imageOne,
-                    width: Get.width * 0.9,
-                    height: Get.width * 0.3,
-                    fit: BoxFit.cover,
-                    cache: true,
-                    // border: Border.all(color: Colors.red, width: 1.0),
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    //cancelToken: cancellationToken,
+                children: [
+                  if (widget.offersModel.imageOne != '' && widget.isShowImage)
+                    InkWell(
+                      onTap: () {
+                        Get.to(() => FullImagePageView(
+                              url: widget.offersModel.imageOne,
+                            ));
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: ExtendedImage.network(
+                          widget.offersModel.imageOne,
+                          width: Get.width,
+                          height: Get.width * 0.3,
+                          fit: BoxFit.cover,
+                          cache: true,
+                          // border: Border.all(color: Colors.red, width: 1.0),
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          //cancelToken: cancellationToken,
+                        ),
+                      ),
+                    ),
+                  if (widget.offersModel.imageTwo != '' && widget.isShowImage)
+                    InkWell(
+                      onTap: () {
+                        Get.to(() => FullImagePageView(
+                              url: widget.offersModel.imageTwo,
+                            ));
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: ExtendedImage.network(
+                          widget.offersModel.imageTwo,
+                          width: Get.width,
+                          height: Get.width * 0.3,
+                          fit: BoxFit.cover,
+                          cache: true,
+                          // border: Border.all(color: Colors.red, width: 1.0),
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          //cancelToken: cancellationToken,
+                        ),
+                      ),
+                    ),
+                ],
+              )),
+          const SizedBox(
+            height: 10,
+          ),
+          SizedBox(
+            height: 15,
+            width: Get.width,
+            child: Align(
+              alignment: Alignment.center,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 12,
+                    width: 12,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(200),
+                      color: currentInde == 0 ? Colors.green : Colors.grey,
+                    ),
                   ),
-                ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Container(
+                    height: 12,
+                    width: 12,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(200),
+                      color: currentInde == 1 ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                ],
               ),
             ),
-          if (offersModel.imageOne != '' && isShowImage)
-            const SizedBox(
-              height: 10,
-            ),
+          ),
+          // if (widget.offersModel.imageOne != '' && widget.isShowImage)
+          const SizedBox(
+            height: 10,
+          ),
           Padding(
             padding: const EdgeInsets.all(9),
             child: Column(
@@ -79,7 +152,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -87,11 +162,13 @@ class VehicleDetailsRequest extends StatelessWidget {
                   height: 5,
                 ),
                 Text(
-                  vehicleType,
+                  widget.vehicleType,
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 16,
                   ),
                 ),
@@ -103,7 +180,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -111,11 +190,13 @@ class VehicleDetailsRequest extends StatelessWidget {
                   height: 5,
                 ),
                 Text(
-                  vehicleMake,
+                  widget.vehicleMake,
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 16,
                   ),
                 ),
@@ -127,7 +208,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -135,11 +218,13 @@ class VehicleDetailsRequest extends StatelessWidget {
                   height: 5,
                 ),
                 Text(
-                  vehicleYear,
+                  widget.vehicleYear,
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 16,
                   ),
                 ),
@@ -151,7 +236,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -159,11 +246,13 @@ class VehicleDetailsRequest extends StatelessWidget {
                   height: 5,
                 ),
                 Text(
-                  vehicleModle,
+                  widget.vehicleModle,
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 16,
                   ),
                 ),
@@ -175,7 +264,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -187,7 +278,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 16,
                   ),
                 ),
@@ -199,7 +292,9 @@ class VehicleDetailsRequest extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: 'Avenir',
                     fontWeight: FontWeight.w400,
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 13,
                   ),
                 ),
@@ -210,23 +305,25 @@ class VehicleDetailsRequest extends StatelessWidget {
                   children: [
                     SvgPicture.asset(
                         getServices()
-                            .firstWhere(
-                                (element) => element.name == offersModel.issue)
+                            .firstWhere((element) =>
+                                element.name == widget.offersModel.issue)
                             .image,
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
+                        color: widget.userController.isDark
+                            ? Colors.white
+                            : primaryColor,
                         height: 15,
                         width: 15),
                     const SizedBox(
                       width: 8,
                     ),
                     Text(
-                      offersModel.issue,
+                      widget.offersModel.issue,
                       style: TextStyle(
                         fontFamily: 'Avenir',
                         fontWeight: FontWeight.w400,
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
+                        color: widget.userController.isDark
+                            ? Colors.white
+                            : primaryColor,
                         fontSize: 16,
                       ),
                     ),

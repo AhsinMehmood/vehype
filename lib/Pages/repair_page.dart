@@ -230,6 +230,7 @@ class RepairPage extends StatelessWidget {
                       );
                     }
                     return InActiveOffers(
+                        title: 'Check Progress',
                         offersPosted: offersPosted,
                         userController: userController);
                   }),
@@ -272,6 +273,7 @@ class RepairPage extends StatelessWidget {
                     }
                     return InActiveOffers(
                         offersPosted: offersPosted,
+                        title: 'Rated',
                         userController: userController);
                   }),
             ),
@@ -281,12 +283,12 @@ class RepairPage extends StatelessWidget {
 }
 
 class InActiveOffers extends StatelessWidget {
-  const InActiveOffers({
-    super.key,
-    required this.offersPosted,
-    required this.userController,
-  });
-
+  const InActiveOffers(
+      {super.key,
+      required this.offersPosted,
+      required this.userController,
+      required this.title});
+  final String title;
   final List<OffersModel> offersPosted;
   final UserController userController;
 
@@ -304,10 +306,10 @@ class InActiveOffers extends StatelessWidget {
                 OffersModel offersModel = offersPosted[index];
 
                 List<String> vehicleInfo = offersModel.vehicleId.split(',');
-                final String vehicleType = vehicleInfo[0];
-                final String vehicleMake = vehicleInfo[1];
-                final String vehicleYear = vehicleInfo[2];
-                final String vehicleModle = vehicleInfo[3];
+                final String vehicleType = vehicleInfo[0].trim();
+                final String vehicleMake = vehicleInfo[1].trim();
+                final String vehicleYear = vehicleInfo[2].trim();
+                final String vehicleModle = vehicleInfo[3].trim();
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
@@ -371,7 +373,7 @@ class InActiveOffers extends StatelessWidget {
                                                 BorderRadius.circular(3),
                                           )),
                                       child: Text(
-                                        '${offersReceivedModel.length} Offers',
+                                        title,
                                         style: TextStyle(
                                             color: userController.isDark
                                                 ? primaryColor

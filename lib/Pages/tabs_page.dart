@@ -31,12 +31,12 @@ class _TabsPageState extends State<TabsPage> {
   List<Widget> _body = [
     RepairPage(),
     MyGarage(),
+    ExplorePage(),
     ChatPage(),
     ProfilePage(),
   ];
   List<Widget> _body2 = [
     OrdersHistoryProvider(),
-    // ExplorePage(),
     ChatPage(),
     ProfilePage(),
   ];
@@ -48,14 +48,8 @@ class _TabsPageState extends State<TabsPage> {
     // AppController controller = Get.put(AppController());
     return Scaffold(
         body: userModel.accountType == 'seeker'
-            ? IndexedStack(
-                children: _body,
-                index: userController.tabIndex,
-              )
-            : IndexedStack(
-                children: _body2,
-                index: userController.tabIndex,
-              ),
+            ? _body[userController.tabIndex]
+            : _body2[userController.tabIndex],
         backgroundColor: Colors.white,
         bottomNavigationBar: userModel.accountType == 'seeker'
             ? bottomNavigationBarSeeker()
@@ -81,6 +75,7 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) {
+        print(userModel.userId);
         userController.changeTabIndex(index);
         userController.checkIsAdmin(userModel.email);
       },
@@ -109,6 +104,8 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) {
+        print(userModel.userId);
+
         userController.checkIsAdmin(userModel.email);
 
         userController.changeTabIndex(index);
@@ -233,6 +230,15 @@ class _TabsPageState extends State<TabsPage> {
             color: labelAndIconColorDark(1),
           ),
           label: 'My Garage'),
+      BottomNavigationBarItem(
+          icon: Icon(
+            Icons.location_on_outlined,
+            size: 28,
+            // width: 28,
+            // ignore: deprecated_member_use
+            color: labelAndIconColorDark(2),
+          ),
+          label: 'Explore'),
       // if (userModel.accountType != 'seeker')
       //   BottomNavigationBarItem(
       //       icon: Icon(
@@ -250,7 +256,7 @@ class _TabsPageState extends State<TabsPage> {
                 height: 28,
                 width: 28,
                 // ignore: deprecated_member_use
-                color: labelAndIconColorDark(2),
+                color: labelAndIconColorDark(3),
               ),
               StreamBuilder<List<ChatModel>>(
                   stream:
@@ -290,7 +296,7 @@ class _TabsPageState extends State<TabsPage> {
           height: 28,
           width: 28,
           // ignore: deprecated_member_use
-          color: labelAndIconColorDark(3),
+          color: labelAndIconColorDark(4),
         ),
         label: 'Profile',
       ),

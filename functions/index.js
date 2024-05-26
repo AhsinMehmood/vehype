@@ -2,9 +2,56 @@ const functions = require("firebase-functions");
 
 const admin = require('firebase-admin');
 
-
+const axios = require('axios');
 admin.initializeApp();
+const ONE_SIGNAL_APP_ID = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
+const ONE_SIGNAL_API_KEY = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
 
+exports.sendPushNotifications = functions.https.onRequest(async (req, res) => {
+    try
+    {
+        const usersRef = admin.firestore().collection('users');
+        const snapshot = await usersRef.where('accountType', '==', 'provider').get();
+
+        if (snapshot.empty)
+        {
+            console.log('No matching documents.');
+            return res.status(404).send('No matching documents.');
+        }
+
+        const userIds = [];
+        snapshot.forEach(doc => {
+            const userData = doc.data();
+            userIds.push(userData.id);
+        });
+
+        if (userIds.length === 0)
+        {
+            console.log('No users with OneSignal user IDs.');
+            return res.status(404).send('No users with OneSignal user IDs.');
+        }
+
+        const message = 'Created a new Offer';
+
+        const response = await axios.post('https://onesignal.com/api/v1/notifications', {
+            app_id: ONE_SIGNAL_APP_ID,
+            include_player_ids: userIds,
+            contents: { en: `${req.body.name} ${message}` }
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${ONE_SIGNAL_API_KEY}`
+            }
+        });
+
+        console.log('Notification sent successfully:', response.data);
+        return res.status(200).send({ success: true, message: 'Notification sent successfully' });
+    } catch (error)
+    {
+        console.error('Error sending notification:', error);
+        return res.status(500).send({ success: false, error: error.message });
+    }
+});
 exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
     const uid = req.query.uid;
     const currentUserID = req.query.uid;

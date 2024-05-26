@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
@@ -489,6 +491,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                       onSuggestionSelected:
                                           (Prediction? result) async {
                                         if (result != null) {
+                                          // result.matchedSubstrings.first.
                                           // setState(() {
 
                                           //   lat = result.
@@ -543,23 +546,23 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               InkWell(
                 onTap: () {
                   // garageController.selectImage(0, context);
-                  garageController.selectImage(context, userModel, 0);
+                  // garageController.selectImage(context, userModel, 1);
                 },
                 child: Container(
                   width: Get.width * 0.9,
                   height: Get.width * 0.35,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
-                    color: garageController.imageOneUrl == ''
+                    color: garageController.imageTwoUrl == ''
                         ? Colors.grey.shade400.withOpacity(0.7)
                         : null,
                   ),
-                  child: garageController.imageOneLoading
+                  child: garageController.imageTwoLoading
                       ? SizedBox(
                           height: 40,
                           width: 40,
                           child: CupertinoActivityIndicator())
-                      : (garageController.imageOneUrl == ''
+                      : (garageController.imageTwoUrl == ''
                           ? Icon(
                               Icons.add_a_photo_rounded,
                               size: 70,
@@ -568,7 +571,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: ExtendedImage.network(
-                                garageController.imageOneUrl,
+                                garageController.imageTwoUrl,
                                 handleLoadingProgress: true,
                                 fit: BoxFit.cover,
                               ),
@@ -582,7 +585,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                 alignment: Alignment.center,
                 child: TextButton(
                     onPressed: () {
-                      garageController.selectImage(context, userModel, 0);
+                      garageController.selectImage(context, userModel, 1);
                     },
                     style: TextButton.styleFrom(
                         // backgroundColor: userController.isDark
@@ -625,6 +628,28 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 userModel.userId,
                                 null,
                                 garageController.garageId);
+                            String url =
+                                'https://your-project-id.cloudfunctions.net/sendPushNotifications';
+                            try {
+                              final response = await http.post(
+                                Uri.parse(url),
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: json.encode({'name': userModel.name}),
+                              );
+
+                              if (response.statusCode == 200) {
+                                print('Notification sent successfully');
+                              } else {
+                                print(
+                                    'Failed to send notification: ${response.body}');
+                              }
+                            } catch (e) {
+                              print('Error sending notification: $e');
+                            }
+
+                            //  FirebaseFirestore.instance.collection('collectionPath')
                           }
                         }
                       : null,

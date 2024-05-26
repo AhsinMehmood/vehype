@@ -78,10 +78,10 @@ class NewOffers extends StatelessWidget {
                 itemBuilder: (context, index) {
                   OffersModel offersModel = offers[index];
                   List<String> vehicleInfo = offersModel.vehicleId.split(',');
-                  final String vehicleType = vehicleInfo[0];
-                  final String vehicleMake = vehicleInfo[1];
-                  final String vehicleYear = vehicleInfo[2];
-                  final String vehicleModle = vehicleInfo[3];
+                  final String vehicleType = vehicleInfo[0].trim();
+                  final String vehicleMake = vehicleInfo[1].trim();
+                  final String vehicleYear = vehicleInfo[2].trim();
+                  final String vehicleModle = vehicleInfo[3].trim();
                   // final PageController imagePageController = PageController();
 
                   return NewOfferWidget(
@@ -98,7 +98,7 @@ class NewOffers extends StatelessWidget {
   }
 }
 
-class NewOfferWidget extends StatelessWidget {
+class NewOfferWidget extends StatefulWidget {
   const NewOfferWidget({
     super.key,
     required this.userController,
@@ -119,52 +119,123 @@ class NewOfferWidget extends StatelessWidget {
   final UserModel userModel;
 
   @override
+  State<NewOfferWidget> createState() => _NewOfferWidgetState();
+}
+
+class _NewOfferWidgetState extends State<NewOfferWidget> {
+  PageController pageController = PageController();
+  int currentInde = 0;
+  @override
   Widget build(BuildContext context) {
-    final createdAt = DateTime.parse(offersModel.createdAt);
+    final createdAt = DateTime.parse(widget.offersModel.createdAt);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: () async {},
         child: Card(
-          color:
-              userController.isDark ? Colors.blueGrey.shade700 : Colors.white,
+          color: widget.userController.isDark
+              ? Colors.blueGrey.shade700
+              : Colors.white,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (offersModel.imageOne != '')
-                SizedBox(
-                  width: Get.width * 0.9,
-                  height: Get.width * 0.35,
-                  child: Stack(
+              SizedBox(
+                  width: Get.width,
+                  height: Get.width * 0.3,
+                  child: PageView(
+                    controller: pageController,
+                    onPageChanged: (value) {
+                      setState(() {
+                        currentInde = value;
+                      });
+                    },
                     children: [
-                      InkWell(
-                        onTap: () {
-                          Get.to(() => FullImagePageView(
-                                url: offersModel.imageOne,
-                              ));
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: ExtendedImage.network(
-                            offersModel.imageOne,
-                            width: Get.width * 0.9,
-                            height: Get.width * 0.35,
-                            fit: BoxFit.cover,
-                            cache: true,
-                            // border: Border.all(color: Colors.red, width: 1.0),
-                            shape: BoxShape.rectangle,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10.0)),
-                            //cancelToken: cancellationToken,
+                      if (widget.offersModel.imageOne != '')
+                        InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                  url: widget.offersModel.imageOne,
+                                ));
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: ExtendedImage.network(
+                              widget.offersModel.imageOne,
+                              width: Get.width,
+                              height: Get.width * 0.3,
+                              fit: BoxFit.cover,
+                              cache: true,
+                              // border: Border.all(color: Colors.red, width: 1.0),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                              //cancelToken: cancellationToken,
+                            ),
                           ),
+                        ),
+                      if (widget.offersModel.imageTwo != '')
+                        InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                  url: widget.offersModel.imageTwo,
+                                ));
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: ExtendedImage.network(
+                              widget.offersModel.imageTwo,
+                              width: Get.width,
+                              height: Get.width * 0.3,
+                              fit: BoxFit.cover,
+                              cache: true,
+                              // border: Border.all(color: Colors.red, width: 1.0),
+                              shape: BoxShape.rectangle,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                              //cancelToken: cancellationToken,
+                            ),
+                          ),
+                        ),
+                    ],
+                  )),
+              const SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                height: 15,
+                width: Get.width,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: currentInde == 0 ? Colors.green : Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: currentInde == 1 ? Colors.green : Colors.grey,
                         ),
                       ),
                     ],
                   ),
                 ),
+              ),
               const SizedBox(
                 height: 10,
               ),
@@ -182,7 +253,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -192,11 +263,11 @@ class NewOfferWidget extends StatelessWidget {
                           height: 5,
                         ),
                         Text(
-                          vehicleType,
+                          widget.vehicleType,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 16,
@@ -210,7 +281,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -220,11 +291,11 @@ class NewOfferWidget extends StatelessWidget {
                           height: 5,
                         ),
                         Text(
-                          vehicleMake,
+                          widget.vehicleMake,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 16,
@@ -238,7 +309,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -248,11 +319,11 @@ class NewOfferWidget extends StatelessWidget {
                           height: 5,
                         ),
                         Text(
-                          vehicleYear,
+                          widget.vehicleYear,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 16,
@@ -266,7 +337,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -276,11 +347,11 @@ class NewOfferWidget extends StatelessWidget {
                           height: 5,
                         ),
                         Text(
-                          vehicleModle,
+                          widget.vehicleModle,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 16,
@@ -294,7 +365,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -308,7 +379,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 16,
@@ -322,7 +393,7 @@ class NewOfferWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w400,
-                            color: userController.isDark
+                            color: widget.userController.isDark
                                 ? Colors.white
                                 : primaryColor,
                             fontSize: 13,
@@ -336,9 +407,10 @@ class NewOfferWidget extends StatelessWidget {
                             SvgPicture.asset(
                                 getServices()
                                     .firstWhere((element) =>
-                                        element.name == offersModel.issue)
+                                        element.name ==
+                                        widget.offersModel.issue)
                                     .image,
-                                color: userController.isDark
+                                color: widget.userController.isDark
                                     ? Colors.white
                                     : primaryColor,
                                 height: 35,
@@ -347,11 +419,11 @@ class NewOfferWidget extends StatelessWidget {
                               width: 8,
                             ),
                             Text(
-                              offersModel.issue,
+                              widget.offersModel.issue,
                               style: TextStyle(
                                 fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w400,
-                                color: userController.isDark
+                                color: widget.userController.isDark
                                     ? Colors.white
                                     : primaryColor,
                                 fontSize: 16,
@@ -372,13 +444,13 @@ class NewOfferWidget extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      if (userModel.email == 'No email set') {
+                      if (widget.userModel.email == 'No email set') {
                         Get.showSnackbar(GetSnackBar(
                           message: 'Login to continue',
                           duration: const Duration(
                             seconds: 3,
                           ),
-                          backgroundColor: userController.isDark
+                          backgroundColor: widget.userController.isDark
                               ? Colors.white
                               : primaryColor,
                           mainButton: TextButton(
@@ -389,7 +461,7 @@ class NewOfferWidget extends StatelessWidget {
                             child: Text(
                               'Login Page',
                               style: TextStyle(
-                                color: userController.isDark
+                                color: widget.userController.isDark
                                     ? primaryColor
                                     : Colors.white,
                               ),
@@ -399,15 +471,15 @@ class NewOfferWidget extends StatelessWidget {
                       } else {
                         await FirebaseFirestore.instance
                             .collection('offers')
-                            .doc(offersModel.offerId)
+                            .doc(widget.offersModel.offerId)
                             .update({
                           'ignoredBy':
-                              FieldValue.arrayUnion([userModel.userId]),
+                              FieldValue.arrayUnion([widget.userModel.userId]),
                         });
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: userController.isDark
+                        backgroundColor: widget.userController.isDark
                             ? Colors.white70
                             : primaryColor.withOpacity(0.3),
                         elevation: 0.0,
@@ -418,20 +490,20 @@ class NewOfferWidget extends StatelessWidget {
                     child: Text(
                       'Ignore',
                       style: TextStyle(
-                          color: userController.isDark
+                          color: widget.userController.isDark
                               ? primaryColor
                               : primaryColor),
                     ),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      if (userModel.email == 'No email set') {
+                      if (widget.userModel.email == 'No email set') {
                         Get.showSnackbar(GetSnackBar(
                           message: 'Login to continue',
                           duration: const Duration(
                             seconds: 3,
                           ),
-                          backgroundColor: userController.isDark
+                          backgroundColor: widget.userController.isDark
                               ? Colors.white
                               : primaryColor,
                           mainButton: TextButton(
@@ -442,7 +514,7 @@ class NewOfferWidget extends StatelessWidget {
                             child: Text(
                               'Login Page',
                               style: TextStyle(
-                                color: userController.isDark
+                                color: widget.userController.isDark
                                     ? primaryColor
                                     : Colors.white,
                               ),
@@ -451,7 +523,7 @@ class NewOfferWidget extends StatelessWidget {
                         ));
                       } else {
                         Get.to(() => OfferReceivedDetails(
-                              offersModel: offersModel,
+                              offersModel: widget.offersModel,
                             ));
                       }
                     },

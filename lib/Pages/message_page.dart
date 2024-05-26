@@ -262,11 +262,69 @@ class _MessagePageState extends State<MessagePage> {
                                                 height: 5,
                                               ),
                                               if (chatModel != null)
-                                                RequestDetailsButton(
-                                                  widget: widget,
-                                                  offersModel: offersModel,
-                                                  userModel: userModel,
-                                                )
+                                                StreamBuilder<
+                                                        OffersReceivedModel>(
+                                                    stream: userModel.userId ==
+                                                            offersModel.ownerId
+                                                        ? FirebaseFirestore.instance
+                                                            .collection(
+                                                                'offersReceived')
+                                                            .where('ownerId',
+                                                                isEqualTo: userModel
+                                                                    .userId)
+                                                            .where('offerId',
+                                                                isEqualTo: offersModel
+                                                                    .offerId)
+                                                            .snapshots()
+                                                            .map((event) =>
+                                                                OffersReceivedModel.fromJson(event
+                                                                    .docs
+                                                                    .first))
+                                                        : FirebaseFirestore.instance
+                                                            .collection('offersReceived')
+                                                            .where('offerBy', isEqualTo: userModel.userId)
+                                                            .where('offerId', isEqualTo: offersModel.offerId)
+                                                            .snapshots()
+                                                            .map((event) => OffersReceivedModel.fromJson(event.docs.first)),
+                                                    builder: (context, AsyncSnapshot<OffersReceivedModel> snapshot) {
+                                                      if (snapshot.hasData ==
+                                                          false) {
+                                                        return Container();
+                                                      }
+                                                      OffersReceivedModel
+                                                          offersReceivedModel =
+                                                          snapshot.data!;
+                                                      if (offersReceivedModel
+                                                                  .ownerId ==
+                                                              userModel
+                                                                  .userId &&
+                                                          offersReceivedModel
+                                                                  .status ==
+                                                              'Pending') {
+                                                        return RequestDetailsButtonOwner(
+                                                          widget: widget,
+                                                          offersReceivedModel:
+                                                              offersReceivedModel,
+                                                          offersModel:
+                                                              offersModel,
+                                                          userModel: userModel,
+                                                        );
+                                                      } else if (offersReceivedModel
+                                                              .status ==
+                                                          'Pending') {
+                                                        return RequestDetailsButtonProvider(
+                                                          widget: widget,
+                                                          offersReceivedModel:
+                                                              offersReceivedModel,
+                                                          offersModel:
+                                                              offersModel,
+                                                          userModel: userModel,
+                                                        );
+                                                      } else {
+                                                        return SizedBox
+                                                            .shrink();
+                                                      }
+                                                    })
                                             ],
                                           ),
                                         ],
@@ -949,17 +1007,218 @@ class _MessagePageState extends State<MessagePage> {
   }
 }
 
-class RequestDetailsButton extends StatelessWidget {
-  const RequestDetailsButton({
+class RequestDetailsButtonOwner extends StatelessWidget {
+  const RequestDetailsButtonOwner({
     super.key,
     required this.widget,
     required this.offersModel,
     required this.userModel,
+    required this.offersReceivedModel,
   });
 
   final MessagePage widget;
   final OffersModel offersModel;
+
   final UserModel userModel;
+  final OffersReceivedModel offersReceivedModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () async {
+        Get.dialog(AcceptOfferConfirm(
+          offersModel: offersModel,
+          offersReceivedModel: offersReceivedModel,
+        ));
+        // Get.dialog(LoadingDialog(), barrierDismissible: false);
+        // await FirebaseFirestore.instance
+        //     .collection('offersReceived')
+        //     .doc(offersReceivedModel.id)
+        //     .update({
+        //   'status': 'Upcoming',
+        // });
+        // await FirebaseFirestore.instance
+        //     .collection('offers')
+        //     .doc(offersModel.offerId)
+        //     .update({
+        //   'status': 'inProgress',
+        // });
+        // sendNotification(
+        //     offersReceivedModel.offerBy,
+        //     userModel.name,
+        //     'Offer Update',
+        //     '${userModel.name}, Accepted the offer',
+        //     offersReceivedModel.id,
+        //     'Offer',
+        //     '');
+        // Get.close(1);
+      },
+      style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.withOpacity(0.2),
+          elevation: 0.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+          )),
+      child: Text(
+        'Accept Request',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+}
+
+class AcceptOfferConfirm extends StatelessWidget {
+  final OffersReceivedModel offersReceivedModel;
+  final OffersModel offersModel;
+
+  const AcceptOfferConfirm(
+      {super.key,
+      required this.offersModel,
+      required this.offersReceivedModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+
+    UserModel userModel = userController.userModel!;
+    return Dialog(
+      // insetPadding: const EdgeInsets.all(4),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 15,
+            ),
+            Text(
+              'Confirm Request Acceptance',
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Text(
+              'Are you sure you want to accept this request?',
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Text(
+              'You can review our rating policy here.',
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            InkWell(
+              onTap: () {
+                launchUrl(Uri.parse('https://vehype.com/help#'));
+              },
+              child: Text(
+                'Rating Policy',
+                style: TextStyle(
+                    color: Colors.red, decoration: TextDecoration.underline),
+              ),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Get.close(1);
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  const SizedBox(
+                    width: 15,
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // Get.dialog(AcceptOfferConfirm());
+                      Get.dialog(LoadingDialog(), barrierDismissible: false);
+                      await FirebaseFirestore.instance
+                          .collection('offersReceived')
+                          .doc(offersReceivedModel.id)
+                          .update({
+                        'status': 'Upcoming',
+                      });
+                      await FirebaseFirestore.instance
+                          .collection('offers')
+                          .doc(offersModel.offerId)
+                          .update({
+                        'status': 'inProgress',
+                      });
+                      sendNotification(
+                          offersReceivedModel.offerBy,
+                          userModel.name,
+                          'Offer Update',
+                          '${userModel.name}, Accepted the offer',
+                          offersReceivedModel.id,
+                          'Offer',
+                          '');
+                      Get.close(1);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.withOpacity(0.2),
+                        elevation: 0.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(3),
+                        )),
+                    child: Text(
+                      'Accept Request',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RequestDetailsButtonProvider extends StatelessWidget {
+  const RequestDetailsButtonProvider({
+    super.key,
+    required this.widget,
+    required this.offersModel,
+    required this.userModel,
+    required this.offersReceivedModel,
+  });
+
+  final MessagePage widget;
+  final OffersModel offersModel;
+
+  final UserModel userModel;
+  final OffersReceivedModel offersReceivedModel;
 
   @override
   Widget build(BuildContext context) {
@@ -967,8 +1226,29 @@ class RequestDetailsButton extends StatelessWidget {
         ? TextButton(
             onPressed: () {
               Get.to(
-                  () => RequestDetailsChatPage(offerId: offersModel.offerId));
+                () => SelectDateAndPrice(
+                  offersModel: offersModel,
+                  ownerModel: userModel,
+                  offersReceivedModel: offersReceivedModel,
+                ),
+              );
             },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.withOpacity(0.2),
+                elevation: 0.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                )),
+            child: Text(
+              'Update Offer',
+              style: TextStyle(
+                color: Colors.green,
+                fontSize: 14,
+              ),
+            ),
+          )
+        : TextButton(
+            onPressed: () {},
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green.withOpacity(0.2),
                 elevation: 0.0,
@@ -982,46 +1262,7 @@ class RequestDetailsButton extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
-          )
-        : StreamBuilder<OffersReceivedModel>(
-            stream: FirebaseFirestore.instance
-                .collection('offersReceived')
-                .where('offerBy', isEqualTo: widget.secondUser.userId)
-                .where('offerId', isEqualTo: offersModel.offerId)
-                .snapshots()
-                .map((event) => OffersReceivedModel.fromJson(event.docs.first)),
-            builder: (context, offersReceivedSnap) {
-              if (offersReceivedSnap.hasData) {
-                return TextButton(
-                  onPressed: () {
-                    if (offersModel.ownerId != widget.secondUser.userId) {
-                      Get.to(
-                        () => RequestDetailsSeekerChatPage(
-                            offersModel: offersModel,
-                            offerReceivedId: offersReceivedSnap.data!.id),
-                      );
-                    } else {
-                      Get.to(() =>
-                          RequestDetailsChatPage(offerId: offersModel.offerId));
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.withOpacity(0.2),
-                      elevation: 0.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3),
-                      )),
-                  child: Text(
-                    'Request Details',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 14,
-                    ),
-                  ),
-                );
-              }
-              return Container();
-            });
+          );
   }
 }
 

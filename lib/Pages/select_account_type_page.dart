@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
@@ -14,11 +11,13 @@ import '../Widgets/loading_dialog.dart';
 import 'location_permission.dart';
 
 class SelectAccountType extends StatelessWidget {
-  const SelectAccountType({super.key});
+  final UserModel userModelAccount;
+  // final String userId;
+  const SelectAccountType({super.key, required this.userModelAccount});
 
   @override
   Widget build(BuildContext context) {
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
+    // final UserModel userModel = Provider.of<UserController>(context).userModel!;
     final UserController userController = Provider.of<UserController>(context);
 
     return Scaffold(
@@ -48,26 +47,33 @@ class SelectAccountType extends StatelessWidget {
                     onTap: () async {
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
+                      print(userModelAccount.userId);
 
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userModel.userId)
+                          .doc(userModelAccount.userId)
                           .update({
                         'accountType': 'provider',
                       });
-                      LocationPermission permission =
-                          await Geolocator.checkPermission();
+
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc('${userModelAccount.userId}provider')
+                          .set({
+                        'accountType': 'provider',
+                        'name': userModelAccount.name,
+                        // 'accountType': 'owner',
+                        'profileUrl': userModelAccount.profileUrl,
+                        'id': '${userModelAccount.userId}provider',
+                        'email': userModelAccount.email,
+                        'status': 'active',
+                      });
+                      userController
+                          .getUserStream('${userModelAccount.userId}provider');
+                      await Future.delayed(const Duration(seconds: 2));
 
                       Get.close(1);
-                      if (permission == LocationPermission.denied) {
-                        Get.offAll(() => const NotificationDialog());
-                      } else {
-                        Get.offAll(() => const TabsPage());
-                      }
-                      // LoginController.signInWithGoogle('provider', context);
-                      // LoginController.signInWithGoogle(
-                      //     userProvider: userProvider, context: context);
-                      // Get.to(() => const CompleteProfile());
+                      Get.offAll(() => const NotificationDialog());
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -116,10 +122,25 @@ class SelectAccountType extends StatelessWidget {
 
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userModel.userId)
+                          .doc(userModelAccount.userId)
                           .update({
                         'accountType': 'seeker',
                       });
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc('${userModelAccount.userId}seeker')
+                          .set({
+                        'accountType': 'seeker',
+                        'name': userModelAccount.name,
+                        // 'accountType': 'owner',
+                        'profileUrl': userModelAccount.profileUrl,
+                        'id': '${userModelAccount.userId}seeker',
+                        'email': userModelAccount.email,
+                      });
+                      userController
+                          .getUserStream('${userModelAccount.userId}seeker');
+                      await Future.delayed(const Duration(seconds: 2));
+
                       Get.close(1);
                       Get.offAll(() => const NotificationDialog());
                     },
@@ -138,11 +159,11 @@ class SelectAccountType extends StatelessWidget {
                         width: Get.width * 0.7,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(200),
-                            color: Color.fromARGB(255, 3, 0, 10),
+                            color: const Color.fromARGB(255, 3, 0, 10),
                             border: Border.all(
-                              color: Color.fromARGB(255, 3, 0, 10),
+                              color: const Color.fromARGB(255, 3, 0, 10),
                             )),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(

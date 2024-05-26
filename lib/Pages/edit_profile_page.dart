@@ -10,8 +10,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/splash_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
@@ -175,13 +178,175 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ],
                 ),
                 const SizedBox(
-                  height: 5,
+                  height: 15,
                 ),
-                Container(
-                  height: 1,
-                  width: Get.width,
-                  color: changeColor(color: 'D9D9D9'),
-                ),
+                if (userController.userModel!.accountType == 'provider')
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Business Info',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      TextFormField(
+                        onTapOutside: (s) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        // controller: _vinController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: 'Add your business details',
+                          // counter: const SizedBox.shrink(),
+                        ),
+                        initialValue: userController.userModel!.businessInfo,
+                        onChanged: (String value) => userController.updateTexts(
+                            userController.userModel!, 'businessInfo', value),
+                        textCapitalization: TextCapitalization.words,
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 16,
+                        ),
+                        // maxLength: 25,
+                        // onChanged: (String value) => editProfileProvider
+                        //     .updateTexts(userModel, 'name', value),
+                      ),
+                    ],
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  const SizedBox(
+                    height: 5,
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  Container(
+                    height: 1,
+                    width: Get.width,
+                    color: changeColor(color: 'D9D9D9'),
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  const SizedBox(
+                    height: 15,
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Contact Info',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      TextFormField(
+                        onTapOutside: (s) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        // controller: _vinController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: 'Enter your contact info',
+                          // counter: const SizedBox.shrink(),
+                        ),
+                        initialValue: userController.userModel!.contactInfo,
+                        onChanged: (String value) => userController.updateTexts(
+                            userController.userModel!, 'contactInfo', value),
+                        textCapitalization: TextCapitalization.words,
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 16,
+                        ),
+                        // maxLength: 25,
+                        // onChanged: (String value) => editProfileProvider
+                        //     .updateTexts(userModel, 'name', value),
+                      ),
+                    ],
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  const SizedBox(
+                    height: 5,
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  Container(
+                    height: 1,
+                    width: Get.width,
+                    color: changeColor(color: 'D9D9D9'),
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  const SizedBox(
+                    height: 15,
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Business Website',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      TextFormField(
+                        onTapOutside: (s) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        // controller: _vinController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: 'https://yourbusiness.com/',
+                          // counter: const SizedBox.shrink(),
+                        ),
+                        initialValue: userController.userModel!.website,
+                        onChanged: (String value) => userController.updateTexts(
+                            userController.userModel!, 'website', value),
+                        textCapitalization: TextCapitalization.words,
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 16,
+                        ),
+                        // maxLength: 25,
+                        // onChanged: (String value) => editProfileProvider
+                        //     .updateTexts(userModel, 'name', value),
+                      ),
+                    ],
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  const SizedBox(
+                    height: 5,
+                  ),
+                if (userController.userModel!.accountType == 'provider')
+                  Container(
+                    height: 1,
+                    width: Get.width,
+                    color: changeColor(color: 'D9D9D9'),
+                  ),
                 const SizedBox(
                   height: 50,
                 ),
@@ -206,19 +371,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       InkWell(
                         borderRadius: BorderRadius.circular(200),
                         onTap: () async {
-                          // Get.dialog(const LoadingDialog(),
-                          //     barrierDismissible: false);
+                          UserModel userModel = userController.userModel!;
+                          Get.dialog(const LoadingDialog(),
+                              barrierDismissible: false);
+                          // User user = FirebaseAuth.instance.currentUser;
+                          SharedPreferences sharedPreferences =
+                              await SharedPreferences.getInstance();
+                          String realUserId =
+                              sharedPreferences.getString('userId') ?? '';
+
                           userController.changeTabIndex(0);
                           await FirebaseFirestore.instance
                               .collection('users')
-                              .doc(userController.userModel!.userId)
+                              .doc(realUserId)
                               .update({
                             'accountType': 'provider',
                           });
-                          // LoginController.signInWithGoogle('provider', context);
-                          // LoginController.signInWithGoogle(
-                          //     userProvider: userProvider, context: context);
-                          // Get.to(() => const CompleteProfile());
+                          Get.close(1);
+                          Get.offAll(() => SplashPage());
                         },
                         child: Card(
                           shape: RoundedRectangleBorder(
@@ -291,14 +461,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       InkWell(
                         borderRadius: BorderRadius.circular(200),
                         onTap: () async {
-                          userController.changeTabIndex(0);
+                          Get.dialog(const LoadingDialog(),
+                              barrierDismissible: false);
+                          // User user = FirebaseAuth.instance.currentUser;
+                          SharedPreferences sharedPreferences =
+                              await SharedPreferences.getInstance();
+                          String realUserId =
+                              sharedPreferences.getString('userId') ?? '';
+                          print(realUserId);
+                          UserModel userModel = userController.userModel!;
+                          print(userModel.userId);
 
+                          userController.changeTabIndex(0);
                           await FirebaseFirestore.instance
                               .collection('users')
-                              .doc(userController.userModel!.userId)
+                              .doc(realUserId)
                               .update({
                             'accountType': 'seeker',
                           });
+                          Get.close(1);
+                          Get.offAll(() => SplashPage());
                         },
                         child: Card(
                           shape: RoundedRectangleBorder(
@@ -443,82 +625,83 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       const SizedBox(
                         height: 20,
                       ),
-                      for (Service service in getServices())
-                        Column(
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                // userController.selectServices(service.name);
-                                FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(userController.userModel!.userId)
-                                    .update({
-                                  'services':
-                                      FieldValue.arrayUnion([service.name])
-                                });
-                                // appProvider.selectPrefs(pref);
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Transform.scale(
-                                    scale: 1.5,
-                                    child: Checkbox(
-                                        activeColor: userController.isDark
+                      if (userController.userModel!.accountType == 'provider')
+                        for (Service service in getServices())
+                          Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  // userController.selectServices(service.name);
+                                  FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(userController.userModel!.userId)
+                                      .update({
+                                    'services':
+                                        FieldValue.arrayUnion([service.name])
+                                  });
+                                  // appProvider.selectPrefs(pref);
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1.5,
+                                      child: Checkbox(
+                                          activeColor: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          checkColor: userController.isDark
+                                              ? Colors.green
+                                              : Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          value: userController
+                                              .userModel!.services
+                                              .contains(service.name),
+                                          onChanged: (s) {
+                                            // appProvider.selectPrefs(pref);
+                                            FirebaseFirestore.instance
+                                                .collection('users')
+                                                .doc(userController
+                                                    .userModel!.userId)
+                                                .update({
+                                              'services': FieldValue.arrayUnion(
+                                                  [service.name])
+                                            });
+                                          }),
+                                    ),
+                                    const SizedBox(
+                                      width: 6,
+                                    ),
+                                    SvgPicture.asset(service.image,
+                                        height: 40,
+                                        width: 40,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor),
+                                    const SizedBox(
+                                      width: 6,
+                                    ),
+                                    Text(
+                                      service.name,
+                                      style: TextStyle(
+                                        color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
-                                        checkColor: userController.isDark
-                                            ? Colors.green
-                                            : Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        value: userController
-                                            .userModel!.services
-                                            .contains(service.name),
-                                        onChanged: (s) {
-                                          // appProvider.selectPrefs(pref);
-                                          FirebaseFirestore.instance
-                                              .collection('users')
-                                              .doc(userController
-                                                  .userModel!.userId)
-                                              .update({
-                                            'services': FieldValue.arrayUnion(
-                                                [service.name])
-                                          });
-                                        }),
-                                  ),
-                                  const SizedBox(
-                                    width: 6,
-                                  ),
-                                  SvgPicture.asset(service.image,
-                                      height: 40,
-                                      width: 40,
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor),
-                                  const SizedBox(
-                                    width: 6,
-                                  ),
-                                  Text(
-                                    service.name,
-                                    style: TextStyle(
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                          ],
-                        ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                            ],
+                          ),
                     ],
                   ),
                 ),

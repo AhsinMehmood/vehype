@@ -191,14 +191,37 @@ class Offers extends StatelessWidget {
                   itemBuilder: (context, index) {
                     OffersReceivedModel offersReceivedModel =
                         offersPending[index];
-                    OffersModel offersModel = userController.historyOffers
-                        .firstWhere((element) =>
-                            element.offerId == offersReceivedModel.offerId);
+                    // OffersModel offersModel = userController.historyOffers
+                    //     .firstWhere((element) =>
+                    //         element.offerId == offersReceivedModel.offerId);
+                    // print(offersReceivedModel.id);
 
-                    return OffersHistoryWidget(
-                        userController: userController,
-                        offersModel: offersModel,
-                        offersReceivedModel: offersReceivedModel);
+                    return StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('offers')
+                            .doc(offersReceivedModel.offerId)
+                            .snapshots(),
+                        builder: (context, AsyncSnapshot offerSnap) {
+                          if (!offerSnap.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                              ),
+                            );
+                          }
+                          if (offerSnap.hasError) {
+                            return Text(offerSnap.stackTrace.toString());
+                          }
+                          OffersModel offersModel =
+                              OffersModel.fromJson(offerSnap.data);
+
+                          return OffersHistoryWidget(
+                              userController: userController,
+                              offersModel: offersModel,
+                              offersReceivedModel: offersReceivedModel);
+                        });
                   }),
     );
   }
@@ -432,8 +455,8 @@ class OffersHistoryWidget extends StatelessWidget {
 
                       UserModel ownerDetails = UserModel.fromJson(snap);
 
-                      Get.bottomSheet(
-                        SelectDateAndPrice(
+                      Get.to(
+                        () => SelectDateAndPrice(
                           offersModel: offersModel,
                           ownerModel: ownerDetails,
                           offersReceivedModel: offersReceivedModel,

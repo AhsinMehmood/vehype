@@ -52,13 +52,13 @@ class LoginController {
         String? email = userCredential.user!.email;
         String? name = userCredential.user!.displayName;
 
-        Mixpanel mixpanel = await Mixpanel.init(
-            'c40aeb8e3a8f1030b811314d56973f5a',
-            trackAutomaticEvents: true);
-        mixpanel.identify(userId);
-        OneSignal.login(userId);
+        // Mixpanel mixpanel = await Mixpanel.init(
+        //     'c40aeb8e3a8f1030b811314d56973f5a',
+        //     trackAutomaticEvents: true);
+        // mixpanel.identify(userId);
+        // OneSignal.login(userId);
 
-        mixpanel.getPeople().set('\$name', name ?? '');
+        // mixpanel.getPeople().set('\$name', name ?? '');
         sharedPreferences.setString('userId', userId);
         if (userCredential.additionalUserInfo!.isNewUser) {
           String? name = userCredential.user!.displayName;
@@ -70,18 +70,27 @@ class LoginController {
             'id': userId,
             'email': email,
           });
-          UserController userController =
-              Provider.of<UserController>(context, listen: false);
-          userController.getUserStream(userId);
-          await Future.delayed(const Duration(seconds: 2));
 
+          // UserController userController =
+          //     Provider.of<UserController>(context, listen: false);
+          // userController.getUserStream('${userId}provider');
+          // await Future.delayed(const Duration(seconds: 2));
+
+          DocumentSnapshot<Map<String, dynamic>> snapshot =
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId)
+                  .get();
+          UserModel userModel = UserModel.fromJson(snapshot);
           Get.close(1);
 
-          Get.offAll(() => const SelectAccountType());
+          Get.offAll(() => SelectAccountType(
+                userModelAccount: userModel,
+              ));
         } else {
           UserController userController =
               Provider.of<UserController>(context, listen: false);
-          userController.getUserStream(userId);
+          // userController.getUserStream(userId);
 
           // if(){}
           DocumentSnapshot<Map<String, dynamic>> snapshot =
@@ -99,16 +108,24 @@ class LoginController {
             'lat': latLng.latitude,
             'long': latLng.longitude,
           });
-          await UserController().addPushToken(userModel.userId, true);
 
           Get.close(1);
 
           if (userModel.accountType == '') {
-            Get.offAll(() => const SelectAccountType());
+            Get.offAll(() => SelectAccountType(
+                  userModelAccount: userModel,
+                ));
           } else {
             if (userModel.adminStatus == 'blocked') {
               Get.offAll(() => const DisabledWidget());
             } else {
+              userController.getUserStream(userId + userModel.accountType);
+              DocumentSnapshot<Map<String, dynamic>> accountType =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .get();
+              // Get.offAll(() => const TabsPage());
               Get.offAll(() => const TabsPage());
             }
           }
@@ -171,13 +188,6 @@ class LoginController {
       String? email = userCredential.user!.email;
       String? name = userCredential.user!.displayName;
 
-      Mixpanel mixpanel = await Mixpanel.init(
-          'c40aeb8e3a8f1030b811314d56973f5a',
-          trackAutomaticEvents: true);
-      mixpanel.identify(userId);
-      OneSignal.login(userId);
-
-      mixpanel.getPeople().set('\$name', name ?? '');
       sharedPreferences.setString('userId', userId);
       if (userCredential.additionalUserInfo!.isNewUser) {
         String? urlAvatar = userCredential.user!.photoURL;
@@ -188,19 +198,20 @@ class LoginController {
           'id': userId,
           'email': email,
         });
-        UserController userController =
-            Provider.of<UserController>(context, listen: false);
-        userController.getUserStream(userId);
-
-        await Future.delayed(const Duration(seconds: 2));
-
+        DocumentSnapshot<Map<String, dynamic>> snapshot =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
+        UserModel userModel = UserModel.fromJson(snapshot);
         Get.close(1);
 
-        Get.offAll(() => const SelectAccountType());
+        Get.offAll(() => SelectAccountType(
+              userModelAccount: userModel,
+            ));
       } else {
         UserController userController =
             Provider.of<UserController>(context, listen: false);
-        userController.getUserStream(userId);
 
         // if(){}
         DocumentSnapshot<Map<String, dynamic>> snapshot =
@@ -210,22 +221,27 @@ class LoginController {
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
         Get.close(1);
-
         if (userModel.accountType == '') {
-          Get.offAll(() => const SelectAccountType());
+          Get.offAll(() => SelectAccountType(
+                userModelAccount: userModel,
+              ));
         } else {
-          UserController().addPushToken(userModel.userId, true);
-
           if (userModel.adminStatus == 'blocked') {
             Get.offAll(() => const DisabledWidget());
           } else {
+            userController.getUserStream(userId + userModel.accountType);
+            DocumentSnapshot<Map<String, dynamic>> accountType =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .get();
             Get.offAll(() => const TabsPage());
           }
         }
       }
     } on FirebaseAuthException catch (e) {
       Get.close(1);
-      print(e.toString());
+
       Get.showSnackbar(GetSnackBar(
         message: e.message,
         duration: const Duration(seconds: 3),

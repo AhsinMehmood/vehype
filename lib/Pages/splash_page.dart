@@ -39,8 +39,6 @@ class _SplashPageState extends State<SplashPage> {
       if (userId == null) {
         Get.offAll(() => ChooseAccountTypePage());
       } else {
-        userController.getUserStream(userId);
-
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
@@ -49,12 +47,45 @@ class _SplashPageState extends State<SplashPage> {
 
         UserModel userModel = UserModel.fromJson(snapshot);
         if (userModel.accountType == '') {
-          Get.offAll(() => const SelectAccountType());
+          Get.offAll(() => SelectAccountType(
+                userModelAccount: userModel,
+              ));
         } else {
           if (userModel.adminStatus == 'blocked') {
             Get.offAll(() => const DisabledWidget());
           } else {
-            Get.offAll(() => const TabsPage());
+            DocumentSnapshot<Map<String, dynamic>> accountTypeUserSnap =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId + userModel.accountType)
+                    .get();
+            if (accountTypeUserSnap.exists) {
+              print(accountTypeUserSnap.data()!['userId']);
+              print(userId);
+              print(userModel.userId);
+
+              userController.getUserStream(userId + userModel.accountType);
+              await Future.delayed(const Duration(seconds: 2));
+              Get.offAll(() => const TabsPage());
+            } else {
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId + userModel.accountType)
+                  .set({
+                'accountType': userModel.accountType,
+                'name': userModel.name,
+                // 'accountType': 'owner',
+                'profileUrl': userModel.profileUrl,
+                'id': '$userId${userModel.accountType}',
+                'email': userModel.email,
+                'status': 'active',
+              });
+              await Future.delayed(const Duration(seconds: 2));
+
+              userController.getUserStream(userId + userModel.accountType);
+              await Future.delayed(const Duration(seconds: 2));
+              Get.offAll(() => const TabsPage());
+            }
           }
         }
         // if(streamSubscription.)

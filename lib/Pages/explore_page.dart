@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -32,6 +33,14 @@ class _ExplorePageState extends State<ExplorePage> {
   void initState() {
     super.initState();
     getLocations();
+    _loadMapStyles();
+  }
+
+  String _darkMapStyle = '';
+
+  Future _loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
+    setState(() {});
   }
 
   double lat = 0.0;
@@ -41,32 +50,14 @@ class _ExplorePageState extends State<ExplorePage> {
   getLocations() async {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
+    final UserModel userModel = userController.userModel!;
 
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
+    // Position position = await Geolocator.getCurrentPosition();
     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
         .instance
         .collection('users')
         .where('accountType', isEqualTo: 'provider')
+        .where('status', isEqualTo: 'active')
         .get();
     for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
       nearbyProviders.add(UserModel.fromJson(element));
@@ -74,7 +65,7 @@ class _ExplorePageState extends State<ExplorePage> {
     markers.add(
       Marker(
         markerId: const MarkerId('current'),
-        position: LatLng(position.latitude, position.longitude),
+        position: LatLng(userModel.lat, userModel.long),
       ),
     );
 
@@ -103,8 +94,8 @@ class _ExplorePageState extends State<ExplorePage> {
       }
     }
 
-    lat = position.latitude;
-    long = position.longitude;
+    lat = userModel.lat;
+    long = userModel.long;
 
     setState(() {});
   }
@@ -117,27 +108,27 @@ class _ExplorePageState extends State<ExplorePage> {
         Provider.of<GarageController>(context);
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      appBar: AppBar(
-        elevation: 0.0,
-        backgroundColor: userController.isDark ? primaryColor : Colors.white,
-        centerTitle: true,
-        leading: IconButton(
-            onPressed: () {
-              Get.back();
-            },
-            icon: Icon(
-              Icons.arrow_back_ios_new,
-              color: userController.isDark ? Colors.white : primaryColor,
-            )),
-        title: Text(
-          'Explore Nearby',
-          style: TextStyle(
-            color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   elevation: 0.0,
+      //   backgroundColor: userController.isDark ? primaryColor : Colors.white,
+      //   centerTitle: true,
+      //   leading: IconButton(
+      //       onPressed: () {
+      //         Get.back();
+      //       },
+      //       icon: Icon(
+      //         Icons.arrow_back_ios_new,
+      //         color: userController.isDark ? Colors.white : primaryColor,
+      //       )),
+      //   title: Text(
+      //     'Explore Nearby',
+      //     style: TextStyle(
+      //       color: userController.isDark ? Colors.white : primaryColor,
+      //       fontSize: 18,
+      //       fontWeight: FontWeight.w800,
+      //     ),
+      //   ),
+      // ),
       body: lat == 0.0
           ? Center(
               child: CircularProgressIndicator(
@@ -150,6 +141,11 @@ class _ExplorePageState extends State<ExplorePage> {
                 target: LatLng(lat, long),
                 zoom: 16.0,
               ),
+              onMapCreated: (controller) {
+                if (userController.isDark) {
+                  controller.setMapStyle(_darkMapStyle);
+                }
+              },
             ),
     );
   }

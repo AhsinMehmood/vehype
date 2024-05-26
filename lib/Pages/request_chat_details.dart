@@ -363,8 +363,8 @@ class OffersHistoryWidgetChat extends StatelessWidget {
 
                     UserModel ownerDetails = UserModel.fromJson(snap);
 
-                    Get.bottomSheet(
-                      SelectDateAndPrice(
+                    Get.to(
+                      () => SelectDateAndPrice(
                         offersModel: offersModel,
                         ownerModel: ownerDetails,
                         offersReceivedModel: offersReceivedModel,

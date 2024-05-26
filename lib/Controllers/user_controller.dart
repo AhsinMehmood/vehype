@@ -307,8 +307,6 @@ class UserController with ChangeNotifier {
     return earthRadius * c;
   }
 
-  Future addPushToken(String id, bool isPermission) async {}
-
   deleteUserAccount(String userId) async {
     try {
       SharedPreferences sharedPreferences =

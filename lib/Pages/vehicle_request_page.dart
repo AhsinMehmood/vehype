@@ -138,6 +138,7 @@ class VehicleRequestsPage extends StatelessWidget {
                     );
                   }
                   return InActiveOffers(
+                      title: 'Check Progress',
                       offersPosted: offersPosted,
                       userController: userController);
                 }),
@@ -179,6 +180,7 @@ class VehicleRequestsPage extends StatelessWidget {
                     );
                   }
                   return InActiveOffers(
+                      title: 'Rated',
                       offersPosted: offersPosted,
                       userController: userController);
                 }),

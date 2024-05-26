@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
@@ -224,13 +225,19 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     Provider.of<UserController>(context,
                                         listen: false);
                                 userController.changeTabIndex(0);
-                                userController.getUserStream(user.uid);
-                                await Future.delayed(
-                                    const Duration(seconds: 1));
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    snapshot = await FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(user.uid)
+                                        .get();
+                                UserModel userModel =
+                                    UserModel.fromJson(snapshot);
 
                                 Get.close(1);
-
-                                Get.offAll(() => const SelectAccountType());
+                                Get.offAll(() => SelectAccountType(
+                                      userModelAccount: userModel,
+                                    ));
+                                // userController.getUserStream(user.uid);
                               },
                               child: Text(
                                 'Continue As a Guest',
