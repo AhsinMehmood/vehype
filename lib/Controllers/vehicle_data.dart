@@ -115,28 +115,28 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
 }
 
 Future<List<int>> getVehicleYear(String make) async {
-  String jwtToken = await getJwtToken();
+  // String jwtToken = await getJwtToken();
   List<int> vehicleMakeList = [];
 
-  http.Response response = await http
-      .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
-    'Content-type': 'application/json',
-    'Authorization': 'Bearer $jwtToken'
-  });
-  final data = jsonDecode(response.body);
-  List listOfData = data as List;
+  // http.Response response = await http
+  //     .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
+  //   'Content-type': 'application/json',
+  //   'Authorization': 'Bearer $jwtToken'
+  // });
+  // final data = jsonDecode(response.body);
+  // List listOfData = data as List;
 
-  print(listOfData.length);
-  for (var element in listOfData) {
-    print(element);
-    vehicleMakeList.add(element);
-  }
-  if (vehicleMakeList.isEmpty) {
-    List<int> years =
-        List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
+  // print(listOfData.length);
+  // for (var element in listOfData) {
+  //   print(element);
+  //   vehicleMakeList.add(element);
+  // }
+  // if (vehicleMakeList.isEmpty) {
+  List<int> years =
+      List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
 
-    vehicleMakeList = years;
-  }
+  vehicleMakeList = years;
+  // }
 
   return vehicleMakeList;
 }

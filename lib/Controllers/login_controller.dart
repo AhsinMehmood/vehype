@@ -56,7 +56,6 @@ class LoginController {
         //     'c40aeb8e3a8f1030b811314d56973f5a',
         //     trackAutomaticEvents: true);
         // mixpanel.identify(userId);
-        // OneSignal.login(userId);
 
         // mixpanel.getPeople().set('\$name', name ?? '');
         sharedPreferences.setString('userId', userId);

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/const.dart';
@@ -68,6 +69,8 @@ class SelectAccountType extends StatelessWidget {
                         'email': userModelAccount.email,
                         'status': 'active',
                       });
+                      OneSignal.login('${userModelAccount.userId}provider');
+
                       userController
                           .getUserStream('${userModelAccount.userId}provider');
                       await Future.delayed(const Duration(seconds: 2));
@@ -126,6 +129,8 @@ class SelectAccountType extends StatelessWidget {
                           .update({
                         'accountType': 'seeker',
                       });
+                      OneSignal.login('${userModelAccount.userId}seeker');
+
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc('${userModelAccount.userId}seeker')
