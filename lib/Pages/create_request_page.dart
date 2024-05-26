@@ -629,7 +629,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 null,
                                 garageController.garageId);
                             String url =
-                                'https://your-project-id.cloudfunctions.net/sendPushNotifications';
+                                'https://us-central1-vehype-386313.cloudfunctions.net/sendPushNotifications';
                             try {
                               final response = await http.post(
                                 Uri.parse(url),
