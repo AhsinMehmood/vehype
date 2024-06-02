@@ -615,7 +615,7 @@ class OffersHistoryWidget extends StatelessWidget {
                             offersModel: offersModel,
                             isDark: userController.isDark);
                       });
-                }, 'Give Rating', null),
+                }, 'Give Rating', primaryColor),
               if (offersReceivedModel.status == 'Completed' &&
                   offersReceivedModel.ratingOne != 0.0)
                 RatingBarIndicator(

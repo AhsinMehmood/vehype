@@ -32,7 +32,8 @@ import 'package:http/http.dart' as http;
 //   }
 
 List<VehicleType> getVehicleType() {
-  return [
+  // .sort((a, b) => a.title.compareTo(b.title)
+  List<VehicleType> vehicleTypeList = [
     VehicleType(id: 1, title: "Motorcycle", icon: 'assets/motorcycle.svg'),
     // VehicleType(id: 2, title: "Car", icon: 'assets/passenger_vehicle.svg'),
     VehicleType(
@@ -53,15 +54,20 @@ List<VehicleType> getVehicleType() {
     VehicleType(
         id: 8, title: "Off road vehicle", icon: 'assets/off_road_vehicle.svg'),
   ];
+  vehicleTypeList.sort((a, b) => a.title.compareTo(b.title));
+  return vehicleTypeList;
 }
 
-Future<List<VehicleModel>> getVehicleModel(int year, String make) async {
+Future<List<VehicleModel>> getVehicleModel(
+    int year, String make, String type) async {
+  String vehicleType = type == 'Passenger Vehicle' ? 'Car' : type;
+
   String jwtToken = await getJwtToken();
   List<VehicleModel> vehicleMakeList = [];
 
   http.Response response = await http.get(
       Uri.parse(
-          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/$make?format=json'),
+          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/$make/modelyear/$year/vehicletype/$vehicleType?format=json'),
       headers: {
         'Content-type': 'application/json',
         'Authorization': 'Bearer $jwtToken'
@@ -69,9 +75,7 @@ Future<List<VehicleModel>> getVehicleModel(int year, String make) async {
   final data = jsonDecode(response.body);
   List listOfData = data['Results'] as List;
 
-  print(listOfData.length);
   for (var element in listOfData) {
-    print(element);
     vehicleMakeList.add(VehicleModel(
         id: element['Make_ID'],
         title: element['Model_Name'],
@@ -90,7 +94,7 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
 
     http.Response response = await http.get(
         Uri.parse(
-            'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/$type?format=json'),
+            'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/$vehicleType?format=json'),
         headers: {
           'Content-type': 'application/json',
           // 'Authorization': 'Bearer $jwtToken'

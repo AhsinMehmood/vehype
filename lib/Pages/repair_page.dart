@@ -273,7 +273,7 @@ class RepairPage extends StatelessWidget {
                     }
                     return InActiveOffers(
                         offersPosted: offersPosted,
-                        title: 'Rated',
+                        title: 'Rate Job',
                         userController: userController);
                   }),
             ),

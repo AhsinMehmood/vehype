@@ -81,13 +81,22 @@ class _ExplorePageState extends State<ExplorePage> {
                 Get.bottomSheet(
                   BottomSheet(
                       onClosing: () {},
+                      enableDrag: true,
+                      constraints: BoxConstraints(
+                        maxHeight: Get.height * 0.9,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
+                          borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      )),
                       backgroundColor:
                           userController.isDark ? primaryColor : Colors.white,
                       builder: (conte) {
                         return SecondUserProfile(userId: element.userId);
                       }),
+                  isDismissible: true,
+                  isScrollControlled: true,
                 );
               }),
         );

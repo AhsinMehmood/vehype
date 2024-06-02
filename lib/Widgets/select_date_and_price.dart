@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
@@ -418,6 +419,16 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         !garageController.agreement
                     ? null
                     : () {
+                        if (badWords
+                            .contains(comment.text.trim().toLowerCase())) {
+                          Get.showSnackbar(GetSnackBar(
+                            message:
+                                'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                            duration: const Duration(seconds: 3),
+                            snackPosition: SnackPosition.TOP,
+                          ));
+                          return;
+                        }
                         Get.close(1);
 
                         applyToJob(userModel, garageController, comment);

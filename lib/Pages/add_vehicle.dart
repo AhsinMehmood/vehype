@@ -232,6 +232,8 @@ class _AddVehicleState extends State<AddVehicle> {
 
                     List<VehicleMake> vehicleMakeList = await getVehicleMake(
                         garageController.selectedVehicleType!.title);
+                    vehicleMakeList.sort((a, b) => a.title.compareTo(b.title));
+
                     Get.close(1);
                     showModalBottomSheet(
                         context: context,
@@ -387,7 +389,11 @@ class _AddVehicleState extends State<AddVehicle> {
                       List<VehicleModel> vehicleMakeList =
                           await getVehicleModel(
                               int.parse(garageController.selectedYear),
-                              garageController.selectedVehicleMake!.title);
+                              garageController.selectedVehicleMake!.title,
+                              garageController.selectedVehicleType!.title);
+                      vehicleMakeList
+                          .sort((a, b) => a.title.compareTo(b.title));
+
                       Get.close(1);
                       showModalBottomSheet(
                           context: context,

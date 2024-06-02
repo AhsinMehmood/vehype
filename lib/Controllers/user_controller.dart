@@ -26,6 +26,7 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:vehype/bad_words.dart';
 import '../Widgets/loading_dialog.dart';
 
 enum AccountType {
@@ -145,6 +146,15 @@ class UserController with ChangeNotifier {
 
   updateTexts(UserModel userModel, String fieldName, String value) async {
     if (value.isNotEmpty) {
+      // if (badWords.contains(value.trim().toLowerCase())) {
+      //   Get.showSnackbar(GetSnackBar(
+      //     message:
+      //         'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+      //     duration: const Duration(seconds: 3),
+      //     snackPosition: SnackPosition.TOP,
+      //   ));
+      //   return;
+      // }
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userModel.userId)

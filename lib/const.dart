@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:vehype/bad_words.dart';
 
 Color changeColor({required String color}) {
   String hexColor = color;
@@ -106,6 +107,18 @@ const String icWheelRepair = 'assets/images/ic_wheel_repair.svg';
 const String icWheelTires = 'assets/images/ic_wheel_tires.svg';
 const String icWindshield = 'assets/images/ic_windshield.svg';
 const String icWrench = 'assets/images/ic_wrench.svg';
+List<String> checkBadWords(String inputText) {
+  List<String> detectedBadWords = [];
+  String lowerCaseInput = inputText.toLowerCase();
+
+  for (String word in badWords) {
+    if (lowerCaseInput.contains(word)) {
+      detectedBadWords.add(word);
+    }
+  }
+  // print(detectedBadWords.length);
+  return detectedBadWords;
+}
 
 TextStyle textLable1Style() {
   return TextStyle(

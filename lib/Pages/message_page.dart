@@ -34,6 +34,7 @@ import 'package:vehype/Pages/request_details_seeker_chat_page.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/video_player.dart';
+import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
@@ -570,45 +571,55 @@ class _MessagePageState extends State<MessagePage> {
                             FocusScope.of(context).requestFocus(FocusNode());
                           },
                           onSubmitted: (s) {
-                            if (chatController.pickedMedia.isEmpty) {
-                              if (s.isNotEmpty) {
-                                // chatController.cleanController();
-                                chatController.sendMessage(
-                                    userModel,
-                                    widget.chatModel,
-                                    s.trim(),
-                                    widget.secondUser,
-                                    '',
-                                    '',
-                                    false);
-
-                                messageScrollController.jumpTo(0);
-                                // MixpanelProvider().messageSentEvent(
-                                //     senderUser: userModel,
-                                //     receiverUser: secondUser!,
-                                //     messageText: s.trim(),
-                                //     totalMessages: messagesLengthTotal);
-                                textMessageController.clear();
-                              }
+                            if (checkBadWords(s).isNotEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message:
+                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                duration: const Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
                             } else {
-                              for (MediaModel element
-                                  in chatController.pickedMedia) {
-                                chatController.sendMessage(
-                                    userModel,
-                                    widget.chatModel,
-                                    s.trim(),
-                                    widget.secondUser,
-                                    element.uploadedUrl,
-                                    element.thumbnailUrl,
-                                    element.isVideo);
-                                messageScrollController.jumpTo(0);
-                                chatController.removeMedia(element);
-                                // MixpanelProvider().messageSentEvent(
-                                //     senderUser: userModel,
-                                //     receiverUser: secondUser!,
-                                //     messageText: s.trim(),
-                                //     totalMessages: messagesLengthTotal);
-                                textMessageController.clear();
+                              if (chatController.pickedMedia.isEmpty) {
+                                if (s.isNotEmpty) {
+                                  // chatController.cleanController();
+                                  chatController.sendMessage(
+                                      userModel,
+                                      widget.chatModel,
+                                      s.trim(),
+                                      widget.secondUser,
+                                      '',
+                                      '',
+                                      false);
+
+                                  messageScrollController.jumpTo(0);
+                                  // MixpanelProvider().messageSentEvent(
+                                  //     senderUser: userModel,
+                                  //     receiverUser: secondUser!,
+                                  //     messageText: s.trim(),
+                                  //     totalMessages: messagesLengthTotal);
+                                  textMessageController.clear();
+                                }
+                              } else {
+                                for (MediaModel element
+                                    in chatController.pickedMedia) {
+                                  chatController.sendMessage(
+                                      userModel,
+                                      widget.chatModel,
+                                      s.trim(),
+                                      widget.secondUser,
+                                      element.uploadedUrl,
+                                      element.thumbnailUrl,
+                                      element.isVideo);
+                                  messageScrollController.jumpTo(0);
+                                  chatController.removeMedia(element);
+                                  // MixpanelProvider().messageSentEvent(
+                                  //     senderUser: userModel,
+                                  //     receiverUser: secondUser!,
+                                  //     messageText: s.trim(),
+                                  //     totalMessages: messagesLengthTotal);
+                                  textMessageController.clear();
+                                }
                               }
                             }
                           },
@@ -674,9 +685,18 @@ class _MessagePageState extends State<MessagePage> {
                         IconButton(
                             padding: const EdgeInsets.all(0),
                             onPressed: () {
+                              if (checkBadWords(textMessageController.text)
+                                  .isNotEmpty) {
+                                Get.showSnackbar(GetSnackBar(
+                                  message:
+                                      'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                  duration: const Duration(seconds: 3),
+                                  snackPosition: SnackPosition.TOP,
+                                ));
+                                return;
+                              }
                               if (chatController.pickedMedia.isEmpty) {
                                 if (textMessageController.text.isNotEmpty) {
-                                  // chatController.cleanController();
                                   chatController.sendMessage(
                                       userModel,
                                       widget.chatModel,
@@ -693,6 +713,8 @@ class _MessagePageState extends State<MessagePage> {
                                   //     messageText: s.trim(),
                                   //     totalMessages: messagesLengthTotal);
                                   textMessageController.clear();
+
+                                  // chatController.cleanController();
                                 }
                               } else {
                                 List<MediaModel> copiedList =
@@ -706,7 +728,7 @@ class _MessagePageState extends State<MessagePage> {
                                       element.uploadedUrl,
                                       element.thumbnailUrl,
                                       element.isVideo);
-                                  print(element.uploadedUrl);
+
                                   messageScrollController.jumpTo(0);
                                   chatController.removeMedia(element);
                                   // MixpanelProvider().messageSentEvent(
@@ -1176,6 +1198,7 @@ class AcceptOfferConfirm extends StatelessWidget {
                           offersReceivedModel.id,
                           'Offer',
                           '');
+                      Get.close(1);
                       Get.close(1);
                     },
                     style: ElevatedButton.styleFrom(

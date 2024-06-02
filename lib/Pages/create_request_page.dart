@@ -545,8 +545,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               ),
               InkWell(
                 onTap: () {
-                  // garageController.selectImage(0, context);
-                  // garageController.selectImage(context, userModel, 1);
+                  garageController.selectImage(context, userModel, 1);
                 },
                 child: Container(
                   width: Get.width * 0.9,

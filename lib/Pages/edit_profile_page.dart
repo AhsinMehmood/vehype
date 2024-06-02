@@ -117,18 +117,46 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     UserController().selectAndUploadImage(
                         context, userController.userModel!, 0);
                   },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(200),
-                    child: ExtendedImage.network(
-                      userController.userModel!.profileUrl,
-                      width: 125,
-                      height: 125,
-                      fit: BoxFit.fill,
-                      cache: true,
-                      // border: Border.all(color: Colors.red, width: 1.0),
-                      shape: BoxShape.circle,
-                      borderRadius: BorderRadius.all(Radius.circular(200.0)),
-                      //cancelToken: cancellationToken,
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(200),
+                          child: ExtendedImage.network(
+                            userController.userModel!.profileUrl,
+                            width: 125,
+                            height: 125,
+                            fit: BoxFit.fill,
+                            cache: true,
+                            // border: Border.all(color: Colors.red, width: 1.0),
+                            shape: BoxShape.circle,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(200.0)),
+                            //cancelToken: cancellationToken,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(200),
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                            height: 30,
+                            width: 30,
+                            child: Icon(
+                              Icons.edit,
+                              color: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

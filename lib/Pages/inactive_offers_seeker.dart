@@ -21,6 +21,7 @@ import 'package:vehype/Widgets/offer_details_button_widget.dart';
 import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
+import 'package:vehype/bad_words.dart';
 
 import '../Controllers/garage_controller.dart';
 import '../Models/user_model.dart';
@@ -393,6 +394,16 @@ class _RatingSheetState extends State<RatingSheet> {
                     onPressed: commentController.text.isEmpty
                         ? null
                         : () async {
+                            if (checkBadWords(commentController.text)
+                                .isNotEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message:
+                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                duration: const Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
+                            }
                             Get.dialog(LoadingDialog(),
                                 barrierDismissible: false);
                             await FirebaseFirestore.instance
@@ -576,6 +587,16 @@ class _RatingSheet2State extends State<RatingSheet2> {
                     onPressed: commentController.text.isEmpty
                         ? null
                         : () async {
+                            if (checkBadWords(commentController.text)
+                                .isNotEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message:
+                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                duration: const Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
+                            }
                             Get.dialog(LoadingDialog(),
                                 barrierDismissible: false);
                             await FirebaseFirestore.instance
