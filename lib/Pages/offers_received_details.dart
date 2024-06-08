@@ -9,11 +9,13 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/chat_model.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/const.dart';
 
@@ -45,6 +47,11 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
     UserModel userModel = userController.userModel!;
     final GarageController garageController =
         Provider.of<GarageController>(context);
+    List<String> vehicleInfo = widget.offersModel.vehicleId.split(',');
+    final String vehicleType = vehicleInfo[0];
+    final String vehicleMake = vehicleInfo[1];
+    final String vehicleYear = vehicleInfo[2];
+    final String vehicleModle = vehicleInfo[3];
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: widget.isChat
@@ -103,103 +110,15 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                     const SizedBox(
                       height: 20,
                     ),
-                    SizedBox(
-                        width: Get.width,
-                        height: Get.width * 0.3,
-                        child: PageView(
-                          controller: pageController,
-                          onPageChanged: (value) {
-                            setState(() {
-                              currentInde = value;
-                            });
-                          },
-                          children: [
-                            if (widget.offersModel.imageOne != '')
-                              InkWell(
-                                onTap: () {
-                                  Get.to(() => FullImagePageView(
-                                        url: widget.offersModel.imageOne,
-                                      ));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: ExtendedImage.network(
-                                    widget.offersModel.imageOne,
-                                    width: Get.width,
-                                    height: Get.width * 0.3,
-                                    fit: BoxFit.cover,
-                                    cache: true,
-                                    // border: Border.all(color: Colors.red, width: 1.0),
-                                    shape: BoxShape.rectangle,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10.0)),
-                                    //cancelToken: cancellationToken,
-                                  ),
-                                ),
-                              ),
-                            if (widget.offersModel.imageTwo != '')
-                              InkWell(
-                                onTap: () {
-                                  Get.to(() => FullImagePageView(
-                                        url: widget.offersModel.imageTwo,
-                                      ));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: ExtendedImage.network(
-                                    widget.offersModel.imageTwo,
-                                    width: Get.width,
-                                    height: Get.width * 0.3,
-                                    fit: BoxFit.cover,
-                                    cache: true,
-                                    // border: Border.all(color: Colors.red, width: 1.0),
-                                    shape: BoxShape.rectangle,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10.0)),
-                                    //cancelToken: cancellationToken,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        )),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
-                      height: 15,
-                      width: Get.width,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 12,
-                              width: 12,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(200),
-                                color: currentInde == 0
-                                    ? Colors.green
-                                    : Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              height: 12,
-                              width: 12,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(200),
-                                color: currentInde == 1
-                                    ? Colors.green
-                                    : Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: VehicleDetailsRequest(
+                          userController: userController,
+                          vehicleType: vehicleType,
+                          vehicleMake: vehicleMake,
+                          vehicleYear: vehicleYear,
+                          vehicleModle: vehicleModle,
+                          offersModel: widget.offersModel),
                     ),
                     const SizedBox(
                       height: 10,
@@ -275,91 +194,6 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                     ),
                     const SizedBox(
                       height: 25,
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Vehicle Info',
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            widget.offersModel.vehicleId,
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Issue',
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              SvgPicture.asset(
-                                  getServices()
-                                      .firstWhere((element) =>
-                                          element.name ==
-                                          widget.offersModel.issue)
-                                      .image,
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                  height: 35,
-                                  width: 35),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              Text(
-                                widget.offersModel.issue,
-                                style: TextStyle(
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w400,
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -487,6 +321,46 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                                   target: LatLng(widget.offersModel.lat,
                                       widget.offersModel.long),
                                   zoom: 16.0,
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.center,
+                              child: InkWell(
+                                onTap: () {
+                                  MapsLauncher.launchCoordinates(
+                                      userModel.lat, userModel.long);
+                                },
+                                child: Container(
+                                  height: 40,
+                                  width: 150,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(200),
+                                    color: Colors.blue,
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.directions_outlined,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          'View Directions',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

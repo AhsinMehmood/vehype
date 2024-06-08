@@ -5,6 +5,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -56,6 +57,10 @@ class _ChatWidgetState extends State<ChatWidget> {
             UserModel secondUserData = snapshot.data!;
             return InkWell(
               onTap: () {
+                if (getUnread(widget.chat.lastMessageAt,
+                    widget.chat.lastOpen[widget.user.userId], context)) {
+                  FlutterAppBadger.removeBadge();
+                }
                 Get.to(() => MessagePage(
                       chatModel: widget.chat,
                       secondUser: secondUserData,

@@ -189,9 +189,9 @@ class ChatController with ChangeNotifier {
         chats.add(ChatModel.fromJson(element));
       }
       chats.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
-      for (var element in chats) {
-        getUnread(element.lastMessageAt, element.lastOpen[userId], context);
-      }
+      // for (var element in chats) {
+      //   getUnread(element.lastMessageAt, element.lastOpen[userId], context);
+      // }
       return chats;
     }).handleError((errors) {
       print(errors);

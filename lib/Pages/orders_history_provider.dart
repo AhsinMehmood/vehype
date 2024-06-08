@@ -18,6 +18,7 @@ import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/message_page.dart';
+import 'package:vehype/Pages/repair_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/Widgets/request_vehicle_details.dart';
@@ -26,6 +27,7 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/vehicle_data.dart';
 import 'full_image_view_page.dart';
+import 'inactive_offers_seeker.dart';
 import 'offers_received_details.dart';
 import 'offers_tab_page.dart';
 import 'received_offers_seeker.dart';
@@ -78,19 +80,104 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
             labelColor: userController.isDark ? Colors.white : primaryColor,
             tabs: [
               Tab(
-                text: 'New',
+                child: Row(
+                  children: [
+                    Text('New'),
+                    if (userModel.isActiveNew)
+                      const SizedBox(
+                        width: 5,
+                      ),
+                    if (userModel.isActiveNew)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
               ),
               Tab(
-                text: 'Pending',
+                child: Row(
+                  children: [
+                    Text('Pending'),
+                    if (userModel.isActivePending)
+                      const SizedBox(
+                        width: 5,
+                      ),
+                    if (userModel.isActivePending)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
               ),
               Tab(
-                text: 'Upcoming',
+                child: Row(
+                  children: [
+                    Text('In Progress'),
+                    if (userModel.isActiveInProgress)
+                      const SizedBox(
+                        width: 5,
+                      ),
+                    if (userModel.isActiveInProgress)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
               ),
               Tab(
-                text: 'Completed',
+                child: Row(
+                  children: [
+                    Text('Completed'),
+                    if (userModel.isActiveCompleted)
+                      const SizedBox(
+                        width: 5,
+                      ),
+                    if (userModel.isActiveCompleted)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
               ),
               Tab(
-                text: 'Cancelled',
+                child: Row(
+                  children: [
+                    Text('Cancelled'),
+                    if (userModel.isActiveCancelled)
+                      const SizedBox(
+                        width: 5,
+                      ),
+                    if (userModel.isActiveCancelled)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
               ),
             ],
           ),
@@ -122,6 +209,7 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
               List<OffersReceivedModel> upcomingOffers = offersReceivedList
                   .where((element) => element.status == 'Upcoming')
                   .toList();
+
               return TabBarView(
                 children: [
                   NewOffers(
@@ -129,17 +217,21 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                   Offers(
                       userController: userController,
                       emptyText: 'No Pending Offers',
+                      id: 1,
                       offersPending: offersPending),
                   Offers(
                       userController: userController,
-                      emptyText: 'No Upcoming Offers',
+                      emptyText: 'No Accepted Offers Yet!',
+                      id: 2,
                       offersPending: upcomingOffers),
                   Offers(
                       userController: userController,
+                      id: 3,
                       emptyText: 'No Completed Offers',
                       offersPending: offersCompleted),
                   Offers(
                       userController: userController,
+                      id: 4,
                       emptyText: 'No Cancelled Offers',
                       offersPending: offersCencelled),
                 ],
@@ -150,12 +242,14 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
   }
 }
 
-class Offers extends StatelessWidget {
+class Offers extends StatefulWidget {
+  final int id;
   const Offers({
     super.key,
     required this.userController,
     required this.offersPending,
     required this.emptyText,
+    required this.id,
   });
 
   final String emptyText;
@@ -164,33 +258,72 @@ class Offers extends StatelessWidget {
   final List<OffersReceivedModel> offersPending;
 
   @override
+  State<Offers> createState() => _OffersState();
+}
+
+class _OffersState extends State<Offers> {
+  @override
+  void initState() {
+    super.initState();
+    UserModel userModel = widget.userController.userModel!;
+    Future.delayed(const Duration(seconds: 2)).then((e) {
+      if (widget.id == 1) {
+        if (userModel.isActivePending) {
+          UserController().changeNotiOffers(
+              widget.id, false, widget.userController.userModel!.userId);
+        }
+      }
+      if (widget.id == 2) {
+        if (userModel.isActiveInProgress) {
+          UserController().changeNotiOffers(
+              widget.id, false, widget.userController.userModel!.userId);
+        }
+      }
+      if (widget.id == 3) {
+        if (userModel.isActiveCompleted) {
+          UserController().changeNotiOffers(
+              widget.id, false, widget.userController.userModel!.userId);
+        }
+      }
+      if (widget.id == 4) {
+        if (userModel.isActiveCancelled) {
+          UserController().changeNotiOffers(
+              widget.id, false, widget.userController.userModel!.userId);
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15, bottom: 0, top: 0),
-      child: userController.historyLoading
+      child: widget.userController.historyLoading
           ? Center(
               child: CircularProgressIndicator(
-                color: userController.isDark ? Colors.white : primaryColor,
+                color:
+                    widget.userController.isDark ? Colors.white : primaryColor,
               ),
             )
-          : offersPending.isEmpty
+          : widget.offersPending.isEmpty
               ? Center(
                   child: Text(
-                    'No Offers Yet!',
+                    widget.emptyText,
                     style: TextStyle(
-                      color:
-                          userController.isDark ? Colors.white : primaryColor,
+                      color: widget.userController.isDark
+                          ? Colors.white
+                          : primaryColor,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 )
               : ListView.builder(
-                  itemCount: offersPending.length,
+                  itemCount: widget.offersPending.length,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     OffersReceivedModel offersReceivedModel =
-                        offersPending[index];
+                        widget.offersPending[index];
                     // OffersModel offersModel = userController.historyOffers
                     //     .firstWhere((element) =>
                     //         element.offerId == offersReceivedModel.offerId);
@@ -205,7 +338,7 @@ class Offers extends StatelessWidget {
                           if (!offerSnap.hasData) {
                             return Center(
                               child: CircularProgressIndicator(
-                                color: userController.isDark
+                                color: widget.userController.isDark
                                     ? Colors.white
                                     : primaryColor,
                               ),
@@ -218,7 +351,7 @@ class Offers extends StatelessWidget {
                               OffersModel.fromJson(offerSnap.data);
 
                           return OffersHistoryWidget(
-                              userController: userController,
+                              userController: widget.userController,
                               offersModel: offersModel,
                               offersReceivedModel: offersReceivedModel);
                         });
@@ -247,6 +380,8 @@ class OffersHistoryWidget extends StatelessWidget {
     final String vehicleMake = vehicleInfo[1].trim();
     final String vehicleYear = vehicleInfo[2].trim();
     final String vehicleModle = vehicleInfo[3].trim();
+    final UserController userController = Provider.of<UserController>(context);
+    UserModel userModel = userController.userModel!;
     return Padding(
       padding: const EdgeInsets.only(bottom: 0, top: 15),
       child: InkWell(
@@ -285,6 +420,7 @@ class OffersHistoryWidget extends StatelessWidget {
                       offersReceivedModel: offersReceivedModel),
                 ),
               ),
+
               if (offersReceivedModel.status == 'Pending')
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -388,8 +524,15 @@ class OffersHistoryWidget extends StatelessWidget {
                                                 'status': 'Cancelled',
                                                 'cancelBy': 'provider',
                                               });
-                                              await userController
-                                                  .getRequestsHistoryProvider();
+
+                                              sendNotification(
+                                                  offersReceivedModel.ownerId,
+                                                  userModel.name,
+                                                  'Offer Update',
+                                                  '${userModel.name} Cancelled the offer.',
+                                                  'chatId',
+                                                  'offer',
+                                                  'messageId');
                                               Get.close(1);
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -547,8 +690,15 @@ class OffersHistoryWidget extends StatelessWidget {
                                                 'status': 'Cancelled',
                                                 'cancelBy': 'provider',
                                               });
-                                              await userController
-                                                  .getRequestsHistoryProvider();
+                                              sendNotification(
+                                                  offersModel.ownerId,
+                                                  userController
+                                                      .userModel!.name,
+                                                  'Cancelled The Offer',
+                                                  'contents',
+                                                  '',
+                                                  'offer',
+                                                  '');
                                               Get.close(1);
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -596,7 +746,7 @@ class OffersHistoryWidget extends StatelessWidget {
                   ],
                 ),
               if (offersReceivedModel.status == 'Completed' &&
-                  offersReceivedModel.ratingOne == 0.0)
+                  offersReceivedModel.ratingTwo == 0.0)
                 _getButton(Colors.white, () {
                   showModalBottomSheet(
                       context: context,
@@ -617,9 +767,9 @@ class OffersHistoryWidget extends StatelessWidget {
                       });
                 }, 'Give Rating', primaryColor),
               if (offersReceivedModel.status == 'Completed' &&
-                  offersReceivedModel.ratingOne != 0.0)
+                  offersReceivedModel.ratingTwo != 0.0)
                 RatingBarIndicator(
-                  rating: offersReceivedModel.ratingOne,
+                  rating: offersReceivedModel.ratingTwo,
                   itemBuilder: (context, _) => Icon(
                     Icons.star,
                     color: Colors.amber,

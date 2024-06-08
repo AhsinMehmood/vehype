@@ -32,29 +32,27 @@ import 'package:http/http.dart' as http;
 //   }
 
 List<VehicleType> getVehicleType() {
-  // .sort((a, b) => a.title.compareTo(b.title)
   List<VehicleType> vehicleTypeList = [
-    VehicleType(id: 1, title: "Motorcycle", icon: 'assets/motorcycle.svg'),
-    // VehicleType(id: 2, title: "Car", icon: 'assets/passenger_vehicle.svg'),
     VehicleType(
-        id: 2,
+        id: 1,
         title: "Passenger vehicle",
         icon: 'assets/passenger_vehicle.svg'),
-    VehicleType(id: 3, title: "Truck", icon: 'assets/truck.svg'),
-    VehicleType(id: 4, title: "Bus", icon: 'assets/bus.svg'),
+    VehicleType(id: 2, title: "Motorcycle", icon: 'assets/motorcycle.svg'),
+    VehicleType(id: 3, title: "Bus", icon: 'assets/bus.svg'),
+    VehicleType(id: 4, title: "Truck", icon: 'assets/truck.svg'),
     VehicleType(id: 5, title: "Trailer", icon: 'assets/trailer.svg'),
     VehicleType(
         id: 6,
-        title: "Low speed vehicle",
-        icon: 'assets/low_speed_vehicle.svg'),
-    VehicleType(
-        id: 7,
         title: "Incomplete Vehicle",
         icon: 'assets/incomplete_vehicle.svg'),
     VehicleType(
+        id: 7,
+        title: "Low speed vehicle",
+        icon: 'assets/low_speed_vehicle.svg'),
+    VehicleType(
         id: 8, title: "Off road vehicle", icon: 'assets/off_road_vehicle.svg'),
   ];
-  vehicleTypeList.sort((a, b) => a.title.compareTo(b.title));
+
   return vehicleTypeList;
 }
 
@@ -67,7 +65,7 @@ Future<List<VehicleModel>> getVehicleModel(
 
   http.Response response = await http.get(
       Uri.parse(
-          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/$make/modelyear/$year/vehicletype/$vehicleType?format=json'),
+          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/$make/vehicletype/$vehicleType?format=json'),
       headers: {
         'Content-type': 'application/json',
         'Authorization': 'Bearer $jwtToken'

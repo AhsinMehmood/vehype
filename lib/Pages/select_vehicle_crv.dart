@@ -44,7 +44,7 @@ class _SelectVehicleCreateRequestState
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
         garageController.selectedIssue = widget.offersModel!.issue;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
-        garageController.imageTwoUrl = widget.offersModel!.imageTwo;
+        // garageController.requestImages = widget.offersModel!.images;
         garageController.additionalService =
             widget.offersModel!.additionalService;
       }

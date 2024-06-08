@@ -48,7 +48,7 @@ class CommentsPage extends StatelessWidget {
               return StreamBuilder<UserModel>(
                   stream: FirebaseFirestore.instance
                       .collection('users')
-                      .doc(data.ratings[inde]['id'])
+                      .doc(data.ratings[inde].id)
                       .snapshots()
                       .map((event) => UserModel.fromJson(event)),
                   builder: (context, AsyncSnapshot<UserModel> snapshot) {
@@ -86,7 +86,7 @@ class CommentsPage extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          data.ratings[inde]['comment'] ?? 'No Comment',
+                          data.ratings[inde].comment,
                           style: TextStyle(
                             color: userController.isDark
                                 ? Colors.white

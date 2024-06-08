@@ -29,7 +29,7 @@ class OffersController {
         offersReceivedModel.offerBy,
         userModel.name,
         'Offer Update',
-        '${userModel.name}, Accepted the offer',
+        '${userModel.name} Accepted the offer',
         offersReceivedModel.id,
         'Offer',
         '');
@@ -45,17 +45,10 @@ class OffersController {
           'Offer Accepted',
           '${userModel.name} accepted your offer for ${offersModel.vehicleId}',
           'chat');
-      await ChatController().createChat(
-          userModel,
-          postedByDetails,
-          offersReceivedModel.id,
-          offersModel,
-          'New Message',
-          '${userModel.name} started a chat for ${offersModel.vehicleId}',
-          'Message');
+
       ChatModel? newchat = await ChatController().getChat(
           userModel.userId, postedByDetails.userId, offersModel.offerId);
-      Get.close(1);
+      Get.close(2);
       Get.to(() => MessagePage(
             chatModel: newchat!,
             secondUser: postedByDetails,

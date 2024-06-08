@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:image_select/image_selector.dart';
@@ -75,11 +76,105 @@ class GarageController with ChangeNotifier {
 
   bool imageOneLoading = false;
   bool imageTwoLoading = false;
+  ImageSelect imageSelector = ImageSelect(
+    compressImage: false,
+  );
+  List<RequestImageModel> requestImages = [];
+  removeRequestImage(int index) {
+    requestImages.removeAt(index);
+    notifyListeners();
+  }
+
+  final ImagePicker picker = ImagePicker();
+  selectRequestImageUpdateSingleImage(
+      ImageSource imageSource, String userId, int index) async {
+    final XFile? image = await picker.pickImage(source: imageSource);
+    if (image != null) {
+      requestImages.removeAt(index);
+      requestImages.insert(
+          index,
+          RequestImageModel(
+              imageUrl: '',
+              isLoading: true,
+              progress: 0.4,
+              imageFile: File(image.path)));
+      notifyListeners();
+      uploadRequestImage(requestImages[index], userId);
+    }
+  }
+
+  selectRequestImage(ImageSource imageSource, String userId) async {
+    if (imageSource == ImageSource.camera) {
+      final XFile? image = await picker.pickImage(source: imageSource);
+      if (image != null) {
+        requestImages.add(RequestImageModel(
+            imageUrl: '',
+            isLoading: true,
+            progress: 0.4,
+            imageFile: File(image.path)));
+        for (var element in requestImages) {
+          if (element.imageUrl != '') {
+            uploadRequestImage(element, userId);
+          }
+        }
+      }
+    } else {
+      final List<XFile> images = await picker.pickMultiImage();
+      List<RequestImageModel> selectedImage = [];
+
+      for (var i = 0; i < images.length; i++) {
+        selectedImage.add(RequestImageModel(
+            imageUrl: '',
+            isLoading: true,
+            progress: 0.4,
+            imageFile: File(images[i].path)));
+      }
+      if (selectedImage.length + requestImages.length >= 3) {
+        // requestImages.addAll(selectedImage.sublist(0, 3));
+      } else {
+        requestImages.addAll(selectedImage);
+      }
+      notifyListeners();
+      for (RequestImageModel requestImageModel in requestImages) {
+        if (requestImageModel.imageUrl == '') {
+          uploadRequestImage(requestImageModel, userId);
+        }
+      }
+    }
+  }
+
+  uploadRequestImage(RequestImageModel requestImageModel, String userId) async {
+    File compressedFile = await FlutterNativeImage.compressImage(
+      requestImageModel.imageFile!.absolute.path,
+      quality: 100,
+      percentage: 50,
+    );
+    final storageRef = FirebaseStorage.instance.ref();
+
+    final ref = storageRef
+        .child("users/$userId/${DateTime.now().microsecondsSinceEpoch}.jpg");
+    UploadTask uploadTask = ref.putFile(compressedFile);
+
+    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      double progress = snapshot.bytesTransferred / snapshot.totalBytes;
+      print('Upload progress: $progress');
+      requestImageModel.progress = progress; // Update progress in your model
+      notifyListeners(); // Notify listeners to update UI
+    });
+    try {
+      await uploadTask;
+      uploadTask.whenComplete(() async {
+        requestImageModel.imageUrl = await ref.getDownloadURL();
+        requestImageModel.isLoading = false;
+        notifyListeners(); // Notify listeners to update UI
+      });
+      print('Upload complete');
+    } catch (e) {
+      print('Upload failed: $e');
+    }
+  }
 
   selectImage(BuildContext context, UserModel userModel, int index) async {
-    ImageSelect imageSelector = ImageSelect(
-      compressImage: false,
-    );
     File? selectedFile = await imageSelector.pickImage(
         context: context, source: ImageFrom.gallery);
     if (selectedFile != null) {
@@ -319,7 +414,11 @@ class GarageController with ChangeNotifier {
 
   String selectedIssue = '';
   selectIssue(String vehicle) {
-    selectedIssue = vehicle;
+    if (vehicle == selectedIssue) {
+      selectedIssue = '';
+    } else {
+      selectedIssue = vehicle;
+    }
     notifyListeners();
   }
 
@@ -342,6 +441,10 @@ class GarageController with ChangeNotifier {
     try {
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
       print(userId);
+      List images = [];
+      for (var element in requestImages) {
+        images.add(element.imageUrl);
+      }
 
       if (offerId != null) {
         await FirebaseFirestore.instance
@@ -357,7 +460,7 @@ class GarageController with ChangeNotifier {
           'long': latLng.longitude,
           'description': desc,
           'imageOne': imageOneUrl,
-          'imageTwo': imageTwoUrl,
+          'images': images,
           'additionalService': additionalService,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -372,7 +475,7 @@ class GarageController with ChangeNotifier {
           'description': desc,
           'imageOne': imageOneUrl,
           'status': 'active',
-          'imageTwo': imageTwoUrl,
+          'images': images,
           'additionalService': additionalService,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -423,4 +526,17 @@ class GarageController with ChangeNotifier {
     price = 0.0;
     notifyListeners();
   }
+}
+
+class RequestImageModel {
+  String imageUrl;
+  bool isLoading;
+  double progress;
+  File? imageFile;
+
+  RequestImageModel(
+      {required this.imageUrl,
+      required this.isLoading,
+      required this.progress,
+      required this.imageFile});
 }

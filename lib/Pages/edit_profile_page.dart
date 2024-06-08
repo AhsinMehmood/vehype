@@ -660,13 +660,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               InkWell(
                                 onTap: () {
                                   // userController.selectServices(service.name);
-                                  FirebaseFirestore.instance
-                                      .collection('users')
-                                      .doc(userController.userModel!.userId)
-                                      .update({
-                                    'services':
-                                        FieldValue.arrayUnion([service.name])
-                                  });
+                                  if (userController.userModel!.services
+                                      .contains(service.name)) {
+                                    FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(userController.userModel!.userId)
+                                        .update({
+                                      'services':
+                                          FieldValue.arrayRemove([service.name])
+                                    });
+                                  } else {
+                                    FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(userController.userModel!.userId)
+                                        .update({
+                                      'services':
+                                          FieldValue.arrayUnion([service.name])
+                                    });
+                                  }
+
                                   // appProvider.selectPrefs(pref);
                                 },
                                 child: Row(
@@ -704,8 +716,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       width: 6,
                                     ),
                                     SvgPicture.asset(service.image,
-                                        height: 40,
-                                        width: 40,
+                                        height: 45,
+                                        width: 45,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor),

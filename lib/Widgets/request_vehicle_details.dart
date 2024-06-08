@@ -48,7 +48,7 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
         children: [
           SizedBox(
               width: Get.width,
-              height: Get.width * 0.3,
+              height: Get.width * 0.4,
               child: PageView(
                 controller: pageController,
                 onPageChanged: (value) {
@@ -57,123 +57,145 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                   });
                 },
                 children: [
-                  if (widget.offersModel.imageOne != '' && widget.isShowImage)
-                    InkWell(
-                      onTap: () {
-                        Get.to(() => FullImagePageView(
-                              url: widget.offersModel.imageOne,
-                            ));
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: ExtendedImage.network(
-                          widget.offersModel.imageOne,
-                          width: Get.width,
-                          height: Get.width * 0.3,
-                          fit: BoxFit.cover,
-                          cache: true,
-                          // border: Border.all(color: Colors.red, width: 1.0),
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          //cancelToken: cancellationToken,
-                        ),
+                  InkWell(
+                    onTap: () {
+                      Get.to(() => FullImagePageView(
+                            url: widget.offersModel.imageOne,
+                          ));
+                    },
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8)),
+                      child: ExtendedImage.network(
+                        widget.offersModel.imageOne,
+                        width: Get.width,
+                        height: Get.width * 0.4,
+                        fit: BoxFit.cover,
+                        cache: true,
+
+                        // border: Border.all(color: Colors.red, width: 1.0),
+                        shape: BoxShape.rectangle,
+                        borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
+                        //cancelToken: cancellationToken,
                       ),
                     ),
-                  if (widget.offersModel.imageTwo != '' && widget.isShowImage)
-                    InkWell(
-                      onTap: () {
-                        Get.to(() => FullImagePageView(
-                              url: widget.offersModel.imageTwo,
-                            ));
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: ExtendedImage.network(
-                          widget.offersModel.imageTwo,
-                          width: Get.width,
-                          height: Get.width * 0.3,
-                          fit: BoxFit.cover,
-                          cache: true,
-                          // border: Border.all(color: Colors.red, width: 1.0),
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          //cancelToken: cancellationToken,
-                        ),
-                      ),
-                    ),
+                  ),
                 ],
               )),
           const SizedBox(
             height: 10,
           ),
-          SizedBox(
-            height: 15,
-            width: Get.width,
-            child: Align(
-              alignment: Alignment.center,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 12,
-                    width: 12,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(200),
-                      color: currentInde == 0 ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Container(
-                    height: 12,
-                    width: 12,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(200),
-                      color: currentInde == 1 ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          widget.offersModel.images.isEmpty
+              ? const SizedBox.shrink()
+              : SizedBox(
+                  height: Get.width * 0.42,
+                  width: Get.width,
+                  child: PageView.builder(
+                      itemCount: widget.offersModel.images.length,
+                      controller: PageController(viewportFraction: 0.9),
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                url: widget.offersModel.images[index]));
+                          },
+                          child: Card(
+                            child: ExtendedImage.network(
+                              widget.offersModel.images[index],
+                              fit: BoxFit.cover,
+                              width: Get.width,
+                              height: Get.width * 0.42,
+                            ),
+                          ),
+                        );
+                      }),
+                ),
+
           // if (widget.offersModel.imageOne != '' && widget.isShowImage)
-          const SizedBox(
-            height: 10,
-          ),
+
           Padding(
             padding: const EdgeInsets.all(9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Body Style',
-                  style: TextStyle(
-                    fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
-                    color: widget.userController.isDark
-                        ? Colors.white
-                        : primaryColor,
-                    fontSize: 13,
-                  ),
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Body Style',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            color: widget.userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          widget.vehicleType.trim(),
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w700,
+                            color: widget.userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      width: 30,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Vehicle Year',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            color: widget.userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          widget.vehicleYear.trim(),
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w700,
+                            color: widget.userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    )
+                  ],
                 ),
                 const SizedBox(
                   height: 5,
-                ),
-                Text(
-                  widget.vehicleType,
-                  style: TextStyle(
-                    fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
-                    color: widget.userController.isDark
-                        ? Colors.white
-                        : primaryColor,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 Text(
                   'Vehicle Make',
@@ -190,38 +212,10 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                   height: 5,
                 ),
                 Text(
-                  widget.vehicleMake,
+                  widget.vehicleMake.trim(),
                   style: TextStyle(
                     fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
-                    color: widget.userController.isDark
-                        ? Colors.white
-                        : primaryColor,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  'Vehicle Year',
-                  style: TextStyle(
-                    fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
-                    color: widget.userController.isDark
-                        ? Colors.white
-                        : primaryColor,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text(
-                  widget.vehicleYear,
-                  style: TextStyle(
-                    fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: widget.userController.isDark
                         ? Colors.white
                         : primaryColor,
@@ -246,10 +240,10 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                   height: 5,
                 ),
                 Text(
-                  widget.vehicleModle,
+                  widget.vehicleModle.trim(),
                   style: TextStyle(
                     fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: widget.userController.isDark
                         ? Colors.white
                         : primaryColor,
@@ -277,7 +271,7 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                   timeago.format(createdAt),
                   style: TextStyle(
                     fontFamily: 'Avenir',
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: widget.userController.isDark
                         ? Colors.white
                         : primaryColor,
@@ -320,7 +314,7 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                       widget.offersModel.issue,
                       style: TextStyle(
                         fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w700,
                         color: widget.userController.isDark
                             ? Colors.white
                             : primaryColor,

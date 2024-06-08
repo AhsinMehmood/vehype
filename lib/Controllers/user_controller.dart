@@ -302,6 +302,14 @@ class UserController with ChangeNotifier {
         .toList();
   }
 
+  List<UserModel> filterProviders(List<UserModel> providers, double userLat,
+      double userLong, double radiusKm) {
+    return providers
+        .where((offer) =>
+            haversine(userLat, userLong, offer.lat, offer.long) <= radiusKm)
+        .toList();
+  }
+
   double toRadians(double degrees) {
     return degrees * pi / 180.0;
   }
@@ -420,6 +428,23 @@ class UserController with ChangeNotifier {
     });
 
     FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+  }
+
+  List fieldNames = [
+    'isActiveNew',
+    'isActivePending',
+    'isActiveInProgress',
+    'isActiveCompleted',
+    'isActiveCancelled',
+    'isActive',
+    'isHistoryActive',
+  ];
+
+  changeNotiOffers(int fieldNameIndex, bool value, String userId) {
+    print('object');
+    FirebaseFirestore.instance.collection('users').doc(userId).update({
+      fieldNames[fieldNameIndex]: value,
+    });
   }
 }
 

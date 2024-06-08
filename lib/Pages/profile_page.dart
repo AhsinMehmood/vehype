@@ -249,52 +249,7 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if (userModel.accountType == 'seeker')
-                        InkWell(
-                          onTap: () async {
-                            if (userModel.email == 'No email set') {
-                              Get.showSnackbar(GetSnackBar(
-                                message: 'Login to continue',
-                                duration: const Duration(
-                                  seconds: 3,
-                                ),
-                                backgroundColor: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                mainButton: TextButton(
-                                  onPressed: () {
-                                    Get.to(() => ChooseAccountTypePage());
-                                    Get.closeCurrentSnackbar();
-                                  },
-                                  child: Text(
-                                    'Login Page',
-                                    style: TextStyle(
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ));
-                            } else {
-                              Get.to(() => ExplorePage());
-                            }
-                          },
-                          child: Text(
-                            'Explore Nearby',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
+
                       if (userModel.accountType == 'seeker')
                         const SizedBox(
                           height: 10,
@@ -586,7 +541,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.33',
+                        'App Version: 3.0.3.34',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

@@ -114,8 +114,9 @@ class SelectServiceCreateVehicle extends StatelessWidget {
                                           width: 6,
                                         ),
                                         SvgPicture.asset(service.image,
-                                            height: 40,
-                                            width: 40,
+                                            height: 45,
+                                            width: 45,
+                                            fit: BoxFit.cover,
                                             color: userController.isDark
                                                 ? Colors.white
                                                 : primaryColor),

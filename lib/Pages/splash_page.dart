@@ -63,6 +63,7 @@ class _SplashPageState extends State<SplashPage> {
               print(accountTypeUserSnap.data()!['userId']);
               print(userId);
               print(userModel.userId);
+              OneSignal.login(userId + userModel.accountType);
 
               userController.getUserStream(userId + userModel.accountType);
               await Future.delayed(const Duration(seconds: 2));
@@ -81,6 +82,7 @@ class _SplashPageState extends State<SplashPage> {
                 'status': 'active',
               });
               await Future.delayed(const Duration(seconds: 2));
+              OneSignal.login(userId + userModel.accountType);
 
               userController.getUserStream(userId + userModel.accountType);
               await Future.delayed(const Duration(seconds: 2));

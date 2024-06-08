@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -22,9 +23,8 @@ import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/Widgets/vehicle_owner_request_widget.dart';
 import 'package:vehype/const.dart';
 import 'package:http/http.dart' as http;
-import '../Controllers/vehicle_data.dart';
+
 import 'choose_account_type.dart';
-import 'full_image_view_page.dart';
 
 Future<void> sendNotification(String userId, String userName, String heading,
     String contents, String chatId, String type, String messageId) async {
@@ -140,13 +140,67 @@ class RepairPage extends StatelessWidget {
               labelColor: userController.isDark ? Colors.white : primaryColor,
               tabs: [
                 Tab(
-                  text: 'Active',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Active'),
+                      if (userModel.isActive)
+                        const SizedBox(
+                          width: 5,
+                        ),
+                      if (userModel.isActive)
+                        Container(
+                          height: 12,
+                          width: 12,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.red,
+                          ),
+                        )
+                    ],
+                  ),
                 ),
                 Tab(
-                  text: 'In Progress',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('In Progress'),
+                      if (userModel.isActiveInProgress)
+                        const SizedBox(
+                          width: 5,
+                        ),
+                      if (userModel.isActiveInProgress)
+                        Container(
+                          height: 12,
+                          width: 12,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.red,
+                          ),
+                        )
+                    ],
+                  ),
                 ),
                 Tab(
-                  text: 'History',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('History'),
+                      if (userModel.isActiveHistory)
+                        const SizedBox(
+                          width: 5,
+                        ),
+                      if (userModel.isActiveHistory)
+                        Container(
+                          height: 12,
+                          width: 12,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.red,
+                          ),
+                        )
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -217,7 +271,7 @@ class RepairPage extends StatelessWidget {
                     if (offersPosted.isEmpty) {
                       return Center(
                         child: Text(
-                          'Nothing Yet!',
+                          'No In Progress Offers Yet!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: userController.isDark
@@ -282,7 +336,7 @@ class RepairPage extends StatelessWidget {
   }
 }
 
-class InActiveOffers extends StatelessWidget {
+class InActiveOffers extends StatefulWidget {
   const InActiveOffers(
       {super.key,
       required this.offersPosted,
@@ -293,17 +347,33 @@ class InActiveOffers extends StatelessWidget {
   final UserController userController;
 
   @override
+  State<InActiveOffers> createState() => _InActiveOffersState();
+}
+
+class _InActiveOffersState extends State<InActiveOffers> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userController.userModel!.isActiveHistory == true) {
+      Future.delayed(const Duration(seconds: 2)).then((e) {
+        UserController().changeNotiOffers(
+            6, false, widget.userController.userModel!.userId);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ListView.builder(
-              itemCount: offersPosted.length,
+              itemCount: widget.offersPosted.length,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                OffersModel offersModel = offersPosted[index];
+                OffersModel offersModel = widget.offersPosted[index];
 
                 List<String> vehicleInfo = offersModel.vehicleId.split(',');
                 final String vehicleType = vehicleInfo[0].trim();
@@ -317,7 +387,7 @@ class InActiveOffers extends StatelessWidget {
                       // Get.to(() => CreateRequestPage(offersModel: offersModel));
                     },
                     child: Card(
-                      color: userController.isDark
+                      color: widget.userController.isDark
                           ? Colors.blueGrey.shade700
                           : Colors.white,
                       shape: RoundedRectangleBorder(
@@ -326,7 +396,7 @@ class InActiveOffers extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           VehicleDetailsRequest(
-                              userController: userController,
+                              userController: widget.userController,
                               vehicleType: vehicleType,
                               vehicleMake: vehicleMake,
                               vehicleYear: vehicleYear,
@@ -351,21 +421,43 @@ class InActiveOffers extends StatelessWidget {
                                     List<OffersReceivedModel>
                                         offersReceivedModel =
                                         snapshots.data ?? [];
+
                                     if (offersReceivedModel.isEmpty) {
                                       return Text(
                                         'Deleted',
                                       );
                                     }
+                                    if (offersReceivedModel.first.status ==
+                                            'Completed' &&
+                                        offersReceivedModel.first.ratingOne !=
+                                            0.0) {
+                                      return RatingBarIndicator(
+                                        rating:
+                                            offersReceivedModel.first.ratingOne,
+                                        itemBuilder: (context, _) => Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                        ),
+                                      );
+                                    }
+                                    if (offersReceivedModel.first.status
+                                            .toLowerCase() ==
+                                        'Cancelled'.toLowerCase()) {
+                                      return Text('Cancelled');
+                                    }
+
                                     return ElevatedButton(
                                       onPressed: () {
                                         Get.to(() => InActiveOffersSeeker(
                                               offersModel: offersModel,
+                                              tittle: 'Rate Job',
                                             ));
                                       },
                                       style: ElevatedButton.styleFrom(
-                                          backgroundColor: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
+                                          backgroundColor:
+                                              widget.userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
                                           elevation: 0.0,
                                           fixedSize: Size(Get.width * 0.8, 40),
                                           shape: RoundedRectangleBorder(
@@ -373,9 +465,9 @@ class InActiveOffers extends StatelessWidget {
                                                 BorderRadius.circular(3),
                                           )),
                                       child: Text(
-                                        title,
+                                        widget.title,
                                         style: TextStyle(
-                                            color: userController.isDark
+                                            color: widget.userController.isDark
                                                 ? primaryColor
                                                 : Colors.white),
                                       ),
@@ -401,7 +493,7 @@ class InActiveOffers extends StatelessWidget {
   }
 }
 
-class ActiveOffers extends StatelessWidget {
+class ActiveOffers extends StatefulWidget {
   const ActiveOffers({
     super.key,
     required this.offersPosted,
@@ -412,26 +504,36 @@ class ActiveOffers extends StatelessWidget {
   final UserController userController;
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ListView.builder(
-              itemCount: offersPosted.length,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                OffersModel offersModel = offersPosted[index];
+  State<ActiveOffers> createState() => _ActiveOffersState();
+}
 
-                return VehicleOwnerRequestWidget(
-                    offersModel: offersModel, offersReceivedModel: null);
-              }),
-          const SizedBox(
-            height: 70,
-          ),
-        ],
-      ),
+class _ActiveOffersState extends State<ActiveOffers> {
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.userController.userModel!.isActive == true) {
+      Future.delayed(const Duration(seconds: 2)).then((e) {
+        UserController().changeNotiOffers(
+            5, false, widget.userController.userModel!.userId);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 70),
+      child: ListView.builder(
+          itemCount: widget.offersPosted.length,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            OffersModel offersModel = widget.offersPosted[index];
+
+            return VehicleOwnerRequestWidget(
+                offersModel: offersModel, offersReceivedModel: null);
+          }),
     );
   }
 }

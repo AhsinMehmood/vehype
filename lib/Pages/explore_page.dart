@@ -96,6 +96,11 @@ class _ExplorePageState extends State<ExplorePage> {
                         return SecondUserProfile(userId: element.userId);
                       }),
                   isDismissible: true,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  )),
                   isScrollControlled: true,
                 );
               }),

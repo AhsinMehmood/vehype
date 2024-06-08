@@ -2,8 +2,10 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/app_controller.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
@@ -47,9 +49,12 @@ class _TabsPageState extends State<TabsPage> {
 
     // AppController controller = Get.put(AppController());
     return Scaffold(
-        body: userModel.accountType == 'seeker'
-            ? _body[userController.tabIndex]
-            : _body2[userController.tabIndex],
+        body: IndexedStack(
+          index: userModel.accountType == 'seeker'
+              ? userController.tabIndex
+              : userController.tabIndex,
+          children: userModel.accountType == 'seeker' ? _body : _body2,
+        ),
         backgroundColor: Colors.white,
         bottomNavigationBar: userModel.accountType == 'seeker'
             ? bottomNavigationBarSeeker()
@@ -75,9 +80,14 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) {
-        print(userModel.userId);
+        // print(userModel.userId);
         userController.changeTabIndex(index);
-        userController.checkIsAdmin(userModel.email);
+
+        // FlutterAppBadger.updateBadgeCount(10);
+        // OneSignal.login(userModel.userId);
+        // sendNotification(userModel.userId, 'Ahsinnn', 'Has', 'contents',
+        //     'chatId', 'type', 'messageId');
+        // userController.checkIsAdmin(userModel.email);
       },
       items: providerTabs(),
 
@@ -103,12 +113,16 @@ class _TabsPageState extends State<TabsPage> {
         color: userController.isDark ? Colors.white : Colors.black,
       ),
       currentIndex: userController.tabIndex,
-      onTap: (int index) {
+      onTap: (int index) async {
         print(userModel.userId);
 
-        userController.checkIsAdmin(userModel.email);
-
+        // userController.checkIsAdmin(userModel.email);
         userController.changeTabIndex(index);
+        // FlutterAppBadger.updateBadgeCount(10);
+        // OneSignal.login(userModel.userId);
+        // sendNotification(userModel.userId, 'Ahsinnn', 'Has', 'contents',
+        //     'chatId', 'type', 'messageId');
+        print(userModel.userId);
       },
       items: seekerTabs(),
 
@@ -157,8 +171,10 @@ class _TabsPageState extends State<TabsPage> {
                       bool haveUnread = false;
                       List<ChatModel> chats = snapshot.data ?? [];
                       for (var element in chats) {
-                        haveUnread = getUnread(element.lastMessageAt,
-                            element.lastOpen[userModel.userId], context);
+                        if (haveUnread == false) {
+                          haveUnread = getUnread(element.lastMessageAt,
+                              element.lastOpen[userModel.userId], context);
+                        }
                       }
                       return Positioned(
                         top: 0,
@@ -265,8 +281,10 @@ class _TabsPageState extends State<TabsPage> {
                     if (snapshot.hasData) {
                       List<ChatModel> chats = snapshot.data ?? [];
                       for (var element in chats) {
-                        haveUnread = getUnread(element.lastMessageAt,
-                            element.lastOpen[userModel.userId], context);
+                        if (haveUnread == false) {
+                          haveUnread = getUnread(element.lastMessageAt,
+                              element.lastOpen[userModel.userId], context);
+                        }
                       }
 
                       return Positioned(
@@ -278,7 +296,7 @@ class _TabsPageState extends State<TabsPage> {
                             height: 12,
                             width: 12,
                             decoration: BoxDecoration(
-                              color: haveUnread ? Colors.red : Colors.white,
+                              color: Colors.red,
                               borderRadius: BorderRadius.circular(200),
                             ),
                           ),

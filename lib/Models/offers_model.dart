@@ -10,7 +10,7 @@ class OffersModel {
   final double long;
   final String description;
   final String imageOne;
-  final String imageTwo;
+  final List images;
   final String additionalService;
   final List offersReceived;
   final List ignoredBy;
@@ -28,12 +28,12 @@ class OffersModel {
       required this.additionalService,
       required this.ignoredBy,
       required this.issue,
-      required this.imageTwo,
+      required this.imageOne,
       required this.lat,
       required this.long,
       required this.description,
       required this.createdAt,
-      required this.imageOne});
+      required this.images});
 
   factory OffersModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -50,12 +50,12 @@ class OffersModel {
         vehicleId: data['vehicleName'] ?? '',
         issue: data['issue'] ?? '',
         additionalService: data['additionalService'] ?? '',
-        imageTwo: data['imageTwo'] ?? '',
+        imageOne: data['imageOne'] ?? '',
         status: data['status'] ?? '',
         lat: data['lat'] ?? 0.0,
         long: data['long'] ?? 0.0,
         description: data['description'] ?? '',
-        imageOne: data['imageOne'] ?? '');
+        images: data['images'] ?? []);
   }
 }
 
@@ -79,9 +79,13 @@ class OffersReceivedModel {
   final String cancelBy;
   final String comment;
   final String status;
-
+  final String commentOne;
+  final String commentTwo;
+  final bool isDone;
   OffersReceivedModel(
       {required this.offerBy,
+      required this.commentOne,
+      required this.commentTwo,
       required this.ratingOne,
       required this.ratingTwo,
       required this.offerAt,
@@ -93,6 +97,7 @@ class OffersReceivedModel {
       required this.price,
       required this.startDate,
       required this.endDate,
+      required this.isDone,
       required this.status});
 
   factory OffersReceivedModel.fromJson(
@@ -113,6 +118,9 @@ class OffersReceivedModel {
         endDate: data['endDate'],
         status: data['status'],
         ownerId: data['ownerId'] ?? '',
+        commentOne: data['commentOne'] ?? '',
+        isDone: data['isDone'] ?? false,
+        commentTwo: data['commentTwo'] ?? '',
         offerId: data['offerId']);
   }
 }

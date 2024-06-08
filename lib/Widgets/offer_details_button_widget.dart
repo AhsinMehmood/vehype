@@ -3,6 +3,7 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
@@ -111,11 +112,19 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                                             userModel.userId) {
                                           OffersController().cancelOfferByOwner(
                                               offersReceivedModel, userModel);
+                                          UserController().changeNotiOffers(
+                                              4,
+                                              true,
+                                              offersReceivedModel.offerBy);
                                         } else {
                                           OffersController()
                                               .cancelOfferByProvider(
                                                   offersReceivedModel,
                                                   userModel);
+                                          UserController().changeNotiOffers(
+                                              6,
+                                              true,
+                                              offersReceivedModel.ownerId);
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -182,7 +191,7 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                     });
               }, 'Give Rating', context),
             if (offersReceivedModel.status == 'Completed' &&
-                offersReceivedModel.ratingTwo == 0.0)
+                offersReceivedModel.ratingOne == 0.0)
               _getButtonFull(Colors.white, () {
                 showModalBottomSheet(
                     context: context,
@@ -202,7 +211,15 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                           isDark: userController.isDark);
                     });
               }, 'Give Rating', context),
-
+            if (offersReceivedModel.status == 'Completed' &&
+                offersReceivedModel.ratingOne != 0.0)
+              RatingBarIndicator(
+                rating: offersReceivedModel.ratingOne,
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+              ),
             // else
           ],
         ),
@@ -250,6 +267,8 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                       .update({
                     'status': 'inactive',
                   });
+                  UserController()
+                      .changeNotiOffers(3, true, offersReceivedModel.offerBy);
 
                   Get.close(1);
                 },

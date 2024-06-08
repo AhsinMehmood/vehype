@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,12 +13,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/repair_page.dart';
+import 'package:vehype/Widgets/choose_gallery_camera.dart';
 
 import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
@@ -33,7 +37,7 @@ class CreateRequestPage extends StatefulWidget {
 }
 
 class _CreateRequestPageState extends State<CreateRequestPage> {
-  TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   void initState() {
@@ -50,11 +54,20 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
         garageController.selectedIssue = widget.offersModel!.issue;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
-        garageController.imageTwoUrl = widget.offersModel!.imageTwo;
+        List<RequestImageModel> images = [];
+        for (var element in widget.offersModel!.images) {
+          images.add(RequestImageModel(
+              imageUrl: element,
+              isLoading: false,
+              progress: 1.0,
+              imageFile: null));
+        }
+        garageController.requestImages = images;
         garageController.additionalService =
             widget.offersModel!.additionalService;
         _descriptionController.text = widget.offersModel!.description;
         garageController.garageId = widget.offersModel!.garageId;
+        setState(() {});
       }
     });
   }
@@ -408,205 +421,322 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               const SizedBox(
                 height: 15,
               ),
-              InkWell(
-                child: SizedBox(
-                  width: Get.width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Location',
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
+              Card(
+                color: userController.isDark ? Colors.white : Colors.black,
+                child: Column(
+                  children: [
+                    InkWell(
+                      child: SizedBox(
+                        width: Get.width,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 140,
+                              width: Get.width,
+                              child: lat == 0.0
+                                  ? CupertinoActivityIndicator(
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                    )
+                                  : GoogleMap(
+                                      onMapCreated: (contr) {
+                                        _controller.complete(contr);
+                                      },
+                                      markers: {
+                                        Marker(
+                                          markerId: MarkerId('current'),
+                                          position: LatLng(lat, long),
+                                        ),
+                                      },
+                                      initialCameraPosition: CameraPosition(
+                                        target: LatLng(lat, long),
+                                        zoom: 16.0,
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Align(
+                              alignment: Alignment.center,
+                              child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return GoogleMapLocationPicker(
+                                            apiKey:
+                                                'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                            currentLatLng: LatLng(lat, long),
+                                            onNext: (GeocodingResult?
+                                                result) async {
+                                              if (result != null) {
+                                                setState(() {
+                                                  lat = result
+                                                      .geometry.location.lat;
+                                                  long = result
+                                                      .geometry.location.lng;
+                                                });
+                                                final GoogleMapController
+                                                    controller =
+                                                    await _controller.future;
+                                                await controller.animateCamera(
+                                                    CameraUpdate
+                                                        .newCameraPosition(
+                                                            CameraPosition(
+                                                  target: LatLng(lat, long),
+                                                  zoom: 16.0,
+                                                )));
+                                              }
+                                            },
+                                            onSuggestionSelected:
+                                                (Prediction? result) async {
+                                              if (result != null) {
+                                                // result.matchedSubstrings.first.
+                                                // setState(() {
+
+                                                //   lat = result.
+                                                //       .geometry!.location.lat;
+                                                //   long = result
+                                                //       .result.geometry!.location.lng;
+                                                // });
+                                                final GoogleMapController
+                                                    controller =
+                                                    await _controller.future;
+                                                await controller.animateCamera(
+                                                    CameraUpdate
+                                                        .newCameraPosition(
+                                                            CameraPosition(
+                                                  target: LatLng(lat, long),
+                                                  zoom: 16.0,
+                                                )));
+                                              }
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                      // backgroundColor: userController.isDark
+                                      //     ? Colors.white
+                                      //     : primaryColor,
+                                      // maximumSize: Size(Get.width * 0.8, 60),
+                                      // minimumSize: Size(Get.width * 0.8, 60),
+                                      // shape: RoundedRectangleBorder(
+                                      //   borderRadius: BorderRadius.circular(7),
+                                      // ),
+                                      ),
+                                  child: Text(
+                                    'Pick Location',
+                                    style: TextStyle(
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                      fontSize: 16,
+                                      fontFamily: 'Avenir',
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  )),
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Card(
+                  color: userController.isDark ? Colors.white : Colors.black,
+                  // margin: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      InkWell(
+                        child: Container(
+                            width: Get.width,
+                            height: Get.width * 0.45,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              // color: Colors.grey.shade400.withOpacity(0.7),
+                            ),
+                            child: garageController.requestImages.isEmpty
+                                ? InkWell(
+                                    onTap: () {
+                                      Get.bottomSheet(
+                                        ChooseGalleryCamera(
+                                          onTapCamera: () {
+                                            garageController.selectRequestImage(
+                                                ImageSource.camera,
+                                                userModel.userId);
+                                            Get.close(1);
+                                          },
+                                          onTapGallery: () {
+                                            garageController.selectRequestImage(
+                                                ImageSource.gallery,
+                                                userModel.userId);
+                                            Get.close(1);
+                                          },
+                                        ),
+                                        backgroundColor: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Card(
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                      child: Icon(
+                                        Icons.add_a_photo_rounded,
+                                        size: 70,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                : PageView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount:
+                                        garageController.requestImages.length,
+                                    controller:
+                                        PageController(viewportFraction: 0.90),
+                                    itemBuilder: (context, index) {
+                                      // return InkWell(
+                                      //   onTap: () {},
+                                      //   child: Card(
+                                      //     color: userController.isDark
+                                      //         ? primaryColor
+                                      //         : Colors.white,
+                                      //     child: Icon(
+                                      //       Icons.add_a_photo_rounded,
+                                      //       size: 70,
+                                      //       color: userController.isDark
+                                      //           ? Colors.white
+                                      //           : primaryColor,
+                                      //     ),
+                                      //   ),
+                                      // );
+                                      RequestImageModel requestImageModel =
+                                          garageController.requestImages[index];
+                                      return InkWell(
+                                        onTap: () {
+                                          Get.bottomSheet(
+                                            ChooseGalleryCamera(
+                                              onTapCamera: () {
+                                                garageController
+                                                    .selectRequestImageUpdateSingleImage(
+                                                        ImageSource.camera,
+                                                        userModel.userId,
+                                                        index);
+                                                Get.close(1);
+                                              },
+                                              onTapGallery: () {
+                                                garageController
+                                                    .selectRequestImageUpdateSingleImage(
+                                                        ImageSource.gallery,
+                                                        userModel.userId,
+                                                        index);
+                                                Get.close(1);
+                                              },
+                                            ),
+                                            backgroundColor:
+                                                userController.isDark
+                                                    ? primaryColor
+                                                    : Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(20),
+                                                topRight: Radius.circular(20),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: CreateRequestImageWidget(
+                                          requestImageModel: requestImageModel,
+                                          index: index,
+                                        ),
+                                      );
+                                    })),
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      Container(
-                        height: 140,
-                        width: Get.width,
-                        child: lat == 0.0
-                            ? CupertinoActivityIndicator()
-                            : GoogleMap(
-                                onMapCreated: (contr) {
-                                  _controller.complete(contr);
-                                },
-                                markers: {
-                                  Marker(
-                                    markerId: MarkerId('current'),
-                                    position: LatLng(lat, long),
-                                  ),
-                                },
-                                initialCameraPosition: CameraPosition(
-                                  target: LatLng(lat, long),
-                                  zoom: 16.0,
-                                ),
-                              ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
                       Align(
                         alignment: Alignment.center,
-                        child: Container(
-                          height: 1,
-                          width: Get.width,
-                          color: changeColor(color: 'D9D9D9'),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return GoogleMapLocationPicker(
-                                      apiKey:
-                                          'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                      currentLatLng: LatLng(lat, long),
-                                      onNext: (GeocodingResult? result) async {
-                                        if (result != null) {
-                                          setState(() {
-                                            lat = result.geometry.location.lat;
-                                            long = result.geometry.location.lng;
-                                          });
-                                          final GoogleMapController controller =
-                                              await _controller.future;
-                                          await controller.animateCamera(
-                                              CameraUpdate.newCameraPosition(
-                                                  CameraPosition(
-                                            target: LatLng(lat, long),
-                                            zoom: 16.0,
-                                          )));
-                                        }
-                                      },
-                                      onSuggestionSelected:
-                                          (Prediction? result) async {
-                                        if (result != null) {
-                                          // result.matchedSubstrings.first.
-                                          // setState(() {
-
-                                          //   lat = result.
-                                          //       .geometry!.location.lat;
-                                          //   long = result
-                                          //       .result.geometry!.location.lng;
-                                          // });
-                                          final GoogleMapController controller =
-                                              await _controller.future;
-                                          await controller.animateCamera(
-                                              CameraUpdate.newCameraPosition(
-                                                  CameraPosition(
-                                            target: LatLng(lat, long),
-                                            zoom: 16.0,
-                                          )));
-                                        }
-                                      },
+                        child: ElevatedButton(
+                            onPressed: garageController.requestImages.length ==
+                                    3
+                                ? null
+                                : () {
+                                    Get.bottomSheet(
+                                      ChooseGalleryCamera(
+                                        onTapCamera: () {
+                                          garageController.selectRequestImage(
+                                              ImageSource.camera,
+                                              userModel.userId);
+                                          Get.close(1);
+                                        },
+                                        onTapGallery: () {
+                                          garageController.selectRequestImage(
+                                              ImageSource.gallery,
+                                              userModel.userId);
+                                          Get.close(1);
+                                        },
+                                      ),
+                                      backgroundColor: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
                                     );
                                   },
-                                ),
-                              );
-                            },
                             style: TextButton.styleFrom(
-                                // backgroundColor: userController.isDark
-                                //     ? Colors.white
-                                //     : primaryColor,
-                                // maximumSize: Size(Get.width * 0.8, 60),
-                                // minimumSize: Size(Get.width * 0.8, 60),
-                                // shape: RoundedRectangleBorder(
-                                //   borderRadius: BorderRadius.circular(7),
-                                // ),
-                                ),
+                              backgroundColor: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white,
+                              maximumSize: Size(Get.width * 0.6, 50),
+                              minimumSize: Size(Get.width * 0.6, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                            ),
                             child: Text(
-                              'Pick Location',
+                              'Select Media ${garageController.requestImages.length}/3',
                               style: TextStyle(
                                 color: userController.isDark
                                     ? Colors.white
                                     : primaryColor,
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w800,
                               ),
                             )),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              InkWell(
-                onTap: () {
-                  garageController.selectImage(context, userModel, 1);
-                },
-                child: Container(
-                  width: Get.width * 0.9,
-                  height: Get.width * 0.35,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: garageController.imageTwoUrl == ''
-                        ? Colors.grey.shade400.withOpacity(0.7)
-                        : null,
-                  ),
-                  child: garageController.imageTwoLoading
-                      ? SizedBox(
-                          height: 40,
-                          width: 40,
-                          child: CupertinoActivityIndicator())
-                      : (garageController.imageTwoUrl == ''
-                          ? Icon(
-                              Icons.add_a_photo_rounded,
-                              size: 70,
-                              color: Colors.white,
-                            )
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: ExtendedImage.network(
-                                garageController.imageTwoUrl,
-                                handleLoadingProgress: true,
-                                fit: BoxFit.cover,
-                              ),
-                            )),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: TextButton(
-                    onPressed: () {
-                      garageController.selectImage(context, userModel, 1);
-                    },
-                    style: TextButton.styleFrom(
-                        // backgroundColor: userController.isDark
-                        //     ? Colors.white
-                        //     : primaryColor,
-                        // maximumSize: Size(Get.width * 0.8, 60),
-                        // minimumSize: Size(Get.width * 0.8, 60),
-                        // shape: RoundedRectangleBorder(
-                        //   borderRadius: BorderRadius.circular(7),
-                        // ),
-                        ),
-                    child: Text(
-                      'Select Media',
-                      style: TextStyle(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
-                        fontSize: 18,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w800,
+                      const SizedBox(
+                        height: 10,
                       ),
-                    )),
-              ),
+                    ],
+                  )),
               const SizedBox(
                 height: 40,
               ),
@@ -627,26 +757,27 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 userModel.userId,
                                 null,
                                 garageController.garageId);
+                            getUserProviders();
                             String url =
                                 'https://us-central1-vehype-386313.cloudfunctions.net/sendPushNotifications';
-                            try {
-                              final response = await http.post(
-                                Uri.parse(url),
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: json.encode({'name': userModel.name}),
-                              );
+                            // try {
+                            //   final response = await http.post(
+                            //     Uri.parse(url),
+                            //     headers: {
+                            //       'Content-Type': 'application/json',
+                            //     },
+                            //     body: json.encode({'name': userModel.name}),
+                            //   );
 
-                              if (response.statusCode == 200) {
-                                print('Notification sent successfully');
-                              } else {
-                                print(
-                                    'Failed to send notification: ${response.body}');
-                              }
-                            } catch (e) {
-                              print('Error sending notification: $e');
-                            }
+                            //   if (response.statusCode == 200) {
+                            //     print('Notification sent successfully');
+                            //   } else {
+                            //     print(
+                            //         'Failed to send notification: ${response.body}');
+                            //   }
+                            // } catch (e) {
+                            //   print('Error sending notification: $e');
+                            // }
 
                             //  FirebaseFirestore.instance.collection('collectionPath')
                           }
@@ -661,7 +792,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         borderRadius: BorderRadius.circular(7),
                       )),
                   child: Text(
-                    'Save',
+                    'Create Request',
                     style: TextStyle(
                       color:
                           userController.isDark ? primaryColor : Colors.white,
@@ -676,6 +807,191 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  getUserProviders() async {
+    List<UserModel> providers = [];
+
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .where('accountType', isEqualTo: 'provider')
+        .where('status', isEqualTo: 'active')
+        .get();
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
+      providers.add(UserModel.fromJson(element));
+    }
+    for (var user in providers) {
+      UserController().changeNotiOffers(0, true, user.userId);
+    }
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    UserModel userModel = userController.userModel!;
+    List<UserModel> filterProviders = userController.filterProviders(
+        providers, userModel.lat, userModel.long, 100);
+    for (UserModel provider in filterProviders) {
+      sendNotification(
+          provider.userId,
+          userModel.name,
+          'Offer Request',
+          '${userModel.name} created a new offer.',
+          'chatId',
+          'offer',
+          'messageId');
+    }
+    print(filterProviders.length);
+  }
+}
+
+class CreateRequestImageWidget extends StatelessWidget {
+  final RequestImageModel requestImageModel;
+  final int index;
+
+  const CreateRequestImageWidget(
+      {super.key, required this.requestImageModel, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    final UserModel userModel = userController.userModel!;
+    final GarageController garageController =
+        Provider.of<GarageController>(context);
+    return Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (requestImageModel.isLoading)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Image.file(
+                    requestImageModel.imageFile!,
+                    fit: BoxFit.cover,
+                    width: Get.width,
+                    height: Get.width * 0.42,
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                              value: requestImageModel.progress,
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            )
+          else
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: ExtendedImage.network(
+                    requestImageModel.imageUrl,
+                    handleLoadingProgress: true,
+                    fit: BoxFit.cover,
+                    width: Get.width,
+                    height: Get.width * 0.42,
+                  ),
+                ),
+                Positioned(
+                    right: 0,
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(
+                            top: 4,
+                            right: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.white,
+                          ),
+                          child: IconButton(
+                              onPressed: () {
+                                garageController.removeRequestImage(index);
+                              },
+                              color: primaryColor,
+                              icon: Icon(
+                                Icons.delete_outline,
+                              )),
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(
+                            top: 4,
+                            right: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.white,
+                          ),
+                          child: IconButton(
+                              onPressed: () {
+                                Get.bottomSheet(
+                                  ChooseGalleryCamera(
+                                    onTapCamera: () {
+                                      garageController
+                                          .selectRequestImageUpdateSingleImage(
+                                              ImageSource.camera,
+                                              userModel.userId,
+                                              index);
+                                      Get.close(1);
+                                    },
+                                    onTapGallery: () {
+                                      garageController
+                                          .selectRequestImageUpdateSingleImage(
+                                              ImageSource.gallery,
+                                              userModel.userId,
+                                              index);
+                                      Get.close(1);
+                                    },
+                                  ),
+                                  backgroundColor: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      topRight: Radius.circular(20),
+                                    ),
+                                  ),
+                                );
+                              },
+                              color: primaryColor,
+                              icon: Icon(
+                                Icons.edit,
+                              )),
+                        ),
+                      ],
+                    ))
+              ],
+            )
+        ],
       ),
     );
   }

@@ -16,6 +16,19 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
 
+class RatingsModel {
+  final String id;
+  final String images;
+  final String comment;
+  final double rating;
+
+  RatingsModel(
+      {required this.id,
+      required this.images,
+      required this.comment,
+      required this.rating});
+}
+
 class SecondUserProfile extends StatelessWidget {
   final String userId;
   const SecondUserProfile({super.key, required this.userId});
@@ -23,7 +36,6 @@ class SecondUserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-
     return DefaultTabController(
       length: 5,
       child: StreamBuilder<UserModel>(
@@ -40,25 +52,68 @@ class SecondUserProfile extends StatelessWidget {
                 ),
               );
             }
-            UserModel userModel = snapshot.data!;
-            return Scaffold(
-              body: NestedScrollView(
+            List<RatingsModel> ratings = [];
+
+            UserModel profileModel = snapshot.data!;
+            for (var element in profileModel.ratings) {
+              if (element['images'] != null) {
+                ratings.add(RatingsModel(
+                    id: element['id'],
+                    images: element['images'],
+                    comment: element['comment'],
+                    rating: element['rating']));
+              }
+            }
+            // print(ratings.first.id);
+
+            return Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              )),
+              color: userController.isDark ? primaryColor : Colors.white,
+              child: NestedScrollView(
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
                     SliverAppBar(
-                      expandedHeight: 300.0,
+                      elevation: 0.0,
+
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      )),
+                      expandedHeight: 510.0,
+                      leading: IconButton(
+                          onPressed: () {
+                            Get.close(1);
+                          },
+                          icon: Icon(
+                            Icons.close,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                          )),
+                      backgroundColor:
+                          userController.isDark ? primaryColor : Colors.white,
                       floating: false,
                       pinned: true,
+                      // snap: true,
                       flexibleSpace: FlexibleSpaceBar(
                           centerTitle: true,
-                          title: Text(userModel.name,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                              )),
-                          background:
-                              SecondUserHeaderWidget(userModel: userModel)),
+                          background: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 60,
+                              left: 12,
+                              right: 12,
+                            ),
+                            child: SecondUserHeaderWidget(
+                              profile: profileModel,
+                              rating: ratings,
+                            ),
+                          )),
                       bottom: TabBar(
                         isScrollable: true,
                         indicatorColor: userController.isDark
@@ -91,23 +146,23 @@ class SecondUserProfile extends StatelessWidget {
                     ),
                   ];
                 },
-                body: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Container(
-                          //   height: 30,
-                          //   width: Get.width,
-                          //   child:
-                          // ),
-                        ],
-                      ),
-                    ],
+                body: TabBarView(children: [
+                  Container(
+                    color: userController.isDark ? primaryColor : Colors.white,
                   ),
-                ),
+                  Container(
+                    color: Colors.blue,
+                  ),
+                  Container(
+                    color: Colors.green,
+                  ),
+                  Container(
+                    color: Colors.yellow,
+                  ),
+                  Container(
+                    color: Colors.red,
+                  ),
+                ]),
               ),
             );
           }),
@@ -116,35 +171,24 @@ class SecondUserProfile extends StatelessWidget {
 }
 
 class SecondUserHeaderWidget extends StatelessWidget {
-  final UserModel userModel;
-  const SecondUserHeaderWidget({super.key, required this.userModel});
+  final UserModel profile;
+  final List<RatingsModel> rating;
+  const SecondUserHeaderWidget(
+      {super.key, required this.profile, required this.rating});
 
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+    List imageUrls = [];
+    for (var element in rating) {
+      imageUrls.add(element.images);
+    }
+    // UserModel userModel = userController.userModel!;
 
     return Column(
       children: [
         const SizedBox(
           height: 5,
-        ),
-        GestureDetector(
-          onTap: () {
-            Get.close(1);
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 4,
-                width: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(200),
-                  color: userController.isDark ? Colors.white : primaryColor,
-                ),
-              ),
-            ],
-          ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -152,12 +196,12 @@ class SecondUserHeaderWidget extends StatelessWidget {
           children: [
             InkWell(
               onTap: () {
-                Get.to(() => FullImagePageView(url: userModel.profileUrl));
+                Get.to(() => FullImagePageView(url: profile.profileUrl));
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(200),
                 child: ExtendedImage.network(
-                  userModel.profileUrl,
+                  profile.profileUrl,
                   width: 55,
                   height: 55,
                   fit: BoxFit.fill,
@@ -176,11 +220,11 @@ class SecondUserHeaderWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userModel.name,
+                  profile.name,
                   style: TextStyle(
                     color: userController.isDark ? Colors.white : primaryColor,
                     fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(
@@ -193,7 +237,7 @@ class SecondUserHeaderWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       RatingBarIndicator(
-                        rating: userModel.rating,
+                        rating: profile.rating,
                         itemBuilder: (context, index) => Icon(
                           Icons.star,
                           color: Colors.amber,
@@ -206,7 +250,7 @@ class SecondUserHeaderWidget extends StatelessWidget {
                         width: 8,
                       ),
                       Text(
-                        '(${userModel.ratings.length.toString()})',
+                        '(${profile.ratings.length.toString()})',
                         style: TextStyle(
                           color: userController.isDark
                               ? Colors.white
@@ -235,8 +279,7 @@ class SecondUserHeaderWidget extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    MapsLauncher.launchCoordinates(
-                        userModel.lat, userModel.long);
+                    MapsLauncher.launchCoordinates(profile.lat, profile.long);
                   },
                   child: Container(
                     height: 40,
@@ -394,21 +437,22 @@ class SecondUserHeaderWidget extends StatelessWidget {
         const SizedBox(
           height: 15,
         ),
-        SizedBox(
-          height: 250,
-          width: Get.width,
-          child: MasonryView(
-            listOfItem: userModel.gallery,
-            // numberOfColumn: 2,
-            itemBuilder: (item) {
-              return InkWell(
-                  onTap: () {
-                    Get.to(() => FullImagePageView(url: item));
-                  },
-                  child: ExtendedImage.network(item));
-            },
+        if (imageUrls.isNotEmpty)
+          SizedBox(
+            height: 250,
+            width: Get.width,
+            child: MasonryView(
+              listOfItem: imageUrls,
+              // numberOfColumn: 2,
+              itemBuilder: (item) {
+                return InkWell(
+                    onTap: () {
+                      Get.to(() => FullImagePageView(url: item));
+                    },
+                    child: ExtendedImage.network(item));
+              },
+            ),
           ),
-        ),
         const SizedBox(
           height: 15,
         ),

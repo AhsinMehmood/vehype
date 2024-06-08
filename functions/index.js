@@ -11,7 +11,7 @@ exports.sendPushNotifications = functions.https.onRequest(async (req, res) => {
     try
     {
         const usersRef = admin.firestore().collection('users');
-        const snapshot = await usersRef.where('accountType', '==', 'provider').get();
+        const snapshot = await usersRef.where('accountType', '==', 'provider').where('status', '==', 'active').get();
 
         if (snapshot.empty)
         {

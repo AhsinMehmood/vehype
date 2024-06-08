@@ -32,6 +32,8 @@ import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Pages/request_chat_details.dart';
 import 'package:vehype/Pages/request_details_seeker_chat_page.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
+import 'package:vehype/Widgets/offer_request_details.dart';
+import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/video_player.dart';
 import 'package:vehype/bad_words.dart';
@@ -1109,119 +1111,128 @@ class AcceptOfferConfirm extends StatelessWidget {
     return Dialog(
       // insetPadding: const EdgeInsets.all(4),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 15,
-            ),
-            Text(
-              'Confirm Request Acceptance',
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 15,
               ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Text(
-              'Are you sure you want to accept this request?',
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Text(
-              'You can review our rating policy here.',
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            InkWell(
-              onTap: () {
-                launchUrl(Uri.parse('https://vehype.com/help#'));
-              },
-              child: Text(
-                'Rating Policy',
+              Text(
+                'Confirm Request Acceptance',
                 style: TextStyle(
-                    color: Colors.red, decoration: TextDecoration.underline),
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Get.close(1);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      // Get.dialog(AcceptOfferConfirm());
-                      Get.dialog(LoadingDialog(), barrierDismissible: false);
-                      await FirebaseFirestore.instance
-                          .collection('offersReceived')
-                          .doc(offersReceivedModel.id)
-                          .update({
-                        'status': 'Upcoming',
-                      });
-                      await FirebaseFirestore.instance
-                          .collection('offers')
-                          .doc(offersModel.offerId)
-                          .update({
-                        'status': 'inProgress',
-                      });
-                      sendNotification(
-                          offersReceivedModel.offerBy,
-                          userModel.name,
-                          'Offer Update',
-                          '${userModel.name}, Accepted the offer',
-                          offersReceivedModel.id,
-                          'Offer',
-                          '');
-                      Get.close(1);
-                      Get.close(1);
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.withOpacity(0.2),
-                        elevation: 0.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        )),
-                    child: Text(
-                      'Accept Request',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 14,
-                      ),
+              const SizedBox(
+                height: 15,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OfferRequestDetails(
+                          userController: userController,
+                          offersReceivedModel: offersReceivedModel),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-          ],
+              const SizedBox(
+                height: 15,
+              ),
+              Text(
+                'You can review our rating policy here.',
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              InkWell(
+                onTap: () {
+                  launchUrl(Uri.parse('https://vehype.com/help#'));
+                },
+                child: Text(
+                  'Rating Policy',
+                  style: TextStyle(
+                      color: Colors.red, decoration: TextDecoration.underline),
+                ),
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Get.close(1);
+                      },
+                      child: Text('Cancel'),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        // Get.dialog(AcceptOfferConfirm());
+                        Get.dialog(LoadingDialog(), barrierDismissible: false);
+                        await FirebaseFirestore.instance
+                            .collection('offersReceived')
+                            .doc(offersReceivedModel.id)
+                            .update({
+                          'status': 'Upcoming',
+                        });
+                        await FirebaseFirestore.instance
+                            .collection('offers')
+                            .doc(offersModel.offerId)
+                            .update({
+                          'status': 'inProgress',
+                        });
+                        sendNotification(
+                            offersReceivedModel.offerBy,
+                            userModel.name,
+                            'Offer Update',
+                            '${userModel.name}, Accepted the offer',
+                            offersReceivedModel.id,
+                            'Offer',
+                            '');
+                        Get.close(1);
+                        Get.close(1);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.withOpacity(0.2),
+                          elevation: 0.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          )),
+                      child: Text(
+                        'Accept Request',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 14,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -92,5 +92,9 @@
 <string>This app Needs access to Calendar Usage.</string>
 <key>NSContactsUsageDescription</key>
 <string>This app needs contacts usage permission</string>
+<key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
 </dict>
 </plist>

@@ -1,13 +1,17 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:io';
+
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
@@ -16,6 +20,7 @@ import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/comments_page.dart';
 import 'package:vehype/Pages/message_page.dart';
+import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/Widgets/offer_details_button_widget.dart';
 import 'package:vehype/Widgets/offer_request_details.dart';
@@ -30,7 +35,9 @@ import 'repair_page.dart';
 
 class InActiveOffersSeeker extends StatefulWidget {
   final OffersModel offersModel;
-  const InActiveOffersSeeker({super.key, required this.offersModel});
+  final String tittle;
+  const InActiveOffersSeeker(
+      {super.key, required this.offersModel, required this.tittle});
 
   @override
   State<InActiveOffersSeeker> createState() => _InActiveOffersSeekerState();
@@ -64,7 +71,9 @@ class _InActiveOffersSeekerState extends State<InActiveOffersSeeker> {
               color: userController.isDark ? Colors.white : primaryColor,
             )),
         title: Text(
-          'Offers Received',
+          widget.offersModel.status == 'inProgress'
+              ? 'Check Progress'
+              : 'Rate Job',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 20,
@@ -120,7 +129,10 @@ class _InActiveOffersSeekerState extends State<InActiveOffersSeeker> {
                         ],
                       );
                     }
-                    List<OffersReceivedModel> offers = snapshot.data ?? [];
+                    List<OffersReceivedModel> filter = snapshot.data ?? [];
+                    List<OffersReceivedModel> offers = filter
+                        .where((offer) => offer.status != 'Pending')
+                        .toList();
 
                     return ListView.builder(
                         itemCount: offers.length,
@@ -291,6 +303,7 @@ class RatingSheet extends StatefulWidget {
 }
 
 class _RatingSheetState extends State<RatingSheet> {
+  File? image;
   double rating = 1.0;
   final commentController = TextEditingController();
   @override
@@ -310,156 +323,370 @@ class _RatingSheetState extends State<RatingSheet> {
               color: widget.isDark ? primaryColor : Colors.white,
             ),
             child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 25,
-                      ),
-                      Text(
-                        'Please rate your experience and provide any comments to help others.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 25,
                         ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      RatingBar.builder(
-                        initialRating: rating,
-                        minRating: 1,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        itemCount: 5,
-                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        onRatingUpdate: (ratings) {
-                          // Update the rating value
-                          setState(() {
-                            rating = ratings;
-                          });
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          maxLines: 5,
-                          controller: commentController,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.done,
-                          onTapOutside: (s) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                          },
+                        Text(
+                          'Please rate your experience and provide any comments and relevent images to help others.',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w500,
                             fontSize: 18,
                           ),
-                          onChanged: (u) {
-                            // setState(() {});
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        SizedBox(
+                            height: Get.width * 0.4,
+                            width: Get.width,
+                            child: image == null
+                                ? InkWell(
+                                    onTap: () async {
+                                      Get.bottomSheet(
+                                        ChooseGalleryCamera(
+                                          onTapCamera: () async {
+                                            XFile? selectedImage =
+                                                await ImagePicker().pickImage(
+                                                    source: ImageSource.camera);
+                                            Get.dialog(LoadingDialog(),
+                                                barrierDismissible: false);
+                                            if (selectedImage != null) {
+                                              File compressedFile =
+                                                  await FlutterNativeImage
+                                                      .compressImage(
+                                                File(selectedImage.path)
+                                                    .absolute
+                                                    .path,
+                                                quality: 100,
+                                                percentage: 50,
+                                              );
+                                              image = compressedFile;
+
+                                              setState(() {});
+                                              Get.close(1);
+                                            }
+
+                                            Get.close(1);
+                                          },
+                                          onTapGallery: () async {
+                                            XFile? selectedImage =
+                                                await ImagePicker().pickImage(
+                                                    source:
+                                                        ImageSource.gallery);
+                                            Get.dialog(LoadingDialog(),
+                                                barrierDismissible: false);
+                                            if (selectedImage != null) {
+                                              File compressedFile =
+                                                  await FlutterNativeImage
+                                                      .compressImage(
+                                                File(selectedImage.path)
+                                                    .absolute
+                                                    .path,
+                                                quality: 100,
+                                                percentage: 50,
+                                              );
+
+                                              image = compressedFile;
+                                              setState(() {});
+                                              Get.close(1);
+                                            }
+
+                                            Get.close(1);
+                                          },
+                                        ),
+                                        backgroundColor: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Card(
+                                      child: Icon(
+                                        Icons.add_a_photo_outlined,
+                                        size: 70,
+                                      ),
+                                    ),
+                                  )
+                                : Card(
+                                    child: Stack(
+                                      children: [
+                                        ExtendedImage.file(
+                                          image!,
+                                          fit: BoxFit.cover,
+                                          width: Get.width,
+                                          height: Get.width * 0.4,
+                                        ),
+                                        Positioned(
+                                            right: 0,
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  margin: const EdgeInsets.only(
+                                                    top: 4,
+                                                    right: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            200),
+                                                    color: Colors.white,
+                                                  ),
+                                                  child: IconButton(
+                                                      onPressed: () {
+                                                        Get.bottomSheet(
+                                                          ChooseGalleryCamera(
+                                                            onTapCamera:
+                                                                () async {
+                                                              XFile?
+                                                                  selectedImage =
+                                                                  await ImagePicker()
+                                                                      .pickImage(
+                                                                          source:
+                                                                              ImageSource.camera);
+                                                              Get.dialog(
+                                                                  LoadingDialog(),
+                                                                  barrierDismissible:
+                                                                      false);
+                                                              if (selectedImage !=
+                                                                  null) {
+                                                                File
+                                                                    compressedFile =
+                                                                    await FlutterNativeImage
+                                                                        .compressImage(
+                                                                  File(selectedImage
+                                                                          .path)
+                                                                      .absolute
+                                                                      .path,
+                                                                  quality: 100,
+                                                                  percentage:
+                                                                      50,
+                                                                );
+                                                                image =
+                                                                    compressedFile;
+
+                                                                setState(() {});
+                                                                Get.close(1);
+                                                              }
+
+                                                              Get.close(1);
+                                                            },
+                                                            onTapGallery:
+                                                                () async {
+                                                              XFile?
+                                                                  selectedImage =
+                                                                  await ImagePicker()
+                                                                      .pickImage(
+                                                                          source:
+                                                                              ImageSource.gallery);
+                                                              Get.dialog(
+                                                                  LoadingDialog(),
+                                                                  barrierDismissible:
+                                                                      false);
+                                                              if (selectedImage !=
+                                                                  null) {
+                                                                File
+                                                                    compressedFile =
+                                                                    await FlutterNativeImage
+                                                                        .compressImage(
+                                                                  File(selectedImage
+                                                                          .path)
+                                                                      .absolute
+                                                                      .path,
+                                                                  quality: 100,
+                                                                  percentage:
+                                                                      50,
+                                                                );
+
+                                                                image =
+                                                                    compressedFile;
+                                                                setState(() {});
+                                                                Get.close(1);
+                                                              }
+
+                                                              Get.close(1);
+                                                            },
+                                                          ),
+                                                          backgroundColor:
+                                                              userController
+                                                                      .isDark
+                                                                  ? primaryColor
+                                                                  : Colors
+                                                                      .white,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topLeft: Radius
+                                                                  .circular(20),
+                                                              topRight: Radius
+                                                                  .circular(20),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      color: primaryColor,
+                                                      icon: Icon(
+                                                        Icons.edit,
+                                                      )),
+                                                ),
+                                              ],
+                                            ))
+                                      ],
+                                    ),
+                                  )),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        RatingBar.builder(
+                          initialRating: rating,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          allowHalfRating: true,
+                          itemCount: 5,
+                          itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                          itemBuilder: (context, _) => Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (ratings) {
+                            // Update the rating value
+                            setState(() {
+                              rating = ratings;
+                            });
                           },
-                          decoration: InputDecoration(
-                            hintText:
-                                'Share your experience and any feedback...',
-                            hintStyle: TextStyle(
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            maxLines: 5,
+                            controller: commentController,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.sentences,
+                            textInputAction: TextInputAction.done,
+                            onTapOutside: (s) {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                            },
+                            style: TextStyle(
                               fontFamily: 'Avenir',
                               fontWeight: FontWeight.w500,
                               fontSize: 18,
-                              color: Colors.grey[600],
                             ),
-                            border: OutlineInputBorder(),
+                            onChanged: (u) {
+                              // setState(() {});
+                            },
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Share your experience and any feedback...',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  ElevatedButton(
-                    onPressed: commentController.text.isEmpty
-                        ? null
-                        : () async {
-                            if (checkBadWords(commentController.text)
-                                .isNotEmpty) {
-                              Get.showSnackbar(GetSnackBar(
-                                message:
-                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                duration: const Duration(seconds: 3),
-                                snackPosition: SnackPosition.TOP,
-                              ));
-                              return;
-                            }
-                            Get.dialog(LoadingDialog(),
-                                barrierDismissible: false);
-                            await FirebaseFirestore.instance
-                                .collection('offersReceived')
-                                .doc(widget.offersReceivedModel.id)
-                                .update({
-                              // 'status': 'finish',
-                              'ratingOne': rating,
-                              'comment': commentController.text.trim(),
-                            });
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(widget.offersReceivedModel.offerBy)
-                                .update({
-                              'ratings': FieldValue.arrayUnion([
-                                {
-                                  'id': userModel.userId,
-                                  'rating': rating,
-                                  'comment': commentController.text.trim(),
-                                  'at':
-                                      DateTime.now().toUtc().toIso8601String(),
-                                }
-                              ])
-                            });
-                            sendNotification(
-                                widget.offersReceivedModel.offerBy,
-                                userModel.name,
-                                'Offer Update',
-                                '${userModel.name}, Rated the offer',
-                                widget.offersReceivedModel.id,
-                                'Offer',
-                                '');
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    ElevatedButton(
+                      onPressed: commentController.text.isEmpty
+                          ? null
+                          : () async {
+                              if (image == null) {
+                                Get.showSnackbar(GetSnackBar(
+                                  message: 'Please add at least one image.',
+                                  duration: const Duration(seconds: 3),
+                                  snackPosition: SnackPosition.BOTTOM,
+                                ));
+                                return;
+                              }
+                              Get.dialog(LoadingDialog(),
+                                  barrierDismissible: false);
+                              String url = await UserController()
+                                  .uploadImage(image!, userModel.userId);
+                              setState(() {});
+                              await FirebaseFirestore.instance
+                                  .collection('offersReceived')
+                                  .doc(widget.offersReceivedModel.id)
+                                  .update({
+                                // 'status': 'finish',
+                                'ratingTwo': rating,
+                                'commentTwo': commentController.text.trim(),
+                                'media': url,
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(widget.offersReceivedModel.ownerId)
+                                  .update({
+                                'ratings': FieldValue.arrayUnion([
+                                  {
+                                    'id': userModel.userId,
+                                    'rating': rating,
+                                    'comment': commentController.text.trim(),
+                                    'images': url,
+                                    'at': DateTime.now()
+                                        .toUtc()
+                                        .toIso8601String(),
+                                  }
+                                ])
+                              });
+                              sendNotification(
+                                  widget.offersReceivedModel.ownerId,
+                                  userModel.name,
+                                  'Offer Update',
+                                  '${userModel.name}, Rated the offer',
+                                  widget.offersReceivedModel.id,
+                                  'Offer',
+                                  '');
 
-                            await userController.getRequestsHistoryProvider();
+                              // await userController.getRequestsHistoryProvider();
 
-                            Get.close(2);
-                          },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        elevation: 0.0,
-                        fixedSize: Size(Get.width * 0.8, 55),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        )),
-                    child: Text(
-                      'Post',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                              Get.close(2);
+                            },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          elevation: 0.0,
+                          fixedSize: Size(Get.width * 0.8, 55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          )),
+                      child: Text(
+                        'Post',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 80,
-                  ),
-                ],
+                    const SizedBox(
+                      height: 80,
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -484,6 +711,7 @@ class RatingSheet2 extends StatefulWidget {
 }
 
 class _RatingSheet2State extends State<RatingSheet2> {
+  File? image;
   double rating = 1.0;
   final commentController = TextEditingController();
   @override
@@ -503,156 +731,370 @@ class _RatingSheet2State extends State<RatingSheet2> {
               color: widget.isDark ? primaryColor : Colors.white,
             ),
             child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 25,
-                      ),
-                      Text(
-                        'Please rate your experience and provide any comments to help others.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 25,
                         ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      RatingBar.builder(
-                        initialRating: rating,
-                        minRating: 1,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        itemCount: 5,
-                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        onRatingUpdate: (ratings) {
-                          // Update the rating value
-                          setState(() {
-                            rating = ratings;
-                          });
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          maxLines: 5,
-                          controller: commentController,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.done,
-                          onTapOutside: (s) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                          },
+                        Text(
+                          'Please rate your experience and provide any comments and relevent images to help others.',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Avenir',
                             fontWeight: FontWeight.w500,
                             fontSize: 18,
                           ),
-                          onChanged: (u) {
-                            // setState(() {});
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        SizedBox(
+                            height: Get.width * 0.4,
+                            width: Get.width,
+                            child: image == null
+                                ? InkWell(
+                                    onTap: () async {
+                                      Get.bottomSheet(
+                                        ChooseGalleryCamera(
+                                          onTapCamera: () async {
+                                            XFile? selectedImage =
+                                                await ImagePicker().pickImage(
+                                                    source: ImageSource.camera);
+                                            Get.dialog(LoadingDialog(),
+                                                barrierDismissible: false);
+                                            if (selectedImage != null) {
+                                              File compressedFile =
+                                                  await FlutterNativeImage
+                                                      .compressImage(
+                                                File(selectedImage.path)
+                                                    .absolute
+                                                    .path,
+                                                quality: 100,
+                                                percentage: 50,
+                                              );
+                                              image = compressedFile;
+
+                                              setState(() {});
+                                              Get.close(1);
+                                            }
+
+                                            Get.close(1);
+                                          },
+                                          onTapGallery: () async {
+                                            XFile? selectedImage =
+                                                await ImagePicker().pickImage(
+                                                    source:
+                                                        ImageSource.gallery);
+                                            Get.dialog(LoadingDialog(),
+                                                barrierDismissible: false);
+                                            if (selectedImage != null) {
+                                              File compressedFile =
+                                                  await FlutterNativeImage
+                                                      .compressImage(
+                                                File(selectedImage.path)
+                                                    .absolute
+                                                    .path,
+                                                quality: 100,
+                                                percentage: 50,
+                                              );
+
+                                              image = compressedFile;
+                                              setState(() {});
+                                              Get.close(1);
+                                            }
+
+                                            Get.close(1);
+                                          },
+                                        ),
+                                        backgroundColor: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight: Radius.circular(20),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Card(
+                                      child: Icon(
+                                        Icons.add_a_photo_outlined,
+                                        size: 70,
+                                      ),
+                                    ),
+                                  )
+                                : Card(
+                                    child: Stack(
+                                      children: [
+                                        ExtendedImage.file(
+                                          image!,
+                                          fit: BoxFit.cover,
+                                          width: Get.width,
+                                          height: Get.width * 0.4,
+                                        ),
+                                        Positioned(
+                                            right: 0,
+                                            child: Column(
+                                              children: [
+                                                Container(
+                                                  margin: const EdgeInsets.only(
+                                                    top: 4,
+                                                    right: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            200),
+                                                    color: Colors.white,
+                                                  ),
+                                                  child: IconButton(
+                                                      onPressed: () {
+                                                        Get.bottomSheet(
+                                                          ChooseGalleryCamera(
+                                                            onTapCamera:
+                                                                () async {
+                                                              XFile?
+                                                                  selectedImage =
+                                                                  await ImagePicker()
+                                                                      .pickImage(
+                                                                          source:
+                                                                              ImageSource.camera);
+                                                              Get.dialog(
+                                                                  LoadingDialog(),
+                                                                  barrierDismissible:
+                                                                      false);
+                                                              if (selectedImage !=
+                                                                  null) {
+                                                                File
+                                                                    compressedFile =
+                                                                    await FlutterNativeImage
+                                                                        .compressImage(
+                                                                  File(selectedImage
+                                                                          .path)
+                                                                      .absolute
+                                                                      .path,
+                                                                  quality: 100,
+                                                                  percentage:
+                                                                      50,
+                                                                );
+                                                                image =
+                                                                    compressedFile;
+
+                                                                setState(() {});
+                                                                Get.close(1);
+                                                              }
+
+                                                              Get.close(1);
+                                                            },
+                                                            onTapGallery:
+                                                                () async {
+                                                              XFile?
+                                                                  selectedImage =
+                                                                  await ImagePicker()
+                                                                      .pickImage(
+                                                                          source:
+                                                                              ImageSource.gallery);
+                                                              Get.dialog(
+                                                                  LoadingDialog(),
+                                                                  barrierDismissible:
+                                                                      false);
+                                                              if (selectedImage !=
+                                                                  null) {
+                                                                File
+                                                                    compressedFile =
+                                                                    await FlutterNativeImage
+                                                                        .compressImage(
+                                                                  File(selectedImage
+                                                                          .path)
+                                                                      .absolute
+                                                                      .path,
+                                                                  quality: 100,
+                                                                  percentage:
+                                                                      50,
+                                                                );
+
+                                                                image =
+                                                                    compressedFile;
+                                                                setState(() {});
+                                                                Get.close(1);
+                                                              }
+
+                                                              Get.close(1);
+                                                            },
+                                                          ),
+                                                          backgroundColor:
+                                                              userController
+                                                                      .isDark
+                                                                  ? primaryColor
+                                                                  : Colors
+                                                                      .white,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topLeft: Radius
+                                                                  .circular(20),
+                                                              topRight: Radius
+                                                                  .circular(20),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      color: primaryColor,
+                                                      icon: Icon(
+                                                        Icons.edit,
+                                                      )),
+                                                ),
+                                              ],
+                                            ))
+                                      ],
+                                    ),
+                                  )),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        RatingBar.builder(
+                          initialRating: rating,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          allowHalfRating: true,
+                          itemCount: 5,
+                          itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                          itemBuilder: (context, _) => Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (ratings) {
+                            // Update the rating value
+                            setState(() {
+                              rating = ratings;
+                            });
                           },
-                          decoration: InputDecoration(
-                            hintText:
-                                'Share your experience and any feedback...',
-                            hintStyle: TextStyle(
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            maxLines: 5,
+                            controller: commentController,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.sentences,
+                            textInputAction: TextInputAction.done,
+                            onTapOutside: (s) {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                            },
+                            style: TextStyle(
                               fontFamily: 'Avenir',
                               fontWeight: FontWeight.w500,
                               fontSize: 18,
-                              color: Colors.grey[600],
                             ),
-                            border: OutlineInputBorder(),
+                            onChanged: (u) {
+                              // setState(() {});
+                            },
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Share your experience and any feedback...',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  ElevatedButton(
-                    onPressed: commentController.text.isEmpty
-                        ? null
-                        : () async {
-                            if (checkBadWords(commentController.text)
-                                .isNotEmpty) {
-                              Get.showSnackbar(GetSnackBar(
-                                message:
-                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                duration: const Duration(seconds: 3),
-                                snackPosition: SnackPosition.TOP,
-                              ));
-                              return;
-                            }
-                            Get.dialog(LoadingDialog(),
-                                barrierDismissible: false);
-                            await FirebaseFirestore.instance
-                                .collection('offersReceived')
-                                .doc(widget.offersReceivedModel.id)
-                                .update({
-                              // 'status': 'finish',
-                              'ratingTwo': rating,
-                              'comment': commentController.text.trim(),
-                            });
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(widget.offersReceivedModel.offerBy)
-                                .update({
-                              'ratings': FieldValue.arrayUnion([
-                                {
-                                  'id': userModel.userId,
-                                  'rating': rating,
-                                  'comment': commentController.text.trim(),
-                                  'at':
-                                      DateTime.now().toUtc().toIso8601String(),
-                                }
-                              ])
-                            });
-                            sendNotification(
-                                widget.offersReceivedModel.offerBy,
-                                userModel.name,
-                                'Offer Update',
-                                '${userModel.name}, Rated the offer',
-                                widget.offersReceivedModel.id,
-                                'Offer',
-                                '');
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    ElevatedButton(
+                      onPressed: commentController.text.isEmpty
+                          ? null
+                          : () async {
+                              if (image == null) {
+                                Get.showSnackbar(GetSnackBar(
+                                  message: 'Please add at least one image.',
+                                  duration: const Duration(seconds: 3),
+                                  snackPosition: SnackPosition.TOP,
+                                ));
+                                return;
+                              }
+                              Get.dialog(LoadingDialog(),
+                                  barrierDismissible: false);
+                              String url = await UserController()
+                                  .uploadImage(image!, userModel.userId);
+                              setState(() {});
+                              await FirebaseFirestore.instance
+                                  .collection('offersReceived')
+                                  .doc(widget.offersReceivedModel.id)
+                                  .update({
+                                // 'status': 'finish',
+                                'ratingOne': rating,
+                                'commentOne': commentController.text.trim(),
+                                'media': url,
+                              });
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(widget.offersReceivedModel.offerBy)
+                                  .update({
+                                'ratings': FieldValue.arrayUnion([
+                                  {
+                                    'id': userModel.userId,
+                                    'rating': rating,
+                                    'comment': commentController.text.trim(),
+                                    'images': url,
+                                    'at': DateTime.now()
+                                        .toUtc()
+                                        .toIso8601String(),
+                                  }
+                                ])
+                              });
+                              sendNotification(
+                                  widget.offersReceivedModel.offerBy,
+                                  userModel.name,
+                                  'Offer Update',
+                                  '${userModel.name}, Rated the offer',
+                                  widget.offersReceivedModel.id,
+                                  'Offer',
+                                  '');
 
-                            // await userController.getRequestsHistoryProvider();
+                              // await userController.getRequestsHistoryProvider();
 
-                            Get.close(2);
-                          },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        elevation: 0.0,
-                        fixedSize: Size(Get.width * 0.8, 55),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        )),
-                    child: Text(
-                      'Post',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                              Get.close(2);
+                            },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          elevation: 0.0,
+                          fixedSize: Size(Get.width * 0.8, 55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          )),
+                      child: Text(
+                        'Post',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 80,
-                  ),
-                ],
+                    const SizedBox(
+                      height: 80,
+                    ),
+                  ],
+                ),
               ),
             ),
           );

@@ -11,6 +11,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -19,7 +20,7 @@ import 'choose_account_type.dart';
 import 'full_image_view_page.dart';
 import 'offers_received_details.dart';
 
-class NewOffers extends StatelessWidget {
+class NewOffers extends StatefulWidget {
   const NewOffers({
     super.key,
     required this.userController,
@@ -30,42 +31,62 @@ class NewOffers extends StatelessWidget {
   final UserModel userModel;
 
   @override
+  State<NewOffers> createState() => _NewOffersState();
+}
+
+class _NewOffersState extends State<NewOffers> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userModel.isActiveNew == true) {
+      Future.delayed(const Duration(seconds: 2)).then((e) {
+        UserController().changeNotiOffers(0, false, widget.userModel.userId);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
       child: StreamBuilder<List<OffersModel>>(
-          stream: userController.getOffersProvider(userModel),
+          stream: widget.userController.getOffersProvider(widget.userModel),
           builder: (context, AsyncSnapshot<List<OffersModel>> snapshot) {
             if (!snapshot.hasData) {
               return Center(
                 child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
+                  color: widget.userController.isDark
+                      ? Colors.white
+                      : primaryColor,
                 ),
               );
             }
+
             List<OffersModel> rawOffers = snapshot.data ?? [];
 
             List<OffersModel> filterOffers = rawOffers
                 .where((element) =>
-                    !element.offersReceived.contains(userModel.userId))
+                    !element.offersReceived.contains(widget.userModel.userId))
                 .toList();
             List<OffersModel> filterIgnore = filterOffers
-                .where(
-                    (element) => !element.ignoredBy.contains(userModel.userId))
+                .where((element) =>
+                    !element.ignoredBy.contains(widget.userModel.userId))
                 .toList();
             List<OffersModel> blockedUsers = filterIgnore
                 .where((element) =>
-                    !userModel.blockedUsers.contains(element.ownerId))
+                    !widget.userModel.blockedUsers.contains(element.ownerId))
                 .toList();
-            List<OffersModel> offers = userController.filterOffers(
-                blockedUsers, userModel.lat, userModel.long, 100);
+            List<OffersModel> offers = widget.userController.filterOffers(
+                blockedUsers, widget.userModel.lat, widget.userModel.long, 100);
 
             if (offers.isEmpty) {
               return Center(
                 child: Text(
                   'No Offers Yet',
                   style: TextStyle(
-                    color: userController.isDark ? Colors.white : primaryColor,
+                    color: widget.userController.isDark
+                        ? Colors.white
+                        : primaryColor,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -85,13 +106,13 @@ class NewOffers extends StatelessWidget {
                   // final PageController imagePageController = PageController();
 
                   return NewOfferWidget(
-                      userController: userController,
+                      userController: widget.userController,
                       offersModel: offersModel,
                       vehicleType: vehicleType,
                       vehicleMake: vehicleMake,
                       vehicleYear: vehicleYear,
                       vehicleModle: vehicleModle,
-                      userModel: userModel);
+                      userModel: widget.userModel);
                 });
           }),
     );
@@ -128,7 +149,13 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
   @override
   Widget build(BuildContext context) {
     final createdAt = DateTime.parse(widget.offersModel.createdAt);
+    final UserController userController = Provider.of<UserController>(context);
 
+    List<String> vehicleInfo = widget.offersModel.vehicleId.split(',');
+    final String vehicleType = vehicleInfo[0];
+    final String vehicleMake = vehicleInfo[1];
+    final String vehicleYear = vehicleInfo[2];
+    final String vehicleModle = vehicleInfo[3];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
@@ -142,302 +169,15 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                  width: Get.width,
-                  height: Get.width * 0.3,
-                  child: PageView(
-                    controller: pageController,
-                    onPageChanged: (value) {
-                      setState(() {
-                        currentInde = value;
-                      });
-                    },
-                    children: [
-                      if (widget.offersModel.imageOne != '')
-                        InkWell(
-                          onTap: () {
-                            Get.to(() => FullImagePageView(
-                                  url: widget.offersModel.imageOne,
-                                ));
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: ExtendedImage.network(
-                              widget.offersModel.imageOne,
-                              width: Get.width,
-                              height: Get.width * 0.3,
-                              fit: BoxFit.cover,
-                              cache: true,
-                              // border: Border.all(color: Colors.red, width: 1.0),
-                              shape: BoxShape.rectangle,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              //cancelToken: cancellationToken,
-                            ),
-                          ),
-                        ),
-                      if (widget.offersModel.imageTwo != '')
-                        InkWell(
-                          onTap: () {
-                            Get.to(() => FullImagePageView(
-                                  url: widget.offersModel.imageTwo,
-                                ));
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: ExtendedImage.network(
-                              widget.offersModel.imageTwo,
-                              width: Get.width,
-                              height: Get.width * 0.3,
-                              fit: BoxFit.cover,
-                              cache: true,
-                              // border: Border.all(color: Colors.red, width: 1.0),
-                              shape: BoxShape.rectangle,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              //cancelToken: cancellationToken,
-                            ),
-                          ),
-                        ),
-                    ],
-                  )),
-              const SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: 15,
-                width: Get.width,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 12,
-                        width: 12,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(200),
-                          color: currentInde == 0 ? Colors.green : Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Container(
-                        height: 12,
-                        width: 12,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(200),
-                          color: currentInde == 1 ? Colors.green : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Body Style',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          widget.vehicleType,
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Vehicle Make',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          widget.vehicleMake,
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Vehicle Year',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          widget.vehicleYear,
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Vehicle Model',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          widget.vehicleModle,
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Time Ago',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          timeago.format(createdAt),
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          'Issue',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: widget.userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          children: [
-                            SvgPicture.asset(
-                                getServices()
-                                    .firstWhere((element) =>
-                                        element.name ==
-                                        widget.offersModel.issue)
-                                    .image,
-                                color: widget.userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                height: 35,
-                                width: 35),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Text(
-                              widget.offersModel.issue,
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                color: widget.userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: VehicleDetailsRequest(
+                    userController: userController,
+                    vehicleType: vehicleType,
+                    vehicleMake: vehicleMake,
+                    vehicleYear: vehicleYear,
+                    vehicleModle: vehicleModle,
+                    offersModel: widget.offersModel),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

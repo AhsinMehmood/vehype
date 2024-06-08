@@ -41,7 +41,7 @@ class OfferRequestDetails extends StatelessWidget {
               : offersReceivedModel.comment,
           style: const TextStyle(
             fontFamily: 'Avenir',
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w700,
             // color: Colors.black,
             fontSize: 16,
           ),
@@ -66,7 +66,7 @@ class OfferRequestDetails extends StatelessWidget {
               DateTime.parse(offersReceivedModel.startDate).toLocal()),
           style: TextStyle(
             fontFamily: 'Avenir',
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w700,
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 16,
           ),
@@ -90,7 +90,7 @@ class OfferRequestDetails extends StatelessWidget {
           formatDateTime(DateTime.parse(offersReceivedModel.endDate).toLocal()),
           style: const TextStyle(
             fontFamily: 'Avenir',
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w700,
             // color: Colors.black,
             fontSize: 16,
           ),
@@ -111,12 +111,12 @@ class OfferRequestDetails extends StatelessWidget {
           height: 5,
         ),
         Text(
-          '\$${offersReceivedModel.price}',
+          '${offersReceivedModel.price}\$',
           style: TextStyle(
             fontFamily: 'Avenir',
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.bold,
             color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 16,
+            fontSize: 17,
           ),
         ),
         const SizedBox(

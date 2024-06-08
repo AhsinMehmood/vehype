@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/repair_page.dart';
 import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
@@ -474,7 +475,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
       });
-      userController.getRequestsHistoryProvider();
+      // userController.getRequestsHistoryProvider();
 
       Get.close(1);
       garageController.closeOfferSubmit();
@@ -497,7 +498,15 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'comment': comment.text,
       });
       garageController.closeOfferSubmit();
-      userController.getRequestsHistoryProvider();
+      sendNotification(
+          widget.ownerModel.userId,
+          userModel.name,
+          'Offer Update',
+          '${userModel.name} Sent you an offer.',
+          'chatId',
+          'offer',
+          'messageId');
+      UserController().changeNotiOffers(5, true, widget.ownerModel.userId);
 
       Get.close(2);
       Get.showSnackbar(

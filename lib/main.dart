@@ -7,6 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:get/get.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -103,6 +104,7 @@ class _MyAppState extends State<MyApp> {
   listenOneSignalNotification() {
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
       if (event.notification.additionalData!['type'] == 'Message') {
+        FlutterAppBadger.updateBadgeCount(1);
         // print(event.notification.additionalData);
         ChatController().updateMessage(
             event.notification.additionalData!['chatId'],
