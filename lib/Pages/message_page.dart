@@ -1326,6 +1326,8 @@ class SecondUserMessageWidget extends StatelessWidget {
           ? Container(
               // margin: const EdgeInsets.all(7),
               padding: const EdgeInsets.all(12),
+              width: Get.width * 0.75,
+
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 color: changeColor(color: 'F1F1F1'),
@@ -2261,6 +2263,7 @@ class MessageWidget extends StatelessWidget {
         message.mediaUrl == ''
             ? Container(
                 // margin: const EdgeInsets.all(7),
+
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
