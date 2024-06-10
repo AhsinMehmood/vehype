@@ -1323,23 +1323,28 @@ class SecondUserMessageWidget extends StatelessWidget {
         color: changeColor(color: 'F1F1F1'),
       ),
       child: message.mediaUrl == ''
-          ? Container(
-              // margin: const EdgeInsets.all(7),
-              padding: const EdgeInsets.all(12),
-              width: Get.width * 0.75,
-
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: changeColor(color: 'F1F1F1'),
+          ? ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Get.width * 0.75,
               ),
-              child: RichText(
-                text: TextSpan(
-                  children: textSpans,
-                  style: TextStyle(
-                    fontFamily: 'Avenir',
-                    color: Colors.black,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w400,
+              child: Container(
+                // margin: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(12),
+                // width: Get.width * 0.75,
+
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: changeColor(color: 'F1F1F1'),
+                ),
+                child: RichText(
+                  text: TextSpan(
+                    children: textSpans,
+                    style: TextStyle(
+                      fontFamily: 'Avenir',
+                      color: Colors.black,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
               ),
