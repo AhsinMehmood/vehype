@@ -527,7 +527,7 @@ class _ActiveOffersState extends State<ActiveOffers> {
       child: ListView.builder(
           itemCount: widget.offersPosted.length,
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             OffersModel offersModel = widget.offersPosted[index];
 
