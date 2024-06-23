@@ -312,7 +312,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                       SelectDateAndPrice(
                                                                     offersModel:
                                                                         offersModel,
-                                                                        chatId: widget.chatModel.id,
+                                                                    chatId: widget
+                                                                        .chatModel
+                                                                        .id,
                                                                     ownerModel:
                                                                         widget
                                                                             .secondUser,
@@ -381,18 +383,8 @@ class _MessagePageState extends State<MessagePage> {
                                                           userModel: userModel,
                                                         );
                                                       } else {
-                                                        if (chatModel!
-                                                                .offerRequestId ==
-                                                            '') {
-                                                          return ElevatedButton(
-                                                              onPressed: () {},
-                                                              child:
-                                                                  Text('data'));
-                                                        }
-                                                        return ElevatedButton(
-                                                            onPressed: () {},
-                                                            child:
-                                                                Text('data'));
+                                                        return SizedBox
+                                                            .shrink();
                                                       }
                                                     })
                                             ],
