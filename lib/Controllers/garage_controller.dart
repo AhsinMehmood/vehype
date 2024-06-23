@@ -1,14 +1,18 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
 import 'dart:io';
 // import 'dart:js_interop';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:image_select/image_selector.dart';
@@ -18,6 +22,30 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:http/http.dart' as http;
+
+Future<LatLng> getPlaceLatLng(String placeId) async {
+  // Use Google Maps Geocoding API to get lat/lng from place ID
+  // You can use any HTTP client like http package or Dio
+  // Example using http package:
+  String apiKey = 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E';
+  String url =
+      'https://maps.googleapis.com/maps/api/geocode/json?place_id=$placeId&key=$apiKey';
+
+  // Make the HTTP request
+  var response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    // Parse the JSON response
+    var json = jsonDecode(response.body);
+    var location = json['results'][0]['geometry']['location'];
+    print(location.toString());
+    double lat = location['lat'];
+    double lng = location['lng'];
+    return LatLng(lat, lng);
+  } else {
+    throw Exception('Failed to load place details');
+  }
+}
 
 class GarageController with ChangeNotifier {
   Stream<List<GarageModel>> myVehicles(String userId) {
@@ -86,6 +114,7 @@ class GarageController with ChangeNotifier {
   }
 
   final ImagePicker picker = ImagePicker();
+  bool isRequestImageLoading = false;
   selectRequestImageUpdateSingleImage(
       ImageSource imageSource, String userId, int index) async {
     final XFile? image = await picker.pickImage(source: imageSource);
@@ -98,9 +127,20 @@ class GarageController with ChangeNotifier {
               isLoading: true,
               progress: 0.4,
               imageFile: File(image.path)));
+      isRequestImageLoading = true;
       notifyListeners();
       uploadRequestImage(requestImages[index], userId);
     }
+  }
+
+  Future<File> writeToFile(ByteData data, String name) async {
+    final buffer = data.buffer;
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    var filePath =
+        '$tempPath/$name.jpeg'; // file_01.tmp is dump file, can be anything
+    return File(filePath).writeAsBytes(
+        buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 
   selectRequestImage(ImageSource imageSource, String userId) async {
@@ -112,29 +152,64 @@ class GarageController with ChangeNotifier {
             isLoading: true,
             progress: 0.4,
             imageFile: File(image.path)));
+        isRequestImageLoading = true;
+
+        notifyListeners();
         for (var element in requestImages) {
-          if (element.imageUrl != '') {
+          if (element.imageUrl == '') {
             uploadRequestImage(element, userId);
           }
         }
       }
     } else {
-      final List<XFile> images = await picker.pickMultiImage();
+      List<Asset> pickImages = await MultiImagePicker.pickImages(
+          androidOptions: AndroidOptions(
+            maxImages: 3 - requestImages.length,
+          ),
+          iosOptions: IOSOptions(
+              settings: CupertinoSettings(
+                  selection: SelectionSetting(
+            max: 3 - requestImages.length,
+          ))));
+
+      // images.first.getByteData();
+      // final List<XFile> images = await picker.pickMultiImage();
+      List<File> images = [];
+      Get.dialog(LoadingDialog(),
+          useSafeArea: false, barrierDismissible: false);
+      for (Asset asset in pickImages) {
+        ByteData getFile = await asset.getByteData();
+        File file = await writeToFile(getFile, asset.name);
+
+        images.add(file);
+      }
+
       List<RequestImageModel> selectedImage = [];
 
       for (var i = 0; i < images.length; i++) {
         selectedImage.add(RequestImageModel(
             imageUrl: '',
             isLoading: true,
-            progress: 0.4,
+            progress: 0.5,
             imageFile: File(images[i].path)));
       }
-      if (selectedImage.length + requestImages.length >= 3) {
-        // requestImages.addAll(selectedImage.sublist(0, 3));
-      } else {
-        requestImages.addAll(selectedImage);
+      Get.close(1);
+
+      requestImages.addAll(selectedImage);
+      if (selectedImage.isNotEmpty) {
+        isRequestImageLoading = true;
       }
+
+      // if (selectedImage.length + requestImages.length >= 3) {
+      //   if (selectedImage.length + requestImages.length == 3) {
+      //     requestImages.addAll(selectedImage);
+      //   } else {}
+      // } else {
+      //   requestImages.addAll(selectedImage);
+      // }
       notifyListeners();
+      print(requestImages.length);
+
       for (RequestImageModel requestImageModel in requestImages) {
         if (requestImageModel.imageUrl == '') {
           uploadRequestImage(requestImageModel, userId);
@@ -429,17 +504,20 @@ class GarageController with ChangeNotifier {
   }
 
   bool saveButtonValidation2() {
-    if (selectedVehicle != '' && selectedIssue != '' && !imageTwoLoading) {
+    if (selectedVehicle != '' &&
+        selectedIssue != '' &&
+        !requestImages.every((vv) => vv.isLoading == true)) {
       return true;
     } else {
       return false;
     }
   }
 
-  saveRequest(String desc, LatLng latLng, String userId, String? offerId,
-      String garageId) async {
+  Future<String> saveRequest(String desc, LatLng latLng, String userId,
+      String? offerId, String garageId) async {
     try {
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
+      String requestId = '';
       print(userId);
       List images = [];
       for (var element in requestImages) {
@@ -447,6 +525,7 @@ class GarageController with ChangeNotifier {
       }
 
       if (offerId != null) {
+        requestId = offerId;
         await FirebaseFirestore.instance
             .collection('offers')
             .doc(offerId)
@@ -465,7 +544,8 @@ class GarageController with ChangeNotifier {
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
       } else {
-        await FirebaseFirestore.instance.collection('offers').add({
+        DocumentReference<Map<String, dynamic>> reference =
+            await FirebaseFirestore.instance.collection('offers').add({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
           'issue': selectedIssue,
@@ -479,13 +559,15 @@ class GarageController with ChangeNotifier {
           'additionalService': additionalService,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
+        requestId = reference.id;
       }
 
       disposeController();
-      Get.offAll(() => TabsPage());
+      return requestId;
     } catch (e) {
       print(e);
       Get.close(1);
+      return '';
     }
   }
 

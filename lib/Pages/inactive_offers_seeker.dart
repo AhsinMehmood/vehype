@@ -616,14 +616,14 @@ class _RatingSheetState extends State<RatingSheet> {
                       onPressed: commentController.text.isEmpty
                           ? null
                           : () async {
-                              if (image == null) {
-                                Get.showSnackbar(GetSnackBar(
-                                  message: 'Please add at least one image.',
-                                  duration: const Duration(seconds: 3),
-                                  snackPosition: SnackPosition.BOTTOM,
-                                ));
-                                return;
-                              }
+                              // if (image == null) {
+                              //   Get.showSnackbar(GetSnackBar(
+                              //     message: 'Please add at least one image.',
+                              //     duration: const Duration(seconds: 3),
+                              //     snackPosition: SnackPosition.BOTTOM,
+                              //   ));
+                              //   return;
+                              // }
                               Get.dialog(LoadingDialog(),
                                   barrierDismissible: false);
                               String url = await UserController()
@@ -658,7 +658,7 @@ class _RatingSheetState extends State<RatingSheet> {
                                   widget.offersReceivedModel.ownerId,
                                   userModel.name,
                                   'Offer Update',
-                                  '${userModel.name}, Rated the offer',
+                                  '${userModel.name}, Rated the Job',
                                   widget.offersReceivedModel.id,
                                   'Offer',
                                   '');
@@ -672,7 +672,7 @@ class _RatingSheetState extends State<RatingSheet> {
                           elevation: 0.0,
                           fixedSize: Size(Get.width * 0.8, 55),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(20),
                           )),
                       child: Text(
                         'Post',
@@ -1024,14 +1024,14 @@ class _RatingSheet2State extends State<RatingSheet2> {
                       onPressed: commentController.text.isEmpty
                           ? null
                           : () async {
-                              if (image == null) {
-                                Get.showSnackbar(GetSnackBar(
-                                  message: 'Please add at least one image.',
-                                  duration: const Duration(seconds: 3),
-                                  snackPosition: SnackPosition.TOP,
-                                ));
-                                return;
-                              }
+                              // if (image == null) {
+                              //   Get.showSnackbar(GetSnackBar(
+                              //     message: 'Please add at least one image.',
+                              //     duration: const Duration(seconds: 3),
+                              //     snackPosition: SnackPosition.TOP,
+                              //   ));
+                              //   return;
+                              // }
                               Get.dialog(LoadingDialog(),
                                   barrierDismissible: false);
                               String url = await UserController()
@@ -1066,7 +1066,7 @@ class _RatingSheet2State extends State<RatingSheet2> {
                                   widget.offersReceivedModel.offerBy,
                                   userModel.name,
                                   'Offer Update',
-                                  '${userModel.name}, Rated the offer',
+                                  '${userModel.name}, Rated the Job',
                                   widget.offersReceivedModel.id,
                                   'Offer',
                                   '');
@@ -1080,7 +1080,7 @@ class _RatingSheet2State extends State<RatingSheet2> {
                           elevation: 0.0,
                           fixedSize: Size(Get.width * 0.8, 55),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(20),
                           )),
                       child: Text(
                         'Post',

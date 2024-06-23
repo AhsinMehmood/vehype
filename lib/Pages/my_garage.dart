@@ -161,7 +161,7 @@ class MyGarage extends StatelessWidget {
                                       child: InkWell(
                                         onTap: () {
                                           Get.to(() => FullImagePageView(
-                                                url: garageModel.imageOne,
+                                                urls: [garageModel.imageOne],
                                               ));
                                         },
                                         child: ClipRRect(

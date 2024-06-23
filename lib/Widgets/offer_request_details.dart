@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:vehype/const.dart';
 
@@ -95,32 +97,41 @@ class OfferRequestDetails extends StatelessWidget {
             fontSize: 16,
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        Text(
-          'Price',
-          style: const TextStyle(
-            fontFamily: 'Avenir',
-            fontWeight: FontWeight.w400,
-            // color: Colors.black,
-            fontSize: 16,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Price:',
+                    style: const TextStyle(
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w600,
+                      // color: Colors.black,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    '${offersReceivedModel.price.toInt()}\$',
+                    style: TextStyle(
+                      fontFamily: 'Avenir',
+                      fontWeight: FontWeight.bold,
+                      // color: Colors.red,
+                      fontSize: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Text(
-          '${offersReceivedModel.price}\$',
-          style: TextStyle(
-            fontFamily: 'Avenir',
-            fontWeight: FontWeight.bold,
-            color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 17,
-          ),
-        ),
-        const SizedBox(
-          height: 10,
         ),
       ],
     );

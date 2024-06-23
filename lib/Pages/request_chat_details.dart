@@ -143,7 +143,7 @@ class OffersHistoryWidgetChat extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       Get.to(() => FullImagePageView(
-                            url: offersModel.imageOne,
+                            urls: [offersModel.imageOne],
                           ));
                     },
                     child: ClipRRect(

@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +22,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/repair_page.dart';
+import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 
 import '../Controllers/vehicle_data.dart';
@@ -38,7 +40,8 @@ class CreateRequestPage extends StatefulWidget {
 
 class _CreateRequestPageState extends State<CreateRequestPage> {
   final TextEditingController _descriptionController = TextEditingController();
-
+  double lat = 0.0;
+  double long = 0.0;
   @override
   void initState() {
     super.initState();
@@ -49,11 +52,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           Provider.of<UserController>(context, listen: false);
       UserModel userModel = userController.userModel!;
 
-      getLocations();
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
         garageController.selectedIssue = widget.offersModel!.issue;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
+        lat = widget.offersModel!.lat;
+        long = widget.offersModel!.long;
         List<RequestImageModel> images = [];
         for (var element in widget.offersModel!.images) {
           images.add(RequestImageModel(
@@ -68,14 +72,15 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         _descriptionController.text = widget.offersModel!.description;
         garageController.garageId = widget.offersModel!.garageId;
         setState(() {});
+      } else {
+        getLocations();
       }
     });
   }
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-  double lat = 0.0;
-  double long = 0.0;
+
   getLocations() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -421,135 +426,235 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               const SizedBox(
                 height: 15,
               ),
-              Card(
-                color: userController.isDark ? Colors.white : Colors.black,
-                child: Column(
-                  children: [
-                    InkWell(
-                      child: SizedBox(
-                        width: Get.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 140,
-                              width: Get.width,
-                              child: lat == 0.0
-                                  ? CupertinoActivityIndicator(
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white,
-                                    )
-                                  : GoogleMap(
-                                      onMapCreated: (contr) {
-                                        _controller.complete(contr);
-                                      },
-                                      markers: {
-                                        Marker(
-                                          markerId: MarkerId('current'),
-                                          position: LatLng(lat, long),
-                                        ),
-                                      },
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(lat, long),
-                                        zoom: 16.0,
-                                      ),
-                                    ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return GoogleMapLocationPicker(
-                                            apiKey:
-                                                'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                            currentLatLng: LatLng(lat, long),
-                                            onNext: (GeocodingResult?
-                                                result) async {
-                                              if (result != null) {
-                                                setState(() {
-                                                  lat = result
-                                                      .geometry.location.lat;
-                                                  long = result
-                                                      .geometry.location.lng;
-                                                });
-                                                final GoogleMapController
-                                                    controller =
-                                                    await _controller.future;
-                                                await controller.animateCamera(
-                                                    CameraUpdate
-                                                        .newCameraPosition(
-                                                            CameraPosition(
-                                                  target: LatLng(lat, long),
-                                                  zoom: 16.0,
-                                                )));
-                                              }
-                                            },
-                                            onSuggestionSelected:
-                                                (Prediction? result) async {
-                                              if (result != null) {
-                                                // result.matchedSubstrings.first.
-                                                // setState(() {
+              InkWell(
+                onTap: () {
+// ...
 
-                                                //   lat = result.
-                                                //       .geometry!.location.lat;
-                                                //   long = result
-                                                //       .result.geometry!.location.lng;
-                                                // });
-                                                final GoogleMapController
-                                                    controller =
-                                                    await _controller.future;
-                                                await controller.animateCamera(
-                                                    CameraUpdate
-                                                        .newCameraPosition(
-                                                            CameraPosition(
-                                                  target: LatLng(lat, long),
-                                                  zoom: 16.0,
-                                                )));
-                                              }
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  style: TextButton.styleFrom(
-                                      // backgroundColor: userController.isDark
-                                      //     ? Colors.white
-                                      //     : primaryColor,
-                                      // maximumSize: Size(Get.width * 0.8, 60),
-                                      // minimumSize: Size(Get.width * 0.8, 60),
-                                      // shape: RoundedRectangleBorder(
-                                      //   borderRadius: BorderRadius.circular(7),
-                                      // ),
-                                      ),
-                                  child: Text(
-                                    'Pick Location',
-                                    style: TextStyle(
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white,
-                                      fontSize: 16,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  )),
-                            ),
-                          ],
-                        ),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PlacePicker(
+                        apiKey: 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                        selectText: 'Pick This Place',
+                        onPlacePicked: (result) async {
+                          Get.dialog(LoadingDialog(),
+                              barrierDismissible: false);
+                          LatLng latLng =
+                              await getPlaceLatLng(result.placeId ?? '');
+                          lat = latLng.latitude;
+                          long = latLng.longitude;
+                          setState(() {});
+                          final GoogleMapController controller =
+                              await _controller.future;
+                          await controller.animateCamera(
+                              CameraUpdate.newCameraPosition(CameraPosition(
+                            target: LatLng(lat, long),
+                            zoom: 16.0,
+                          )));
+                          Get.close(2);
+                        },
+                        initialPosition: LatLng(lat, long),
+                        useCurrentLocation: true,
+                        selectInitialPosition: true,
+                        resizeToAvoidBottomInset:
+                            false, // only works in page mode, less flickery, remove if wrong offsets
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
+                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) {
+                  //       return GoogleMapLocationPicker(
+                  //         apiKey: 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                  //         currentLatLng: LatLng(lat, long),
+                  //         onNext: (GeocodingResult? result) async {
+                  //           if (result != null) {
+                  //             setState(() {
+
+                  //             });
+
+                  //           }
+                  //         },
+                  //         onSuggestionSelected: (Prediction? result) async {
+                  //           if (result != null) {
+                  //             print(result.description);
+                  //             print(result.placeId);
+                  //             print(result.structuredFormatting.toString());
+                  //             print(result.reference);
+
+                  //             // result.matchedSubstrings.first.
+                  //             // setState(() {
+
+                  //             // lat = result
+                  //             //     .geometry!.location.lat;
+                  //             //   long = result
+                  //             //       .result.geometry!.location.lng;
+                  //             // });
+                  //             final GoogleMapController controller =
+                  //                 await _controller.future;
+                  //             await controller.animateCamera(
+                  //                 CameraUpdate.newCameraPosition(CameraPosition(
+                  //               target: LatLng(lat, long),
+                  //               zoom: 16.0,
+                  //             )));
+                  //           }
+                  //         },
+                  //       );
+                  //     },
+                  //   ),
+                  // );
+                },
+                child: Card(
+                  color: userController.isDark ? Colors.white : Colors.black,
+                  child: Column(
+                    children: [
+                      InkWell(
+                        child: SizedBox(
+                          width: Get.width,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 140,
+                                width: Get.width,
+                                child: lat == 0.0
+                                    ? CupertinoActivityIndicator(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                      )
+                                    : GoogleMap(
+                                        onMapCreated: (contr) {
+                                          _controller.complete(contr);
+                                        },
+                                        onTap: (l) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => PlacePicker(
+                                                apiKey:
+                                                    'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                                selectText: 'Pick This Place',
+                                                onPlacePicked: (result) async {
+                                                  Get.dialog(LoadingDialog(),
+                                                      barrierDismissible:
+                                                          false);
+                                                  LatLng latLng =
+                                                      await getPlaceLatLng(
+                                                          result.placeId ?? '');
+                                                  lat = latLng.latitude;
+                                                  long = latLng.longitude;
+                                                  setState(() {});
+                                                  final GoogleMapController
+                                                      controller =
+                                                      await _controller.future;
+                                                  await controller.animateCamera(
+                                                      CameraUpdate
+                                                          .newCameraPosition(
+                                                              CameraPosition(
+                                                    target: LatLng(lat, long),
+                                                    zoom: 16.0,
+                                                  )));
+                                                  Get.close(2);
+                                                },
+                                                initialPosition:
+                                                    LatLng(lat, long),
+                                                useCurrentLocation: true,
+                                                selectInitialPosition: true,
+                                                resizeToAvoidBottomInset:
+                                                    false, // only works in page mode, less flickery, remove if wrong offsets
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        markers: {
+                                          Marker(
+                                            markerId: MarkerId('current'),
+                                            position: LatLng(lat, long),
+                                          ),
+                                        },
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(lat, long),
+                                          zoom: 16.0,
+                                        ),
+                                      ),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlacePicker(
+                                            apiKey:
+                                                'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                            selectText: 'Pick This Place',
+                                            onPlacePicked: (result) async {
+                                              Get.dialog(LoadingDialog(),
+                                                  barrierDismissible: false);
+                                              LatLng latLng =
+                                                  await getPlaceLatLng(
+                                                      result.placeId ?? '');
+                                              lat = latLng.latitude;
+                                              long = latLng.longitude;
+                                              setState(() {});
+                                              final GoogleMapController
+                                                  controller =
+                                                  await _controller.future;
+                                              await controller.animateCamera(
+                                                  CameraUpdate
+                                                      .newCameraPosition(
+                                                          CameraPosition(
+                                                target: LatLng(lat, long),
+                                                zoom: 16.0,
+                                              )));
+                                              Get.close(2);
+                                            },
+                                            initialPosition: LatLng(lat, long),
+                                            useCurrentLocation: true,
+                                            selectInitialPosition: true,
+                                            resizeToAvoidBottomInset:
+                                                false, // only works in page mode, less flickery, remove if wrong offsets
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: TextButton.styleFrom(
+                                        // backgroundColor: userController.isDark
+                                        //     ? Colors.white
+                                        //     : primaryColor,
+                                        // maximumSize: Size(Get.width * 0.8, 60),
+                                        // minimumSize: Size(Get.width * 0.8, 60),
+                                        // shape: RoundedRectangleBorder(
+                                        //   borderRadius: BorderRadius.circular(7),
+                                        // ),
+                                        ),
+                                    child: Text(
+                                      'Pick Location',
+                                      style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(
@@ -741,48 +846,25 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                 height: 40,
               ),
               ElevatedButton(
-                  onPressed: garageController.saveButtonValidation2()
-                      ? () async {
-                          if (widget.offersModel != null) {
-                            garageController.saveRequest(
-                                _descriptionController.text,
-                                LatLng(lat, long),
-                                userModel.userId,
-                                widget.offersModel!.offerId,
-                                garageController.garageId);
-                          } else {
-                            garageController.saveRequest(
-                                _descriptionController.text,
-                                LatLng(lat, long),
-                                userModel.userId,
-                                null,
-                                garageController.garageId);
-                            getUserProviders();
-                            String url =
-                                'https://us-central1-vehype-386313.cloudfunctions.net/sendPushNotifications';
-                            // try {
-                            //   final response = await http.post(
-                            //     Uri.parse(url),
-                            //     headers: {
-                            //       'Content-Type': 'application/json',
-                            //     },
-                            //     body: json.encode({'name': userModel.name}),
-                            //   );
-
-                            //   if (response.statusCode == 200) {
-                            //     print('Notification sent successfully');
-                            //   } else {
-                            //     print(
-                            //         'Failed to send notification: ${response.body}');
-                            //   }
-                            // } catch (e) {
-                            //   print('Error sending notification: $e');
-                            // }
-
-                            //  FirebaseFirestore.instance.collection('collectionPath')
-                          }
-                        }
-                      : null,
+                  onPressed: () async {
+                    if (widget.offersModel != null) {
+                      garageController.saveRequest(
+                          _descriptionController.text,
+                          LatLng(lat, long),
+                          userModel.userId,
+                          widget.offersModel!.offerId,
+                          garageController.garageId);
+                    } else {
+                      String requestId = await garageController.saveRequest(
+                          _descriptionController.text,
+                          LatLng(lat, long),
+                          userModel.userId,
+                          null,
+                          garageController.garageId);
+                      getUserProviders(requestId);
+                      Get.offAll(() => TabsPage());
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
                           userController.isDark ? Colors.white : primaryColor,
@@ -811,7 +893,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     );
   }
 
-  getUserProviders() async {
+  getUserProviders(String requestId) async {
     List<UserModel> providers = [];
 
     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
@@ -825,7 +907,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       providers.add(UserModel.fromJson(element));
     }
     for (var user in providers) {
-      UserController().changeNotiOffers(0, true, user.userId);
+      UserController().changeNotiOffers(0, true, user.userId, requestId);
     }
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
@@ -891,9 +973,8 @@ class CreateRequestImageWidget extends StatelessWidget {
                             height: 60,
                             child: CircularProgressIndicator(
                               value: requestImageModel.progress,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
+                              // backgroundColor: Colors.white,
+                              color: Colors.white,
                             ),
                           ),
                         ),

@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -99,15 +100,17 @@ class NotificationDialog extends StatelessWidget {
                 onPressed: () async {
                   Get.dialog(const LoadingDialog(), barrierDismissible: false);
                   LatLng latLng = await UserController().getLocations();
+                  final GeoFirePoint geoFirePoint =
+                      GeoFirePoint(GeoPoint(latLng.latitude, latLng.longitude));
 
                   await FirebaseFirestore.instance
                       .collection('users')
                       .doc(userModel.userId)
                       .update({
+                    'geo': geoFirePoint.data,
                     'lat': latLng.latitude,
                     'long': latLng.longitude,
                   });
-                  OneSignal.Notifications.requestPermission(true);
 
                   Get.close(1);
                   Get.offAll(() => const TabsPage());

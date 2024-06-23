@@ -38,84 +38,103 @@ class _NewOffersState extends State<NewOffers> {
   @override
   void initState() {
     super.initState();
-    if (widget.userModel.isActiveNew == true) {
-      Future.delayed(const Duration(seconds: 2)).then((e) {
-        UserController().changeNotiOffers(0, false, widget.userModel.userId);
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
-      child: StreamBuilder<List<OffersModel>>(
-          stream: widget.userController.getOffersProvider(widget.userModel),
-          builder: (context, AsyncSnapshot<List<OffersModel>> snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(
+    return StreamBuilder<List<OffersModel>>(
+        stream: widget.userController.getOffersProvider(widget.userModel),
+        builder: (context, AsyncSnapshot<List<OffersModel>> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                color:
+                    widget.userController.isDark ? Colors.white : primaryColor,
+              ),
+            );
+          }
+
+          List<OffersModel> rawOffers = snapshot.data ?? [];
+
+          List<OffersModel> filterOffers = rawOffers
+              .where((element) =>
+                  !element.offersReceived.contains(widget.userModel.userId))
+              .toList();
+          List<OffersModel> filterIgnore = filterOffers
+              .where((element) =>
+                  !element.ignoredBy.contains(widget.userModel.userId))
+              .toList();
+          List<OffersModel> blockedUsers = filterIgnore
+              .where((element) =>
+                  !widget.userModel.blockedUsers.contains(element.ownerId))
+              .toList();
+          List<OffersModel> offers = widget.userController.filterOffers(
+              blockedUsers, widget.userModel.lat, widget.userModel.long, 100);
+
+          if (offers.isEmpty) {
+            return Center(
+              child: Text(
+                'No Offers Yet',
+                style: TextStyle(
                   color: widget.userController.isDark
                       ? Colors.white
                       : primaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                 ),
-              );
-            }
-
-            List<OffersModel> rawOffers = snapshot.data ?? [];
-
-            List<OffersModel> filterOffers = rawOffers
-                .where((element) =>
-                    !element.offersReceived.contains(widget.userModel.userId))
-                .toList();
-            List<OffersModel> filterIgnore = filterOffers
-                .where((element) =>
-                    !element.ignoredBy.contains(widget.userModel.userId))
-                .toList();
-            List<OffersModel> blockedUsers = filterIgnore
-                .where((element) =>
-                    !widget.userModel.blockedUsers.contains(element.ownerId))
-                .toList();
-            List<OffersModel> offers = widget.userController.filterOffers(
-                blockedUsers, widget.userModel.lat, widget.userModel.long, 100);
-
-            if (offers.isEmpty) {
-              return Center(
-                child: Text(
-                  'No Offers Yet',
-                  style: TextStyle(
-                    color: widget.userController.isDark
-                        ? Colors.white
-                        : primaryColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              );
-            }
-            return ListView.builder(
-                itemCount: offers.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  OffersModel offersModel = offers[index];
-                  List<String> vehicleInfo = offersModel.vehicleId.split(',');
-                  final String vehicleType = vehicleInfo[0].trim();
-                  final String vehicleMake = vehicleInfo[1].trim();
-                  final String vehicleYear = vehicleInfo[2].trim();
-                  final String vehicleModle = vehicleInfo[3].trim();
-                  // final PageController imagePageController = PageController();
-
-                  return NewOfferWidget(
-                      userController: widget.userController,
-                      offersModel: offersModel,
-                      vehicleType: vehicleType,
-                      vehicleMake: vehicleMake,
-                      vehicleYear: vehicleYear,
-                      vehicleModle: vehicleModle,
-                      userModel: widget.userModel);
-                });
-          }),
-    );
+              ),
+            );
+          }
+          return ListView.builder(
+              itemCount: offers.length,
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(
+                  left: 15, right: 15, bottom: 0, top: 15),
+              itemBuilder: (context, index) {
+                OffersModel offersModel = offers[index];
+                List<String> vehicleInfo = offersModel.vehicleId.split(',');
+                final String vehicleType = vehicleInfo[0].trim();
+                final String vehicleMake = vehicleInfo[1].trim();
+                final String vehicleYear = vehicleInfo[2].trim();
+                final String vehicleModle = vehicleInfo[3].trim();
+                // final PageController imagePageController = PageController();
+                if (widget.userModel.isActiveNew) {
+                  Future.delayed(const Duration(seconds: 4)).then((e) {
+                    UserController().changeNotiOffers(
+                        0, false, widget.userModel.userId, offersModel.offerId);
+                  });
+                }
+                return Stack(
+                  children: [
+                    NewOfferWidget(
+                        userController: widget.userController,
+                        offersModel: offersModel,
+                        vehicleType: vehicleType,
+                        vehicleMake: vehicleMake,
+                        vehicleYear: vehicleYear,
+                        vehicleModle: vehicleModle,
+                        userModel: widget.userModel),
+                    if (widget.userController.userModel!.offerIdsToCheck
+                        .contains(offersModel.offerId))
+                      Positioned(
+                          right: 5,
+                          top: -1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(200),
+                              color: Colors.white,
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Icon(
+                              Icons.notifications_on_sharp,
+                              color: Colors.red,
+                              size: 28,
+                            ),
+                          ))
+                  ],
+                );
+              });
+        });
   }
 }
 
@@ -225,7 +244,7 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
                         elevation: 0.0,
                         fixedSize: Size(Get.width * 0.35, 40),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
+                          borderRadius: BorderRadius.circular(20),
                         )),
                     child: Text(
                       'Ignore',
@@ -272,7 +291,7 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
                         fixedSize: Size(Get.width * 0.35, 40),
                         elevation: 0.0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
+                          borderRadius: BorderRadius.circular(20),
                         )),
                     child: Text(
                       'Details',

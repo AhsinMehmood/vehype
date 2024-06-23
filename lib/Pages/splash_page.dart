@@ -4,6 +4,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -31,14 +33,24 @@ class _SplashPageState extends State<SplashPage> {
     Future.delayed(const Duration(seconds: 1)).then((value) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
+
+      bool? newUpdate = sharedPreferences.getBool('newUpdate');
+      if (newUpdate == null) {
+        sharedPreferences.remove('userId');
+      }
       String? userId = sharedPreferences.getString('userId');
 
       UserController userController =
           Provider.of<UserController>(context, listen: false);
-
+      userController.getCustomMarkers();
       if (userId == null) {
+        sharedPreferences.setBool('newUpdate', true);
         Get.offAll(() => ChooseAccountTypePage());
       } else {
+        sharedPreferences.setBool('newUpdate', true);
+
+        OneSignal.Notifications.requestPermission(true);
+
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
@@ -64,9 +76,21 @@ class _SplashPageState extends State<SplashPage> {
               print(userId);
               print(userModel.userId);
               OneSignal.login(userId + userModel.accountType);
+              Position position = await Geolocator.getCurrentPosition();
 
+              final GeoFirePoint geoFirePoint =
+                  GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId + userModel.accountType)
+                  .update({
+                'lat': position.latitude,
+                'geo': geoFirePoint.data,
+                'long': position.longitude,
+              });
               userController.getUserStream(userId + userModel.accountType);
-              await Future.delayed(const Duration(seconds: 2));
+              await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());
             } else {
               await FirebaseFirestore.instance
@@ -81,11 +105,23 @@ class _SplashPageState extends State<SplashPage> {
                 'email': userModel.email,
                 'status': 'active',
               });
-              await Future.delayed(const Duration(seconds: 2));
+              // await Future.delayed(const Duration(seconds: 1));
               OneSignal.login(userId + userModel.accountType);
+              Position position = await Geolocator.getCurrentPosition();
 
+              final GeoFirePoint geoFirePoint =
+                  GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId + userModel.accountType)
+                  .update({
+                'lat': position.latitude,
+                'geo': geoFirePoint.data,
+                'long': position.longitude,
+              });
               userController.getUserStream(userId + userModel.accountType);
-              await Future.delayed(const Duration(seconds: 2));
+              await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());
             }
           }
@@ -98,8 +134,9 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: userController.isDark ? primaryColor : Colors.white,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -108,8 +145,8 @@ class _SplashPageState extends State<SplashPage> {
             child: Text(
               'VEHYPE',
               style: TextStyle(
-                color: Colors.black,
-                fontSize: 24,
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 28,
                 fontFamily: poppinsBold,
                 fontWeight: FontWeight.w800,
               ),

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:get/get.dart';
+import 'package:map_location_picker/map_location_picker.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +24,9 @@ import 'package:json_theme/json_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  // if (Platform.isAndroid) {
+  //   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+  // }
   await Firebase.initializeApp();
   final themeStr = await rootBundle.loadString('assets/theme.json');
   final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');

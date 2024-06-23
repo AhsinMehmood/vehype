@@ -216,7 +216,7 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                       userController: userController, userModel: userModel),
                   Offers(
                       userController: userController,
-                      emptyText: 'No Pending Offers',
+                      emptyText: 'No Pending Offers Yet!',
                       id: 1,
                       offersPending: offersPending),
                   Offers(
@@ -227,12 +227,12 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                   Offers(
                       userController: userController,
                       id: 3,
-                      emptyText: 'No Completed Offers',
+                      emptyText: 'No Completed Offers Yet!',
                       offersPending: offersCompleted),
                   Offers(
                       userController: userController,
                       id: 4,
-                      emptyText: 'No Cancelled Offers',
+                      emptyText: 'No Cancelled Offers Yet!',
                       offersPending: offersCencelled),
                 ],
               );
@@ -265,98 +265,117 @@ class _OffersState extends State<Offers> {
   @override
   void initState() {
     super.initState();
-    UserModel userModel = widget.userController.userModel!;
-    Future.delayed(const Duration(seconds: 2)).then((e) {
-      if (widget.id == 1) {
-        if (userModel.isActivePending) {
-          UserController().changeNotiOffers(
-              widget.id, false, widget.userController.userModel!.userId);
-        }
-      }
-      if (widget.id == 2) {
-        if (userModel.isActiveInProgress) {
-          UserController().changeNotiOffers(
-              widget.id, false, widget.userController.userModel!.userId);
-        }
-      }
-      if (widget.id == 3) {
-        if (userModel.isActiveCompleted) {
-          UserController().changeNotiOffers(
-              widget.id, false, widget.userController.userModel!.userId);
-        }
-      }
-      if (widget.id == 4) {
-        if (userModel.isActiveCancelled) {
-          UserController().changeNotiOffers(
-              widget.id, false, widget.userController.userModel!.userId);
-        }
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15, bottom: 0, top: 0),
-      child: widget.userController.historyLoading
-          ? Center(
-              child: CircularProgressIndicator(
+    UserModel userModel = widget.userController.userModel!;
+
+    return widget.offersPending.isEmpty
+        ? Center(
+            child: Text(
+              widget.emptyText,
+              style: TextStyle(
                 color:
                     widget.userController.isDark ? Colors.white : primaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
               ),
-            )
-          : widget.offersPending.isEmpty
-              ? Center(
-                  child: Text(
-                    widget.emptyText,
-                    style: TextStyle(
-                      color: widget.userController.isDark
-                          ? Colors.white
-                          : primaryColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: widget.offersPending.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    OffersReceivedModel offersReceivedModel =
-                        widget.offersPending[index];
-                    // OffersModel offersModel = userController.historyOffers
-                    //     .firstWhere((element) =>
-                    //         element.offerId == offersReceivedModel.offerId);
-                    // print(offersReceivedModel.id);
+            ),
+          )
+        : ListView.builder(
+            itemCount: widget.offersPending.length,
+            shrinkWrap: true,
+            padding:
+                const EdgeInsets.only(left: 15, right: 15, bottom: 0, top: 0),
+            itemBuilder: (context, index) {
+              OffersReceivedModel offersReceivedModel =
+                  widget.offersPending[index];
+              // OffersModel offersModel = userController.historyOffers
+              //     .firstWhere((element) =>
+              //         element.offerId == offersReceivedModel.offerId);
+              // print(offersReceivedModel.id);
 
-                    return StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection('offers')
-                            .doc(offersReceivedModel.offerId)
-                            .snapshots(),
-                        builder: (context, AsyncSnapshot offerSnap) {
-                          if (!offerSnap.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                color: widget.userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                              ),
-                            );
-                          }
-                          if (offerSnap.hasError) {
-                            return Text(offerSnap.stackTrace.toString());
-                          }
-                          OffersModel offersModel =
-                              OffersModel.fromJson(offerSnap.data);
+              return StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('offers')
+                      .doc(offersReceivedModel.offerId)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot offerSnap) {
+                    if (!offerSnap.hasData) {
+                      return SizedBox.shrink();
+                    }
+                    if (offerSnap.hasError) {
+                      return Text(offerSnap.stackTrace.toString());
+                    }
+                    OffersModel offersModel =
+                        OffersModel.fromJson(offerSnap.data);
+                    Future.delayed(const Duration(seconds: 4)).then((e) {
+                      if (widget.id == 1) {
+                        if (userModel.isActivePending) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId);
+                        }
+                      }
+                      if (widget.id == 2) {
+                        if (userModel.isActiveInProgress) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId);
+                        }
+                      }
+                      if (widget.id == 3) {
+                        if (userModel.isActiveCompleted) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId);
+                        }
+                      }
+                      if (widget.id == 4) {
+                        if (userModel.isActiveCancelled) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId);
+                        }
+                      }
+                    });
 
-                          return OffersHistoryWidget(
-                              userController: widget.userController,
-                              offersModel: offersModel,
-                              offersReceivedModel: offersReceivedModel);
-                        });
-                  }),
-    );
+                    return Stack(
+                      children: [
+                        OffersHistoryWidget(
+                            userController: widget.userController,
+                            offersModel: offersModel,
+                            offersReceivedModel: offersReceivedModel),
+                        if (widget.userController.userModel!.offerIdsToCheck
+                            .contains(offersModel.offerId))
+                          Positioned(
+                              right: 5,
+                              top: -1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(200),
+                                  color: Colors.white,
+                                ),
+                                padding: const EdgeInsets.all(5),
+                                child: Icon(
+                                  Icons.notifications_on_sharp,
+                                  color: Colors.red,
+                                  size: 28,
+                                ),
+                              ))
+                      ],
+                    );
+                  });
+            });
   }
 }
 
@@ -795,7 +814,7 @@ class OffersHistoryWidget extends StatelessWidget {
           elevation: 0.0,
           fixedSize: Size(Get.width * 0.8, 40),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(20),
           )),
       child: Text(
         text,

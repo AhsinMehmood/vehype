@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -65,11 +66,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     Position position = await Geolocator.getCurrentPosition();
     lat = position.latitude;
     long = position.longitude;
+    final GeoFirePoint geoFirePoint =
+        GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+
     await FirebaseFirestore.instance
         .collection('users')
         .doc(userController.userModel!.userId)
         .update({
       'lat': position.latitude,
+      'geo': geoFirePoint.data,
       'long': position.longitude,
     });
     setState(() {
@@ -118,8 +123,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         context, userController.userModel!, 0);
                   },
                   child: SizedBox(
-                    width: 150,
-                    height: 150,
+                    width: 130,
+                    height: 130,
                     child: Stack(
                       children: [
                         ClipRRect(
@@ -238,7 +243,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         initialValue: userController.userModel!.businessInfo,
                         onChanged: (String value) => userController.updateTexts(
                             userController.userModel!, 'businessInfo', value),
-                        textCapitalization: TextCapitalization.words,
+                        // textCapitalization: TextCapitalization.words,
                         style: TextStyle(
                           fontFamily: 'Avenir',
                           fontWeight: FontWeight.w400,
@@ -295,7 +300,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         initialValue: userController.userModel!.contactInfo,
                         onChanged: (String value) => userController.updateTexts(
                             userController.userModel!, 'contactInfo', value),
-                        textCapitalization: TextCapitalization.words,
+                        textCapitalization: TextCapitalization.none,
+                        keyboardType: TextInputType.phone,
                         style: TextStyle(
                           fontFamily: 'Avenir',
                           fontWeight: FontWeight.w400,
@@ -702,14 +708,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                               .contains(service.name),
                                           onChanged: (s) {
                                             // appProvider.selectPrefs(pref);
-                                            FirebaseFirestore.instance
-                                                .collection('users')
-                                                .doc(userController
-                                                    .userModel!.userId)
-                                                .update({
-                                              'services': FieldValue.arrayUnion(
-                                                  [service.name])
-                                            });
+                                            if (userController
+                                                .userModel!.services
+                                                .contains(service.name)) {
+                                              FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(userController
+                                                      .userModel!.userId)
+                                                  .update({
+                                                'services':
+                                                    FieldValue.arrayRemove(
+                                                        [service.name])
+                                              });
+                                            } else {
+                                              FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(userController
+                                                      .userModel!.userId)
+                                                  .update({
+                                                'services':
+                                                    FieldValue.arrayUnion(
+                                                        [service.name])
+                                              });
+                                            }
                                           }),
                                     ),
                                     const SizedBox(

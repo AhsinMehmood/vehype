@@ -110,6 +110,8 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  UserController().changeNotiOffers(5, false,
+                      userController.userModel!.userId, offersModel.offerId);
                   Get.to(() => ReceivedOffersSeeker(
                         offersModel: offersModel,
                       ));
@@ -124,7 +126,7 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
                             : Get.width * 0.4,
                         40),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(20),
                     )),
                 child: Text(
                   '${filterReceivedOffers.length} Offers',
@@ -158,7 +160,7 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
                       elevation: 0.0,
                       fixedSize: Size(Get.width * 0.4, 40),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(20),
                       )),
                   child: Text(
                     'Delete',
@@ -227,6 +229,9 @@ class CancelRequestWidget extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       elevation: 1.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       maximumSize: Size(Get.width * 0.6, 50),
                       minimumSize: Size(Get.width * 0.6, 50),
                     ),

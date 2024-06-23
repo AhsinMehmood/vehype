@@ -176,12 +176,12 @@ class _SelectVehicleCreateRequestState
                                 children: [
                                   if (garageModel.imageOne != '')
                                     SizedBox(
-                                      width: Get.width * 0.9,
+                                      width: Get.width,
                                       height: Get.width * 0.35,
                                       child: InkWell(
                                         onTap: () {
                                           Get.to(() => FullImagePageView(
-                                                url: garageModel.imageOne,
+                                                urls: [garageModel.imageOne],
                                               ));
                                         },
                                         child: ClipRRect(

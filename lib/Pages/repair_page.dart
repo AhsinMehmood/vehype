@@ -354,12 +354,6 @@ class _InActiveOffersState extends State<InActiveOffers> {
   @override
   void initState() {
     super.initState();
-    if (widget.userController.userModel!.isActiveHistory == true) {
-      Future.delayed(const Duration(seconds: 2)).then((e) {
-        UserController().changeNotiOffers(
-            6, false, widget.userController.userModel!.userId);
-      });
-    }
   }
 
   @override
@@ -374,7 +368,15 @@ class _InActiveOffersState extends State<InActiveOffers> {
               physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 OffersModel offersModel = widget.offersPosted[index];
-
+                if (widget.userController.userModel!.isActiveHistory) {
+                  Future.delayed(const Duration(seconds: 2)).then((e) {
+                    UserController().changeNotiOffers(
+                        6,
+                        false,
+                        widget.userController.userModel!.userId,
+                        offersModel.offerId);
+                  });
+                }
                 List<String> vehicleInfo = offersModel.vehicleId.split(',');
                 final String vehicleType = vehicleInfo[0].trim();
                 final String vehicleMake = vehicleInfo[1].trim();
@@ -392,92 +394,118 @@ class _InActiveOffersState extends State<InActiveOffers> {
                           : Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          VehicleDetailsRequest(
-                              userController: widget.userController,
-                              vehicleType: vehicleType,
-                              vehicleMake: vehicleMake,
-                              vehicleYear: vehicleYear,
-                              vehicleModle: vehicleModle,
-                              offersModel: offersModel),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              StreamBuilder<List<OffersReceivedModel>>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('offersReceived')
-                                      .where('offerId',
-                                          isEqualTo: offersModel.offerId)
-                                      .snapshots()
-                                      .map((event) => event.docs
-                                          .map((e) =>
-                                              OffersReceivedModel.fromJson(e))
-                                          .toList()),
-                                  builder: (context,
-                                      AsyncSnapshot<List<OffersReceivedModel>>
-                                          snapshots) {
-                                    List<OffersReceivedModel>
-                                        offersReceivedModel =
-                                        snapshots.data ?? [];
+                              VehicleDetailsRequest(
+                                  userController: widget.userController,
+                                  vehicleType: vehicleType,
+                                  vehicleMake: vehicleMake,
+                                  vehicleYear: vehicleYear,
+                                  vehicleModle: vehicleModle,
+                                  offersModel: offersModel),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  StreamBuilder<List<OffersReceivedModel>>(
+                                      stream: FirebaseFirestore.instance
+                                          .collection('offersReceived')
+                                          .where('offerId',
+                                              isEqualTo: offersModel.offerId)
+                                          .snapshots()
+                                          .map((event) => event.docs
+                                              .map((e) =>
+                                                  OffersReceivedModel.fromJson(
+                                                      e))
+                                              .toList()),
+                                      builder: (context,
+                                          AsyncSnapshot<
+                                                  List<OffersReceivedModel>>
+                                              snapshots) {
+                                        List<OffersReceivedModel>
+                                            offersReceivedModel =
+                                            snapshots.data ?? [];
 
-                                    if (offersReceivedModel.isEmpty) {
-                                      return Text(
-                                        'Deleted',
-                                      );
-                                    }
-                                    if (offersReceivedModel.first.status ==
-                                            'Completed' &&
-                                        offersReceivedModel.first.ratingOne !=
-                                            0.0) {
-                                      return RatingBarIndicator(
-                                        rating:
-                                            offersReceivedModel.first.ratingOne,
-                                        itemBuilder: (context, _) => Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                        ),
-                                      );
-                                    }
-                                    if (offersReceivedModel.first.status
-                                            .toLowerCase() ==
-                                        'Cancelled'.toLowerCase()) {
-                                      return Text('Cancelled');
-                                    }
+                                        if (offersReceivedModel.isEmpty) {
+                                          return Text(
+                                            'Deleted',
+                                          );
+                                        }
+                                        if (offersReceivedModel.first.status ==
+                                                'Completed' &&
+                                            offersReceivedModel
+                                                    .first.ratingOne !=
+                                                0.0) {
+                                          return RatingBarIndicator(
+                                            rating: offersReceivedModel
+                                                .first.ratingOne,
+                                            itemBuilder: (context, _) => Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                          );
+                                        }
+                                        if (offersReceivedModel.first.status
+                                                .toLowerCase() ==
+                                            'Cancelled'.toLowerCase()) {
+                                          return Text('Cancelled');
+                                        }
 
-                                    return ElevatedButton(
-                                      onPressed: () {
-                                        Get.to(() => InActiveOffersSeeker(
-                                              offersModel: offersModel,
-                                              tittle: 'Rate Job',
-                                            ));
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              widget.userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                          elevation: 0.0,
-                                          fixedSize: Size(Get.width * 0.8, 40),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(3),
-                                          )),
-                                      child: Text(
-                                        widget.title,
-                                        style: TextStyle(
-                                            color: widget.userController.isDark
-                                                ? primaryColor
-                                                : Colors.white),
-                                      ),
-                                    );
-                                  }),
+                                        return ElevatedButton(
+                                          onPressed: () {
+                                            Get.to(() => InActiveOffersSeeker(
+                                                  offersModel: offersModel,
+                                                  tittle: 'Rate Job',
+                                                ));
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  widget.userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                              elevation: 0.0,
+                                              fixedSize:
+                                                  Size(Get.width * 0.8, 40),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              )),
+                                          child: Text(
+                                            widget.title,
+                                            style: TextStyle(
+                                                color:
+                                                    widget.userController.isDark
+                                                        ? primaryColor
+                                                        : Colors.white),
+                                          ),
+                                        );
+                                      }),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 10,
-                          ),
+                          if (widget.userController.userModel!.offerIdsToCheck
+                              .contains(offersModel.offerId))
+                            Positioned(
+                                right: 5,
+                                top: -1,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(200),
+                                    color: Colors.white,
+                                  ),
+                                  padding: const EdgeInsets.all(5),
+                                  child: Icon(
+                                    Icons.notifications_on_sharp,
+                                    color: Colors.red,
+                                    size: 28,
+                                  ),
+                                ))
                         ],
                       ),
                     ),
@@ -511,28 +539,51 @@ class _ActiveOffersState extends State<ActiveOffers> {
   @override
   void initState() {
     super.initState();
-
-    if (widget.userController.userModel!.isActive == true) {
-      Future.delayed(const Duration(seconds: 2)).then((e) {
-        UserController().changeNotiOffers(
-            5, false, widget.userController.userModel!.userId);
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 70),
+      padding: const EdgeInsets.only(bottom: 0),
       child: ListView.builder(
           itemCount: widget.offersPosted.length,
           shrinkWrap: true,
+          padding: const EdgeInsets.only(bottom: 70),
           // physics: NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             OffersModel offersModel = widget.offersPosted[index];
-
-            return VehicleOwnerRequestWidget(
-                offersModel: offersModel, offersReceivedModel: null);
+            if (widget.userController.userModel!.isActive == true) {
+              Future.delayed(const Duration(seconds: 4)).then((e) {
+                UserController().changeNotiOffers(
+                    5,
+                    false,
+                    widget.userController.userModel!.userId,
+                    'offersModel.offerId');
+              });
+            }
+            return Stack(
+              children: [
+                VehicleOwnerRequestWidget(
+                    offersModel: offersModel, offersReceivedModel: null),
+                if (widget.userController.userModel!.offerIdsToCheck
+                    .contains(offersModel.offerId))
+                  Positioned(
+                      right: 5,
+                      top: -1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.white,
+                        ),
+                        padding: const EdgeInsets.all(5),
+                        child: Icon(
+                          Icons.notifications_on_sharp,
+                          color: Colors.red,
+                          size: 28,
+                        ),
+                      ))
+              ],
+            );
           }),
     );
   }

@@ -309,20 +309,26 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               width: Get.width,
-                              child: GoogleMap(
-                                markers: {
-                                  Marker(
-                                    markerId: MarkerId('current'),
-                                    position: LatLng(widget.offersModel.lat,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: GoogleMap(
+                                  markers: {
+                                    Marker(
+                                      markerId: MarkerId('current'),
+                                      position: LatLng(widget.offersModel.lat,
+                                          widget.offersModel.long),
+                                    ),
+                                  },
+                                  initialCameraPosition: CameraPosition(
+                                    target: LatLng(widget.offersModel.lat,
                                         widget.offersModel.long),
+                                    zoom: 16.0,
                                   ),
-                                },
-                                initialCameraPosition: CameraPosition(
-                                  target: LatLng(widget.offersModel.lat,
-                                      widget.offersModel.long),
-                                  zoom: 16.0,
                                 ),
                               ),
+                            ),
+                            const SizedBox(
+                              height: 10,
                             ),
                             Align(
                               alignment: Alignment.center,
@@ -331,34 +337,42 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                                   MapsLauncher.launchCoordinates(
                                       userModel.lat, userModel.long);
                                 },
-                                child: Container(
-                                  height: 40,
-                                  width: 150,
-                                  decoration: BoxDecoration(
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(200),
-                                    color: Colors.blue,
                                   ),
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.directions_outlined,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          'View Directions',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w400,
+                                  color: primaryColor,
+                                  child: Container(
+                                    height: 40,
+                                    width: Get.width * 0.7,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(200),
+                                        color: primaryColor,
+                                        border:
+                                            Border.all(color: Colors.white)),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.directions_outlined,
                                             color: Colors.white,
+                                            size: 20,
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            'View Directions',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -382,70 +396,73 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                     const SizedBox(
                       height: 40,
                     ),
-                    if (widget.isChat == false)
-                      ElevatedButton(
-                        onPressed: () async {
-                          Get.dialog(LoadingDialog(),
-                              barrierDismissible: false);
-                          ChatModel? chatModel = await ChatController().getChat(
-                              userModel.userId,
-                              ownerDetails.userId,
-                              widget.offersModel.offerId);
-                          if (chatModel == null) {
-                            await ChatController().createChat(
-                                userModel,
-                                ownerDetails,
-                                '',
-                                widget.offersModel,
-                                'New Message',
-                                '${userModel.name} started a chat for ${widget.offersModel.vehicleId}',
-                                'chat');
-                            ChatModel? newchat = await ChatController().getChat(
-                              userModel.userId,
-                              ownerDetails.userId,
-                              widget.offersModel.offerId,
-                            );
-                            // ChatController(). updateOfferId(newchat!, userModel.userId);
-
-                            Get.close(1);
-                            Get.to(() => MessagePage(
-                                  chatModel: newchat!,
-                                  secondUser: ownerDetails,
-                                ));
-                          } else {
-                            Get.close(1);
-
-                            Get.to(() => MessagePage(
-                                  chatModel: chatModel,
-                                  secondUser: ownerDetails,
-                                ));
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            elevation: 0.0,
-                            fixedSize: Size(Get.width * 0.8, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(3),
-                            )),
-                        child: Text(
-                          'Chat',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? primaryColor
-                                : Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(
-                      height: 20,
-                    ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        if (widget.isChat == false)
+                          InkWell(
+                            onTap: () async {
+                              Get.dialog(LoadingDialog(),
+                                  barrierDismissible: false);
+                              ChatModel? chatModel = await ChatController()
+                                  .getChat(
+                                      userModel.userId,
+                                      ownerDetails.userId,
+                                      widget.offersModel.offerId);
+                              if (chatModel == null) {
+                                await ChatController().createChat(
+                                    userModel,
+                                    ownerDetails,
+                                    '',
+                                    widget.offersModel,
+                                    'New Message',
+                                    '${userModel.name} started a chat for ${widget.offersModel.vehicleId}',
+                                    'chat');
+                                ChatModel? newchat =
+                                    await ChatController().getChat(
+                                  userModel.userId,
+                                  ownerDetails.userId,
+                                  widget.offersModel.offerId,
+                                );
+                                // ChatController(). updateOfferId(newchat!, userModel.userId);
+
+                                Get.close(1);
+                                Get.to(() => MessagePage(
+                                      chatModel: newchat!,
+                                      secondUser: ownerDetails,
+                                    ));
+                              } else {
+                                Get.close(1);
+
+                                Get.to(() => MessagePage(
+                                      chatModel: chatModel,
+                                      secondUser: ownerDetails,
+                                    ));
+                              }
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(300),
+                              ),
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: SvgPicture.asset(
+                                  'assets/messages.svg',
+                                  height: 34,
+                                  width: 34,
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         ElevatedButton(
                           onPressed: () {
                             // applyToJob(userModel);
@@ -460,15 +477,16 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               elevation: 0.0,
-                              fixedSize: Size(Get.width * 0.8, 55),
+                              fixedSize: Size(Get.width * 0.6, 45),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(3),
+                                borderRadius: BorderRadius.circular(28),
                               )),
                           child: Text(
                             'Send Offer',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),

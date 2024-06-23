@@ -188,15 +188,25 @@ class _MessagePageState extends State<MessagePage> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           if (offersModel.imageOne != '')
-                                            ExtendedImage.network(
-                                              offersModel.imageOne,
-                                              height: 65,
-                                              width: 65,
-                                              // fit: BoxFit.cover,
-                                              cache: true,
-                                              shape: BoxShape.rectangle,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                            InkWell(
+                                              onTap: () {
+                                                Get.to(() => FullImagePageView(
+                                                      urls: [
+                                                        offersModel.imageOne
+                                                      ],
+                                                      currentIndex: 0,
+                                                    ));
+                                              },
+                                              child: ExtendedImage.network(
+                                                offersModel.imageOne,
+                                                height: 65,
+                                                width: 65,
+                                                // fit: BoxFit.cover,
+                                                cache: true,
+                                                shape: BoxShape.rectangle,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
                                             ),
                                           const SizedBox(
                                             width: 8,
@@ -292,7 +302,54 @@ class _MessagePageState extends State<MessagePage> {
                                                     builder: (context, AsyncSnapshot<OffersReceivedModel> snapshot) {
                                                       if (snapshot.hasData ==
                                                           false) {
-                                                        return Container();
+                                                        if (userModel.userId !=
+                                                            offersModel
+                                                                .ownerId) {
+                                                          return ElevatedButton(
+                                                              onPressed: () {
+                                                                Get.to(
+                                                                  () =>
+                                                                      SelectDateAndPrice(
+                                                                    offersModel:
+                                                                        offersModel,
+                                                                        chatId: widget.chatModel.id,
+                                                                    ownerModel:
+                                                                        widget
+                                                                            .secondUser,
+                                                                    offersReceivedModel:
+                                                                        null,
+                                                                  ),
+                                                                );
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                minimumSize:
+                                                                    Size(120,
+                                                                        40),
+                                                                backgroundColor:
+                                                                    const Color
+                                                                        .fromARGB(
+                                                                        255,
+                                                                        28,
+                                                                        131,
+                                                                        31),
+                                                              ),
+                                                              child: Text(
+                                                                'Send Offer',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                ),
+                                                              ));
+                                                        } else {
+                                                          return Container();
+                                                        }
                                                       }
                                                       OffersReceivedModel
                                                           offersReceivedModel =
@@ -324,8 +381,18 @@ class _MessagePageState extends State<MessagePage> {
                                                           userModel: userModel,
                                                         );
                                                       } else {
-                                                        return SizedBox
-                                                            .shrink();
+                                                        if (chatModel!
+                                                                .offerRequestId ==
+                                                            '') {
+                                                          return ElevatedButton(
+                                                              onPressed: () {},
+                                                              child:
+                                                                  Text('data'));
+                                                        }
+                                                        return ElevatedButton(
+                                                            onPressed: () {},
+                                                            child:
+                                                                Text('data'));
                                                       }
                                                     })
                                             ],
@@ -1144,31 +1211,7 @@ class AcceptOfferConfirm extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 15,
-              ),
-              Text(
-                'You can review our rating policy here.',
-                style: TextStyle(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              InkWell(
-                onTap: () {
-                  launchUrl(Uri.parse('https://vehype.com/help#'));
-                },
-                child: Text(
-                  'Rating Policy',
-                  style: TextStyle(
-                      color: Colors.red, decoration: TextDecoration.underline),
-                ),
-              ),
-              const SizedBox(
-                height: 25,
+                height: 10,
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1226,6 +1269,30 @@ class AcceptOfferConfirm extends StatelessWidget {
                       ),
                     )
                   ],
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Text(
+                'You can review our rating policy here.',
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              InkWell(
+                onTap: () {
+                  launchUrl(Uri.parse('https://vehype.com/help#'));
+                },
+                child: Text(
+                  'Rating Policy',
+                  style: TextStyle(
+                      color: Colors.red, decoration: TextDecoration.underline),
                 ),
               ),
               const SizedBox(
@@ -1405,7 +1472,7 @@ class SecondUserMessageWidget extends StatelessWidget {
                 else
                   InkWell(
                     onTap: () {
-                      Get.to(() => FullImagePageView(url: message.mediaUrl));
+                      Get.to(() => FullImagePageView(urls: [message.mediaUrl]));
                     },
                     child: ExtendedImage.network(
                       message.mediaUrl,
@@ -1503,19 +1570,8 @@ class TopBarMessage extends StatelessWidget {
               onTap: () {
                 ChatController().updateChatTime(userModel, widget.chatModel);
 
-                Get.bottomSheet(
-                  BottomSheet(
-                      onClosing: () {},
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      backgroundColor:
-                          userController.isDark ? primaryColor : Colors.white,
-                      builder: (conte) {
-                        return SecondUserProfile(userId: secondUser.userId);
-                      }),
-                );
-                // Get.to(() => SecondUserProfile(
-                //     userId: widget.chatModel.secondUserId));
+                Get.to(
+                    () => SecondUserProfile(userId: widget.secondUser.userId));
               },
               child: Row(
                 children: [
@@ -2342,7 +2398,8 @@ class MessageWidget extends StatelessWidget {
                   else
                     InkWell(
                       onTap: () {
-                        Get.to(() => FullImagePageView(url: message.mediaUrl));
+                        Get.to(
+                            () => FullImagePageView(urls: [message.mediaUrl]));
                       },
                       child: ExtendedImage.network(
                         message.mediaUrl,

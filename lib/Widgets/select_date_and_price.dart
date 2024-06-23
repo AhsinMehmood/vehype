@@ -20,11 +20,13 @@ import 'loading_dialog.dart';
 
 class SelectDateAndPrice extends StatefulWidget {
   final OffersModel offersModel;
+  final String? chatId;
   final UserModel ownerModel;
   final OffersReceivedModel? offersReceivedModel;
   const SelectDateAndPrice(
       {super.key,
       required this.offersModel,
+      this.chatId,
       required this.ownerModel,
       required this.offersReceivedModel});
 
@@ -439,7 +441,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                     elevation: 0.0,
                     fixedSize: Size(Get.width * 0.8, 55),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(20),
                     )),
                 child: Text(
                   widget.offersReceivedModel == null ? 'Apply' : 'Update',
@@ -486,7 +488,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           .update({
         'offersReceived': FieldValue.arrayUnion([userModel.userId]),
       });
-      await FirebaseFirestore.instance.collection('offersReceived').add({
+      DocumentReference<Map<String, dynamic>> reference =
+          await FirebaseFirestore.instance.collection('offersReceived').add({
         'offerBy': userModel.userId,
         'offerId': widget.offersModel.offerId,
         'ownerId': widget.ownerModel.userId,
@@ -497,6 +500,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
       });
+
       garageController.closeOfferSubmit();
       sendNotification(
           widget.ownerModel.userId,
@@ -506,8 +510,16 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'chatId',
           'offer',
           'messageId');
-      UserController().changeNotiOffers(5, true, widget.ownerModel.userId);
-
+      UserController().changeNotiOffers(
+          5, true, widget.ownerModel.userId, widget.offersModel.offerId);
+      if (widget.chatId != null) {
+        await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(widget.chatId)
+            .update({
+          'offerRequestId': reference.id,
+        });
+      }
       Get.close(2);
       Get.showSnackbar(
         GetSnackBar(

@@ -60,7 +60,7 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                   InkWell(
                     onTap: () {
                       Get.to(() => FullImagePageView(
-                            url: widget.offersModel.imageOne,
+                            urls: [widget.offersModel.imageOne],
                           ));
                     },
                     child: ClipRRect(
@@ -100,14 +100,23 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                         return InkWell(
                           onTap: () {
                             Get.to(() => FullImagePageView(
-                                url: widget.offersModel.images[index]));
+                                  urls: widget.offersModel.images,
+                                  currentIndex: index,
+                                ));
                           },
                           child: Card(
-                            child: ExtendedImage.network(
-                              widget.offersModel.images[index],
-                              fit: BoxFit.cover,
-                              width: Get.width,
-                              height: Get.width * 0.42,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: ExtendedImage.network(
+                                widget.offersModel.images[index],
+                                fit: BoxFit.cover,
+                                width: Get.width,
+                                height: Get.width * 0.42,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         );
@@ -305,8 +314,8 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                         color: widget.userController.isDark
                             ? Colors.white
                             : primaryColor,
-                        height: 15,
-                        width: 15),
+                        height: 35,
+                        width: 35),
                     const SizedBox(
                       width: 8,
                     ),

@@ -74,8 +74,10 @@ class SelectAccountType extends StatelessWidget {
                       userController
                           .getUserStream('${userModelAccount.userId}provider');
                       await Future.delayed(const Duration(seconds: 2));
+                      await OneSignal.Notifications.requestPermission(true);
 
                       Get.close(1);
+
                       Get.offAll(() => const NotificationDialog());
                     },
                     child: Card(
@@ -145,6 +147,7 @@ class SelectAccountType extends StatelessWidget {
                       userController
                           .getUserStream('${userModelAccount.userId}seeker');
                       await Future.delayed(const Duration(seconds: 2));
+                      await OneSignal.Notifications.requestPermission(true);
 
                       Get.close(1);
                       Get.offAll(() => const NotificationDialog());

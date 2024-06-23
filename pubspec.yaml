@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.0.3+36
+version: 3.0.3+37
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -30,12 +30,12 @@ dependencies:
 
 
   cupertino_icons: ^1.0.6
-  firebase_core: ^2.27.1
-  cloud_firestore: ^4.15.9
-  firebase_auth: ^4.17.9
+  firebase_core: ^3.1.0
+  cloud_firestore: ^5.0.1
+  firebase_auth: ^5.1.0
   google_sign_in: ^6.2.1
   provider: ^6.1.2
-  firebase_storage: ^11.6.10
+  firebase_storage: ^12.0.1
   sign_in_with_apple: ^6.0.0
   # firebase_messaging: ^14.7.20
   google_maps_flutter: ^2.6.0
@@ -56,16 +56,17 @@ dependencies:
   # package_rename: ^1.5.3
   flutter_rating_bar: ^4.0.1
   # smooth_page_indicator: ^1.1.0
-  firebase_database: ^10.4.10
+  firebase_database: ^11.0.1
   
   image_picker: ^1.0.7
+  multi_image_picker_plus: ^0.0.4
   video_player: ^2.8.3
   video_compress: ^3.1.2
   # cached_video_preview: ^1.0.6
   path_provider:
   dio: ^5.4.1
   ffmpeg_kit_flutter: ^6.0.3
-  flick_video_player: ^0.7.0
+  flick_video_player: ^0.8.0
   url_launcher:
   maps_launcher: ^2.2.1
   # awesome_notifications: ^0.8.2
@@ -76,6 +77,13 @@ dependencies:
   # flutter_masonry_view: ^0.0.2
   flutter_staggered_grid_view: ^0.7.0
   flutter_app_badger: ^1.5.0
+  google_maps_place_picker_mb: ^3.1.2
+  geoflutterfire_plus: ^0.0.24
+  rxdart: ^0.27.7
+  readmore: ^3.0.0
+  image_cropper: ^7.0.5
+  crop_your_image: ^1.1.0
+  fuzzy: ^0.5.1
   # image_picker: ^1.1.2
   # flutter_link_previewer: ^3.2.2
 dev_dependencies:

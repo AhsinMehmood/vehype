@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
@@ -429,8 +430,8 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceAround,
                                           children: [
-                                            ElevatedButton(
-                                              onPressed: () async {
+                                            InkWell(
+                                              onTap: () async {
                                                 OffersController()
                                                     .chatWithOffer(
                                                         userModel,
@@ -438,26 +439,26 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                                         widget.offersModel,
                                                         offersReceivedModel);
                                               },
-                                              style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      userController.isDark
-                                                          ? Colors.white
-                                                          : primaryColor,
-                                                  elevation: 0.0,
-                                                  fixedSize:
-                                                      Size(Get.width * 0.4, 40),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            3),
-                                                  )),
-                                              child: Text(
-                                                'Chat',
-                                                style: TextStyle(
-                                                  color: userController.isDark
-                                                      ? primaryColor
-                                                      : Colors.white,
-                                                  fontSize: 18,
+                                              child: Card(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          300),
+                                                ),
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(6.0),
+                                                  child: SvgPicture.asset(
+                                                    'assets/messages.svg',
+                                                    height: 34,
+                                                    width: 34,
+                                                    color: userController.isDark
+                                                        ? primaryColor
+                                                        : Colors.white,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -471,7 +472,8 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                               UserController().changeNotiOffers(
                                                   2,
                                                   true,
-                                                  offersReceivedModel.offerBy);
+                                                  offersReceivedModel.offerBy,
+                                                  widget.offersModel.offerId);
                                             }, 'Accept'),
 
                                             // else
@@ -502,9 +504,9 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
       style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
           elevation: 0.0,
-          fixedSize: Size(Get.width * 0.4, 40),
+          fixedSize: Size(Get.width * 0.7, 40),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(20),
           )),
       child: Text(
         text,

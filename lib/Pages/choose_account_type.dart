@@ -22,8 +22,9 @@ class ChooseAccountTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: userController.isDark ? primaryColor : Colors.white,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,15 +34,13 @@ class ChooseAccountTypePage extends StatelessWidget {
               const SizedBox(
                 height: 80,
               ),
-              Container(
-                height: 125,
-                width: 125,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
-                ),
-                child: Center(
-                  child: Image.asset('assets/icon.png'),
+              Text(
+                'VEHYPE',
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontSize: 28,
+                  fontFamily: poppinsBold,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(
@@ -56,7 +55,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                   'VEHYPE is an app based on ratings given in-between vehicle owners and service providers.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: userController.isDark ? Colors.white : primaryColor,
                     fontSize: 18,
                     fontWeight: FontWeight.w400,
                   ),
@@ -79,7 +78,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                       width: Get.width,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
+                        color:
+                            userController.isDark ? primaryColor : Colors.white,
                       ),
                       child: SingleChildScrollView(
                         child: Column(
@@ -115,7 +115,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(200),
                                       color: Colors.white,
                                       border: Border.all(
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.yellowAccent
+                                            : Colors.green,
                                       )),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -142,7 +144,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 15,
                             ),
                             if (Platform.isIOS)
                               InkWell(
@@ -172,7 +174,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             BorderRadius.circular(200),
                                         color: Colors.black,
                                         border: Border.all(
-                                          color: Colors.black,
+                                          color: userController.isDark
+                                              ? Colors.yellowAccent
+                                              : Colors.green,
                                         )),
                                     child: Row(
                                       mainAxisAlignment:
@@ -199,9 +203,10 @@ class ChooseAccountTypePage extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            const SizedBox(
-                              height: 10,
-                            ),
+                            if (Platform.isIOS)
+                              const SizedBox(
+                                height: 15,
+                              ),
                             InkWell(
                               onTap: () async {
                                 Get.dialog(const LoadingDialog(),
@@ -247,12 +252,14 @@ class ChooseAccountTypePage extends StatelessWidget {
                                   fontFamily: 'Avenir',
                                   fontWeight: FontWeight.w600,
                                   fontSize: 17,
-                                  // color: Colors.white,
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
                                 ),
                               ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 15,
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -273,11 +280,16 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: Get.width * 0.04,
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
                                       ),
                                     ),
                                     _createClickableTextSpan(
-                                        'Terms', Colors.black.withOpacity(0.8),
+                                        'Terms',
+                                        userController.isDark
+                                            ? Colors.white.withOpacity(0.8)
+                                            : primaryColor.withOpacity(0.8),
                                         () {
                                       // Handle tap on 'world'
                                       // launchUrl(Uri.parse(
@@ -285,13 +297,15 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       // setState(() {});
                                       // launchUrl('');
                                     }),
-                                    const TextSpan(
+                                    TextSpan(
                                       text: '.',
                                       style: TextStyle(
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: 14,
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
                                       ),
                                     ),
                                     TextSpan(
@@ -301,11 +315,17 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: Get.width * 0.04,
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
                                       ),
                                     ),
-                                    _createClickableTextSpan(' Privacy Policy',
-                                        Colors.black.withOpacity(0.8), () {
+                                    _createClickableTextSpan(
+                                        ' Privacy Policy',
+                                        userController.isDark
+                                            ? Colors.white.withOpacity(0.8)
+                                            : primaryColor.withOpacity(0.8),
+                                        () {
                                       // launchUrl(Uri.parse(
                                       //     'https://www.fairytrail.app/terms.html#privacy'));
                                       // Handle tap on 'clickable'
@@ -319,11 +339,17 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: Get.width * 0.04,
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
                                       ),
                                     ),
-                                    _createClickableTextSpan('Cookies Policy',
-                                        Colors.black.withOpacity(0.8), () {
+                                    _createClickableTextSpan(
+                                        'Cookies Policy',
+                                        userController.isDark
+                                            ? Colors.white.withOpacity(0.8)
+                                            : primaryColor.withOpacity(0.8),
+                                        () {
                                       // launchUrl(Uri.parse(
                                       //     'https://www.fairytrail.app/terms.html#cookies'));
                                       // Handle tap on 'clickable'
@@ -336,7 +362,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: Get.width * 0.04,
-                                        color: Colors.black,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
                                       ),
                                     ),
                                   ],

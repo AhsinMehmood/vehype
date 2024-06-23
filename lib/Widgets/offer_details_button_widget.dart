@@ -4,6 +4,7 @@ import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
@@ -41,133 +42,6 @@ class OfferDetailsButtonWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            if (offersReceivedModel.status == 'Upcoming')
-              ElevatedButton(
-                onPressed: () async {
-                  OffersController().chatWithOffer(userModel, postedByDetails,
-                      offersModel, offersReceivedModel);
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        userController.isDark ? Colors.white : primaryColor,
-                    elevation: 0.0,
-                    fixedSize: Size(Get.width * 0.4, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
-                    )),
-                child: Text(
-                  'Chat',
-                  style: TextStyle(
-                    color: userController.isDark ? primaryColor : Colors.white,
-                    // fontSize: 14,
-                  ),
-                ),
-              ),
-            if (offersReceivedModel.status == 'Upcoming')
-              _getButton(Colors.white, () async {
-                showModalBottomSheet(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    context: context,
-                    backgroundColor:
-                        userController.isDark ? primaryColor : Colors.white,
-                    builder: (context) {
-                      return BottomSheet(
-                          onClosing: () {},
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          builder: (s) {
-                            return Container(
-                              width: Get.width,
-                              decoration: BoxDecoration(
-                                color: userController.isDark
-                                    ? primaryColor
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.all(14),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      'Are you sure? You won\'t be able to revert this action.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        if (offersReceivedModel.ownerId ==
-                                            userModel.userId) {
-                                          OffersController().cancelOfferByOwner(
-                                              offersReceivedModel, userModel);
-                                          UserController().changeNotiOffers(
-                                              4,
-                                              true,
-                                              offersReceivedModel.offerBy);
-                                        } else {
-                                          OffersController()
-                                              .cancelOfferByProvider(
-                                                  offersReceivedModel,
-                                                  userModel);
-                                          UserController().changeNotiOffers(
-                                              6,
-                                              true,
-                                              offersReceivedModel.ownerId);
-                                        }
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        elevation: 1.0,
-                                        maximumSize: Size(Get.width * 0.6, 50),
-                                        minimumSize: Size(Get.width * 0.6, 50),
-                                      ),
-                                      child: Text(
-                                        'Confirm',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontFamily: 'Avenir',
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Get.close(1);
-                                      },
-                                      child: Text(
-                                        'Cancel',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                  ],
-                                ),
-                              ),
-                            );
-                          });
-                    });
-              }, 'Cancel', context),
-
             if (offersReceivedModel.status == 'Cancelled' &&
                 offersReceivedModel.cancelBy == 'provider' &&
                 offersReceivedModel.ratingTwo == 0.0)
@@ -227,28 +101,59 @@ class OfferDetailsButtonWidget extends StatelessWidget {
           height: 15,
         ),
         if (offersReceivedModel.status == 'Upcoming')
-          _getButtonFull(Colors.white, () async {
-            DocumentSnapshot<Map<String, dynamic>> snap =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(offersReceivedModel.ownerId)
-                    .get();
-            UserModel userModel = UserModel.fromJson(snap);
-            Event event = Event(
-              title: userModel.name,
-              description: offersModel.vehicleId,
-              // location: 'Event location',
-              startDate:
-                  DateTime.parse(offersReceivedModel.startDate).toLocal(),
-              endDate: DateTime.parse(offersReceivedModel.endDate).toLocal(),
-            );
-            Add2Calendar.addEvent2Cal(event);
-          }, 'Add To Calendar', context),
-        if (offersReceivedModel.status == 'Upcoming')
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const SizedBox(
-                height: 15,
+              InkWell(
+                onTap: () async {
+                  OffersController().chatWithOffer(userModel, postedByDetails,
+                      offersModel, offersReceivedModel);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(200),
+                    color: userController.isDark ? Colors.white : primaryColor,
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    'assets/messages.svg',
+                    height: 34,
+                    width: 34,
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  DocumentSnapshot<Map<String, dynamic>> snap =
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(offersReceivedModel.ownerId)
+                          .get();
+                  UserModel userModel = UserModel.fromJson(snap);
+                  Event event = Event(
+                    title: userModel.name,
+                    description: offersModel.vehicleId,
+                    // location: 'Event location',
+                    startDate:
+                        DateTime.parse(offersReceivedModel.startDate).toLocal(),
+                    endDate:
+                        DateTime.parse(offersReceivedModel.endDate).toLocal(),
+                  );
+                  Add2Calendar.addEvent2Cal(event);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(200),
+                    color: Colors.blueGrey,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.calendar_month_outlined,
+                    color: Colors.white,
+                    size: 34,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -267,27 +172,150 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                       .update({
                     'status': 'inactive',
                   });
-                  UserController()
-                      .changeNotiOffers(3, true, offersReceivedModel.offerBy);
+                  UserController().changeNotiOffers(3, true,
+                      offersReceivedModel.offerBy, offersModel.offerId);
 
                   Get.close(1);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   elevation: 1.0,
-                  maximumSize: Size(Get.width * 0.85, 50),
-                  minimumSize: Size(Get.width * 0.85, 50),
+                  maximumSize: Size(Get.width * 0.4, 55),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(200),
+                  ),
+                  minimumSize: Size(Get.width * 0.4, 55),
                 ),
                 child: Text(
                   'Complete',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontFamily: 'Avenir',
                     color: Colors.white,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
+            ],
+          ),
+        const SizedBox(
+          height: 15,
+        ),
+        if (offersReceivedModel.status == 'Upcoming')
+          Column(
+            children: [
+              const SizedBox(
+                height: 15,
+              ),
+              _getButton(Colors.white, () async {
+                showModalBottomSheet(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    context: context,
+                    backgroundColor:
+                        userController.isDark ? primaryColor : Colors.white,
+                    builder: (context) {
+                      return BottomSheet(
+                          onClosing: () {},
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          builder: (s) {
+                            return Container(
+                              width: Get.width,
+                              decoration: BoxDecoration(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.all(14),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      'Are you sure? You won\'t be able to revert this action.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        if (offersReceivedModel.ownerId ==
+                                            userModel.userId) {
+                                          OffersController().cancelOfferByOwner(
+                                              offersReceivedModel, userModel);
+                                          UserController().changeNotiOffers(
+                                              4,
+                                              true,
+                                              offersReceivedModel.offerBy,
+                                              offersModel.offerId);
+                                        } else {
+                                          OffersController()
+                                              .cancelOfferByProvider(
+                                                  offersReceivedModel,
+                                                  userModel);
+                                          UserController().changeNotiOffers(
+                                              6,
+                                              true,
+                                              offersReceivedModel.ownerId,
+                                              offersModel.offerId);
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        elevation: 1.0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        maximumSize: Size(Get.width * 0.8, 50),
+                                        minimumSize: Size(Get.width * 0.8, 50),
+                                      ),
+                                      child: Text(
+                                        'Confirm',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontFamily: 'Avenir',
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        Get.close(1);
+                                      },
+                                      child: Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontFamily: 'Avenir',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                    });
+              }, 'Cancel', context),
             ],
           ),
       ],
@@ -303,13 +331,14 @@ class OfferDetailsButtonWidget extends StatelessWidget {
       style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           elevation: 0.0,
-          fixedSize: Size(Get.width * 0.4, 40),
+          fixedSize: Size(Get.width * 0.8, 45),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(20),
           )),
       child: Text(
         text,
-        style: TextStyle(color: textColor),
+        style: TextStyle(
+            color: textColor, fontSize: 16, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -323,13 +352,14 @@ class OfferDetailsButtonWidget extends StatelessWidget {
       style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blueGrey,
           elevation: 0.0,
-          fixedSize: Size(Get.width * 0.85, 40),
+          fixedSize: Size(Get.width * 0.85, 45),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(20),
           )),
       child: Text(
         text,
-        style: TextStyle(color: textColor),
+        style: TextStyle(
+            color: textColor, fontSize: 16, fontWeight: FontWeight.w800),
       ),
     );
   }

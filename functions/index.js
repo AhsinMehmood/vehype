@@ -1,7 +1,10 @@
 const functions = require("firebase-functions");
 
 const admin = require('firebase-admin');
-
+// For details and booking, please call at 0300 9464109 & 0328 4233372
+// 📍Our Location:
+// 4-Main Zeenat Block,Hafeez Taib Road, Allama Iqbal Town, Lahore.
+//Elite Residency Lahore 
 const axios = require('axios');
 admin.initializeApp();
 const ONE_SIGNAL_APP_ID = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';

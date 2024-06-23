@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:math';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
+import 'dart:ui' as ui;
 
 // import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,12 +11,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:get/get.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_select/image_selector.dart';
 import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -24,6 +27,7 @@ import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
+import 'package:vehype/Pages/crop_image_page.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:vehype/bad_words.dart';
@@ -97,25 +101,10 @@ class UserController with ChangeNotifier {
     File? selectedFile = await imageSelector.pickImage(
         context: context, source: ImageFrom.gallery);
     if (selectedFile != null) {
-      Get.dialog(const LoadingDialog(), barrierDismissible: false);
-      File file = await FlutterNativeImage.compressImage(
-        selectedFile.absolute.path,
-        quality: 100,
-        percentage: 50,
-        targetHeight: 125,
-        targetWidth: 125,
-      );
-
-      String imageUrl = await uploadImage(file, userModel.userId);
-      Get.close(1);
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userModel.userId)
-          .update({'profileUrl': imageUrl});
-
-      // notifyListeners();
+      Get.to(() => CropImagePage(imageData: selectedFile, imageField: ''));
     }
+
+    // notifyListeners();
   }
 
   logout(UserModel userModel) async {
@@ -440,11 +429,39 @@ class UserController with ChangeNotifier {
     'isHistoryActive',
   ];
 
-  changeNotiOffers(int fieldNameIndex, bool value, String userId) {
+  changeNotiOffers(
+      int fieldNameIndex, bool value, String userId, String requestId) {
     print('object');
-    FirebaseFirestore.instance.collection('users').doc(userId).update({
-      fieldNames[fieldNameIndex]: value,
-    });
+    if (value == true) {
+      FirebaseFirestore.instance.collection('users').doc(userId).update({
+        fieldNames[fieldNameIndex]: value,
+        'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
+      });
+    } else {
+      FirebaseFirestore.instance.collection('users').doc(userId).update({
+        fieldNames[fieldNameIndex]: value,
+        'offerIdsToCheck': FieldValue.arrayRemove([requestId]),
+      });
+    }
+  }
+
+  late Uint8List favMarkar;
+  late Uint8List userMarker;
+
+  getCustomMarkers() async {
+    favMarkar = await getBytesFromAsset('assets/fav.png', 135);
+    userMarker = await getBytesFromAsset('assets/user.png', 135);
+    notifyListeners();
+  }
+
+  Future<Uint8List> getBytesFromAsset(String path, int size) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: size);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 }
 

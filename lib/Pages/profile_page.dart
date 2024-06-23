@@ -15,6 +15,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
 import 'package:vehype/Pages/explore_page.dart';
+import 'package:vehype/Pages/my_gallery_page.dart';
 import 'package:vehype/Pages/my_garage.dart';
 import 'package:vehype/Pages/orders_history_provider.dart';
 import 'package:vehype/const.dart';
@@ -23,6 +24,7 @@ import '../Models/user_model.dart';
 import 'admin_home_page.dart';
 import 'comments_page.dart';
 import 'delete_account_page.dart';
+import 'my_fav_page.dart';
 import 'orders_history_seeker.dart';
 import 'splash_page.dart';
 
@@ -250,10 +252,9 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
 
-                      if (userModel.accountType == 'seeker')
-                        const SizedBox(
-                          height: 10,
-                        ),
+                      const SizedBox(
+                        height: 10,
+                      ),
 
                       InkWell(
                         onTap: () async {
@@ -297,9 +298,9 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      // const SizedBox(
+                      //   height: 10,
+                      // ),
                       if (userController.isAdmin)
                         InkWell(
                           onTap: () {
@@ -320,8 +321,7 @@ class ProfilePage extends StatelessWidget {
                       if (userController.isAdmin)
                         const SizedBox(
                           height: 10,
-                        ),
-                      // if (userModel.accountType != 'seeker')
+                        )
                       //   InkWell(
                       //     onTap: () async {
                       //       Get.to(() => OrdersHistoryProvider());
@@ -341,36 +341,54 @@ class ProfilePage extends StatelessWidget {
 
                       // if (userModel.accountType != 'seeker')
 
+                      // if (userModel.status != 'approved')
+                      else
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      if (userModel.accountType != 'seeker')
+                        InkWell(
+                          onTap: () async {
+                            Get.to(() => MyGalleryPage());
+                          },
+                          child: Text(
+                            'My Gallery',
+                            style: TextStyle(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              fontFamily: 'Avenir',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      if (userModel.accountType == 'seeker')
+                        InkWell(
+                          onTap: () async {
+                            Get.to(() => MyFavPage());
+                          },
+                          child: Text(
+                            'My Favourites',
+                            style: TextStyle(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              fontFamily: 'Avenir',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
                       const SizedBox(
-                        height: 10,
+                        height: 15,
                       ),
                       Container(
                         height: 1,
                         width: Get.width * 0.8,
                         color: changeColor(color: 'D9D9D9'),
                       ),
-                      // if (userModel.status != 'approved')
-                      // const SizedBox(
-                      //   height: 20,
-                      // ),
 
-                      // InkWell(
-                      //   onTap: () async {
-                      //     // Get.offAll(() => SplashPage());
-                      //   },
-                      //   child: Text(
-                      //     'Notifications',
-                      //     style: TextStyle(
-                      //       color: userController.isDark ? Colors.white : primaryColor,
-                      //       fontFamily: 'Avenir',
-                      //       fontWeight: FontWeight.w800,
-                      //       fontSize: 20,
-                      //     ),
-                      //   ),
-                      // ),
-                      // const SizedBox(
-                      //   height: 10,
-                      // ),
                       // Container(
                       //   height: 1,
                       //   width: Get.width * 0.8,
@@ -541,7 +559,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.36',
+                        'App Version: 3.0.3.37',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
