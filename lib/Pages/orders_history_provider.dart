@@ -773,8 +773,8 @@ class OffersHistoryWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       constraints: BoxConstraints(
-                        maxHeight: Get.height * 0.8,
-                        minHeight: Get.height * 0.8,
+                        maxHeight: Get.height * 0.9,
+                        minHeight: Get.height * 0.9,
                         minWidth: Get.width,
                       ),
                       isScrollControlled: true,

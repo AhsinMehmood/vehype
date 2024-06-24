@@ -313,6 +313,9 @@ class _RatingSheetState extends State<RatingSheet> {
     return BottomSheet(
         backgroundColor: widget.isDark ? primaryColor : Colors.white,
         onClosing: () {},
+        constraints: BoxConstraints(
+          minHeight: Get.height * 0.9,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -616,44 +619,70 @@ class _RatingSheetState extends State<RatingSheet> {
                       onPressed: commentController.text.isEmpty
                           ? null
                           : () async {
-                              // if (image == null) {
-                              //   Get.showSnackbar(GetSnackBar(
-                              //     message: 'Please add at least one image.',
-                              //     duration: const Duration(seconds: 3),
-                              //     snackPosition: SnackPosition.BOTTOM,
-                              //   ));
-                              //   return;
-                              // }
-                              Get.dialog(LoadingDialog(),
-                                  barrierDismissible: false);
-                              String url = await UserController()
-                                  .uploadImage(image!, userModel.userId);
-                              setState(() {});
-                              await FirebaseFirestore.instance
-                                  .collection('offersReceived')
-                                  .doc(widget.offersReceivedModel.id)
-                                  .update({
-                                // 'status': 'finish',
-                                'ratingTwo': rating,
-                                'commentTwo': commentController.text.trim(),
-                                'media': url,
-                              });
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(widget.offersReceivedModel.ownerId)
-                                  .update({
-                                'ratings': FieldValue.arrayUnion([
-                                  {
-                                    'id': userModel.userId,
-                                    'rating': rating,
-                                    'comment': commentController.text.trim(),
-                                    'images': url,
-                                    'at': DateTime.now()
-                                        .toUtc()
-                                        .toIso8601String(),
-                                  }
-                                ])
-                              });
+                              if (image == null) {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+                                // String url = await UserController()
+                                //     .uploadImage(image!, userModel.userId);
+                                setState(() {});
+                                await FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .doc(widget.offersReceivedModel.id)
+                                    .update({
+                                  // 'status': 'finish',
+                                  'ratingTwo': rating,
+                                  'commentTwo': commentController.text.trim(),
+                                  'media': '',
+                                });
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(widget.offersReceivedModel.ownerId)
+                                    .update({
+                                  'ratings': FieldValue.arrayUnion([
+                                    {
+                                      'id': userModel.userId,
+                                      'rating': rating,
+                                      'comment': commentController.text.trim(),
+                                      // 'images': url,
+                                      'at': DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String(),
+                                    }
+                                  ])
+                                });
+                              } else {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+                                String url = await UserController()
+                                    .uploadImage(image!, userModel.userId);
+                                setState(() {});
+                                await FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .doc(widget.offersReceivedModel.id)
+                                    .update({
+                                  // 'status': 'finish',
+                                  'ratingTwo': rating,
+                                  'commentTwo': commentController.text.trim(),
+                                  'media': url,
+                                });
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(widget.offersReceivedModel.ownerId)
+                                    .update({
+                                  'ratings': FieldValue.arrayUnion([
+                                    {
+                                      'id': userModel.userId,
+                                      'rating': rating,
+                                      'comment': commentController.text.trim(),
+                                      'images': url,
+                                      'at': DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String(),
+                                    }
+                                  ])
+                                });
+                              }
+
                               sendNotification(
                                   widget.offersReceivedModel.ownerId,
                                   userModel.name,
@@ -721,6 +750,9 @@ class _RatingSheet2State extends State<RatingSheet2> {
     return BottomSheet(
         backgroundColor: widget.isDark ? primaryColor : Colors.white,
         onClosing: () {},
+        constraints: BoxConstraints(
+          minHeight: Get.height * 0.9,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -1024,44 +1056,70 @@ class _RatingSheet2State extends State<RatingSheet2> {
                       onPressed: commentController.text.isEmpty
                           ? null
                           : () async {
-                              // if (image == null) {
-                              //   Get.showSnackbar(GetSnackBar(
-                              //     message: 'Please add at least one image.',
-                              //     duration: const Duration(seconds: 3),
-                              //     snackPosition: SnackPosition.TOP,
-                              //   ));
-                              //   return;
-                              // }
-                              Get.dialog(LoadingDialog(),
-                                  barrierDismissible: false);
-                              String url = await UserController()
-                                  .uploadImage(image!, userModel.userId);
-                              setState(() {});
-                              await FirebaseFirestore.instance
-                                  .collection('offersReceived')
-                                  .doc(widget.offersReceivedModel.id)
-                                  .update({
-                                // 'status': 'finish',
-                                'ratingOne': rating,
-                                'commentOne': commentController.text.trim(),
-                                'media': url,
-                              });
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(widget.offersReceivedModel.offerBy)
-                                  .update({
-                                'ratings': FieldValue.arrayUnion([
-                                  {
-                                    'id': userModel.userId,
-                                    'rating': rating,
-                                    'comment': commentController.text.trim(),
-                                    'images': url,
-                                    'at': DateTime.now()
-                                        .toUtc()
-                                        .toIso8601String(),
-                                  }
-                                ])
-                              });
+                              if (image == null) {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+                                // String url = await UserController()
+                                //     .uploadImage(image!, userModel.userId);
+                                setState(() {});
+                                await FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .doc(widget.offersReceivedModel.id)
+                                    .update({
+                                  // 'status': 'finish',
+                                  'ratingOne': rating,
+                                  'commentOne': commentController.text.trim(),
+                                  'media': '',
+                                });
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(widget.offersReceivedModel.offerBy)
+                                    .update({
+                                  'ratings': FieldValue.arrayUnion([
+                                    {
+                                      'id': userModel.userId,
+                                      'rating': rating,
+                                      'comment': commentController.text.trim(),
+                                      // 'images': url,
+                                      'at': DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String(),
+                                    }
+                                  ])
+                                });
+                              } else {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+                                String url = await UserController()
+                                    .uploadImage(image!, userModel.userId);
+                                setState(() {});
+                                await FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .doc(widget.offersReceivedModel.id)
+                                    .update({
+                                  // 'status': 'finish',
+                                  'ratingOne': rating,
+                                  'commentOne': commentController.text.trim(),
+                                  'media': url,
+                                });
+                                await FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(widget.offersReceivedModel.offerBy)
+                                    .update({
+                                  'ratings': FieldValue.arrayUnion([
+                                    {
+                                      'id': userModel.userId,
+                                      'rating': rating,
+                                      'comment': commentController.text.trim(),
+                                      'images': url,
+                                      'at': DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String(),
+                                    }
+                                  ])
+                                });
+                              }
+
                               sendNotification(
                                   widget.offersReceivedModel.offerBy,
                                   userModel.name,
