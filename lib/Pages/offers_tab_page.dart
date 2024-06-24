@@ -68,8 +68,15 @@ class _NewOffersState extends State<NewOffers> {
               .where((element) =>
                   !widget.userModel.blockedUsers.contains(element.ownerId))
               .toList();
+          List<OffersModel> filterByService = blockedUsers
+              .where((element) =>
+                  widget.userModel.services.contains(element.issue))
+              .toList();
           List<OffersModel> offers = widget.userController.filterOffers(
-              blockedUsers, widget.userModel.lat, widget.userModel.long, 100);
+              filterByService,
+              widget.userModel.lat,
+              widget.userModel.long,
+              100);
 
           if (offers.isEmpty) {
             return Center(
