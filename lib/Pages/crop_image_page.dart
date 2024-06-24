@@ -64,7 +64,7 @@ class _CropImagePageState extends State<CropImagePage> {
           Expanded(
             child: Crop(
                 baseColor: Colors.black,
-                initialSize: 0.7,
+                initialSize: 1,
                 image: widget.imageData.readAsBytesSync(),
                 radius: 0,
                 aspectRatio: 1,
@@ -75,9 +75,9 @@ class _CropImagePageState extends State<CropImagePage> {
                   File compressedFile = await FlutterNativeImage.compressImage(
                     fromBytes.absolute.path,
                     quality: 100,
-                    percentage: 50,
-                    targetHeight: 125,
-                    targetWidth: 125,
+                    percentage: 0,
+                    targetHeight: 130,
+                    targetWidth: 130,
                   );
 
                   String imageUrl = await UserController()

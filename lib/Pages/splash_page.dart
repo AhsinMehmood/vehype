@@ -30,7 +30,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1)).then((value) async {
+    Future.delayed(const Duration(seconds: 0)).then((value) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
 
@@ -76,19 +76,15 @@ class _SplashPageState extends State<SplashPage> {
               print(userId);
               print(userModel.userId);
               OneSignal.login(userId + userModel.accountType);
-              Position position = await Geolocator.getCurrentPosition();
 
-              final GeoFirePoint geoFirePoint =
-                  GeoFirePoint(GeoPoint(position.latitude, position.longitude));
-
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId + userModel.accountType)
-                  .update({
-                'lat': position.latitude,
-                'geo': geoFirePoint.data,
-                'long': position.longitude,
-              });
+              // await FirebaseFirestore.instance
+              //     .collection('users')
+              //     .doc(userId + userModel.accountType)
+              //     .update({
+              //   'lat': position.latitude,
+              //   'geo': geoFirePoint.data,
+              //   'long': position.longitude,
+              // });
               userController.getUserStream(userId + userModel.accountType);
               await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());
@@ -107,19 +103,19 @@ class _SplashPageState extends State<SplashPage> {
               });
               // await Future.delayed(const Duration(seconds: 1));
               OneSignal.login(userId + userModel.accountType);
-              Position position = await Geolocator.getCurrentPosition();
+              // Position position = await Geolocator.getCurrentPosition();
 
-              final GeoFirePoint geoFirePoint =
-                  GeoFirePoint(GeoPoint(position.latitude, position.longitude));
+              // final GeoFirePoint geoFirePoint =
+              //     GeoFirePoint(GeoPoint(position.latitude, position.longitude));
 
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId + userModel.accountType)
-                  .update({
-                'lat': position.latitude,
-                'geo': geoFirePoint.data,
-                'long': position.longitude,
-              });
+              // await FirebaseFirestore.instance
+              //     .collection('users')
+              //     .doc(userId + userModel.accountType)
+              //     .update({
+              //   'lat': position.latitude,
+              //   'geo': geoFirePoint.data,
+              //   'long': position.longitude,
+              // });
               userController.getUserStream(userId + userModel.accountType);
               await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());

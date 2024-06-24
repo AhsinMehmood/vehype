@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -100,12 +101,16 @@ class LoginController {
           UserModel userModel = UserModel.fromJson(snapshot);
           LatLng latLng = await UserController().getLocations();
 
+          final GeoFirePoint geoFirePoint =
+              GeoFirePoint(GeoPoint(latLng.latitude, latLng.longitude));
+
           await FirebaseFirestore.instance
               .collection('users')
               .doc(userModel.userId)
               .update({
             'lat': latLng.latitude,
             'long': latLng.longitude,
+            'geo': geoFirePoint.data,
           });
 
           Get.close(1);
