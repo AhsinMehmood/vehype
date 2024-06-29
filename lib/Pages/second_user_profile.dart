@@ -802,24 +802,28 @@ class ReviewsTab extends StatelessWidget {
                     const SizedBox(
                       height: 5,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ReadMoreText(
-                        userData.ratings[inde]['comment'],
-                        trimMode: TrimMode.Line,
-                        trimLines: 2,
-                        colorClickableText: Colors.pink,
-                        trimCollapsedText: ' Show more',
-                        trimExpandedText: ' Show less',
-                        style: TextStyle(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ReadMoreText(
+                          userData.ratings[inde]['comment'],
+                          trimMode: TrimMode.Line,
+                          trimLines: 2,
+                          textAlign: TextAlign.start,
+                          colorClickableText: Colors.pink,
+                          trimCollapsedText: ' Show more',
+                          trimExpandedText: ' Show less',
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          moreStyle: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
-                        moreStyle: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
                     if (userData.ratings[inde]['images'] != null)

@@ -321,7 +321,7 @@ class ProfilePage extends StatelessWidget {
                       if (userController.isAdmin)
                         const SizedBox(
                           height: 10,
-                        )
+                        ),
                       //   InkWell(
                       //     onTap: () async {
                       //       Get.to(() => OrdersHistoryProvider());
@@ -342,27 +342,7 @@ class ProfilePage extends StatelessWidget {
                       // if (userModel.accountType != 'seeker')
 
                       // if (userModel.status != 'approved')
-                      else
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      if (userModel.accountType != 'seeker')
-                        InkWell(
-                          onTap: () async {
-                            Get.to(() => MyGalleryPage());
-                          },
-                          child: Text(
-                            'My Gallery',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
+
                       if (userModel.accountType == 'seeker')
                         InkWell(
                           onTap: () async {
@@ -559,7 +539,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.40',
+                        'App Version: 3.0.3.41',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

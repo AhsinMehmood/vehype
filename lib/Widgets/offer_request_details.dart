@@ -120,7 +120,7 @@ class OfferRequestDetails extends StatelessWidget {
                     width: 5,
                   ),
                   Text(
-                    '${offersReceivedModel.price.toInt()}\$',
+                    '\$${offersReceivedModel.price.toInt()}',
                     style: TextStyle(
                       fontFamily: 'Avenir',
                       fontWeight: FontWeight.bold,

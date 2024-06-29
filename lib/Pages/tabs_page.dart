@@ -82,6 +82,7 @@ class _TabsPageState extends State<TabsPage> {
       onTap: (int index) {
         // print(userModel.userId);
         userController.changeTabIndex(index);
+        print(userModel.userId);
 
         // FlutterAppBadger.updateBadgeCount(10);
         // OneSignal.login(userModel.userId);
@@ -115,6 +116,7 @@ class _TabsPageState extends State<TabsPage> {
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
         print(userModel.userId);
+        print(userModel.offerIdsToCheck);
 
         // userController.checkIsAdmin(userModel.email);
         userController.changeTabIndex(index);
@@ -136,11 +138,47 @@ class _TabsPageState extends State<TabsPage> {
     return [
       // if (userModel.accountType == 'seeker')
       BottomNavigationBarItem(
-          icon: Icon(
-            Icons.online_prediction_rounded,
-            size: 28,
-            // ignore: deprecated_member_use
-            color: labelAndIconColorDark(0),
+          icon: Stack(
+            children: [
+              Icon(
+                Icons.online_prediction_rounded,
+                size: 28,
+                // ignore: deprecated_member_use
+                color: labelAndIconColorDark(0),
+              ),
+              userModel.offerIdsToCheck.isNotEmpty
+                  ? Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Visibility(
+                        visible: userModel.offerIdsToCheck.isNotEmpty,
+                        child: Container(
+                          height: 18,
+                          width: 18,
+                          decoration: BoxDecoration(
+                            color: userModel.offerIdsToCheck.isNotEmpty
+                                ? Colors.red
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(200),
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              userModel.offerIdsToCheck.length >= 100
+                                  ? '99+'
+                                  : userModel.offerIdsToCheck.length.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ],
           ),
           label: 'Offers'),
 
@@ -168,25 +206,36 @@ class _TabsPageState extends State<TabsPage> {
                       ChatController().chatsStream(userModel.userId, context),
                   builder: (context, AsyncSnapshot<List<ChatModel>> snapshot) {
                     if (snapshot.hasData) {
-                      bool haveUnread = false;
                       List<ChatModel> chats = snapshot.data ?? [];
-                      for (var element in chats) {
-                        if (haveUnread == false) {
-                          haveUnread = getUnread(element.lastMessageAt,
-                              element.lastOpen[userModel.userId], context);
-                        }
-                      }
+
+                      List<ChatModel> unreadMessages =
+                          getUnread(userModel, chats);
                       return Positioned(
                         top: 0,
                         right: 0,
                         child: Visibility(
-                          visible: haveUnread,
+                          visible: unreadMessages.isNotEmpty,
                           child: Container(
-                            height: 12,
-                            width: 12,
+                            height: 18,
+                            width: 18,
                             decoration: BoxDecoration(
-                              color: haveUnread ? Colors.red : Colors.white,
+                              color: unreadMessages.isNotEmpty
+                                  ? Colors.red
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(200),
+                            ),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                unreadMessages.length >= 100
+                                    ? '99+'
+                                    : unreadMessages.length.toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -210,14 +259,16 @@ class _TabsPageState extends State<TabsPage> {
     ];
   }
 
-  bool getUnread(String sentAt, String lastOpen, BuildContext context) {
-    bool unreadMessage = DateTime.parse(sentAt)
-            .toLocal()
-            .difference(DateTime.parse(lastOpen).toLocal())
-            .inSeconds >
-        0;
-
-    return unreadMessage;
+  List<ChatModel> getUnread(UserModel userModel, List<ChatModel> chats) {
+    return chats
+        .where((element) =>
+            DateTime.parse(element.lastMessageAt)
+                .toLocal()
+                .difference(DateTime.parse(element.lastOpen[userModel.userId])
+                    .toLocal())
+                .inSeconds >
+            0)
+        .toList();
   }
 
   List<BottomNavigationBarItem> seekerTabs() {
@@ -228,12 +279,48 @@ class _TabsPageState extends State<TabsPage> {
     return [
       // if (userModel.accountType == 'seeker')
       BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/repair.png',
-            height: 28,
-            width: 28,
-            // ignore: deprecated_member_use
-            color: labelAndIconColorDark(0),
+          icon: Stack(
+            children: [
+              Image.asset(
+                'assets/repair.png',
+                height: 28,
+                width: 28,
+                // ignore: deprecated_member_use
+                color: labelAndIconColorDark(0),
+              ),
+              userModel.offerIdsToCheck.isNotEmpty
+                  ? Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Visibility(
+                        visible: userModel.offerIdsToCheck.isNotEmpty,
+                        child: Container(
+                          height: 18,
+                          width: 18,
+                          decoration: BoxDecoration(
+                            color: userModel.offerIdsToCheck.isNotEmpty
+                                ? Colors.red
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(200),
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              userModel.offerIdsToCheck.length >= 100
+                                  ? '99+'
+                                  : userModel.offerIdsToCheck.length.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ],
           ),
           label: 'Repair'),
 
@@ -280,24 +367,35 @@ class _TabsPageState extends State<TabsPage> {
                   builder: (context, AsyncSnapshot<List<ChatModel>> snapshot) {
                     if (snapshot.hasData) {
                       List<ChatModel> chats = snapshot.data ?? [];
-                      for (var element in chats) {
-                        if (haveUnread == false) {
-                          haveUnread = getUnread(element.lastMessageAt,
-                              element.lastOpen[userModel.userId], context);
-                        }
-                      }
 
+                      List<ChatModel> unreadMessages =
+                          getUnread(userModel, chats);
                       return Positioned(
                         top: 0,
                         right: 0,
                         child: Visibility(
-                          visible: haveUnread,
+                          visible: unreadMessages.isNotEmpty,
                           child: Container(
-                            height: 12,
-                            width: 12,
+                            height: 18,
+                            width: 18,
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: unreadMessages.isNotEmpty
+                                  ? Colors.red
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(200),
+                            ),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                unreadMessages.length >= 100
+                                    ? '99+'
+                                    : unreadMessages.length.toString(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
                             ),
                           ),
                         ),

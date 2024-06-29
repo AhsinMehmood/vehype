@@ -35,6 +35,7 @@ class NewOffers extends StatefulWidget {
 }
 
 class _NewOffersState extends State<NewOffers> {
+  List selectedServices = [];
   @override
   void initState() {
     super.initState();
@@ -77,6 +78,157 @@ class _NewOffersState extends State<NewOffers> {
               widget.userModel.lat,
               widget.userModel.long,
               100);
+          if (widget.userModel.services.isEmpty) {
+            return Scaffold(
+              backgroundColor:
+                  widget.userController.isDark ? primaryColor : Colors.white,
+              floatingActionButton: selectedServices.isEmpty
+                  ? null
+                  : ElevatedButton(
+                      onPressed: () async {
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userModel.userId)
+                            .update({
+                          'services': FieldValue.arrayUnion(selectedServices)
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: widget.userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          maximumSize: Size(Get.width * 0.8, 55),
+                          minimumSize: Size(Get.width * 0.8, 55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          )),
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          color: widget.userController.isDark
+                              ? primaryColor
+                              : Colors.white,
+                          fontSize: 20,
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w800,
+                        ),
+                      )),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerFloat,
+              body: Column(
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Choose the services you offer:',
+                        style: TextStyle(
+                          color: widget.userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: getServices().length,
+                        padding: const EdgeInsets.all(10),
+                        itemBuilder: (context, index) {
+                          Service service = getServices()[index];
+                          return Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    if (selectedServices
+                                        .contains(service.name)) {
+                                      selectedServices.remove(service.name);
+                                    } else {
+                                      selectedServices.add(service.name);
+                                    }
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1.5,
+                                      child: Checkbox(
+                                          activeColor:
+                                              widget.userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
+                                          checkColor:
+                                              widget.userController.isDark
+                                                  ? Colors.green
+                                                  : Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          value: selectedServices
+                                              .contains(service.name),
+                                          onChanged: (s) {
+                                            // appProvider.selectPrefs(pref);
+                                            setState(() {
+                                              if (selectedServices
+                                                  .contains(service.name)) {
+                                                selectedServices
+                                                    .remove(service.name);
+                                              } else {
+                                                selectedServices
+                                                    .add(service.name);
+                                              }
+                                            });
+                                          }),
+                                    ),
+                                    const SizedBox(
+                                      width: 6,
+                                    ),
+                                    SvgPicture.asset(service.image,
+                                        height: 45,
+                                        width: 45,
+                                        fit: BoxFit.cover,
+                                        color: widget.userController.isDark
+                                            ? Colors.white
+                                            : primaryColor),
+                                    const SizedBox(
+                                      width: 6,
+                                    ),
+                                    Text(
+                                      service.name,
+                                      style: TextStyle(
+                                        color: widget.userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          );
+                        }),
+                  )
+                ],
+              ),
+            );
+          }
 
           if (offers.isEmpty) {
             return Center(
@@ -92,6 +244,7 @@ class _NewOffersState extends State<NewOffers> {
               ),
             );
           }
+
           return ListView.builder(
               itemCount: offers.length,
               shrinkWrap: true,
@@ -108,7 +261,11 @@ class _NewOffersState extends State<NewOffers> {
                 if (widget.userModel.isActiveNew) {
                   Future.delayed(const Duration(seconds: 4)).then((e) {
                     UserController().changeNotiOffers(
-                        0, false, widget.userModel.userId, offersModel.offerId);
+                        0,
+                        false,
+                        widget.userModel.userId,
+                        offersModel.offerId,
+                        widget.userModel.accountType);
                   });
                 }
                 return Stack(

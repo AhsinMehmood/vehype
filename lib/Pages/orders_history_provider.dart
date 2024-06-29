@@ -317,7 +317,8 @@ class _OffersState extends State<Offers> {
                               widget.id,
                               false,
                               widget.userController.userModel!.userId,
-                              offersModel.offerId);
+                              offersModel.offerId,
+                              userModel.accountType);
                         }
                       }
                       if (widget.id == 2) {
@@ -326,7 +327,8 @@ class _OffersState extends State<Offers> {
                               widget.id,
                               false,
                               widget.userController.userModel!.userId,
-                              offersModel.offerId);
+                              offersModel.offerId,
+                              userModel.accountType);
                         }
                       }
                       if (widget.id == 3) {
@@ -335,7 +337,8 @@ class _OffersState extends State<Offers> {
                               widget.id,
                               false,
                               widget.userController.userModel!.userId,
-                              offersModel.offerId);
+                              offersModel.offerId,
+                              userModel.accountType);
                         }
                       }
                       if (widget.id == 4) {
@@ -344,7 +347,8 @@ class _OffersState extends State<Offers> {
                               widget.id,
                               false,
                               widget.userController.userModel!.userId,
-                              offersModel.offerId);
+                              offersModel.offerId,
+                              userModel.accountType);
                         }
                       }
                     });

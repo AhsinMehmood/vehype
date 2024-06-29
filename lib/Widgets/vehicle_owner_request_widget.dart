@@ -108,31 +108,64 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  UserController().changeNotiOffers(5, false,
-                      userController.userModel!.userId, offersModel.offerId);
-                  Get.to(() => ReceivedOffersSeeker(
-                        offersModel: offersModel,
-                      ));
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        userController.isDark ? Colors.white : primaryColor,
-                    elevation: 0.0,
-                    fixedSize: Size(
-                        filterReceivedOffers.isNotEmpty
-                            ? Get.width * 0.8
-                            : Get.width * 0.4,
-                        40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    )),
-                child: Text(
-                  '${filterReceivedOffers.length} Offers',
-                  style: TextStyle(
-                      color:
-                          userController.isDark ? primaryColor : Colors.white),
+              Container(
+                height: 65,
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          UserController().changeNotiOffers(
+                              5,
+                              false,
+                              userController.userModel!.userId,
+                              offersModel.offerId,
+                              userController.userModel!.accountType);
+                          Get.to(() => ReceivedOffersSeeker(
+                                offersModel: offersModel,
+                              ));
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            elevation: 0.0,
+                            fixedSize: Size(
+                                filterReceivedOffers.isNotEmpty
+                                    ? Get.width * 0.8
+                                    : Get.width * 0.4,
+                                40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            )),
+                        child: Text(
+                          '${filterReceivedOffers.length} Offers',
+                          style: TextStyle(
+                              color: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white),
+                        ),
+                      ),
+                    ),
+                    if (userController.userModel!.offerIdsToCheck
+                        .contains(offersModel.offerId))
+                      Positioned(
+                          right: 5,
+                          top: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(200),
+                              color: Colors.red,
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Icon(
+                              Icons.notifications_on_sharp,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ))
+                  ],
                 ),
               ),
               if (filterReceivedOffers.isEmpty)

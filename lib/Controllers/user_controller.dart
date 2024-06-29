@@ -41,6 +41,12 @@ enum AccountType {
 class UserController with ChangeNotifier {
   UserModel? _userModel;
   int tabIndex = 0;
+  bool isShow = false;
+  changeIsShow(bool value) {
+    isShow = value;
+    notifyListeners();
+  }
+
   changeTabIndex(int index) {
     tabIndex = index;
     notifyListeners();
@@ -429,15 +435,33 @@ class UserController with ChangeNotifier {
     'isHistoryActive',
   ];
 
-  changeNotiOffers(
-      int fieldNameIndex, bool value, String userId, String requestId) {
+  changeNotiOffers(int fieldNameIndex, bool value, String userId,
+      String requestId, String userAccountType) {
     print('object');
     if (value == true) {
-      FirebaseFirestore.instance.collection('users').doc(userId).update({
-        fieldNames[fieldNameIndex]: value,
-        'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
-      });
+      if (userAccountType == 'provider') {
+        FirebaseFirestore.instance.collection('users').doc(userId).update({
+          fieldNames[fieldNameIndex]: value,
+          'offerIdsToCheck': [],
+        });
+      } else {
+        FirebaseFirestore.instance.collection('users').doc(userId).update({
+          fieldNames[fieldNameIndex]: value,
+          'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
+        });
+      }
     } else {
+      if (userAccountType == 'provider') {
+        FirebaseFirestore.instance.collection('users').doc(userId).update({
+          fieldNames[fieldNameIndex]: value,
+          'offerIdsToCheck': [],
+        });
+      } else {
+        FirebaseFirestore.instance.collection('users').doc(userId).update({
+          fieldNames[fieldNameIndex]: value,
+          'offerIdsToCheck': FieldValue.arrayRemove([requestId]),
+        });
+      }
       FirebaseFirestore.instance.collection('users').doc(userId).update({
         fieldNames[fieldNameIndex]: value,
         'offerIdsToCheck': FieldValue.arrayRemove([requestId]),

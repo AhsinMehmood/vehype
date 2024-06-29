@@ -58,8 +58,28 @@ Future<void> sendNotification(String userId, String userName, String heading,
   }
 }
 
-class RepairPage extends StatelessWidget {
+class RepairPage extends StatefulWidget {
   const RepairPage({super.key});
+
+  @override
+  State<RepairPage> createState() => _RepairPageState();
+}
+
+class _RepairPageState extends State<RepairPage> {
+  // bool isShow = false;
+  @override
+  void initState() {
+    super.initState();
+    getNotificationSetting();
+  }
+
+  getNotificationSetting() async {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+
+    bool isNotAllowed = await OneSignal.Notifications.canRequest();
+    userController.changeIsShow(isNotAllowed);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,133 +225,185 @@ class RepairPage extends StatelessWidget {
               ],
             ),
           ),
-          body: TabBarView(children: [
-            SafeArea(
-              child: StreamBuilder<List<OffersModel>>(
-                  stream: GarageController()
-                      .getRepairOffersPosted(userModel.userId),
-                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
-                    if (!snap.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
+          body: Stack(
+            children: [
+              TabBarView(children: [
+                SafeArea(
+                  child: StreamBuilder<List<OffersModel>>(
+                      stream: GarageController()
+                          .getRepairOffersPosted(userModel.userId),
+                      builder:
+                          (context, AsyncSnapshot<List<OffersModel>> snap) {
+                        if (!snap.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Center(
+                            child: Text(snap.error.toString()),
+                          );
+                        }
+                        List<OffersModel> offersPosted = snap.data ?? [];
+                        List<OffersModel> filterOffers = [];
+                        if (offersPosted.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'Create a Request to Hire a Proffesional',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }
+                        return ActiveOffers(
+                            offersPosted: offersPosted,
+                            userController: userController);
+                      }),
+                ),
+                SafeArea(
+                  child: StreamBuilder<List<OffersModel>>(
+                      stream: GarageController()
+                          .getRepairOffersPostedInProgress(userModel.userId),
+                      builder:
+                          (context, AsyncSnapshot<List<OffersModel>> snap) {
+                        if (!snap.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Center(
+                            child: Text(snap.error.toString()),
+                          );
+                        }
+                        List<OffersModel> offersPosted = snap.data ?? [];
+                        List<OffersModel> filterOffers = [];
+                        if (offersPosted.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No In Progress Offers Yet!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }
+                        return InActiveOffers(
+                            title: 'Check Progress',
+                            offersPosted: offersPosted,
+                            userController: userController);
+                      }),
+                ),
+                SafeArea(
+                  child: StreamBuilder<List<OffersModel>>(
+                      stream: GarageController()
+                          .getRepairOffersPostedInactive(userModel.userId),
+                      builder:
+                          (context, AsyncSnapshot<List<OffersModel>> snap) {
+                        if (!snap.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Center(
+                            child: Text(snap.error.toString()),
+                          );
+                        }
+                        List<OffersModel> offersPosted = snap.data ?? [];
+                        List<OffersModel> filterOffers = [];
+                        if (offersPosted.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No History Yet!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }
+                        return InActiveOffers(
+                            offersPosted: offersPosted,
+                            title: 'Rate Job',
+                            userController: userController);
+                      }),
+                ),
+              ]),
+              if (userController.isShow)
+                Container(
+                  color: Colors.black,
+                  width: Get.width,
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'You are missing Important\nnotifications.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                    }
-                    if (snap.hasError) {
-                      return Center(
-                        child: Text(snap.error.toString()),
-                      );
-                    }
-                    List<OffersModel> offersPosted = snap.data ?? [];
-                    List<OffersModel> filterOffers = [];
-                    if (offersPosted.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'Create a Request to Hire a Proffesional',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                      ),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              OneSignal.Notifications.requestPermission(true);
+                              userController.changeIsShow(false);
+                            },
+                            child: Text(
+                              'Enable',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                    return ActiveOffers(
-                        offersPosted: offersPosted,
-                        userController: userController);
-                  }),
-            ),
-            SafeArea(
-              child: StreamBuilder<List<OffersModel>>(
-                  stream: GarageController()
-                      .getRepairOffersPostedInProgress(userModel.userId),
-                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
-                    if (!snap.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                        ),
-                      );
-                    }
-                    if (snap.hasError) {
-                      return Center(
-                        child: Text(snap.error.toString()),
-                      );
-                    }
-                    List<OffersModel> offersPosted = snap.data ?? [];
-                    List<OffersModel> filterOffers = [];
-                    if (offersPosted.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No In Progress Offers Yet!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      );
-                    }
-                    return InActiveOffers(
-                        title: 'Check Progress',
-                        offersPosted: offersPosted,
-                        userController: userController);
-                  }),
-            ),
-            SafeArea(
-              child: StreamBuilder<List<OffersModel>>(
-                  stream: GarageController()
-                      .getRepairOffersPostedInactive(userModel.userId),
-                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
-                    if (!snap.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                        ),
-                      );
-                    }
-                    if (snap.hasError) {
-                      return Center(
-                        child: Text(snap.error.toString()),
-                      );
-                    }
-                    List<OffersModel> offersPosted = snap.data ?? [];
-                    List<OffersModel> filterOffers = [];
-                    if (offersPosted.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No History Yet!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      );
-                    }
-                    return InActiveOffers(
-                        offersPosted: offersPosted,
-                        title: 'Rate Job',
-                        userController: userController);
-                  }),
-            ),
-          ])),
+                          IconButton(
+                              onPressed: () {
+                                userController.changeIsShow(false);
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ))
+                        ],
+                      )
+                    ],
+                  ),
+                )
+            ],
+          )),
     );
   }
 }
@@ -374,7 +446,8 @@ class _InActiveOffersState extends State<InActiveOffers> {
                         6,
                         false,
                         widget.userController.userModel!.userId,
-                        offersModel.offerId);
+                        offersModel.offerId,
+                        widget.userController.userModel!.accountType);
                   });
                 }
                 List<String> vehicleInfo = offersModel.vehicleId.split(',');
@@ -558,32 +631,12 @@ class _ActiveOffersState extends State<ActiveOffers> {
                     5,
                     false,
                     widget.userController.userModel!.userId,
-                    'offersModel.offerId');
+                    'offersModel.offerId',
+                    widget.userController.userModel!.accountType);
               });
             }
-            return Stack(
-              children: [
-                VehicleOwnerRequestWidget(
-                    offersModel: offersModel, offersReceivedModel: null),
-                if (widget.userController.userModel!.offerIdsToCheck
-                    .contains(offersModel.offerId))
-                  Positioned(
-                      right: 5,
-                      top: -1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(200),
-                          color: Colors.white,
-                        ),
-                        padding: const EdgeInsets.all(5),
-                        child: Icon(
-                          Icons.notifications_on_sharp,
-                          color: Colors.red,
-                          size: 28,
-                        ),
-                      ))
-              ],
-            );
+            return VehicleOwnerRequestWidget(
+                offersModel: offersModel, offersReceivedModel: null);
           }),
     );
   }

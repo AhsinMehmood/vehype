@@ -82,6 +82,7 @@ class LoginController {
                   .doc(userId)
                   .get();
           UserModel userModel = UserModel.fromJson(snapshot);
+
           Get.close(1);
 
           Get.offAll(() => SelectAccountType(
@@ -99,19 +100,6 @@ class LoginController {
                   .doc(userId)
                   .get();
           UserModel userModel = UserModel.fromJson(snapshot);
-          LatLng latLng = await UserController().getLocations();
-
-          final GeoFirePoint geoFirePoint =
-              GeoFirePoint(GeoPoint(latLng.latitude, latLng.longitude));
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userModel.userId)
-              .update({
-            'lat': latLng.latitude,
-            'long': latLng.longitude,
-            'geo': geoFirePoint.data,
-          });
 
           Get.close(1);
 

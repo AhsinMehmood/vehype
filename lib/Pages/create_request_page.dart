@@ -907,7 +907,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       providers.add(UserModel.fromJson(element));
     }
     for (var user in providers) {
-      UserController().changeNotiOffers(0, true, user.userId, requestId);
+      UserController()
+          .changeNotiOffers(0, true, user.userId, requestId, user.accountType);
     }
     final UserController userController =
         Provider.of<UserController>(context, listen: false);

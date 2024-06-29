@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
@@ -56,6 +59,10 @@ class SelectAccountType extends StatelessWidget {
                           .update({
                         'accountType': 'provider',
                       });
+                      LatLng latLng = await UserController().getLocations();
+
+                      final GeoFirePoint geoFirePoint = GeoFirePoint(
+                          GeoPoint(latLng.latitude, latLng.longitude));
 
                       await FirebaseFirestore.instance
                           .collection('users')
@@ -68,6 +75,9 @@ class SelectAccountType extends StatelessWidget {
                         'id': '${userModelAccount.userId}provider',
                         'email': userModelAccount.email,
                         'status': 'active',
+                        'lat': latLng.latitude,
+                        'long': latLng.longitude,
+                        'geo': geoFirePoint.data,
                       });
                       OneSignal.login('${userModelAccount.userId}provider');
 
@@ -78,7 +88,7 @@ class SelectAccountType extends StatelessWidget {
 
                       Get.close(1);
 
-                      Get.offAll(() => const NotificationDialog());
+                      Get.offAll(() => const TabsPage());
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -132,6 +142,10 @@ class SelectAccountType extends StatelessWidget {
                         'accountType': 'seeker',
                       });
                       OneSignal.login('${userModelAccount.userId}seeker');
+                      LatLng latLng = await UserController().getLocations();
+
+                      final GeoFirePoint geoFirePoint = GeoFirePoint(
+                          GeoPoint(latLng.latitude, latLng.longitude));
 
                       await FirebaseFirestore.instance
                           .collection('users')
@@ -143,6 +157,9 @@ class SelectAccountType extends StatelessWidget {
                         'profileUrl': userModelAccount.profileUrl,
                         'id': '${userModelAccount.userId}seeker',
                         'email': userModelAccount.email,
+                        'lat': latLng.latitude,
+                        'long': latLng.longitude,
+                        'geo': geoFirePoint.data,
                       });
                       userController
                           .getUserStream('${userModelAccount.userId}seeker');

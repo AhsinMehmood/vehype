@@ -72,16 +72,9 @@ class _CropImagePageState extends State<CropImagePage> {
                 withCircleUi: true,
                 onCropped: (image) async {
                   File fromBytes = await widget.imageData.writeAsBytes(image);
-                  File compressedFile = await FlutterNativeImage.compressImage(
-                    fromBytes.absolute.path,
-                    quality: 100,
-                    percentage: 0,
-                    targetHeight: 130,
-                    targetWidth: 130,
-                  );
 
                   String imageUrl = await UserController()
-                      .uploadImage(compressedFile, userModel.userId);
+                      .uploadImage(fromBytes, userModel.userId);
                   Get.close(1);
 
                   await FirebaseFirestore.instance

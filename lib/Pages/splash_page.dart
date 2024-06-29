@@ -49,7 +49,7 @@ class _SplashPageState extends State<SplashPage> {
       } else {
         sharedPreferences.setBool('newUpdate', true);
 
-        OneSignal.Notifications.requestPermission(true);
+        // OneSignal.Notifications.requestPermission(true);
 
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance

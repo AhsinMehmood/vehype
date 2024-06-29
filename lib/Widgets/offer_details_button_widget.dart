@@ -172,8 +172,12 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                       .update({
                     'status': 'inactive',
                   });
-                  UserController().changeNotiOffers(3, true,
-                      offersReceivedModel.offerBy, offersModel.offerId);
+                  UserController().changeNotiOffers(
+                      3,
+                      true,
+                      offersReceivedModel.offerBy,
+                      offersModel.offerId,
+                      userModel.accountType);
 
                   Get.close(1);
                 },
@@ -259,7 +263,8 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                                               4,
                                               true,
                                               offersReceivedModel.offerBy,
-                                              offersModel.offerId);
+                                              offersModel.offerId,
+                                              userModel.accountType);
                                         } else {
                                           OffersController()
                                               .cancelOfferByProvider(
@@ -269,7 +274,8 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                                               6,
                                               true,
                                               offersReceivedModel.ownerId,
-                                              offersModel.offerId);
+                                              offersModel.offerId,
+                                              userModel.accountType);
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(

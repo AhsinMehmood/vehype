@@ -12,11 +12,13 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/repair_page.dart';
+import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
 import 'loading_dialog.dart';
+import 'request_vehicle_details.dart';
 
 class SelectDateAndPrice extends StatefulWidget {
   final OffersModel offersModel;
@@ -60,7 +62,11 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
     UserModel userModel = userController.userModel!;
     final GarageController garageController =
         Provider.of<GarageController>(context);
-
+    List<String> vehicleInfo = widget.offersModel.vehicleId.split(',');
+    final String vehicleType = vehicleInfo[0];
+    final String vehicleMake = vehicleInfo[1];
+    final String vehicleYear = vehicleInfo[2];
+    final String vehicleModle = vehicleInfo[3];
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(
@@ -88,6 +94,28 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Offer Details',
+                  style: TextStyle(
+                    fontFamily: 'Avenir',
+                    fontWeight: FontWeight.w700,
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              VehicleDetailsRequest(
+                  userController: userController,
+                  vehicleType: vehicleType,
+                  vehicleMake: vehicleMake,
+                  vehicleYear: vehicleYear,
+                  vehicleModle: vehicleModle,
+                  offersModel: widget.offersModel),
               const SizedBox(
                 height: 25,
               ),
@@ -478,7 +506,16 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'comment': comment.text,
       });
       // userController.getRequestsHistoryProvider();
-
+      sendNotification(
+          widget.ownerModel.userId,
+          userModel.name,
+          'Offer Update',
+          '${userModel.name} updated his offer.',
+          'chatId',
+          'offer',
+          'messageId');
+      UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
+          widget.offersModel.offerId, userModel.accountType);
       Get.close(1);
       garageController.closeOfferSubmit();
     } else {
@@ -510,8 +547,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'chatId',
           'offer',
           'messageId');
-      UserController().changeNotiOffers(
-          5, true, widget.ownerModel.userId, widget.offersModel.offerId);
+      UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
+          widget.offersModel.offerId, userModel.accountType);
       if (widget.chatId != null) {
         await FirebaseFirestore.instance
             .collection('chats')

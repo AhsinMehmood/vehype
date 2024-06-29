@@ -473,7 +473,8 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                                   2,
                                                   true,
                                                   offersReceivedModel.offerBy,
-                                                  widget.offersModel.offerId);
+                                                  widget.offersModel.offerId,
+                                                  userModel.accountType);
                                             }, 'Accept'),
 
                                             // else

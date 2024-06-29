@@ -1143,7 +1143,7 @@ class RequestDetailsButtonOwner extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
           )),
       child: Text(
-        'Accept Request',
+        'Accept Offer',
         style: TextStyle(
           color: Colors.green,
           fontSize: 14,
@@ -1178,7 +1178,7 @@ class AcceptOfferConfirm extends StatelessWidget {
                 height: 15,
               ),
               Text(
-                'Confirm Request Acceptance',
+                'Confirm Offer Acceptance',
                 style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
                   fontWeight: FontWeight.bold,
@@ -1239,7 +1239,7 @@ class AcceptOfferConfirm extends StatelessWidget {
                             offersReceivedModel.offerBy,
                             userModel.name,
                             'Offer Update',
-                            '${userModel.name}, Accepted the offer',
+                            '${userModel.name}, Accepted your offer',
                             offersReceivedModel.id,
                             'Offer',
                             '');
@@ -1253,7 +1253,7 @@ class AcceptOfferConfirm extends StatelessWidget {
                             borderRadius: BorderRadius.circular(3),
                           )),
                       child: Text(
-                        'Accept Request',
+                        'Accept Offer',
                         style: TextStyle(
                           color: Colors.green,
                           fontSize: 14,

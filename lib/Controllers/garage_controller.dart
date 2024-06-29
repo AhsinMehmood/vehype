@@ -385,6 +385,7 @@ class GarageController with ChangeNotifier {
     imageTwoUrl = '';
     selectedYear = '';
     editGarage = null;
+    requestImages = [];
     // selectedIssue = '';
     selectedVehicle = '';
     additionalService = '';
