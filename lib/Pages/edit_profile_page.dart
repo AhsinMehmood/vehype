@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
@@ -13,6 +15,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +25,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/Pages/splash_page.dart';
+import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
@@ -110,20 +115,120 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ? [
                     EditProfileTab(),
                     ServicesTab(),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: PhotosTab(profile: userModel),
+                    Scaffold(
+                      backgroundColor:
+                          userController.isDark ? primaryColor : Colors.white,
+                      floatingActionButton: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: IconButton(
+                            onPressed: () {
+                              final ImagePicker picker = ImagePicker();
+
+                              Get.bottomSheet(
+                                ChooseGalleryCamera(
+                                  onTapCamera: () async {
+                                    final XFile? image = await picker.pickImage(
+                                        source: ImageSource.camera);
+                                    if (image != null) {
+                                      Get.dialog(LoadingDialog(),
+                                          useSafeArea: false,
+                                          barrierDismissible: false);
+                                      String imageUrl =
+                                          await userController.uploadImage(
+                                              File(image.path),
+                                              userModel.userId);
+                                      FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(userModel.userId)
+                                          .update({
+                                        'gallery':
+                                            FieldValue.arrayUnion([imageUrl])
+                                      });
+                                      Get.close(2);
+                                    }
+                                  },
+                                  onTapGallery: () async {
+                                    List<Asset> pickImages =
+                                        await MultiImagePicker.pickImages(
+                                            androidOptions: AndroidOptions(
+                                              maxImages: 3,
+                                            ),
+                                            iosOptions: IOSOptions(
+                                                settings: CupertinoSettings(
+                                                    selection: SelectionSetting(
+                                              max: 3,
+                                            ))));
+
+                                    // images.first.getByteData();
+                                    // final List<XFile> images = await picker.pickMultiImage();
+                                    List<File> images = [];
+                                    Get.dialog(LoadingDialog(),
+                                        useSafeArea: false,
+                                        barrierDismissible: false);
+                                    for (Asset asset in pickImages) {
+                                      ByteData getFile =
+                                          await asset.getByteData();
+                                      File file = await GarageController()
+                                          .writeToFile(getFile, asset.name);
+
+                                      images.add(file);
+                                    }
+                                    for (var element in images) {
+                                      String imageUrl =
+                                          await userController.uploadImage(
+                                              element, userModel.userId);
+                                      FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(userModel.userId)
+                                          .update({
+                                        'gallery':
+                                            FieldValue.arrayUnion([imageUrl])
+                                      });
+                                    }
+                                    Get.close(2);
+                                  },
+                                ),
+                                backgroundColor: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.add,
+                              color: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white,
+                            )),
+                      ),
+                      body: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: PhotosTab(profile: userModel),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: ReviewsTab(userData: userModel),
+                      child: SingleChildScrollView(
+                          child: ReviewsTab(userData: userModel)),
                     ),
                   ]
                 : [
                     EditProfileTab(),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: ReviewsTab(userData: userModel),
+                      child: SingleChildScrollView(
+                          child: ReviewsTab(userData: userModel)),
                     ),
                   ]),
       ),
@@ -782,160 +887,165 @@ class _EditProfileTabState extends State<EditProfileTab> {
                               width: Get.width,
                               child: userController.userModel!.lat == 0.0
                                   ? CupertinoActivityIndicator()
-                                  : GoogleMap(
-                                      onMapCreated: (contr) {
-                                        _controller.complete(contr);
-                                      },
-                                      onTap: (s) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => PlacePicker(
-                                              apiKey:
-                                                  'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                              selectText: 'Pick This Place',
-                                              onPlacePicked: (result) async {
-                                                Get.dialog(LoadingDialog(),
-                                                    barrierDismissible: false);
-                                                LatLng latLng =
-                                                    await getPlaceLatLng(
-                                                        result.placeId ?? '');
-                                                lat = latLng.latitude;
-                                                long = latLng.longitude;
-                                                setState(() {});
+                                  : ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: GoogleMap(
+                                        onMapCreated: (contr) {
+                                          _controller.complete(contr);
+                                        },
+                                        onTap: (s) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => PlacePicker(
+                                                apiKey:
+                                                    'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                                selectText: 'Pick This Place',
+                                                onPlacePicked: (result) async {
+                                                  Get.dialog(LoadingDialog(),
+                                                      barrierDismissible:
+                                                          false);
+                                                  LatLng latLng =
+                                                      await getPlaceLatLng(
+                                                          result.placeId ?? '');
+                                                  lat = latLng.latitude;
+                                                  long = latLng.longitude;
+                                                  setState(() {});
 
-                                                final GeoFirePoint
-                                                    geoFirePoint = GeoFirePoint(
-                                                        GeoPoint(lat, long));
+                                                  final GeoFirePoint
+                                                      geoFirePoint =
+                                                      GeoFirePoint(
+                                                          GeoPoint(lat, long));
 
-                                                await FirebaseFirestore.instance
-                                                    .collection('users')
-                                                    .doc(userController
-                                                        .userModel!.userId)
-                                                    .update({
-                                                  'lat': lat,
-                                                  'geo': geoFirePoint.data,
-                                                  'long': long,
-                                                });
-                                                final GoogleMapController
-                                                    controller =
-                                                    await _controller.future;
-                                                await controller.animateCamera(
-                                                    CameraUpdate
-                                                        .newCameraPosition(
-                                                            CameraPosition(
-                                                  target: LatLng(lat, long),
-                                                  zoom: 16.0,
-                                                )));
-                                                Get.close(2);
-                                              },
-                                              initialPosition:
-                                                  LatLng(lat, long),
-                                              useCurrentLocation: true,
-                                              selectInitialPosition: true,
-                                              resizeToAvoidBottomInset:
-                                                  false, // only works in page mode, less flickery, remove if wrong offsets
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('users')
+                                                      .doc(userController
+                                                          .userModel!.userId)
+                                                      .update({
+                                                    'lat': lat,
+                                                    'geo': geoFirePoint.data,
+                                                    'long': long,
+                                                  });
+                                                  final GoogleMapController
+                                                      controller =
+                                                      await _controller.future;
+                                                  await controller.animateCamera(
+                                                      CameraUpdate
+                                                          .newCameraPosition(
+                                                              CameraPosition(
+                                                    target: LatLng(lat, long),
+                                                    zoom: 16.0,
+                                                  )));
+                                                  Get.close(2);
+                                                },
+                                                initialPosition:
+                                                    LatLng(lat, long),
+                                                useCurrentLocation: true,
+                                                selectInitialPosition: true,
+                                                resizeToAvoidBottomInset:
+                                                    false, // only works in page mode, less flickery, remove if wrong offsets
+                                              ),
                                             ),
+                                          );
+                                        },
+                                        markers: {
+                                          Marker(
+                                            markerId: MarkerId('current'),
+                                            position: LatLng(
+                                                userController.userModel!.lat,
+                                                userController.userModel!.long),
                                           ),
-                                        );
-                                      },
-                                      markers: {
-                                        Marker(
-                                          markerId: MarkerId('current'),
-                                          position: LatLng(
+                                        },
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(
                                               userController.userModel!.lat,
                                               userController.userModel!.long),
+                                          zoom: 16.0,
                                         ),
-                                      },
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(
-                                            userController.userModel!.lat,
-                                            userController.userModel!.long),
-                                        zoom: 16.0,
                                       ),
                                     ),
                             ),
                             const SizedBox(
                               height: 15,
                             ),
-                            if (userController.userModel!.accountType ==
-                                'provider')
-                              Align(
-                                alignment: Alignment.center,
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => PlacePicker(
-                                            apiKey:
-                                                'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                            selectText: 'Pick This Place',
-                                            onPlacePicked: (result) async {
-                                              Get.dialog(LoadingDialog(),
-                                                  barrierDismissible: false);
-                                              LatLng latLng =
-                                                  await getPlaceLatLng(
-                                                      result.placeId ?? '');
-                                              lat = latLng.latitude;
-                                              long = latLng.longitude;
-                                              setState(() {});
+                            // if (userController.userModel!.accountType ==
+                            //     'provider')
+                            Align(
+                              alignment: Alignment.center,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PlacePicker(
+                                          apiKey:
+                                              'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                          selectText: 'Pick This Place',
+                                          onPlacePicked: (result) async {
+                                            Get.dialog(LoadingDialog(),
+                                                barrierDismissible: false);
+                                            LatLng latLng =
+                                                await getPlaceLatLng(
+                                                    result.placeId ?? '');
+                                            lat = latLng.latitude;
+                                            long = latLng.longitude;
+                                            setState(() {});
 
-                                              final GeoFirePoint geoFirePoint =
-                                                  GeoFirePoint(
-                                                      GeoPoint(lat, long));
+                                            final GeoFirePoint geoFirePoint =
+                                                GeoFirePoint(
+                                                    GeoPoint(lat, long));
 
-                                              await FirebaseFirestore.instance
-                                                  .collection('users')
-                                                  .doc(userController
-                                                      .userModel!.userId)
-                                                  .update({
-                                                'lat': lat,
-                                                'geo': geoFirePoint.data,
-                                                'long': long,
-                                              });
-                                              final GoogleMapController
-                                                  controller =
-                                                  await _controller.future;
-                                              await controller.animateCamera(
-                                                  CameraUpdate
-                                                      .newCameraPosition(
-                                                          CameraPosition(
-                                                target: LatLng(lat, long),
-                                                zoom: 16.0,
-                                              )));
-                                              Get.close(2);
-                                            },
-                                            initialPosition: LatLng(lat, long),
-                                            useCurrentLocation: true,
-                                            selectInitialPosition: true,
-                                            resizeToAvoidBottomInset:
-                                                false, // only works in page mode, less flickery, remove if wrong offsets
-                                          ),
+                                            await FirebaseFirestore.instance
+                                                .collection('users')
+                                                .doc(userController
+                                                    .userModel!.userId)
+                                                .update({
+                                              'lat': lat,
+                                              'geo': geoFirePoint.data,
+                                              'long': long,
+                                            });
+                                            final GoogleMapController
+                                                controller =
+                                                await _controller.future;
+                                            await controller.animateCamera(
+                                                CameraUpdate.newCameraPosition(
+                                                    CameraPosition(
+                                              target: LatLng(lat, long),
+                                              zoom: 16.0,
+                                            )));
+                                            Get.close(2);
+                                          },
+                                          initialPosition: LatLng(lat, long),
+                                          useCurrentLocation: true,
+                                          selectInitialPosition: true,
+                                          resizeToAvoidBottomInset:
+                                              false, // only works in page mode, less flickery, remove if wrong offsets
                                         ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(22),
                                       ),
-                                      minimumSize: Size(Get.width * 0.8, 55),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(22),
                                     ),
-                                    child: Text(
-                                      'Change Location',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    )),
-                              ),
-                            if (userController.userModel!.accountType ==
-                                'provider')
-                              const SizedBox(
-                                height: 15,
-                              ),
+                                    minimumSize: Size(Get.width * 0.8, 55),
+                                  ),
+                                  child: Text(
+                                    'Change Location',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  )),
+                            ),
+                            // if (userController.userModel!.accountType ==
+                            //     'provider')
+                            const SizedBox(
+                              height: 15,
+                            ),
                             Align(
                               alignment: Alignment.center,
                               child: Container(

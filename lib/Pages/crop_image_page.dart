@@ -105,7 +105,7 @@ class _CropImagePageState extends State<CropImagePage> {
                 maximumSize: Size(Get.width * 0.8, 55),
                 minimumSize: Size(Get.width * 0.8, 55),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(22),
                 )),
             child: const Text(
               'Save',

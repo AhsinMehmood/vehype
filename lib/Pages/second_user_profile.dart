@@ -381,6 +381,9 @@ class PhotosTab extends StatelessWidget {
       child: ListView.builder(
         // numberOfColumn: 2,
         itemCount: gallery.length,
+        padding: const EdgeInsets.only(
+          bottom: 70,
+        ),
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {

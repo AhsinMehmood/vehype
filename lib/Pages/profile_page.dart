@@ -338,7 +338,9 @@ class ProfilePage extends StatelessWidget {
                       //       ),
                       //     ),
                       //   ),
-
+                      const SizedBox(
+                        height: 10,
+                      ),
                       // if (userModel.accountType != 'seeker')
 
                       // if (userModel.status != 'approved')
@@ -539,7 +541,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.41',
+                        'App Version: 3.0.3.42',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

@@ -107,6 +107,7 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
               .toList();
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
                 height: 65,
