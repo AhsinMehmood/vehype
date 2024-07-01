@@ -56,83 +56,34 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: StreamBuilder<List<ChatModel>>(
-                // initialData: [],
-                stream: ChatController().chatsStream(userModel.userId, context),
-                builder: (context, AsyncSnapshot<List<ChatModel>> snap) {
-                  if (snap.data == null || snap.data!.isEmpty) {
-                    return Center(
-                      child: Text('Nothing here!'),
+      body: SafeArea(
+        child: StreamBuilder<List<ChatModel>>(
+            // initialData: [],
+            stream: ChatController().chatsStream(userModel.userId, context),
+            builder: (context, AsyncSnapshot<List<ChatModel>> snap) {
+              if (snap.data == null || snap.data!.isEmpty) {
+                return Center(
+                  child: Text('Nothing here!'),
+                );
+              }
+      
+              // List<ChatModel> chats =
+              //     snap.data!.where((element) => element.).toList();
+      
+              return ListView.builder(
+                  itemCount: snap.data!.length,
+                  // physics:const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(10),
+                  itemBuilder: (context, index) {
+                    ChatModel chat = snap.data![index];
+      
+                    return ChatWidget(
+                      user: userModel,
+                      chat: chat,
                     );
-                  }
-
-                  // List<ChatModel> chats =
-                  //     snap.data!.where((element) => element.).toList();
-
-                  return ListView.builder(
-                      itemCount: snap.data!.length,
-                      // physics:const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.all(10),
-                      itemBuilder: (context, index) {
-                        ChatModel chat = snap.data![index];
-
-                        return ChatWidget(
-                          user: userModel,
-                          chat: chat,
-                        );
-                      });
-                }),
-          ),
-          if (userController.isShow)
-            Container(
-              color: Colors.black,
-              width: Get.width,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'You are missing Important\nnotifications.',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          OneSignal.Notifications.requestPermission(true);
-                          userController.changeIsShow(false);
-                        },
-                        child: Text(
-                          'Enable',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            userController.changeIsShow(false);
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                          ))
-                    ],
-                  )
-                ],
-              ),
-            )
-        ],
+                  });
+            }),
       ),
     );
   }

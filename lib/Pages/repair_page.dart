@@ -225,185 +225,134 @@ class _RepairPageState extends State<RepairPage> {
               ],
             ),
           ),
-          body: Stack(
-            children: [
-              TabBarView(children: [
-                SafeArea(
-                  child: StreamBuilder<List<OffersModel>>(
-                      stream: GarageController()
-                          .getRepairOffersPosted(userModel.userId),
-                      builder:
-                          (context, AsyncSnapshot<List<OffersModel>> snap) {
-                        if (!snap.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                          );
-                        }
-                        if (snap.hasError) {
-                          return Center(
-                            child: Text(snap.error.toString()),
-                          );
-                        }
-                        List<OffersModel> offersPosted = snap.data ?? [];
-                        List<OffersModel> filterOffers = [];
-                        if (offersPosted.isEmpty) {
-                          return Center(
-                            child: Text(
-                              'Create a Request to Hire a Proffesional',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }
-                        return ActiveOffers(
-                            offersPosted: offersPosted,
-                            userController: userController);
-                      }),
-                ),
-                SafeArea(
-                  child: StreamBuilder<List<OffersModel>>(
-                      stream: GarageController()
-                          .getRepairOffersPostedInProgress(userModel.userId),
-                      builder:
-                          (context, AsyncSnapshot<List<OffersModel>> snap) {
-                        if (!snap.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                          );
-                        }
-                        if (snap.hasError) {
-                          return Center(
-                            child: Text(snap.error.toString()),
-                          );
-                        }
-                        List<OffersModel> offersPosted = snap.data ?? [];
-                        List<OffersModel> filterOffers = [];
-                        if (offersPosted.isEmpty) {
-                          return Center(
-                            child: Text(
-                              'No In Progress Offers Yet!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }
-                        return InActiveOffers(
-                            title: 'Check Progress',
-                            offersPosted: offersPosted,
-                            userController: userController);
-                      }),
-                ),
-                SafeArea(
-                  child: StreamBuilder<List<OffersModel>>(
-                      stream: GarageController()
-                          .getRepairOffersPostedInactive(userModel.userId),
-                      builder:
-                          (context, AsyncSnapshot<List<OffersModel>> snap) {
-                        if (!snap.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                          );
-                        }
-                        if (snap.hasError) {
-                          return Center(
-                            child: Text(snap.error.toString()),
-                          );
-                        }
-                        List<OffersModel> offersPosted = snap.data ?? [];
-                        List<OffersModel> filterOffers = [];
-                        if (offersPosted.isEmpty) {
-                          return Center(
-                            child: Text(
-                              'No History Yet!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }
-                        return InActiveOffers(
-                            offersPosted: offersPosted,
-                            title: 'Rate Job',
-                            userController: userController);
-                      }),
-                ),
-              ]),
-              if (userController.isShow)
-                Container(
-                  color: Colors.black,
-                  width: Get.width,
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'You are missing Important\nnotifications.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+          body: TabBarView(children: [
+            SafeArea(
+              child: StreamBuilder<List<OffersModel>>(
+                  stream: GarageController()
+                      .getRepairOffersPosted(userModel.userId),
+                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
+                    if (!snap.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
                         ),
-                      ),
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              OneSignal.Notifications.requestPermission(true);
-                              userController.changeIsShow(false);
-                            },
-                            child: Text(
-                              'Enable',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
+                      );
+                    }
+                    if (snap.hasError) {
+                      return Center(
+                        child: Text(snap.error.toString()),
+                      );
+                    }
+                    List<OffersModel> offersPosted = snap.data ?? [];
+                    List<OffersModel> filterOffers = [];
+                    if (offersPosted.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Create a Request to Hire a Proffesional',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
                           ),
-                          IconButton(
-                              onPressed: () {
-                                userController.changeIsShow(false);
-                              },
-                              icon: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ))
-                        ],
-                      )
-                    ],
-                  ),
-                )
-            ],
-          )),
+                        ),
+                      );
+                    }
+                    return ActiveOffers(
+                        offersPosted: offersPosted,
+                        userController: userController);
+                  }),
+            ),
+            SafeArea(
+              child: StreamBuilder<List<OffersModel>>(
+                  stream: GarageController()
+                      .getRepairOffersPostedInProgress(userModel.userId),
+                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
+                    if (!snap.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                        ),
+                      );
+                    }
+                    if (snap.hasError) {
+                      return Center(
+                        child: Text(snap.error.toString()),
+                      );
+                    }
+                    List<OffersModel> offersPosted = snap.data ?? [];
+                    List<OffersModel> filterOffers = [];
+                    if (offersPosted.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No In Progress Offers Yet!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }
+                    return InActiveOffers(
+                        title: 'Check Progress',
+                        offersPosted: offersPosted,
+                        userController: userController);
+                  }),
+            ),
+            SafeArea(
+              child: StreamBuilder<List<OffersModel>>(
+                  stream: GarageController()
+                      .getRepairOffersPostedInactive(userModel.userId),
+                  builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
+                    if (!snap.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                        ),
+                      );
+                    }
+                    if (snap.hasError) {
+                      return Center(
+                        child: Text(snap.error.toString()),
+                      );
+                    }
+                    List<OffersModel> offersPosted = snap.data ?? [];
+                    List<OffersModel> filterOffers = [];
+
+                    if (offersPosted.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No History Yet!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }
+                    return InActiveOffers(
+                        offersPosted: offersPosted,
+                        title: 'Rate Job',
+                        userController: userController);
+                  }),
+            ),
+          ])),
     );
   }
 }
@@ -430,167 +379,170 @@ class _InActiveOffersState extends State<InActiveOffers> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ListView.builder(
-              itemCount: widget.offersPosted.length,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                OffersModel offersModel = widget.offersPosted[index];
-                if (widget.userController.userModel!.isActiveHistory) {
-                  Future.delayed(const Duration(seconds: 2)).then((e) {
-                    UserController().changeNotiOffers(
-                        6,
-                        false,
-                        widget.userController.userModel!.userId,
-                        offersModel.offerId,
-                        widget.userController.userModel!.accountType);
-                  });
-                }
-                List<String> vehicleInfo = offersModel.vehicleId.split(',');
-                final String vehicleType = vehicleInfo[0].trim();
-                final String vehicleMake = vehicleInfo[1].trim();
-                final String vehicleYear = vehicleInfo[2].trim();
-                final String vehicleModle = vehicleInfo[3].trim();
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () {
-                      // Get.to(() => CreateRequestPage(offersModel: offersModel));
-                    },
-                    child: Card(
-                      color: widget.userController.isDark
-                          ? Colors.blueGrey.shade700
-                          : Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Stack(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              VehicleDetailsRequest(
-                                  userController: widget.userController,
-                                  vehicleType: vehicleType,
-                                  vehicleMake: vehicleMake,
-                                  vehicleYear: vehicleYear,
-                                  vehicleModle: vehicleModle,
-                                  offersModel: offersModel),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  StreamBuilder<List<OffersReceivedModel>>(
-                                      stream: FirebaseFirestore.instance
-                                          .collection('offersReceived')
-                                          .where('offerId',
-                                              isEqualTo: offersModel.offerId)
-                                          .snapshots()
-                                          .map((event) => event.docs
-                                              .map((e) =>
-                                                  OffersReceivedModel.fromJson(
-                                                      e))
-                                              .toList()),
-                                      builder: (context,
-                                          AsyncSnapshot<
-                                                  List<OffersReceivedModel>>
-                                              snapshots) {
-                                        List<OffersReceivedModel>
-                                            offersReceivedModel =
-                                            snapshots.data ?? [];
+    return ListView.builder(
+        itemCount: widget.offersPosted.length,
+        shrinkWrap: true,
+        padding: const EdgeInsets.only(
+          bottom: 70,
+        ),
+        // physics: NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          OffersModel offersModel = widget.offersPosted[index];
 
-                                        if (offersReceivedModel.isEmpty) {
-                                          return Text(
-                                            'Deleted',
-                                          );
-                                        }
-                                        if (offersReceivedModel.first.status ==
-                                                'Completed' &&
-                                            offersReceivedModel
-                                                    .first.ratingOne !=
-                                                0.0) {
-                                          return RatingBarIndicator(
-                                            rating: offersReceivedModel
-                                                .first.ratingOne,
-                                            itemBuilder: (context, _) => Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                            ),
-                                          );
-                                        }
-                                        if (offersReceivedModel.first.status
-                                                .toLowerCase() ==
-                                            'Cancelled'.toLowerCase()) {
-                                          return Text('Cancelled');
-                                        }
+          List<String> vehicleInfo = offersModel.vehicleId.split(',');
+          final String vehicleType = vehicleInfo[0].trim();
+          final String vehicleMake = vehicleInfo[1].trim();
+          final String vehicleYear = vehicleInfo[2].trim();
+          final String vehicleModle = vehicleInfo[3].trim();
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () {
+                // Get.to(() => CreateRequestPage(offersModel: offersModel));
+              },
+              child: Card(
+                color: widget.userController.isDark
+                    ? Colors.blueGrey.shade700
+                    : Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Stack(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        VehicleDetailsRequest(
+                            userController: widget.userController,
+                            vehicleType: vehicleType,
+                            vehicleMake: vehicleMake,
+                            vehicleYear: vehicleYear,
+                            vehicleModle: vehicleModle,
+                            offersModel: offersModel),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            StreamBuilder<List<OffersReceivedModel>>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .where('offerId',
+                                        isEqualTo: offersModel.offerId)
+                                    .snapshots()
+                                    .map((event) => event.docs
+                                        .map((e) =>
+                                            OffersReceivedModel.fromJson(e))
+                                        .toList()),
+                                builder: (context,
+                                    AsyncSnapshot<List<OffersReceivedModel>>
+                                        snapshots) {
+                                  List<OffersReceivedModel>
+                                      offersReceivedModel =
+                                      snapshots.data ?? [];
 
-                                        return ElevatedButton(
-                                          onPressed: () {
-                                            Get.to(() => InActiveOffersSeeker(
-                                                  offersModel: offersModel,
-                                                  tittle: 'Rate Job',
-                                                ));
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  widget.userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                              elevation: 0.0,
-                                              fixedSize:
-                                                  Size(Get.width * 0.8, 40),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              )),
-                                          child: Text(
-                                            widget.title,
-                                            style: TextStyle(
-                                                color:
+                                  if (offersReceivedModel.isEmpty) {
+                                    return Text(
+                                      'Deleted',
+                                    );
+                                  }
+                                  if (offersReceivedModel.first.status ==
+                                          'Completed' &&
+                                      offersReceivedModel.first.ratingOne !=
+                                          0.0) {
+                                    return RatingBarIndicator(
+                                      rating:
+                                          offersReceivedModel.first.ratingOne,
+                                      itemBuilder: (context, _) => Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                    );
+                                  }
+                                  if (offersReceivedModel.first.status
+                                          .toLowerCase() ==
+                                      'Cancelled'.toLowerCase()) {
+                                    return Text('Cancelled');
+                                  }
+
+                                  return SizedBox(
+                                    height: 65,
+                                    child: Stack(
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              UserController().changeNotiOffers(
+                                                  6,
+                                                  false,
+                                                  widget.userController
+                                                      .userModel!.userId,
+                                                  offersModel.offerId,
+                                                  widget.userController
+                                                      .userModel!.accountType);
+                                              Get.to(() => InActiveOffersSeeker(
+                                                    offersModel: offersModel,
+                                                    tittle: 'Rate Job',
+                                                  ));
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor:
                                                     widget.userController.isDark
-                                                        ? primaryColor
-                                                        : Colors.white),
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                elevation: 0.0,
+                                                fixedSize:
+                                                    Size(Get.width * 0.8, 40),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                )),
+                                            child: Text(
+                                              widget.title,
+                                              style: TextStyle(
+                                                  color: widget
+                                                          .userController.isDark
+                                                      ? primaryColor
+                                                      : Colors.white),
+                                            ),
                                           ),
-                                        );
-                                      }),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          ),
-                          if (widget.userController.userModel!.offerIdsToCheck
-                              .contains(offersModel.offerId))
-                            Positioned(
-                                right: 5,
-                                top: -1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(200),
-                                    color: Colors.white,
-                                  ),
-                                  padding: const EdgeInsets.all(5),
-                                  child: Icon(
-                                    Icons.notifications_on_sharp,
-                                    color: Colors.red,
-                                    size: 28,
-                                  ),
-                                ))
-                        ],
-                      ),
+                                        ),
+                                        if (widget.userController.userModel!
+                                            .offerIdsToCheck
+                                            .contains(offersModel.offerId))
+                                          Positioned(
+                                              right: 5,
+                                              top: 0,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          200),
+                                                  color: Colors.red,
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.all(5),
+                                                child: Icon(
+                                                  Icons.notifications_on_sharp,
+                                                  color: Colors.white,
+                                                  size: 28,
+                                                ),
+                                              ))
+                                      ],
+                                    ),
+                                  );
+                                }),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              }),
-          const SizedBox(
-            height: 70,
-          ),
-        ],
-      ),
-    );
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
   }
 }
 
@@ -616,28 +568,16 @@ class _ActiveOffersState extends State<ActiveOffers> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: ListView.builder(
-          itemCount: widget.offersPosted.length,
-          shrinkWrap: true,
-          padding: const EdgeInsets.only(bottom: 70),
-          // physics: NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            OffersModel offersModel = widget.offersPosted[index];
-            if (widget.userController.userModel!.isActive == true) {
-              Future.delayed(const Duration(seconds: 4)).then((e) {
-                UserController().changeNotiOffers(
-                    5,
-                    false,
-                    widget.userController.userModel!.userId,
-                    'offersModel.offerId',
-                    widget.userController.userModel!.accountType);
-              });
-            }
-            return VehicleOwnerRequestWidget(
-                offersModel: offersModel, offersReceivedModel: null);
-          }),
-    );
+    return ListView.builder(
+        itemCount: widget.offersPosted.length,
+        shrinkWrap: true,
+        padding: const EdgeInsets.only(bottom: 70),
+        // physics: NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          OffersModel offersModel = widget.offersPosted[index];
+
+          return VehicleOwnerRequestWidget(
+              offersModel: offersModel, offersReceivedModel: null);
+        });
   }
 }

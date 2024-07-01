@@ -437,31 +437,12 @@ class UserController with ChangeNotifier {
 
   changeNotiOffers(int fieldNameIndex, bool value, String userId,
       String requestId, String userAccountType) {
-    print('object');
     if (value == true) {
-      if (userAccountType == 'provider') {
-        FirebaseFirestore.instance.collection('users').doc(userId).update({
-          fieldNames[fieldNameIndex]: value,
-          'offerIdsToCheck': [],
-        });
-      } else {
-        FirebaseFirestore.instance.collection('users').doc(userId).update({
-          fieldNames[fieldNameIndex]: value,
-          'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
-        });
-      }
+      FirebaseFirestore.instance.collection('users').doc(userId).update({
+        fieldNames[fieldNameIndex]: value,
+        'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
+      });
     } else {
-      if (userAccountType == 'provider') {
-        FirebaseFirestore.instance.collection('users').doc(userId).update({
-          fieldNames[fieldNameIndex]: value,
-          'offerIdsToCheck': [],
-        });
-      } else {
-        FirebaseFirestore.instance.collection('users').doc(userId).update({
-          fieldNames[fieldNameIndex]: value,
-          'offerIdsToCheck': FieldValue.arrayRemove([requestId]),
-        });
-      }
       FirebaseFirestore.instance.collection('users').doc(userId).update({
         fieldNames[fieldNameIndex]: value,
         'offerIdsToCheck': FieldValue.arrayRemove([requestId]),

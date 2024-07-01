@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
@@ -21,6 +22,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
+import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Pages/my_fav_page.dart';
 import 'package:vehype/Widgets/widget_to_icon.dart';
 import 'package:vehype/const.dart';
@@ -297,7 +299,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     },
                                     decoration: InputDecoration(
                                         border: InputBorder.none,
-                                        hintText: 'Type to Search...'),
+                                        hintText: 'Search by Name or Service'),
                                   )),
                                   if (searchText.isNotEmpty)
                                     IconButton(
@@ -347,6 +349,134 @@ class _ExplorePageState extends State<ExplorePage> {
                                           child: Icon(isSatLite
                                               ? Icons.map
                                               : Icons.map_outlined),
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (filterList.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 0,
+                                right: 15,
+                                top: 5,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      Get.bottomSheet(
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                            color: userController.isDark
+                                                ? primaryColor
+                                                : Colors.white,
+                                          ),
+                                          height: Get.height * 0.9,
+                                          padding: const EdgeInsets.all(15),
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(
+                                                height: 20,
+                                              ),
+                                              Text(
+                                                'Filter Services by Required Service Type',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 20,
+                                              ),
+                                              Expanded(
+                                                  child: ListView.builder(
+                                                      itemCount:
+                                                          getServices().length,
+                                                      itemBuilder:
+                                                          (context, index) {
+                                                        Service service =
+                                                            getServices()[
+                                                                index];
+
+                                                        return InkWell(
+                                                          onTap: () {
+                                                            setState(() {});
+                                                            Get.close(1);
+                                                            // appProvider.selectPrefs(pref);
+                                                          },
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              const SizedBox(
+                                                                width: 6,
+                                                              ),
+                                                              SvgPicture.asset(
+                                                                  service.image,
+                                                                  height: 45,
+                                                                  width: 45,
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                  color: userController
+                                                                          .isDark
+                                                                      ? Colors
+                                                                          .white
+                                                                      : primaryColor),
+                                                              const SizedBox(
+                                                                width: 6,
+                                                              ),
+                                                              Text(
+                                                                service.name,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: userController
+                                                                          .isDark
+                                                                      ? Colors
+                                                                          .white
+                                                                      : primaryColor,
+                                                                  fontSize: 17,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }))
+                                            ],
+                                          ),
+                                        ),
+                                        backgroundColor: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                        ),
+                                        isScrollControlled: true,
+                                      );
+                                    },
+                                    child: Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(200),
+                                        ),
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(Icons.menu_outlined),
                                         )),
                                   ),
                                 ],
@@ -438,5 +568,44 @@ class _ExplorePageState extends State<ExplorePage> {
         ],
       ),
     ).toBitmapDescriptor();
+  }
+}
+
+class FilterByServiceSheet extends StatelessWidget {
+  const FilterByServiceSheet({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: userController.isDark ? primaryColor : Colors.white,
+      ),
+      // height: 280,
+
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Filter Services by Required Service Type',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: userController.isDark ? Colors.white : primaryColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -358,6 +358,7 @@ class _OffersState extends State<Offers> {
                         OffersHistoryWidget(
                             userController: widget.userController,
                             offersModel: offersModel,
+                            id: widget.id,
                             offersReceivedModel: offersReceivedModel),
                         if (widget.userController.userModel!.offerIdsToCheck
                             .contains(offersModel.offerId))
@@ -389,11 +390,13 @@ class OffersHistoryWidget extends StatelessWidget {
     required this.userController,
     required this.offersModel,
     required this.offersReceivedModel,
+    required this.id,
   });
 
   final UserController userController;
 
   final OffersModel offersModel;
+  final int id;
   final OffersReceivedModel offersReceivedModel;
 
   @override

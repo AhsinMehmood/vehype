@@ -233,7 +233,7 @@ class _NewOffersState extends State<NewOffers> {
           if (offers.isEmpty) {
             return Center(
               child: Text(
-                'No Offers Yet',
+                'No Requests Yet',
                 style: TextStyle(
                   color: widget.userController.isDark
                       ? Colors.white
@@ -258,45 +258,15 @@ class _NewOffersState extends State<NewOffers> {
                 final String vehicleYear = vehicleInfo[2].trim();
                 final String vehicleModle = vehicleInfo[3].trim();
                 // final PageController imagePageController = PageController();
-                if (widget.userModel.isActiveNew) {
-                  Future.delayed(const Duration(seconds: 4)).then((e) {
-                    UserController().changeNotiOffers(
-                        0,
-                        false,
-                        widget.userModel.userId,
-                        offersModel.offerId,
-                        widget.userModel.accountType);
-                  });
-                }
-                return Stack(
-                  children: [
-                    NewOfferWidget(
-                        userController: widget.userController,
-                        offersModel: offersModel,
-                        vehicleType: vehicleType,
-                        vehicleMake: vehicleMake,
-                        vehicleYear: vehicleYear,
-                        vehicleModle: vehicleModle,
-                        userModel: widget.userModel),
-                    if (widget.userController.userModel!.offerIdsToCheck
-                        .contains(offersModel.offerId))
-                      Positioned(
-                          right: 5,
-                          top: -1,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.white,
-                            ),
-                            padding: const EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.notifications_on_sharp,
-                              color: Colors.red,
-                              size: 28,
-                            ),
-                          ))
-                  ],
-                );
+
+                return NewOfferWidget(
+                    userController: widget.userController,
+                    offersModel: offersModel,
+                    vehicleType: vehicleType,
+                    vehicleMake: vehicleMake,
+                    vehicleYear: vehicleYear,
+                    vehicleModle: vehicleModle,
+                    userModel: widget.userModel);
               });
         });
   }
@@ -342,7 +312,7 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
-        onTap: () async {},
+        // onTap: () async {},
         child: Card(
           color: widget.userController.isDark
               ? Colors.blueGrey.shade700
@@ -364,6 +334,7 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   ElevatedButton(
                     onPressed: () async {
@@ -392,6 +363,12 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
                           ),
                         ));
                       } else {
+                        UserController().changeNotiOffers(
+                            0,
+                            false,
+                            widget.userModel.userId,
+                            widget.offersModel.offerId,
+                            widget.userModel.accountType);
                         await FirebaseFirestore.instance
                             .collection('offers')
                             .doc(widget.offersModel.offerId)
@@ -418,50 +395,83 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
                               : primaryColor),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (widget.userModel.email == 'No email set') {
-                        Get.showSnackbar(GetSnackBar(
-                          message: 'Login to continue',
-                          duration: const Duration(
-                            seconds: 3,
-                          ),
-                          backgroundColor: widget.userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          mainButton: TextButton(
+                  SizedBox(
+                    height: 65,
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: ElevatedButton(
                             onPressed: () {
-                              Get.to(() => ChooseAccountTypePage());
-                              Get.closeCurrentSnackbar();
+                              if (widget.userModel.email == 'No email set') {
+                                Get.showSnackbar(GetSnackBar(
+                                  message: 'Login to continue',
+                                  duration: const Duration(
+                                    seconds: 3,
+                                  ),
+                                  backgroundColor: widget.userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  mainButton: TextButton(
+                                    onPressed: () {
+                                      Get.to(() => ChooseAccountTypePage());
+                                      Get.closeCurrentSnackbar();
+                                    },
+                                    child: Text(
+                                      'Login Page',
+                                      style: TextStyle(
+                                        color: widget.userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ));
+                              } else {
+                                UserController().changeNotiOffers(
+                                    0,
+                                    false,
+                                    widget.userModel.userId,
+                                    widget.offersModel.offerId,
+                                    widget.userModel.accountType);
+                                Get.to(() => OfferReceivedDetails(
+                                      offersModel: widget.offersModel,
+                                    ));
+                              }
                             },
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                fixedSize: Size(Get.width * 0.35, 40),
+                                elevation: 0.0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                )),
                             child: Text(
-                              'Login Page',
+                              'Details',
                               style: TextStyle(
-                                color: widget.userController.isDark
-                                    ? primaryColor
-                                    : Colors.white,
+                                color: Colors.white,
                               ),
                             ),
                           ),
-                        ));
-                      } else {
-                        Get.to(() => OfferReceivedDetails(
-                              offersModel: widget.offersModel,
-                            ));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        fixedSize: Size(Get.width * 0.35, 40),
-                        elevation: 0.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        )),
-                    child: Text(
-                      'Details',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                        ),
+                        if (widget.userController.userModel!.offerIdsToCheck
+                            .contains(widget.offersModel.offerId))
+                          Positioned(
+                              right: 5,
+                              top: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(200),
+                                  color: Colors.red,
+                                ),
+                                padding: const EdgeInsets.all(5),
+                                child: Icon(
+                                  Icons.notifications_on_sharp,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ))
+                      ],
                     ),
                   ),
                 ],

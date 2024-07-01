@@ -42,6 +42,31 @@ class _TabsPageState extends State<TabsPage> {
     ChatPage(),
     ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    getNotificationSetting();
+  }
+
+  getNotificationSetting() async {
+    bool isNotAllowed = await OneSignal.Notifications.canRequest();
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+
+    if (isNotAllowed) {
+      Future.delayed(const Duration(seconds: 3)).then((s) {
+        Get.bottomSheet(
+          NotificationSheet(userController: userController),
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -441,4 +466,96 @@ class _TabsPageState extends State<TabsPage> {
     }
   }
   // : const SizedBox.shrink();
+}
+
+class NotificationSheet extends StatelessWidget {
+  const NotificationSheet({
+    super.key,
+    required this.userController,
+  });
+
+  final UserController userController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: userController.isDark ? primaryColor : Colors.white,
+      ),
+      height: 280,
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Get Important Updates',
+            style: TextStyle(
+              color: userController.isDark ? Colors.white : primaryColor,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Text(
+            'We will notify you about updates to Requests, new Offers, and Messages.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: userController.isDark ? Colors.white : primaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(
+            height: 40,
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              OneSignal.Notifications.requestPermission(true);
+              OneSignal.login(userController.userModel!.userId);
+              Get.close(1);
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                minimumSize: Size(Get.width * 0.8, 45),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                )),
+            child: Text(
+              'Yes, notify me',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          InkWell(
+            onTap: () {
+              Get.close(1);
+            },
+            child: Text(
+              'Maybe later',
+              style: TextStyle(
+                decoration: TextDecoration.underline,
+                color: userController.isDark
+                    ? Colors.white.withOpacity(0.7)
+                    : primaryColor,
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
+  }
 }

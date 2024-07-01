@@ -38,6 +38,7 @@ class SelectDateAndPrice extends StatefulWidget {
 
 class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
   TextEditingController comment = TextEditingController();
+  TextEditingController priceController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -51,11 +52,16 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           DateTime.parse(widget.offersReceivedModel!.endDate);
       comment =
           TextEditingController(text: widget.offersReceivedModel!.comment);
-      garageController.price = widget.offersReceivedModel!.price;
+
+      priceController = TextEditingController(
+          text: widget.offersReceivedModel!.price.toString());
       setState(() {});
     }
   }
 
+  bool showPriceWarning = false;
+  bool showDateWarning = false;
+  bool showEndDateWarning = false;
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -138,31 +144,49 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                     onTapOutside: (s) {
                       FocusScope.of(context).requestFocus(FocusNode());
                     },
-
+                    controller: priceController,
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         prefixText: '\$ ',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w600,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 28,
+                        ),
                         hintText: '0.0'
                         // counter: const SizedBox.shrink(),
                         ),
-                    initialValue: garageController.price == 0.0
-                        ? null
-                        : garageController.price.toString(),
 
-                    textCapitalization: TextCapitalization.sentences,
+                    // textCapitalization: TextCapitalization.sentences,
                     keyboardType: TextInputType.number,
+
                     // maxLines: 1,
                     style: TextStyle(
                       fontFamily: 'Avenir',
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w800,
                       // color: changeColor(color: '7B7B7B'),
-                      fontSize: 16,
+                      fontSize: 28,
                     ),
                     // maxLength: 25,
-                    onChanged: (String value) =>
-                        garageController.selectPrcie(double.parse(value)),
+                    // onChanged: (String value) =>
+                    //     garageController.selectPrcie(double.parse(value)),
                   ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  if (showPriceWarning)
+                    Text(
+                      'Price is required.*',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        color: Colors.red,
+                        // color: Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(
@@ -299,6 +323,20 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    if (showDateWarning)
+                      Text(
+                        'Job starting date is required.*',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          color: Colors.red,
+                          // color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -369,6 +407,20 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    if (showEndDateWarning)
+                      Text(
+                        'Estimated job finishing date is required.*',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          color: Colors.red,
+                          // color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -444,26 +496,34 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                 height: 35,
               ),
               ElevatedButton(
-                onPressed: garageController.startDate == null ||
-                        garageController.endDate == null ||
-                        garageController.price == 0.0 ||
-                        !garageController.agreement
-                    ? null
-                    : () {
-                        if (badWords
-                            .contains(comment.text.trim().toLowerCase())) {
-                          Get.showSnackbar(GetSnackBar(
-                            message:
-                                'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                            duration: const Duration(seconds: 3),
-                            snackPosition: SnackPosition.TOP,
-                          ));
-                          return;
-                        }
-                        Get.close(1);
+                onPressed: () {
+                  if (priceController.text.isEmpty) {
+                    showPriceWarning = true;
+                  } else {
+                    showPriceWarning = false;
+                  }
+                  if (garageController.startDate == null ||
+                      garageController.endDate == null ||
+                      !garageController.agreement) {
+                    setState(() {
+                      if (garageController.startDate == null) {
+                        showDateWarning = true;
+                      }
+                      if (garageController.endDate == null) {
+                        showEndDateWarning = true;
+                      }
+                    });
+                  } else {
+                    setState(() {
+                      showDateWarning = false;
+                      showEndDateWarning = false;
+                      showPriceWarning = false;
+                    });
 
-                        applyToJob(userModel, garageController, comment);
-                      },
+                    applyToJob(userModel, garageController, comment);
+                    Get.close(1);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     elevation: 0.0,
