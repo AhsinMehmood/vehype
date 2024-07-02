@@ -21,6 +21,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Pages/my_fav_page.dart';
@@ -128,16 +129,17 @@ class _ExplorePageState extends State<ExplorePage> {
   String searchText = '';
   List<UserModel> searchedUsers = [];
   // Function to search users
-  void searchUsers(String query, List<UserModel> nearbyProvidersStream) {
-    searchedUsers.clear(); // Clear previous search results
+  // void searchUsers(String query, List<UserModel> nearbyProvidersStream) {
+  //   // searchedUsers.clear(); // Clear previous search results
 
-    // Iterate through nearbyProvidersStream to find matching users
-    for (var element in nearbyProvidersStream) {
-      final fuse = Fuzzy(element.services);
-    }
-  }
+  //   // Iterate through nearbyProvidersStream to find matching users
+  //   for (var element in nearbyProvidersStream) {
+  //     final fuse = Fuzzy(element.services);
+  //   }
+  // }
 
   TextEditingController text = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -203,8 +205,8 @@ class _ExplorePageState extends State<ExplorePage> {
                 nearbyProvidersStream.map((e) => e.searchKey).toList(),
                 options: FuzzyOptions());
             List<Result<String>> matches = f.search(searchText);
-
             List<UserModel> filterList = [];
+
             if (searchText != '') {
               for (var match in matches) {
                 var userModel = nearbyProvidersStream
@@ -320,7 +322,7 @@ class _ExplorePageState extends State<ExplorePage> {
                               ),
                             ),
                           ),
-                          if (filterList.isEmpty)
+                          if (filterList.isEmpty && searchedUsers.isEmpty)
                             Padding(
                               padding: const EdgeInsets.only(
                                 left: 0,
@@ -354,7 +356,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                 ],
                               ),
                             ),
-                          if (filterList.isEmpty)
+                          if (filterList.isEmpty && searchedUsers.isEmpty)
                             Padding(
                               padding: const EdgeInsets.only(
                                 left: 0,
@@ -366,6 +368,9 @@ class _ExplorePageState extends State<ExplorePage> {
                                 children: [
                                   InkWell(
                                     onTap: () {
+                                      setState(() {
+                                        selectedMarker = null;
+                                      });
                                       Get.bottomSheet(
                                         Container(
                                           decoration: BoxDecoration(
@@ -406,51 +411,94 @@ class _ExplorePageState extends State<ExplorePage> {
                                                             getServices()[
                                                                 index];
 
-                                                        return InkWell(
-                                                          onTap: () {
-                                                            setState(() {});
-                                                            Get.close(1);
-                                                            // appProvider.selectPrefs(pref);
-                                                          },
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              const SizedBox(
-                                                                width: 6,
+                                                        return Column(
+                                                          children: [
+                                                            InkWell(
+                                                              onTap: () {
+                                                                onFilterListTap(
+                                                                    nearbyProvidersStream,
+                                                                    service,
+                                                                    userController);
+
+                                                                // appProvider.selectPrefs(pref);
+                                                              },
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Row(
+                                                                    children: [
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            6,
+                                                                      ),
+                                                                      SvgPicture.asset(
+                                                                          service
+                                                                              .image,
+                                                                          height:
+                                                                              45,
+                                                                          width:
+                                                                              45,
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                          color: userController.isDark
+                                                                              ? Colors.white
+                                                                              : primaryColor),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            6,
+                                                                      ),
+                                                                      Text(
+                                                                        service
+                                                                            .name,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color: userController.isDark
+                                                                              ? Colors.white
+                                                                              : primaryColor,
+                                                                          fontSize:
+                                                                              17,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        nearbyProvidersStream
+                                                                            .where((provider) => provider.services.any((s) =>
+                                                                                s.toString().toLowerCase() ==
+                                                                                service.name.toLowerCase()))
+                                                                            .toList()
+                                                                            .length
+                                                                            .toString(),
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color: userController.isDark
+                                                                              ? Colors.white
+                                                                              : primaryColor,
+                                                                          fontSize:
+                                                                              17,
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            6,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
                                                               ),
-                                                              SvgPicture.asset(
-                                                                  service.image,
-                                                                  height: 45,
-                                                                  width: 45,
-                                                                  fit: BoxFit
-                                                                      .cover,
-                                                                  color: userController
-                                                                          .isDark
-                                                                      ? Colors
-                                                                          .white
-                                                                      : primaryColor),
-                                                              const SizedBox(
-                                                                width: 6,
-                                                              ),
-                                                              Text(
-                                                                service.name,
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: userController
-                                                                          .isDark
-                                                                      ? Colors
-                                                                          .white
-                                                                      : primaryColor,
-                                                                  fontSize: 17,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                          ],
                                                         );
                                                       }))
                                             ],
@@ -476,10 +524,65 @@ class _ExplorePageState extends State<ExplorePage> {
                                             : Colors.white,
                                         child: Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Icon(Icons.menu_outlined),
+                                          child: SvgPicture.asset(
+                                            'assets/filter.svg',
+                                            height: 24,
+                                            width: 24,
+                                            color: userController.isDark
+                                                ? Colors.white
+                                                : primaryColor,
+                                          ),
                                         )),
                                   ),
                                 ],
+                              ),
+                            ),
+                          if (searchedUsers.isNotEmpty)
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30),
+                                  ),
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                ),
+                                margin: const EdgeInsets.only(top: 20),
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              searchedUsers = [];
+                                              // filterList = [];
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.close,
+                                            color: userController.isDark
+                                                ? Colors.white
+                                                : primaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: ListView.builder(
+                                          itemCount: searchedUsers.length,
+                                          shrinkWrap: true,
+                                          itemBuilder: (context, index) {
+                                            return ProviderShortWidget(
+                                                profile: searchedUsers[index]);
+                                          }),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           if (filterList.isNotEmpty)
@@ -495,13 +598,40 @@ class _ExplorePageState extends State<ExplorePage> {
                                       : Colors.white,
                                 ),
                                 margin: const EdgeInsets.only(top: 20),
-                                child: ListView.builder(
-                                    itemCount: filterList.length,
-                                    shrinkWrap: true,
-                                    itemBuilder: (context, index) {
-                                      return ProviderShortWidget(
-                                          profile: filterList[index]);
-                                    }),
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              searchText = '';
+                                              filterList = [];
+                                              text.clear();
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.close,
+                                            color: userController.isDark
+                                                ? Colors.white
+                                                : primaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: ListView.builder(
+                                          itemCount: filterList.length,
+                                          shrinkWrap: true,
+                                          itemBuilder: (context, index) {
+                                            return ProviderShortWidget(
+                                                profile: filterList[index]);
+                                          }),
+                                    ),
+                                  ],
+                                ),
                               ),
                             )
                         ],
@@ -524,6 +654,66 @@ class _ExplorePageState extends State<ExplorePage> {
             );
           }),
     );
+  }
+
+  onFilterListTap(List<UserModel> nearbyProvidersStream, Service service,
+      UserController userController) {
+    if (nearbyProvidersStream
+        .where((provider) =>
+            provider.services.any((s) => s.toString() == service.name))
+        .toList()
+        .isEmpty) {
+      toastification.show(
+        context: context, // optional if you use ToastificationWrapper
+        type: ToastificationType.error,
+        style: ToastificationStyle.flat,
+        autoCloseDuration: const Duration(seconds: 5),
+        title: Text(
+          'No Providers found for ${service.name}.',
+          style: TextStyle(
+            color: userController.isDark ? primaryColor : Colors.white,
+          ),
+        ),
+        // you can also use RichText widget for title and description parameters
+        // description: RichText(text: const TextSpan(text: '')),
+        alignment: Alignment.topCenter,
+        direction: TextDirection.ltr,
+        animationDuration: const Duration(milliseconds: 300),
+
+        icon: const Icon(Icons.close),
+        primaryColor: Colors.red,
+        backgroundColor: userController.isDark ? Colors.white : primaryColor,
+        // foregroundColor: Colors.black,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+        borderRadius: BorderRadius.circular(12),
+
+        showProgressBar: false,
+        closeButtonShowType: CloseButtonShowType.onHover,
+        closeOnClick: true,
+        pauseOnHover: true,
+        dragToClose: true,
+        applyBlurEffect: false,
+        callbacks: ToastificationCallbacks(
+          onTap: (toastItem) => print('Toast ${toastItem.id} tapped'),
+          onCloseButtonTap: (toastItem) =>
+              print('Toast ${toastItem.id} close button tapped'),
+          onAutoCompleteCompleted: (toastItem) =>
+              print('Toast ${toastItem.id} auto complete completed'),
+          onDismissed: (toastItem) => print('Toast ${toastItem.id} dismissed'),
+        ),
+      );
+    } else {
+      setState(() {
+        // searchText = service.name.toLowerCase();
+        searchedUsers = [];
+        searchedUsers.addAll(nearbyProvidersStream
+            .where((provider) =>
+                provider.services.any((s) => s.toString() == service.name))
+            .toList());
+      });
+      Get.close(1);
+    }
   }
 
   Future<BitmapDescriptor> getCustomIcon(UserModel userData) async {
