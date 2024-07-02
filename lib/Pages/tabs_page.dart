@@ -50,7 +50,7 @@ class _TabsPageState extends State<TabsPage> {
   }
 
   getNotificationSetting() async {
-    bool isNotAllowed = await OneSignal.Notifications.canRequest();
+    bool isNotAllowed = OneSignal.Notifications.permission;
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
 
