@@ -54,7 +54,7 @@ class _TabsPageState extends State<TabsPage> {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
 
-    if (isNotAllowed) {
+    if (isNotAllowed == false) {
       Future.delayed(const Duration(seconds: 3)).then((s) {
         Get.bottomSheet(
           NotificationSheet(userController: userController),
