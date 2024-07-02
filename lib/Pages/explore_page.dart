@@ -139,6 +139,14 @@ class _ExplorePageState extends State<ExplorePage> {
   // }
 
   TextEditingController text = TextEditingController();
+  // List services = [];
+  List<UserModel> filterProvidersByServices(
+      List<UserModel> providers, List targetServices) {
+    return providers
+        .where((provider) => provider.services
+            .any((service) => targetServices.contains(service)))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +222,13 @@ class _ExplorePageState extends State<ExplorePage> {
                 filterList.add(userModel);
               }
             }
-            List<Marker> markers = addMarkers(nearbyProvidersStream);
+            List<UserModel> filterByService =
+                userController.selectedServicesFilter.isEmpty
+                    ? nearbyProvidersStream
+                    : filterProvidersByServices(nearbyProvidersStream,
+                        userController.selectedServicesFilter);
+
+            List<Marker> markers = addMarkers(filterByService);
             markers.add(
               Marker(
                 markerId: const MarkerId('current'),
@@ -372,138 +386,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                         selectedMarker = null;
                                       });
                                       Get.bottomSheet(
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            color: userController.isDark
-                                                ? primaryColor
-                                                : Colors.white,
-                                          ),
-                                          height: Get.height * 0.9,
-                                          padding: const EdgeInsets.all(15),
-                                          child: Column(
-                                            children: [
-                                              const SizedBox(
-                                                height: 20,
-                                              ),
-                                              Text(
-                                                'Filter Services by Required Service Type',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 20,
-                                              ),
-                                              Expanded(
-                                                  child: ListView.builder(
-                                                      itemCount:
-                                                          getServices().length,
-                                                      itemBuilder:
-                                                          (context, index) {
-                                                        Service service =
-                                                            getServices()[
-                                                                index];
-
-                                                        return Column(
-                                                          children: [
-                                                            InkWell(
-                                                              onTap: () {
-                                                                onFilterListTap(
-                                                                    nearbyProvidersStream,
-                                                                    service,
-                                                                    userController);
-
-                                                                // appProvider.selectPrefs(pref);
-                                                              },
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                children: [
-                                                                  Row(
-                                                                    children: [
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            6,
-                                                                      ),
-                                                                      SvgPicture.asset(
-                                                                          service
-                                                                              .image,
-                                                                          height:
-                                                                              45,
-                                                                          width:
-                                                                              45,
-                                                                          fit: BoxFit
-                                                                              .cover,
-                                                                          color: userController.isDark
-                                                                              ? Colors.white
-                                                                              : primaryColor),
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            6,
-                                                                      ),
-                                                                      Text(
-                                                                        service
-                                                                            .name,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color: userController.isDark
-                                                                              ? Colors.white
-                                                                              : primaryColor,
-                                                                          fontSize:
-                                                                              17,
-                                                                          fontWeight:
-                                                                              FontWeight.w500,
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Row(
-                                                                    children: [
-                                                                      Text(
-                                                                        nearbyProvidersStream
-                                                                            .where((provider) => provider.services.any((s) =>
-                                                                                s.toString().toLowerCase() ==
-                                                                                service.name.toLowerCase()))
-                                                                            .toList()
-                                                                            .length
-                                                                            .toString(),
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color: userController.isDark
-                                                                              ? Colors.white
-                                                                              : primaryColor,
-                                                                          fontSize:
-                                                                              17,
-                                                                          fontWeight:
-                                                                              FontWeight.w500,
-                                                                        ),
-                                                                      ),
-                                                                      const SizedBox(
-                                                                        width:
-                                                                            6,
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                          ],
-                                                        );
-                                                      }))
-                                            ],
-                                          ),
-                                        ),
+                                        ServiceFilterSheet(),
                                         backgroundColor: userController.isDark
                                             ? primaryColor
                                             : Colors.white,
@@ -514,77 +397,127 @@ class _ExplorePageState extends State<ExplorePage> {
                                         isScrollControlled: true,
                                       );
                                     },
-                                    child: Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(200),
-                                        ),
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: SvgPicture.asset(
-                                            'assets/filter.svg',
-                                            height: 24,
-                                            width: 24,
-                                            color: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
+                                    child: Container(
+                                      height: 45,
+                                      width: 45,
+                                      child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(200),
                                           ),
-                                        )),
+                                          color: userController.isDark
+                                              ? primaryColor
+                                              : Colors.white,
+                                          child: Center(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(0.0),
+                                              child: Stack(
+                                                children: [
+                                                  SvgPicture.asset(
+                                                    'assets/filter.svg',
+                                                    height: 24,
+                                                    width: 24,
+                                                    color: userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                  ),
+                                                  if (userController
+                                                      .selectedServicesFilter
+                                                      .isNotEmpty)
+                                                    Positioned(
+                                                      top: 0,
+                                                      right: 0,
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Get.close(1);
+                                                        },
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          200),
+                                                              color:
+                                                                  Colors.red),
+                                                          height: 15,
+                                                          width: 15,
+                                                          child: Center(
+                                                            child: Text(
+                                                              userController
+                                                                  .selectedServicesFilter
+                                                                  .length
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          if (searchedUsers.isNotEmpty)
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30),
-                                    topRight: Radius.circular(30),
-                                  ),
-                                  color: userController.isDark
-                                      ? primaryColor
-                                      : Colors.white,
-                                ),
-                                margin: const EdgeInsets.only(top: 20),
-                                child: Column(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              searchedUsers = [];
-                                              // filterList = [];
-                                            });
-                                          },
-                                          icon: Icon(
-                                            Icons.close,
-                                            color: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListView.builder(
-                                          itemCount: searchedUsers.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (context, index) {
-                                            return ProviderShortWidget(
-                                                profile: searchedUsers[index]);
-                                          }),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          // if (searchedUsers.isNotEmpty)
+                          //   Expanded(
+                          //     child: Container(
+                          //       decoration: BoxDecoration(
+                          //         borderRadius: BorderRadius.only(
+                          //           topLeft: Radius.circular(30),
+                          //           topRight: Radius.circular(30),
+                          //         ),
+                          //         color: userController.isDark
+                          //             ? primaryColor
+                          //             : Colors.white,
+                          //       ),
+                          //       margin: const EdgeInsets.only(top: 20),
+                          //       child: Column(
+                          //         children: [
+                          //           Align(
+                          //             alignment: Alignment.centerRight,
+                          //             child: Padding(
+                          //               padding: const EdgeInsets.all(12.0),
+                          //               child: IconButton(
+                          //                 onPressed: () {
+                          //                   setState(() {
+                          //                     searchedUsers = [];
+                          //                     // filterList = [];
+                          //                   });
+                          //                 },
+                          //                 icon: Icon(
+                          //                   Icons.close,
+                          //                   color: userController.isDark
+                          //                       ? Colors.white
+                          //                       : primaryColor,
+                          //                 ),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //           Expanded(
+                          //             child: ListView.builder(
+                          //                 itemCount: searchedUsers.length,
+                          //                 shrinkWrap: true,
+                          //                 itemBuilder: (context, index) {
+                          //                   return ProviderShortWidget(
+                          //                       profile: searchedUsers[index]);
+                          //                 }),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ),
                           if (filterList.isNotEmpty)
                             Expanded(
                               child: Container(
@@ -758,6 +691,173 @@ class _ExplorePageState extends State<ExplorePage> {
         ],
       ),
     ).toBitmapDescriptor();
+  }
+}
+
+class ServiceFilterSheet extends StatelessWidget {
+  const ServiceFilterSheet({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: userController.isDark ? primaryColor : Colors.white,
+      ),
+      height: Get.height * 0.9,
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  userController.clearServie();
+                },
+                child: Text(
+                  'Clear',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                'Filter by Services',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Get.close(1);
+                },
+                child: Text(
+                  'Apply',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: getServices().length,
+              itemBuilder: (context, index) {
+                Service service = getServices()[index];
+
+                return Column(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        userController.selectService(service.name);
+                        // appProvider.selectPrefs(pref);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Transform.scale(
+                                scale: 1.5,
+                                child: Checkbox(
+                                    activeColor: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    checkColor: userController.isDark
+                                        ? Colors.green
+                                        : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    value: userController.selectedServicesFilter
+                                        .contains(service.name),
+                                    onChanged: (s) {
+                                      // appProvider.selectPrefs(pref);
+                                      userController
+                                          .selectService(service.name);
+                                    }),
+                              ),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                              SvgPicture.asset(service.image,
+                                  height: 45,
+                                  width: 45,
+                                  fit: BoxFit.cover,
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                              Text(
+                                service.name,
+                                style: TextStyle(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              // Text(
+                              //   nearbyProvidersStream
+                              //       .where((provider) => provider.services.any(
+                              //           (s) =>
+                              //               s.toString().toLowerCase() ==
+                              //               service.name.toLowerCase()))
+                              //       .toList()
+                              //       .length
+                              //       .toString(),
+                              //   style: TextStyle(
+                              //     color: userController.isDark
+                              //         ? Colors.white
+                              //         : primaryColor,
+                              //     fontSize: 17,
+                              //     fontWeight: FontWeight.w500,
+                              //   ),
+                              // ),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

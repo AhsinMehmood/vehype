@@ -287,7 +287,7 @@ class ProfilePage extends StatelessWidget {
                           }
                         },
                         child: Text(
-                          'Edit Profile',
+                          'Manage Profile',
                           style: TextStyle(
                             color: userController.isDark
                                 ? Colors.white
@@ -541,7 +541,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.44',
+                        'App Version: 3.0.3.45',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

@@ -64,7 +64,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         appBar: AppBar(
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           title: Text(
-            'Edit Profile',
+            'Manage Profile',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
               fontSize: 20,

@@ -40,6 +40,21 @@ enum AccountType {
 
 class UserController with ChangeNotifier {
   UserModel? _userModel;
+  List selectedServicesFilter = [];
+  clearServie() {
+    selectedServicesFilter = [];
+    notifyListeners();
+  }
+
+  selectService(String name) {
+    if (selectedServicesFilter.contains(name)) {
+      selectedServicesFilter.remove(name);
+    } else {
+      selectedServicesFilter.add(name);
+    }
+    notifyListeners();
+  }
+
   int tabIndex = 0;
   bool isShow = false;
   changeIsShow(bool value) {
