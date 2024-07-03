@@ -250,38 +250,42 @@ class ServicesTab extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          InkWell(
-            onTap: () {
-              final List<Service> services = getServices();
-              List servicesToUpdate = [];
-              for (var element in services) {
-                servicesToUpdate.add(element.name);
-              }
-              if (userController.userModel!.services.length ==
-                  getServices().length) {
-                FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userController.userModel!.userId)
-                    .update({
-                  'services': [],
-                });
-              } else {
-                FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userController.userModel!.userId)
-                    .update({
-                  'services': servicesToUpdate,
-                });
-              }
-            },
-            child: Text(
-              userController.userModel!.services.length == getServices().length
-                  ? 'Deselect All'.toUpperCase()
-                  : 'Select All'.toUpperCase(),
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: InkWell(
+              onTap: () {
+                final List<Service> services = getServices();
+                List servicesToUpdate = [];
+                for (var element in services) {
+                  servicesToUpdate.add(element.name);
+                }
+                if (userController.userModel!.services.length ==
+                    getServices().length) {
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userController.userModel!.userId)
+                      .update({
+                    'services': [],
+                  });
+                } else {
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userController.userModel!.userId)
+                      .update({
+                    'services': servicesToUpdate,
+                  });
+                }
+              },
+              child: Text(
+                userController.userModel!.services.length ==
+                        getServices().length
+                    ? 'Clear'.toUpperCase()
+                    : 'Select All'.toUpperCase(),
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

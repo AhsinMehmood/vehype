@@ -76,6 +76,8 @@ class _NewOffersState extends State<NewOffers> {
           List<OffersModel> offers = userController.filterOffers(
               filterByService, userModel.lat, userModel.long, 100);
           if (userModel.services.isEmpty) {
+            UserController().changeNotiOffers(0, false, widget.userModel.userId,
+                'widget.offersModel.offerId', widget.userModel.accountType);
             return Scaffold(
               backgroundColor:
                   userController.isDark ? primaryColor : Colors.white,
@@ -136,30 +138,35 @@ class _NewOffersState extends State<NewOffers> {
                   const SizedBox(
                     height: 10,
                   ),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: InkWell(
-                      onTap: () {
-                        final List<Service> services = getServices();
-                        List servicesToUpdate = [];
-                        for (var element in services) {
-                          servicesToUpdate.add(element.name);
-                        }
-                        if (selectedServices.length == getServices().length) {
-                          selectedServices = [];
-                        } else {
-                          selectedServices = servicesToUpdate;
-                        }
-                        setState(() {});
-                      },
-                      child: Text(
-                        selectedServices.length == getServices().length
-                            ? 'Deselect All'.toUpperCase()
-                            : 'Select All'.toUpperCase(),
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        onTap: () {
+                          final List<Service> services = getServices();
+                          List servicesToUpdate = [];
+                          for (var element in services) {
+                            servicesToUpdate.add(element.name);
+                          }
+                          if (selectedServices.length == getServices().length) {
+                            selectedServices = [];
+                          } else {
+                            selectedServices = servicesToUpdate;
+                          }
+                          setState(() {});
+                        },
+                        child: Text(
+                          selectedServices.length == getServices().length
+                              ? 'Clear'.toUpperCase()
+                              : 'Select All'.toUpperCase(),
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
@@ -170,7 +177,12 @@ class _NewOffersState extends State<NewOffers> {
                   Expanded(
                     child: ListView.builder(
                         itemCount: getServices().length,
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.only(
+                          bottom: 70,
+                          right: 10,
+                          left: 10,
+                          top: 0,
+                        ),
                         itemBuilder: (context, index) {
                           Service service = getServices()[index];
                           return Column(
@@ -257,6 +269,8 @@ class _NewOffersState extends State<NewOffers> {
           }
 
           if (offers.isEmpty) {
+            UserController().changeNotiOffers(0, false, widget.userModel.userId,
+                'widget.offersModel.offerId', widget.userModel.accountType);
             return Center(
               child: Text(
                 'No Requests Yet',

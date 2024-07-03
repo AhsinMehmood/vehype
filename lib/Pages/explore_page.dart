@@ -713,14 +713,24 @@ class ServiceFilterSheet extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () {
-                  userController.clearServie();
+                  if (userController.selectedServicesFilter.isNotEmpty) {
+                    userController.clearServie();
+                  } else {
+                    final List<Service> services = getServices();
+                    // List servicesToUpdate = [];
+                    for (var element in services) {
+                      userController.selectService(element.name);
+                    }
+                  }
                 },
                 child: Text(
-                  'Clear',
+                  userController.selectedServicesFilter.isNotEmpty
+                      ? 'Clear'.toUpperCase()
+                      : 'Select All'.toUpperCase(),
                   style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),

@@ -579,11 +579,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'messageId');
       UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
           widget.offersModel.offerId, userModel.accountType);
-      if (widget.chatId != null) {
-        Get.close(2);
-      } else {
-        Get.close(3);
-      }
+      Get.close(2);
+
       garageController.closeOfferSubmit();
     } else {
       await FirebaseFirestore.instance
