@@ -67,7 +67,7 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           centerTitle: true,
           title: Text(
-            'Offers',
+            'Requests',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
               fontSize: 20,
@@ -312,44 +312,44 @@ class _OffersState extends State<Offers> {
                         OffersModel.fromJson(offerSnap.data);
                     Future.delayed(const Duration(seconds: 4)).then((e) {
                       if (widget.id == 1) {
-                        if (userModel.isActivePending) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
+                        // if (userModel.isActivePending) {
+                        UserController().changeNotiOffers(
+                            widget.id,
+                            false,
+                            widget.userController.userModel!.userId,
+                            offersModel.offerId,
+                            userModel.accountType);
                       }
+                      // }
                       if (widget.id == 2) {
-                        if (userModel.isActiveInProgress) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
+                        // if (userModel.isActiveInProgress) {
+                        UserController().changeNotiOffers(
+                            widget.id,
+                            false,
+                            widget.userController.userModel!.userId,
+                            offersModel.offerId,
+                            userModel.accountType);
+                        // }
                       }
                       if (widget.id == 3) {
-                        if (userModel.isActiveCompleted) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
+                        // if (userModel.isActiveCompleted) {
+                        UserController().changeNotiOffers(
+                            widget.id,
+                            false,
+                            widget.userController.userModel!.userId,
+                            offersModel.offerId,
+                            userModel.accountType);
+                        // }
                       }
                       if (widget.id == 4) {
-                        if (userModel.isActiveCancelled) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
+                        // if (userModel.isActiveCancelled) {
+                        UserController().changeNotiOffers(
+                            widget.id,
+                            false,
+                            widget.userController.userModel!.userId,
+                            offersModel.offerId,
+                            userModel.accountType);
+                        // }
                       }
                     });
 

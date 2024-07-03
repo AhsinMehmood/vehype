@@ -60,7 +60,10 @@ class _TabsPageState extends State<TabsPage> {
           NotificationSheet(userController: userController),
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
           ),
         );
       });
@@ -107,7 +110,7 @@ class _TabsPageState extends State<TabsPage> {
       onTap: (int index) {
         // print(userModel.userId);
         userController.changeTabIndex(index);
-        print(userModel.userId);
+        // print(userModel.userId);
 
         // FlutterAppBadger.updateBadgeCount(10);
         // OneSignal.login(userModel.userId);
@@ -205,7 +208,7 @@ class _TabsPageState extends State<TabsPage> {
                   : const SizedBox.shrink(),
             ],
           ),
-          label: 'Offers'),
+          label: 'Requests'),
 
       // if (userModel.accountType != 'seeker')
       // BottomNavigationBarItem(
@@ -480,7 +483,10 @@ class NotificationSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
       height: 280,

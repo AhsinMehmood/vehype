@@ -521,7 +521,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                     });
 
                     applyToJob(userModel, garageController, comment);
-                    Get.close(1);
+                    // Get.close(1);
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -560,7 +560,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           .collection('offersReceived')
           .doc(widget.offersReceivedModel!.id)
           .update({
-        'price': garageController.price,
+        'price': double.parse(priceController.text.toString()),
         'startDate': garageController.startDate!.toUtc().toIso8601String(),
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
@@ -576,7 +576,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'messageId');
       UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
           widget.offersModel.offerId, userModel.accountType);
-      Get.close(1);
+      Get.close(2);
       garageController.closeOfferSubmit();
     } else {
       await FirebaseFirestore.instance
@@ -592,7 +592,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'ownerId': widget.ownerModel.userId,
         'offerAt': DateTime.now().toUtc().toIso8601String(),
         'status': 'Pending',
-        'price': garageController.price,
+        'price': double.parse(priceController.text.toString()),
         'startDate': garageController.startDate!.toUtc().toIso8601String(),
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
@@ -618,12 +618,12 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         });
       }
       Get.close(2);
-      Get.showSnackbar(
-        GetSnackBar(
-          message: 'Submitted successfully. Check Orders history for status',
-          duration: Duration(seconds: 3),
-        ),
-      );
+      // Get.showSnackbar(
+      //   GetSnackBar(
+      //     message: 'Submitted successfully. Check Orders history for status',
+      //     duration: Duration(seconds: 3),
+      //   ),
+      // );
     }
   }
 }
