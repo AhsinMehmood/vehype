@@ -115,7 +115,7 @@ class OffersController {
         offersReceivedModel.offerBy,
         userModel.name,
         'Offer Update',
-        '${userModel.name}, Cancelled the offer',
+        '${userModel.name}, Cancelled the Request.',
         offersReceivedModel.id,
         'Offer',
         '');
@@ -150,7 +150,7 @@ class OffersController {
         offersReceivedModel.offerBy,
         userModel.name,
         'Offer Update',
-        '${userModel.name}, Cancelled the offer',
+        '${userModel.name}, Cancelled the Request.',
         offersReceivedModel.id,
         'Offer',
         '');

@@ -499,8 +499,11 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                 onPressed: () {
                   if (priceController.text.isEmpty) {
                     showPriceWarning = true;
+                    setState(() {});
+                    return;
                   } else {
                     showPriceWarning = false;
+                    setState(() {});
                   }
                   if (garageController.startDate == null ||
                       garageController.endDate == null ||
@@ -576,7 +579,11 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'messageId');
       UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
           widget.offersModel.offerId, userModel.accountType);
-      Get.close(2);
+      if (widget.chatId != null) {
+        Get.close(2);
+      } else {
+        Get.close(3);
+      }
       garageController.closeOfferSubmit();
     } else {
       await FirebaseFirestore.instance
@@ -617,7 +624,12 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           'offerRequestId': reference.id,
         });
       }
-      Get.close(2);
+      if (widget.chatId != null) {
+        Get.close(2);
+      } else {
+        Get.close(3);
+      }
+
       // Get.showSnackbar(
       //   GetSnackBar(
       //     message: 'Submitted successfully. Check Orders history for status',

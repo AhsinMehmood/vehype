@@ -428,34 +428,28 @@ class _ExplorePageState extends State<ExplorePage> {
                                                     Positioned(
                                                       top: 0,
                                                       right: 0,
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          Get.close(1);
-                                                        },
-                                                        child: Container(
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          200),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        200),
+                                                            color: Colors.red),
+                                                        height: 15,
+                                                        width: 15,
+                                                        child: Center(
+                                                          child: Text(
+                                                            userController
+                                                                .selectedServicesFilter
+                                                                .length
+                                                                .toString(),
+                                                            style: TextStyle(
                                                               color:
-                                                                  Colors.red),
-                                                          height: 15,
-                                                          width: 15,
-                                                          child: Center(
-                                                            child: Text(
-                                                              userController
-                                                                  .selectedServicesFilter
-                                                                  .length
-                                                                  .toString(),
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 10,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
+                                                                  Colors.white,
+                                                              fontSize: 10,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
                                                             ),
                                                           ),
                                                         ),
@@ -739,17 +733,13 @@ class ServiceFilterSheet extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              InkWell(
-                onTap: () {
+              IconButton(
+                onPressed: () {
                   Get.close(1);
                 },
-                child: Text(
-                  'Apply',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                icon: Icon(
+                  Icons.close,
+                  color: userController.isDark ? Colors.white : primaryColor,
                 ),
               )
             ],

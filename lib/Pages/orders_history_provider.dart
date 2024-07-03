@@ -555,7 +555,7 @@ class OffersHistoryWidget extends StatelessWidget {
                                                   offersReceivedModel.ownerId,
                                                   userModel.name,
                                                   'Offer Update',
-                                                  '${userModel.name} Cancelled the offer.',
+                                                  '${userModel.name} Cancelled the Request.',
                                                   'chatId',
                                                   'offer',
                                                   'messageId');
@@ -720,7 +720,7 @@ class OffersHistoryWidget extends StatelessWidget {
                                                   offersModel.ownerId,
                                                   userController
                                                       .userModel!.name,
-                                                  'Cancelled The Offer',
+                                                  'Cancelled The Request',
                                                   'contents',
                                                   '',
                                                   'offer',

@@ -43,14 +43,15 @@ class _NewOffersState extends State<NewOffers> {
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    final UserModel userModel = userController.userModel!;
     return StreamBuilder<List<OffersModel>>(
-        stream: widget.userController.getOffersProvider(widget.userModel),
+        stream: userController.getOffersProvider(userModel),
         builder: (context, AsyncSnapshot<List<OffersModel>> snapshot) {
           if (!snapshot.hasData) {
             return Center(
               child: CircularProgressIndicator(
-                color:
-                    widget.userController.isDark ? Colors.white : primaryColor,
+                color: userController.isDark ? Colors.white : primaryColor,
               ),
             );
           }
@@ -59,42 +60,38 @@ class _NewOffersState extends State<NewOffers> {
 
           List<OffersModel> filterOffers = rawOffers
               .where((element) =>
-                  !element.offersReceived.contains(widget.userModel.userId))
+                  !element.offersReceived.contains(userModel.userId))
               .toList();
           List<OffersModel> filterIgnore = filterOffers
-              .where((element) =>
-                  !element.ignoredBy.contains(widget.userModel.userId))
+              .where((element) => !element.ignoredBy.contains(userModel.userId))
               .toList();
           List<OffersModel> blockedUsers = filterIgnore
               .where((element) =>
-                  !widget.userModel.blockedUsers.contains(element.ownerId))
+                  !userModel.blockedUsers.contains(element.ownerId))
               .toList();
           List<OffersModel> filterByService = blockedUsers
-              .where((element) =>
-                  widget.userModel.services.contains(element.issue))
+              .where((element) => userModel.services.contains(element.issue))
               .toList();
-          List<OffersModel> offers = widget.userController.filterOffers(
-              filterByService,
-              widget.userModel.lat,
-              widget.userModel.long,
-              100);
-          if (widget.userModel.services.isEmpty) {
+          print(userModel.lat);
+          List<OffersModel> offers = userController.filterOffers(
+              filterByService, userModel.lat, userModel.long, 100);
+          if (userModel.services.isEmpty) {
             return Scaffold(
               backgroundColor:
-                  widget.userController.isDark ? primaryColor : Colors.white,
+                  userController.isDark ? primaryColor : Colors.white,
               floatingActionButton: selectedServices.isEmpty
                   ? null
                   : ElevatedButton(
                       onPressed: () async {
                         FirebaseFirestore.instance
                             .collection('users')
-                            .doc(widget.userModel.userId)
+                            .doc(userModel.userId)
                             .update({
                           'services': FieldValue.arrayUnion(selectedServices)
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: widget.userController.isDark
+                          backgroundColor: userController.isDark
                               ? Colors.white
                               : primaryColor,
                           maximumSize: Size(Get.width * 0.8, 55),
@@ -105,7 +102,7 @@ class _NewOffersState extends State<NewOffers> {
                       child: Text(
                         'Save',
                         style: TextStyle(
-                          color: widget.userController.isDark
+                          color: userController.isDark
                               ? primaryColor
                               : Colors.white,
                           fontSize: 20,
@@ -127,7 +124,7 @@ class _NewOffersState extends State<NewOffers> {
                       child: Text(
                         'Choose the services you offer:',
                         style: TextStyle(
-                          color: widget.userController.isDark
+                          color: userController.isDark
                               ? Colors.white
                               : primaryColor,
                           fontSize: 16,
@@ -164,14 +161,12 @@ class _NewOffersState extends State<NewOffers> {
                                     Transform.scale(
                                       scale: 1.5,
                                       child: Checkbox(
-                                          activeColor:
-                                              widget.userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                          checkColor:
-                                              widget.userController.isDark
-                                                  ? Colors.green
-                                                  : Colors.white,
+                                          activeColor: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          checkColor: userController.isDark
+                                              ? Colors.green
+                                              : Colors.white,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(4),
@@ -199,7 +194,7 @@ class _NewOffersState extends State<NewOffers> {
                                         height: 45,
                                         width: 45,
                                         fit: BoxFit.cover,
-                                        color: widget.userController.isDark
+                                        color: userController.isDark
                                             ? Colors.white
                                             : primaryColor),
                                     const SizedBox(
@@ -208,7 +203,7 @@ class _NewOffersState extends State<NewOffers> {
                                     Text(
                                       service.name,
                                       style: TextStyle(
-                                        color: widget.userController.isDark
+                                        color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
                                         fontSize: 17,
@@ -235,9 +230,7 @@ class _NewOffersState extends State<NewOffers> {
               child: Text(
                 'No Requests Yet',
                 style: TextStyle(
-                  color: widget.userController.isDark
-                      ? Colors.white
-                      : primaryColor,
+                  color: userController.isDark ? Colors.white : primaryColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),
@@ -260,13 +253,13 @@ class _NewOffersState extends State<NewOffers> {
                 // final PageController imagePageController = PageController();
 
                 return NewOfferWidget(
-                    userController: widget.userController,
+                    userController: userController,
                     offersModel: offersModel,
                     vehicleType: vehicleType,
                     vehicleMake: vehicleMake,
                     vehicleYear: vehicleYear,
                     vehicleModle: vehicleModle,
-                    userModel: widget.userModel);
+                    userModel: userModel);
               });
         });
   }

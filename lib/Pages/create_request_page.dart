@@ -861,9 +861,11 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           null,
                           garageController.garageId);
-                      getUserProviders(requestId);
-                      Get.offAll(() => TabsPage());
+                      getUserProviders(
+                          requestId, garageController.selectedIssue);
                     }
+
+                    Get.offAll(() => TabsPage());
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
@@ -893,34 +895,36 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     );
   }
 
-  getUserProviders(String requestId) async {
+  getUserProviders(String requestId, String service) async {
     List<UserModel> providers = [];
 
-    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-        .instance
-        .collection('users')
-        .where('accountType', isEqualTo: 'provider')
-        .where('status', isEqualTo: 'active')
-        .get();
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .where('accountType', isEqualTo: 'provider')
+            .where('services', arrayContains: service)
+            // .where('status', isEqualTo: 'active')
+            .get();
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
       providers.add(UserModel.fromJson(element));
     }
-    for (var user in providers) {
-      UserController()
-          .changeNotiOffers(0, true, user.userId, requestId, user.accountType);
-    }
+
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
     UserModel userModel = userController.userModel!;
     List<UserModel> filterProviders = userController.filterProviders(
         providers, userModel.lat, userModel.long, 100);
+    for (var user in filterProviders) {
+      UserController()
+          .changeNotiOffers(0, true, user.userId, requestId, user.accountType);
+    }
     for (UserModel provider in filterProviders) {
       sendNotification(
           provider.userId,
           userModel.name,
-          'Offer Request',
-          '${userModel.name} created a new offer.',
+          'New Request',
+          '${userModel.name} created a new request.',
           'chatId',
           'offer',
           'messageId');
