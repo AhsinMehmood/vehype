@@ -136,6 +136,37 @@ class _NewOffersState extends State<NewOffers> {
                   const SizedBox(
                     height: 10,
                   ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: InkWell(
+                      onTap: () {
+                        final List<Service> services = getServices();
+                        List servicesToUpdate = [];
+                        for (var element in services) {
+                          servicesToUpdate.add(element.name);
+                        }
+                        if (selectedServices.length == getServices().length) {
+                          selectedServices = [];
+                        } else {
+                          selectedServices = servicesToUpdate;
+                        }
+                        setState(() {});
+                      },
+                      child: Text(
+                        selectedServices.length == getServices().length
+                            ? 'Deselect All'.toUpperCase()
+                            : 'Select All'.toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Expanded(
                     child: ListView.builder(
                         itemCount: getServices().length,

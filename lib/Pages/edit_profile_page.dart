@@ -243,111 +243,157 @@ class ServicesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 20,
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          InkWell(
+            onTap: () {
+              final List<Service> services = getServices();
+              List servicesToUpdate = [];
+              for (var element in services) {
+                servicesToUpdate.add(element.name);
+              }
+              if (userController.userModel!.services.length ==
+                  getServices().length) {
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userController.userModel!.userId)
+                    .update({
+                  'services': [],
+                });
+              } else {
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userController.userModel!.userId)
+                    .update({
+                  'services': servicesToUpdate,
+                });
+              }
+            },
+            child: Text(
+              userController.userModel!.services.length == getServices().length
+                  ? 'Deselect All'.toUpperCase()
+                  : 'Select All'.toUpperCase(),
+              style: TextStyle(
+                color: Colors.green,
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            if (userController.userModel!.accountType == 'provider')
-              for (Service service in getServices())
-                Column(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        // userController.selectServices(service.name);
-                        if (userController.userModel!.services
-                            .contains(service.name)) {
-                          FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(userController.userModel!.userId)
-                              .update({
-                            'services': FieldValue.arrayRemove([service.name])
-                          });
-                        } else {
-                          FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(userController.userModel!.userId)
-                              .update({
-                            'services': FieldValue.arrayUnion([service.name])
-                          });
-                        }
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          if (userController.userModel!.accountType == 'provider')
+            Expanded(
+              child: ListView.builder(
+                  itemCount: getServices().length,
+                  itemBuilder: (context, index) {
+                    final Service service = getServices()[index];
+                    return Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            // userController.selectServices(service.name);
+                            if (userController.userModel!.services
+                                .contains(service.name)) {
+                              FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(userController.userModel!.userId)
+                                  .update({
+                                'services':
+                                    FieldValue.arrayRemove([service.name])
+                              });
+                            } else {
+                              FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(userController.userModel!.userId)
+                                  .update({
+                                'services':
+                                    FieldValue.arrayUnion([service.name])
+                              });
+                            }
 
-                        // appProvider.selectPrefs(pref);
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Transform.scale(
-                            scale: 1.5,
-                            child: Checkbox(
-                                activeColor: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                checkColor: userController.isDark
-                                    ? Colors.green
-                                    : Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                            // appProvider.selectPrefs(pref);
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Transform.scale(
+                                scale: 1.5,
+                                child: Checkbox(
+                                    activeColor: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    checkColor: userController.isDark
+                                        ? Colors.green
+                                        : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    value: userController.userModel!.services
+                                        .contains(service.name),
+                                    onChanged: (s) {
+                                      // appProvider.selectPrefs(pref);
+                                      if (userController.userModel!.services
+                                          .contains(service.name)) {
+                                        FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(userController
+                                                .userModel!.userId)
+                                            .update({
+                                          'services': FieldValue.arrayRemove(
+                                              [service.name])
+                                        });
+                                      } else {
+                                        FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(userController
+                                                .userModel!.userId)
+                                            .update({
+                                          'services': FieldValue.arrayUnion(
+                                              [service.name])
+                                        });
+                                      }
+                                    }),
+                              ),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                              SvgPicture.asset(service.image,
+                                  height: 45,
+                                  width: 45,
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor),
+                              const SizedBox(
+                                width: 6,
+                              ),
+                              Text(
+                                service.name,
+                                style: TextStyle(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                value: userController.userModel!.services
-                                    .contains(service.name),
-                                onChanged: (s) {
-                                  // appProvider.selectPrefs(pref);
-                                  if (userController.userModel!.services
-                                      .contains(service.name)) {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(userController.userModel!.userId)
-                                        .update({
-                                      'services':
-                                          FieldValue.arrayRemove([service.name])
-                                    });
-                                  } else {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(userController.userModel!.userId)
-                                        .update({
-                                      'services':
-                                          FieldValue.arrayUnion([service.name])
-                                    });
-                                  }
-                                }),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            width: 6,
-                          ),
-                          SvgPicture.asset(service.image,
-                              height: 45,
-                              width: 45,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor),
-                          const SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            service.name,
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                  ],
-                ),
-          ],
-        ),
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    );
+                  }),
+            ),
+        ],
       ),
     );
   }
