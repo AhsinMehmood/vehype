@@ -34,20 +34,16 @@ class _SplashPageState extends State<SplashPage> {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
 
-      bool? newUpdate = sharedPreferences.getBool('newUpdate');
-      if (newUpdate == null) {
-        sharedPreferences.remove('userId');
-      }
       String? userId = sharedPreferences.getString('userId');
 
       UserController userController =
           Provider.of<UserController>(context, listen: false);
       userController.getCustomMarkers();
       if (userId == null) {
-        sharedPreferences.setBool('newUpdate', true);
+        // sharedPreferences.setBool('newUpdate', true);
         Get.offAll(() => ChooseAccountTypePage());
       } else {
-        sharedPreferences.setBool('newUpdate', true);
+        // sharedPreferences.setBool('newUpdate', true);
 
         // OneSignal.Notifications.requestPermission(true);
 
@@ -72,9 +68,6 @@ class _SplashPageState extends State<SplashPage> {
                     .doc(userId + userModel.accountType)
                     .get();
             if (accountTypeUserSnap.exists) {
-              print(accountTypeUserSnap.data()!['userId']);
-              print(userId);
-              print(userModel.userId);
               OneSignal.login(userId + userModel.accountType);
 
               // await FirebaseFirestore.instance

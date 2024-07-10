@@ -149,7 +149,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               color: userController.isDark ? Colors.white : primaryColor,
             )),
         title: Text(
-          'Create Request',
+          widget.offersModel == null ? 'Create Request' : 'Update Request',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 20,
@@ -847,13 +847,17 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               ),
               ElevatedButton(
                   onPressed: () async {
+                    Get.dialog(const LoadingDialog(),
+                        barrierDismissible: false);
                     if (widget.offersModel != null) {
-                      garageController.saveRequest(
+                      await garageController.saveRequest(
                           _descriptionController.text,
                           LatLng(lat, long),
                           userModel.userId,
                           widget.offersModel!.offerId,
                           garageController.garageId);
+                      Get.close(1);
+                      Get.back();
                     } else {
                       String requestId = await garageController.saveRequest(
                           _descriptionController.text,
@@ -861,22 +865,23 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           null,
                           garageController.garageId);
-                      getUserProviders(
-                          requestId, garageController.selectedIssue);
+                      await getUserProviders(
+                          requestId, garageController.selectedIssue, userModel);
+                      Get.close(4);
                     }
-
-                    Get.offAll(() => TabsPage());
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
                           userController.isDark ? Colors.white : primaryColor,
-                      maximumSize: Size(Get.width * 0.8, 60),
-                      minimumSize: Size(Get.width * 0.8, 60),
+                      maximumSize: Size(Get.width * 0.8, 55),
+                      minimumSize: Size(Get.width * 0.8, 55),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7),
+                        borderRadius: BorderRadius.circular(33),
                       )),
                   child: Text(
-                    'Create Request',
+                    widget.offersModel == null
+                        ? 'Create Request'
+                        : 'Update Request',
                     style: TextStyle(
                       color:
                           userController.isDark ? primaryColor : Colors.white,
@@ -895,7 +900,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     );
   }
 
-  getUserProviders(String requestId, String service) async {
+  Future getUserProviders(
+      String requestId, String service, UserModel userModel) async {
     List<UserModel> providers = [];
 
     QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -918,6 +924,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     for (var user in filterProviders) {
       UserController()
           .changeNotiOffers(0, true, user.userId, requestId, user.accountType);
+      UserController().addToNotifications(userModel, user.userId, 'request',
+          requestId, 'New Request', '${userModel.name} created a new request.');
+      print('======================NOTIFICATION ADDED');
     }
     for (UserModel provider in filterProviders) {
       sendNotification(
@@ -925,8 +934,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           userModel.name,
           'New Request',
           '${userModel.name} created a new request.',
-          'chatId',
-          'offer',
+          requestId,
+          'request',
           'messageId');
     }
     print(filterProviders.length);
@@ -1195,59 +1204,71 @@ class AdditionalServicePicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      // height: Get.height * 0.7,
+      height: Get.height * 0.35,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              for (String service in [
-                'Fix at my place',
-                'Pick it up',
-              ])
+              for (AdditionalServiceModel service in getAdditionalService())
                 InkWell(
                   onTap: () {
-                    garageController.selectAdditionalService(service);
+                    garageController.selectAdditionalService(service.name);
                     Get.close(1);
                   },
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  service,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                        Transform.scale(
+                          scale: 1.5,
+                          child: Checkbox(
+                              activeColor: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              checkColor: userController.isDark
+                                  ? Colors.green
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
                               ),
-                            ],
+                              value: garageController.additionalService ==
+                                  service.name,
+                              onChanged: (s) {
+                                // appProvider.selectPrefs(pref);
+                                garageController
+                                    .selectAdditionalService(service.name);
+                                Get.close(1);
+                              }),
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        SvgPicture.asset(
+                            getAdditionalService()
+                                .firstWhere(
+                                    (element) => element.name == service.name)
+                                .icon,
+                            height: 40,
+                            width: 40,
+                            fit: BoxFit.cover,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        Text(
+                          service.name,
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (garageController.additionalService == service)
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.green,
-                            ),
-                            child: Icon(
-                              Icons.done,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
                       ],
                     ),
                   ),

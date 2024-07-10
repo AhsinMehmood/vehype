@@ -12,10 +12,12 @@ import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/request_vehicle_details.dart';
+import 'package:vehype/Widgets/requests_owner_short_widget.dart';
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../Widgets/loading_dialog.dart';
+import '../Widgets/request_provider_short_widget.dart';
 import 'choose_account_type.dart';
 import 'full_image_view_page.dart';
 import 'offers_received_details.dart';
@@ -286,8 +288,8 @@ class _NewOffersState extends State<NewOffers> {
           return ListView.builder(
               itemCount: offers.length,
               shrinkWrap: true,
-              padding: const EdgeInsets.only(
-                  left: 15, right: 15, bottom: 0, top: 15),
+              padding:
+                  const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
               itemBuilder: (context, index) {
                 OffersModel offersModel = offers[index];
                 List<String> vehicleInfo = offersModel.vehicleId.split(',');
@@ -349,177 +351,15 @@ class _NewOfferWidgetState extends State<NewOfferWidget> {
     final String vehicleModle = vehicleInfo[3];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        // onTap: () async {},
-        child: Card(
-          color: widget.userController.isDark
-              ? Colors.blueGrey.shade700
-              : Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: VehicleDetailsRequest(
-                    userController: userController,
-                    vehicleType: vehicleType,
-                    vehicleMake: vehicleMake,
-                    vehicleYear: vehicleYear,
-                    vehicleModle: vehicleModle,
-                    offersModel: widget.offersModel),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (widget.userModel.email == 'No email set') {
-                        Get.showSnackbar(GetSnackBar(
-                          message: 'Login to continue',
-                          duration: const Duration(
-                            seconds: 3,
-                          ),
-                          backgroundColor: widget.userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          mainButton: TextButton(
-                            onPressed: () {
-                              Get.to(() => ChooseAccountTypePage());
-                              Get.closeCurrentSnackbar();
-                            },
-                            child: Text(
-                              'Login Page',
-                              style: TextStyle(
-                                color: widget.userController.isDark
-                                    ? primaryColor
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        ));
-                      } else {
-                        UserController().changeNotiOffers(
-                            0,
-                            false,
-                            widget.userModel.userId,
-                            widget.offersModel.offerId,
-                            widget.userModel.accountType);
-                        await FirebaseFirestore.instance
-                            .collection('offers')
-                            .doc(widget.offersModel.offerId)
-                            .update({
-                          'ignoredBy':
-                              FieldValue.arrayUnion([widget.userModel.userId]),
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: widget.userController.isDark
-                            ? Colors.white70
-                            : primaryColor.withOpacity(0.3),
-                        elevation: 0.0,
-                        fixedSize: Size(Get.width * 0.35, 40),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        )),
-                    child: Text(
-                      'Ignore',
-                      style: TextStyle(
-                          color: widget.userController.isDark
-                              ? primaryColor
-                              : primaryColor),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 65,
-                    child: Stack(
-                      children: [
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (widget.userModel.email == 'No email set') {
-                                Get.showSnackbar(GetSnackBar(
-                                  message: 'Login to continue',
-                                  duration: const Duration(
-                                    seconds: 3,
-                                  ),
-                                  backgroundColor: widget.userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                  mainButton: TextButton(
-                                    onPressed: () {
-                                      Get.to(() => ChooseAccountTypePage());
-                                      Get.closeCurrentSnackbar();
-                                    },
-                                    child: Text(
-                                      'Login Page',
-                                      style: TextStyle(
-                                        color: widget.userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ));
-                              } else {
-                                UserController().changeNotiOffers(
-                                    0,
-                                    false,
-                                    widget.userModel.userId,
-                                    widget.offersModel.offerId,
-                                    widget.userModel.accountType);
-                                Get.to(() => OfferReceivedDetails(
-                                      offersModel: widget.offersModel,
-                                    ));
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                fixedSize: Size(Get.width * 0.35, 40),
-                                elevation: 0.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                )),
-                            child: Text(
-                              'Details',
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (widget.userController.userModel!.offerIdsToCheck
-                            .contains(widget.offersModel.offerId))
-                          Positioned(
-                              right: 5,
-                              top: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  color: Colors.red,
-                                ),
-                                padding: const EdgeInsets.all(5),
-                                child: Icon(
-                                  Icons.notifications_on_sharp,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ))
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          RequestsProviderShortWidgetActive(
+            title: '',
+            offersModel: widget.offersModel,
+            isActive: true,
           ),
-        ),
+        ],
       ),
     );
   }

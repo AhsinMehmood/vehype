@@ -117,6 +117,7 @@ class LoginController {
                       .collection('users')
                       .doc(userId)
                       .get();
+              OneSignal.login(userId + userModel.accountType);
               // Get.offAll(() => const TabsPage());
               Get.offAll(() => const TabsPage());
             }
@@ -227,6 +228,8 @@ class LoginController {
                     .collection('users')
                     .doc(userId)
                     .get();
+            OneSignal.login(userId + userModel.accountType);
+
             Get.offAll(() => const TabsPage());
           }
         }

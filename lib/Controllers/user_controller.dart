@@ -103,6 +103,11 @@ class UserController with ChangeNotifier {
     notifyListeners();
   }
 
+  void closeStream() {
+    streamSubscription?.cancel();
+    notifyListeners();
+  }
+
   final storageRef = FirebaseStorage.instance.ref();
   Future<String> uploadImage(File file, String userId) async {
     final poiImageRef = storageRef
@@ -449,6 +454,29 @@ class UserController with ChangeNotifier {
     'isActive',
     'isHistoryActive',
   ];
+
+  addToNotifications(
+      UserModel notificationSender,
+      String notificationReceiverId,
+      String type,
+      String objectId,
+      String title,
+      String subtitle) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(notificationReceiverId)
+        .collection('notifications')
+        .add({
+      'title': title,
+      'subTitle': subtitle,
+      'createdAt': DateTime.now().toLocal().toIso8601String(),
+      'senderId': notificationSender.userId,
+      'senderName': notificationSender.name,
+      'type': type,
+      'isRead': false,
+      'objectId': objectId,
+    });
+  }
 
   changeNotiOffers(int fieldNameIndex, bool value, String userId,
       String requestId, String userAccountType) {

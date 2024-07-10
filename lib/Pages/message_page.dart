@@ -1235,13 +1235,20 @@ class AcceptOfferConfirm extends StatelessWidget {
                             .update({
                           'status': 'inProgress',
                         });
+                        UserController().addToNotifications(
+                            userModel,
+                            offersReceivedModel.offerBy,
+                            'offer',
+                            offersReceivedModel.id,
+                            'Offer Update',
+                            '${userModel.name}, Accepted your offer');
                         sendNotification(
                             offersReceivedModel.offerBy,
                             userModel.name,
                             'Offer Update',
                             '${userModel.name}, Accepted your offer',
                             offersReceivedModel.id,
-                            'Offer',
+                            'offer',
                             '');
                         Get.close(1);
                         Get.close(1);

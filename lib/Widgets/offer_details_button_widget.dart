@@ -43,8 +43,7 @@ class OfferDetailsButtonWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             if (offersReceivedModel.status == 'Cancelled' &&
-                offersReceivedModel.cancelBy == 'provider' &&
-                offersReceivedModel.ratingTwo == 0.0)
+                offersReceivedModel.ratingOne == 0.0)
               _getButton(Colors.white, () {
                 showModalBottomSheet(
                     context: context,
@@ -58,9 +57,10 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                     ),
                     isScrollControlled: true,
                     builder: (contex) {
-                      return RatingSheet2(
+                      return OwnerToProviderRatingSheet(
                           offersReceivedModel: offersReceivedModel,
                           offersModel: offersModel,
+                          // postedByDetails: postedByDetails,
                           isDark: userController.isDark);
                     });
               }, 'Give Rating', context),
@@ -79,21 +79,30 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                     ),
                     isScrollControlled: true,
                     builder: (contex) {
-                      return RatingSheet2(
+                      return OwnerToProviderRatingSheet(
                           offersReceivedModel: offersReceivedModel,
                           offersModel: offersModel,
+                          // postedByDetails: postedByDetails,
                           isDark: userController.isDark);
                     });
               }, 'Give Rating', context),
-            if (offersReceivedModel.status == 'Completed' &&
-                offersReceivedModel.ratingOne != 0.0)
+            if (offersReceivedModel.ratingOne != 0.0)
               RatingBarIndicator(
                 rating: offersReceivedModel.ratingOne,
                 itemBuilder: (context, _) => Icon(
                   Icons.star,
                   color: Colors.amber,
                 ),
-              ),
+              )
+            // else if (offersReceivedModel.status == 'Cancelled' &&
+            //     offersReceivedModel.ratingTwo != 0.0)
+            //   RatingBarIndicator(
+            //     rating: offersReceivedModel.ratingTwo,
+            //     itemBuilder: (context, _) => Icon(
+            //       Icons.star,
+            //       color: Colors.amber,
+            //     ),
+            //   ),
             // else
           ],
         ),
@@ -178,6 +187,13 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                       offersReceivedModel.offerBy,
                       offersModel.offerId,
                       userModel.accountType);
+                  UserController().addToNotifications(
+                      userModel,
+                      postedByDetails.userId,
+                      'offer',
+                      offersReceivedModel.id,
+                      'Offer Update',
+                      '${userModel.name}, Completed a Job');
 
                   Get.close(1);
                 },
@@ -257,25 +273,47 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                                       onPressed: () async {
                                         if (offersReceivedModel.ownerId ==
                                             userModel.userId) {
+                                          Get.dialog(LoadingDialog(),
+                                              barrierDismissible: false);
+
+                                          await UserController()
+                                              .changeNotiOffers(
+                                                  4,
+                                                  true,
+                                                  offersReceivedModel.offerBy,
+                                                  offersModel.offerId,
+                                                  userModel.accountType);
+                                          await UserController().addToNotifications(
+                                              userModel,
+                                              postedByDetails.userId,
+                                              'offer',
+                                              offersReceivedModel.id,
+                                              'Offer Update',
+                                              '${userModel.name}, Cancelled the Job');
                                           OffersController().cancelOfferByOwner(
                                               offersReceivedModel, userModel);
-                                          UserController().changeNotiOffers(
-                                              4,
-                                              true,
-                                              offersReceivedModel.offerBy,
-                                              offersModel.offerId,
-                                              userModel.accountType);
                                         } else {
-                                          OffersController()
+                                          Get.dialog(LoadingDialog(),
+                                              barrierDismissible: false);
+                                          await UserController().addToNotifications(
+                                              userModel,
+                                              postedByDetails.userId,
+                                              'offer',
+                                              offersReceivedModel.id,
+                                              'Offer Update',
+                                              '${userModel.name}, Cancelled the Job');
+
+                                          await UserController()
+                                              .changeNotiOffers(
+                                                  6,
+                                                  true,
+                                                  offersReceivedModel.ownerId,
+                                                  offersModel.offerId,
+                                                  userModel.accountType);
+                                          await OffersController()
                                               .cancelOfferByProvider(
                                                   offersReceivedModel,
                                                   userModel);
-                                          UserController().changeNotiOffers(
-                                              6,
-                                              true,
-                                              offersReceivedModel.ownerId,
-                                              offersModel.offerId,
-                                              userModel.accountType);
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(

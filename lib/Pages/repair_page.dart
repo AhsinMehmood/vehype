@@ -3,10 +3,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -15,19 +12,18 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/create_request_page.dart';
-import 'package:vehype/Pages/inactive_offers_seeker.dart';
-import 'package:vehype/Pages/received_offers_seeker.dart';
 import 'package:vehype/Pages/select_service_crv.dart';
-import 'package:vehype/Widgets/request_vehicle_details.dart';
-import 'package:vehype/Widgets/vehicle_owner_request_widget.dart';
 import 'package:vehype/const.dart';
 import 'package:http/http.dart' as http;
 
+import '../Models/notifications_model.dart';
+import '../Widgets/requests_owner_short_widget.dart';
 import 'choose_account_type.dart';
+import 'notifications_page.dart';
+import 'owner_notifications_page.dart';
 
 Future<void> sendNotification(String userId, String userName, String heading,
-    String contents, String chatId, String type, String messageId) async {
+    String contents, String objectId, String type, String messageId) async {
   const appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
   const restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
 
@@ -37,7 +33,7 @@ Future<void> sendNotification(String userId, String userName, String heading,
     'contents': {'en': contents},
     'include_external_user_ids': [userId],
     'data': {
-      'chatId': chatId,
+      'objectId': objectId,
       'type': type,
       'messageId': messageId,
     },
@@ -153,6 +149,96 @@ class _RepairPageState extends State<RepairPage> {
                 fontWeight: FontWeight.w800,
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userModel.userId)
+                        .collection('notifications')
+                        .where('isRead', isEqualTo: false)
+                        .snapshots(),
+                    builder: (context,
+                        AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+                            notificationSnap) {
+                      List<NotificationsModel> notifications = [];
+                      if (!notificationSnap.hasData) {
+                        return IconButton(
+                          onPressed: () {
+                            Get.to(() => NotificationsPage(
+                                  notifications: [],
+                                ));
+                          },
+                          icon: Icon(
+                            Icons.notifications,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            size: 30,
+                          ),
+                        );
+                      }
+                      for (var notificationData
+                          in notificationSnap.data!.docs) {
+                        notifications
+                            .add(NotificationsModel.fromJson(notificationData));
+                      }
+                      if (notifications.isEmpty) {
+                        return IconButton(
+                          onPressed: () {
+                            Get.to(() => OwnerNotificationsPage(
+                                  notifications: [],
+                                ));
+                          },
+                          icon: Icon(
+                            Icons.notifications,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            size: 30,
+                          ),
+                        );
+                      }
+                      return InkWell(
+                        onTap: () {
+                          Get.to(() => OwnerNotificationsPage(
+                                notifications: notifications,
+                              ));
+                        },
+                        child: Stack(
+                          children: [
+                            Icon(
+                              Icons.notifications,
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              size: 30,
+                            ),
+                            Container(
+                              height: 20,
+                              width: 20,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(200),
+                                color: Colors.red,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text(
+                                  notifications.length.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }),
+              )
+            ],
             bottom: TabBar(
               // isScrollable: true,
               indicatorColor:
@@ -348,7 +434,7 @@ class _RepairPageState extends State<RepairPage> {
                     }
                     return InActiveOffers(
                         offersPosted: offersPosted,
-                        title: 'Rate Job',
+                        title: 'Job Details',
                         userController: userController);
                   }),
             ),
@@ -394,153 +480,9 @@ class _InActiveOffersState extends State<InActiveOffers> {
           final String vehicleMake = vehicleInfo[1].trim();
           final String vehicleYear = vehicleInfo[2].trim();
           final String vehicleModle = vehicleInfo[3].trim();
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: () {
-                // Get.to(() => CreateRequestPage(offersModel: offersModel));
-              },
-              child: Card(
-                color: widget.userController.isDark
-                    ? Colors.blueGrey.shade700
-                    : Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Stack(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        VehicleDetailsRequest(
-                            userController: widget.userController,
-                            vehicleType: vehicleType,
-                            vehicleMake: vehicleMake,
-                            vehicleYear: vehicleYear,
-                            vehicleModle: vehicleModle,
-                            offersModel: offersModel),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            StreamBuilder<List<OffersReceivedModel>>(
-                                stream: FirebaseFirestore.instance
-                                    .collection('offersReceived')
-                                    .where('offerId',
-                                        isEqualTo: offersModel.offerId)
-                                    .snapshots()
-                                    .map((event) => event.docs
-                                        .map((e) =>
-                                            OffersReceivedModel.fromJson(e))
-                                        .toList()),
-                                builder: (context,
-                                    AsyncSnapshot<List<OffersReceivedModel>>
-                                        snapshots) {
-                                  List<OffersReceivedModel>
-                                      offersReceivedModel =
-                                      snapshots.data ?? [];
-
-                                  if (offersReceivedModel.isEmpty) {
-                                    return Text(
-                                      'Deleted',
-                                    );
-                                  }
-                                  if (offersReceivedModel.first.status ==
-                                          'Completed' &&
-                                      offersReceivedModel.first.ratingOne !=
-                                          0.0) {
-                                    return RatingBarIndicator(
-                                      rating:
-                                          offersReceivedModel.first.ratingOne,
-                                      itemBuilder: (context, _) => Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                    );
-                                  }
-                                  if (offersReceivedModel.first.status
-                                          .toLowerCase() ==
-                                      'Cancelled'.toLowerCase()) {
-                                    return Text('Cancelled');
-                                  }
-
-                                  return SizedBox(
-                                    height: 65,
-                                    child: Stack(
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              UserController().changeNotiOffers(
-                                                  6,
-                                                  false,
-                                                  widget.userController
-                                                      .userModel!.userId,
-                                                  offersModel.offerId,
-                                                  widget.userController
-                                                      .userModel!.accountType);
-                                              Get.to(() => InActiveOffersSeeker(
-                                                    offersModel: offersModel,
-                                                    tittle: 'Rate Job',
-                                                  ));
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    widget.userController.isDark
-                                                        ? Colors.white
-                                                        : primaryColor,
-                                                elevation: 0.0,
-                                                fixedSize:
-                                                    Size(Get.width * 0.8, 40),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                )),
-                                            child: Text(
-                                              widget.title,
-                                              style: TextStyle(
-                                                  color: widget
-                                                          .userController.isDark
-                                                      ? primaryColor
-                                                      : Colors.white),
-                                            ),
-                                          ),
-                                        ),
-                                        if (widget.userController.userModel!
-                                            .offerIdsToCheck
-                                            .contains(offersModel.offerId))
-                                          Positioned(
-                                              right: 5,
-                                              top: 0,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          200),
-                                                  color: Colors.red,
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                child: Icon(
-                                                  Icons.notifications_on_sharp,
-                                                  color: Colors.white,
-                                                  size: 28,
-                                                ),
-                                              ))
-                                      ],
-                                    ),
-                                  );
-                                }),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          return RequestsOwnerShortWidgetActive(
+            offersModel: offersModel,
+            title: widget.title,
           );
         });
   }
@@ -576,8 +518,15 @@ class _ActiveOffersState extends State<ActiveOffers> {
         itemBuilder: (context, index) {
           OffersModel offersModel = widget.offersPosted[index];
 
-          return VehicleOwnerRequestWidget(
-              offersModel: offersModel, offersReceivedModel: null);
+          return Column(
+            children: [
+              RequestsOwnerShortWidgetActive(
+                offersModel: offersModel,
+                isActive: true,
+                title: '',
+              ),
+            ],
+          );
         });
   }
 }

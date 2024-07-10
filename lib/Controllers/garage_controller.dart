@@ -517,7 +517,6 @@ class GarageController with ChangeNotifier {
   Future<String> saveRequest(String desc, LatLng latLng, String userId,
       String? offerId, String garageId) async {
     try {
-      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       String requestId = '';
       print(userId);
       List images = [];

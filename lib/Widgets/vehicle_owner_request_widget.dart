@@ -15,6 +15,7 @@ import 'package:vehype/Widgets/offer_request_details.dart';
 
 import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
+import '../Pages/request_details_page.dart';
 import '../const.dart';
 import 'request_vehicle_details.dart';
 
@@ -32,47 +33,40 @@ class VehicleOwnerRequestWidget extends StatelessWidget {
     final UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     List<String> vehicleInfo = offersModel.vehicleId.split(',');
-    final String vehicleType = vehicleInfo[0];
-    final String vehicleMake = vehicleInfo[1];
-    final String vehicleYear = vehicleInfo[2];
-    final String vehicleModle = vehicleInfo[3];
+    final String vehicleType = vehicleInfo[0].trim();
+    final String vehicleMake = vehicleInfo[1].trim();
+    final String vehicleYear = vehicleInfo[2].trim();
+    final String vehicleModle = vehicleInfo[3].trim();
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: InkWell(
-        onTap: () {
-          Get.to(() => CreateRequestPage(offersModel: offersModel));
-        },
-        child: Card(
-          color:
-              userController.isDark ? Colors.blueGrey.shade700 : Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: VehicleDetailsRequest(
-                    userController: userController,
-                    vehicleType: vehicleType,
-                    vehicleMake: vehicleMake,
-                    vehicleYear: vehicleYear,
-                    vehicleModle: vehicleModle,
-                    offersModel: offersModel),
-              ),
-              if (offersReceivedModel != null)
-                OfferRequestDetails(
-                    userController: userController,
-                    offersReceivedModel: offersReceivedModel!),
-              if (offersReceivedModel == null)
-                ActiveOfferDetailsButtonsVehicleOwner(
-                    offersModel: offersModel, userController: userController),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-          ),
+      child: Card(
+        color: userController.isDark ? Colors.blueGrey.shade700 : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: VehicleDetailsRequest(
+                  userController: userController,
+                  vehicleType: vehicleType,
+                  vehicleMake: vehicleMake,
+                  vehicleYear: vehicleYear,
+                  vehicleModle: vehicleModle,
+                  offersModel: offersModel),
+            ),
+            if (offersReceivedModel != null)
+              OfferRequestDetails(
+                  userController: userController,
+                  offersReceivedModel: offersReceivedModel!),
+            // if (offersReceivedModel == null)
+            ActiveOfferDetailsButtonsVehicleOwner(
+                offersModel: offersModel, userController: userController),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
         ),
       ),
     );
@@ -94,8 +88,9 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
     return StreamBuilder<List<OffersReceivedModel>>(
         stream: FirebaseFirestore.instance
             .collection('offersReceived')
+            .where('ownerId', isEqualTo: userController.userModel!.userId)
             .where('offerId', isEqualTo: offersModel.offerId)
-            // .where('status', isNotEqualTo: 'Cancelled')
+            .where('status', isNotEqualTo: 'ignore')
             .snapshots()
             .map((event) => event.docs
                 .map((e) => OffersReceivedModel.fromJson(e))
@@ -109,70 +104,6 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                height: 65,
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          UserController().changeNotiOffers(
-                              5,
-                              false,
-                              userController.userModel!.userId,
-                              offersModel.offerId,
-                              userController.userModel!.accountType);
-                          Get.to(() => ReceivedOffersSeeker(
-                                offersModel: offersModel,
-                              ));
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            elevation: 0.0,
-                            fixedSize: Size(
-                                filterReceivedOffers.isNotEmpty
-                                    ? Get.width * 0.8
-                                    : Get.width * 0.4,
-                                40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            )),
-                        child: Text(
-                          '${filterReceivedOffers.length} Offers',
-                          style: TextStyle(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white),
-                        ),
-                      ),
-                    ),
-                    if (userController.userModel!.offerIdsToCheck
-                        .contains(offersModel.offerId))
-                      Positioned(
-                          right: 5,
-                          top: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.red,
-                            ),
-                            padding: const EdgeInsets.all(5),
-                            child: Icon(
-                              Icons.notifications_on_sharp,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                          ))
-                  ],
-                ),
-              ),
-              if (filterReceivedOffers.isEmpty)
-                const SizedBox(
-                  width: 10,
-                ),
               if (filterReceivedOffers.isEmpty)
                 ElevatedButton(
                   onPressed: () {
@@ -200,7 +131,87 @@ class ActiveOfferDetailsButtonsVehicleOwner extends StatelessWidget {
                     'Delete',
                     style: TextStyle(color: Colors.white),
                   ),
+                )
+              else
+                Container(
+                  height: 50,
+                  child: Stack(
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            UserController().changeNotiOffers(
+                                5,
+                                false,
+                                userController.userModel!.userId,
+                                offersModel.offerId,
+                                userController.userModel!.accountType);
+                            Get.to(() => ReceivedOffersSeeker(
+                                  offersModel: offersModel,
+                                ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              elevation: 0.0,
+                              fixedSize: Size(Get.width * 0.4, 40),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              )),
+                          child: Text(
+                            filterReceivedOffers.length == 1
+                                ? '${filterReceivedOffers.length} Offer'
+                                : '${filterReceivedOffers.length} Offers',
+                            style: TextStyle(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white),
+                          ),
+                        ),
+                      ),
+                      if (userController.userModel!.offerIdsToCheck
+                          .contains(offersModel.offerId))
+                        Positioned(
+                            right: 5,
+                            top: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(200),
+                                color: Colors.red,
+                              ),
+                              padding: const EdgeInsets.all(3),
+                              child: Icon(
+                                Icons.notifications_on_sharp,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ))
+                    ],
+                  ),
                 ),
+              // if (filterReceivedOffers.isEmpty)
+              const SizedBox(
+                width: 10,
+              ),
+              // if (filterReceivedOffers.isEmpty)
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(() => RequestDetailsPage(offersModel: offersModel));
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    elevation: 0.0,
+                    fixedSize: Size(Get.width * 0.4, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    )),
+                child: Text(
+                  'View Details',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
             ],
           );
         });

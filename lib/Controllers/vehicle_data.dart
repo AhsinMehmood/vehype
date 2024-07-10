@@ -172,6 +172,15 @@ Future<String> getJwtToken() async {
   }
 }
 
+List<AdditionalServiceModel> getAdditionalService() {
+  List<AdditionalServiceModel> list = [
+    AdditionalServiceModel(name: 'Fix at my place', icon: icFixAtMyPlace),
+    AdditionalServiceModel(name: 'Pick it up', icon: icPickUpMyVehicle),
+  ];
+
+  return list;
+}
+
 List<Service> getServices() {
   List<Service> services = [
     Service(name: "AC (Air conditioning)", image: icAc),
@@ -196,6 +205,7 @@ List<Service> getServices() {
     Service(name: "Emission", image: icEmissions),
     Service(name: "Suspension/Chassis", image: icSuspenssionChassis),
     Service(name: "Drivetrain", image: icDrivetrain),
+    Service(name: "Transmission", image: icTransmission),
   ];
 
   services.sort((a, b) => a.name.compareTo(b.name));
@@ -216,4 +226,11 @@ class YearModel {
   bool startsWith(int query, List<int> years) {
     return years.any((year) => year.toString().startsWith(query.toString()));
   }
+}
+
+class AdditionalServiceModel {
+  final String name;
+  final String icon;
+
+  AdditionalServiceModel({required this.name, required this.icon});
 }

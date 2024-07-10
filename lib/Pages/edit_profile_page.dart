@@ -740,7 +740,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             await SharedPreferences.getInstance();
                         String realUserId =
                             sharedPreferences.getString('userId') ?? '';
-                        OneSignal.logout();
+                        await OneSignal.logout();
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
                             .collection('users')
@@ -748,6 +748,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             .update({
                           'accountType': 'provider',
                         });
+                        userController.closeStream();
+
                         Get.close(1);
                         Get.offAll(() => SplashPage());
                       },
@@ -832,7 +834,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         print(realUserId);
                         UserModel userModel = userController.userModel!;
                         print(userModel.userId);
-                        OneSignal.logout();
+                        await OneSignal.logout();
 
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
@@ -841,6 +843,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             .update({
                           'accountType': 'seeker',
                         });
+                        userController.closeStream();
                         Get.close(1);
                         Get.offAll(() => SplashPage());
                       },

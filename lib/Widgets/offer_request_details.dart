@@ -137,3 +137,34 @@ class OfferRequestDetails extends StatelessWidget {
     );
   }
 }
+
+class OfferRequestDetailsShort extends StatelessWidget {
+  const OfferRequestDetailsShort({
+    super.key,
+    required this.userController,
+    required this.offersReceivedModel,
+  });
+
+  final UserController userController;
+  final OffersReceivedModel offersReceivedModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [],
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -569,12 +569,19 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'comment': comment.text,
       });
       // userController.getRequestsHistoryProvider();
+      UserController().addToNotifications(
+          userModel,
+          widget.ownerModel.userId,
+          'offer',
+          widget.offersReceivedModel!.id,
+          'Offer Update',
+          '${userModel.name} updated his offer.');
       sendNotification(
           widget.ownerModel.userId,
           userModel.name,
           'Offer Update',
           '${userModel.name} updated his offer.',
-          'chatId',
+          widget.offersReceivedModel!.id,
           'offer',
           'messageId');
       UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
@@ -601,14 +608,20 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
       });
-
+      UserController().addToNotifications(
+          userModel,
+          widget.ownerModel.userId,
+          'offer',
+          reference.id,
+          'Offer Update',
+          '${userModel.name} Sent you an offer.');
       garageController.closeOfferSubmit();
       sendNotification(
           widget.ownerModel.userId,
           userModel.name,
           'Offer Update',
           '${userModel.name} Sent you an offer.',
-          'chatId',
+          reference.id,
           'offer',
           'messageId');
       UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
@@ -638,8 +651,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
 }
 
 String formatDateTime(DateTime dateTime) {
-  DateFormat format = DateFormat(dateTimePattern);
-
+  DateFormat format = DateFormat.yMMMMd('en_US').add_jm();
+//  -> July 10, 2024 5:08 PM
   String dateString = format.format(dateTime);
 
   return dateString;

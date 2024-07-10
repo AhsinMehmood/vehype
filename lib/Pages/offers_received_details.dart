@@ -71,7 +71,7 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                     color: userController.isDark ? Colors.white : primaryColor,
                   )),
               title: Text(
-                widget.offersModel.vehicleId,
+                'Request Details',
                 style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
                   fontSize: 18,
@@ -107,22 +107,6 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                 padding: const EdgeInsets.all(15.0),
                 child: Column(
                   children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: VehicleDetailsRequest(
-                          userController: userController,
-                          vehicleType: vehicleType,
-                          vehicleMake: vehicleMake,
-                          vehicleYear: vehicleYear,
-                          vehicleModle: vehicleModle,
-                          offersModel: widget.offersModel),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -193,208 +177,20 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                       ],
                     ),
                     const SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: VehicleDetailsRequest(
+                          userController: userController,
+                          vehicleType: vehicleType,
+                          vehicleMake: vehicleMake,
+                          vehicleYear: vehicleYear,
+                          vehicleModle: vehicleModle,
+                          offersModel: widget.offersModel),
+                    ),
+                    const SizedBox(
                       height: 25,
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Request Details',
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              // color: Colors.black,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            widget.offersModel.description == ''
-                                ? 'Details will be provided on Chat.'
-                                : widget.offersModel.description,
-                            style: TextStyle(
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        height: 1,
-                        width: Get.width,
-                        color: changeColor(color: 'D9D9D9'),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      onTap: () {},
-                      child: SizedBox(
-                        width: Get.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Additional Service',
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              widget.offersModel.additionalService == ''
-                                  ? 'No Additional Service'
-                                  : widget.offersModel.additionalService,
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                // color: changeColor(color: '7B7B7B'),
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                height: 1,
-                                width: Get.width,
-                                color: changeColor(color: 'D9D9D9'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      child: SizedBox(
-                        width: Get.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Location',
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                              height: 140,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              width: Get.width,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: GoogleMap(
-                                  markers: {
-                                    Marker(
-                                      markerId: MarkerId('current'),
-                                      position: LatLng(widget.offersModel.lat,
-                                          widget.offersModel.long),
-                                    ),
-                                  },
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(widget.offersModel.lat,
-                                        widget.offersModel.long),
-                                    zoom: 16.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: InkWell(
-                                onTap: () {
-                                  MapsLauncher.launchCoordinates(
-                                      userModel.lat, userModel.long);
-                                },
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(200),
-                                  ),
-                                  color: primaryColor,
-                                  child: Container(
-                                    height: 40,
-                                    width: Get.width * 0.7,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(200),
-                                        color: primaryColor,
-                                        border:
-                                            Border.all(color: Colors.white)),
-                                    child: Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.directions_outlined,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(
-                                            'View Directions',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                height: 1,
-                                width: Get.width,
-                                color: changeColor(color: 'D9D9D9'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 40,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -503,29 +299,29 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
     );
   }
 
-  applyToJob(UserModel userModel) async {
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-    await FirebaseFirestore.instance
-        .collection('offers')
-        .doc(widget.offersModel.offerId)
-        .update({
-      'offersReceived': FieldValue.arrayUnion([userModel.userId]),
-    });
-    await FirebaseFirestore.instance
-        .collection('offers')
-        .doc(widget.offersModel.offerId)
-        .collection('offersReceived')
-        .add({
-      'offerBy': userModel.userId,
-      'offerAt': DateTime.now().toUtc().toIso8601String(),
-      'status': 'pending',
-    });
-    Get.close(2);
-    Get.showSnackbar(
-      GetSnackBar(
-        message: 'Submitted successfully.',
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
+  // applyToJob(UserModel userModel) async {
+  //   Get.dialog(LoadingDialog(), barrierDismissible: false);
+  //   await FirebaseFirestore.instance
+  //       .collection('offers')
+  //       .doc(widget.offersModel.offerId)
+  //       .update({
+  //     'offersReceived': FieldValue.arrayUnion([userModel.userId]),
+  //   });
+  //   await FirebaseFirestore.instance
+  //       .collection('offers')
+  //       .doc(widget.offersModel.offerId)
+  //       .collection('offersReceived')
+  //       .add({
+  //     'offerBy': userModel.userId,
+  //     'offerAt': DateTime.now().toUtc().toIso8601String(),
+  //     'status': 'pending',
+  //   });
+  //   Get.close(2);
+  //   Get.showSnackbar(
+  //     GetSnackBar(
+  //       message: 'Submitted successfully.',
+  //       duration: Duration(seconds: 3),
+  //     ),
+  //   );
+  // }
 }

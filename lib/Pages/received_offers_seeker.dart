@@ -29,13 +29,21 @@ import 'repair_page.dart';
 
 class ReceivedOffersSeeker extends StatefulWidget {
   final OffersModel offersModel;
-  const ReceivedOffersSeeker({super.key, required this.offersModel});
+  final bool isFromNotification;
+  final OffersReceivedModel? offersReceivedModel;
+  const ReceivedOffersSeeker(
+      {super.key,
+      required this.offersModel,
+      this.offersReceivedModel,
+      this.isFromNotification = false});
 
   @override
   State<ReceivedOffersSeeker> createState() => _ReceivedOffersSeekerState();
 }
 
 class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
+  ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -71,91 +79,65 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: VehicleDetailsRequest(
-                  userController: userController,
-                  isShowImage: false,
-                  vehicleType: vehicleType,
-                  vehicleMake: vehicleMake,
-                  vehicleYear: vehicleYear,
-                  vehicleModle: vehicleModle,
-                  offersModel: widget.offersModel),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Container(
-              height: 1,
-              width: Get.width,
-              color: Colors.grey,
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: StreamBuilder<List<OffersReceivedModel>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('offersReceived')
-                      .where('ownerId', isEqualTo: userModel.userId)
-                      .where('offerId', isEqualTo: widget.offersModel.offerId)
-                      .where('status', isNotEqualTo: 'ignore')
-                      .snapshots()
-                      .map((event) => event.docs
-                          .map((e) => OffersReceivedModel.fromJson(e))
-                          .toList()),
-                  builder: (context,
-                      AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
-                    if (!snapshot.hasData) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: Get.height * 0.7,
-                          ),
-                          Center(
-                            child: CircularProgressIndicator(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    List<OffersReceivedModel> offers = snapshot.data ?? [];
+      body: StreamBuilder<List<OffersReceivedModel>>(
+          stream: FirebaseFirestore.instance
+              .collection('offersReceived')
+              .where('ownerId', isEqualTo: userModel.userId)
+              .where('offerId', isEqualTo: widget.offersModel.offerId)
+              .where('status', isNotEqualTo: 'ignore')
+              .snapshots()
+              .map((event) => event.docs
+                  .map((e) => OffersReceivedModel.fromJson(e))
+                  .toList()),
+          builder:
+              (context, AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                ),
+              );
+            }
+            List<OffersReceivedModel> offers = snapshot.data ?? [];
 
-                    return ListView.builder(
-                        itemCount: offers.length,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          OffersReceivedModel offersReceivedModel =
-                              offers[index];
-                          return StreamBuilder<UserModel>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(offersReceivedModel.offerBy)
-                                  .snapshots()
-                                  .map((newEvent) =>
-                                      UserModel.fromJson(newEvent)),
-                              builder:
-                                  (context, AsyncSnapshot<UserModel> snapshot) {
-                                if (!snapshot.hasData) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                    ),
-                                  );
-                                }
-                                UserModel postedByDetails = snapshot.data!;
-                                return SwipeableTile(
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: offers.length,
+                      controller: scrollController,
+                      shrinkWrap: true,
+                      // physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        OffersReceivedModel offersReceivedModel = offers[index];
+                        return StreamBuilder<UserModel>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(offersReceivedModel.offerBy)
+                                .snapshots()
+                                .map(
+                                    (newEvent) => UserModel.fromJson(newEvent)),
+                            builder:
+                                (context, AsyncSnapshot<UserModel> snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                  ),
+                                );
+                              }
+                              UserModel postedByDetails = snapshot.data!;
+                              return Card(
+                                color: widget.offersReceivedModel != null
+                                    ? Colors.red
+                                    : userController.isDark
+                                        ? Colors.blueGrey.shade700
+                                        : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: SwipeableTile(
                                   color: Colors.black,
                                   swipeThreshold: 0.2,
                                   direction: SwipeDirection.horizontal,
@@ -176,13 +158,20 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                           .update({
                                         'status': 'inProgress',
                                       });
+                                      UserController().addToNotifications(
+                                          userModel,
+                                          postedByDetails.userId,
+                                          'offer',
+                                          offersReceivedModel.id,
+                                          'Offer Update',
+                                          '${userModel.name}, Accepted your offer');
                                       sendNotification(
                                           offersReceivedModel.offerBy,
                                           userModel.name,
                                           'Offer Update',
-                                          '${userModel.name}, Accepted the offer',
+                                          '${userModel.name}, Accepted your offer',
                                           offersReceivedModel.id,
-                                          'Offer',
+                                          'offer',
                                           '');
 
                                       ChatModel? chatModel =
@@ -199,7 +188,11 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                             'Offer Accepted',
                                             '${userModel.name} accepted your offer for ${widget.offersModel.vehicleId}',
                                             'Message');
-
+                                        chatModel = await ChatController()
+                                            .getChat(
+                                                userModel.userId,
+                                                postedByDetails.userId,
+                                                widget.offersModel.offerId);
                                         Get.close(2);
                                         Get.to(() => MessagePage(
                                               chatModel: chatModel!,
@@ -209,7 +202,7 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                         Get.close(2);
 
                                         Get.to(() => MessagePage(
-                                              chatModel: chatModel,
+                                              chatModel: chatModel!,
                                               secondUser: postedByDetails,
                                             ));
                                       }
@@ -464,17 +457,31 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                             ),
 
                                             _getButton(Colors.white, () async {
+                                              Get.dialog(LoadingDialog(),
+                                                  barrierDismissible: false);
+
+                                              await UserController()
+                                                  .addToNotifications(
+                                                      userModel,
+                                                      postedByDetails.userId,
+                                                      'offer',
+                                                      offersReceivedModel.id,
+                                                      'Offer Update',
+                                                      '${userModel.name}, Accepted your offer');
+                                              await UserController()
+                                                  .changeNotiOffers(
+                                                      2,
+                                                      true,
+                                                      offersReceivedModel
+                                                          .offerBy,
+                                                      widget
+                                                          .offersModel.offerId,
+                                                      userModel.accountType);
                                               OffersController().acceptOffer(
                                                   offersReceivedModel,
                                                   widget.offersModel,
                                                   userModel,
                                                   postedByDetails);
-                                              UserController().changeNotiOffers(
-                                                  2,
-                                                  true,
-                                                  offersReceivedModel.offerBy,
-                                                  widget.offersModel.offerId,
-                                                  userModel.accountType);
                                             }, 'Accept'),
 
                                             // else
@@ -486,14 +493,14 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                       ],
                                     ),
                                   ),
-                                );
-                              });
-                        });
-                  }),
-            )
-          ],
-        ),
-      ),
+                                ),
+                              );
+                            });
+                      }),
+                ),
+              ],
+            );
+          }),
     );
   }
 

@@ -11,6 +11,7 @@ Color changeColor({required String color}) {
   }
 
   Color myColor = Color(int.parse('0xFF$hexColor'));
+  // print(myColor.)
   return myColor;
 }
 
@@ -60,6 +61,9 @@ const String colorGrey60 = 'CECECE';
 const String colorBlack80 = '636267';
 const String colorPurple80 = 'A88ED4';
 
+const String icPickUpMyVehicle = 'assets/images/ic_pick_up_my_vehicle.svg';
+const String icFixAtMyPlace = 'assets/images/ic_fix_at_my_place.svg';
+
 const String icAc = 'assets/images/ic_ac.svg';
 const String icBodyPaint = 'assets/images/ic_body_paint.svg';
 const String icBreakSystem = 'assets/images/ic_break_system.svg';
@@ -74,7 +78,6 @@ const String icElectrical = 'assets/images/ic_electrical.svg';
 const String icEmissions = 'assets/images/ic_emissions.svg';
 const String icEngine = 'assets/images/ic_engine.svg';
 const String icFilter = 'assets/images/ic_filter.svg';
-const String icFixAtMyPlace = 'assets/images/ic_fix_at_my_place.svg';
 const String icGarage = 'assets/images/ic_garage.svg';
 const String icGarageRent = 'assets/images/ic_garage_rent.svg';
 const String icGlassDoorService = 'assets/images/ic_glass_door_service.svg';
@@ -95,7 +98,7 @@ const String icMinus = 'assets/images/ic_minus.svg';
 const String icMyLocation = 'assets/images/ic_my_location.svg';
 const String icOilChange = 'assets/images/ic_oil_change.svg';
 const String icPartsSupplies = 'assets/images/ic_parts_supplies.svg';
-const String icPickUpMyVehicle = 'assets/images/ic_pick_up_my_vehicle.svg';
+
 const String icPlus = 'assets/images/ic_plus.svg';
 const String icSetting = 'assets/images/ic_setting.svg';
 const String icSuspenssionChassis = 'assets/images/ic_suspenssion_chassis.svg';
@@ -107,6 +110,8 @@ const String icWheelRepair = 'assets/rims_Repair_Bright.svg';
 const String icWheelTires = 'assets/images/ic_wheel_tires.svg';
 const String icWindshield = 'assets/images/ic_windshield.svg';
 const String icWrench = 'assets/images/ic_wrench.svg';
+const String icTransmission = 'assets/images/ic_wrench.svg';
+
 List<String> checkBadWords(String inputText) {
   List<String> detectedBadWords = [];
   String lowerCaseInput = inputText.toLowerCase();

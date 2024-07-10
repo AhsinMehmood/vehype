@@ -108,7 +108,7 @@ class _MyAppState extends State<MyApp> {
   listenOneSignalNotification() {
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
       if (event.notification.additionalData!['type'] == 'Message') {
-        FlutterAppBadger.updateBadgeCount(1);
+        // FlutterAppBadger.updateBadgeCount(1);
         // print(event.notification.additionalData);
         ChatController().updateMessage(
             event.notification.additionalData!['chatId'],

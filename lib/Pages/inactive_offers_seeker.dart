@@ -36,8 +36,14 @@ import 'repair_page.dart';
 class InActiveOffersSeeker extends StatefulWidget {
   final OffersModel offersModel;
   final String tittle;
+  final bool isFromNoti;
+  final OffersReceivedModel offersReceivedModel;
   const InActiveOffersSeeker(
-      {super.key, required this.offersModel, required this.tittle});
+      {super.key,
+      required this.offersModel,
+      required this.offersReceivedModel,
+      required this.tittle,
+      this.isFromNoti = false});
 
   @override
   State<InActiveOffersSeeker> createState() => _InActiveOffersSeekerState();
@@ -51,10 +57,10 @@ class _InActiveOffersSeekerState extends State<InActiveOffersSeeker> {
     final GarageController garageController =
         Provider.of<GarageController>(context);
     List<String> vehicleInfo = widget.offersModel.vehicleId.split(',');
-    final String vehicleType = vehicleInfo[0].trim();
-    final String vehicleMake = vehicleInfo[1].trim();
-    final String vehicleYear = vehicleInfo[2].trim();
-    final String vehicleModle = vehicleInfo[3].trim();
+    final String vehicleType = vehicleInfo[0];
+    final String vehicleMake = vehicleInfo[1];
+    final String vehicleYear = vehicleInfo[2];
+    final String vehicleModle = vehicleInfo[3];
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(
@@ -71,9 +77,9 @@ class _InActiveOffersSeekerState extends State<InActiveOffersSeeker> {
               color: userController.isDark ? Colors.white : primaryColor,
             )),
         title: Text(
-          widget.offersModel.status == 'inProgress'
-              ? 'Check Progress'
-              : 'Rate Job',
+          widget.offersReceivedModel.status == 'ignore'
+              ? 'Ignored'
+              : widget.offersReceivedModel.status,
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 20,
@@ -81,215 +87,184 @@ class _InActiveOffersSeekerState extends State<InActiveOffersSeeker> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: VehicleDetailsRequest(
-                  userController: userController,
-                  isShowImage: false,
-                  vehicleType: vehicleType,
-                  vehicleMake: vehicleMake,
-                  vehicleYear: vehicleYear,
-                  vehicleModle: vehicleModle,
-                  offersModel: widget.offersModel),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: StreamBuilder<List<OffersReceivedModel>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('offersReceived')
-                      .where('ownerId', isEqualTo: userModel.userId)
-                      .where('offerId', isEqualTo: widget.offersModel.offerId)
-                      // .where('status', isNotEqualTo: 'ignore')
-                      .snapshots()
-                      .map((event) => event.docs
-                          .map((e) => OffersReceivedModel.fromJson(e))
-                          .toList()),
-                  builder: (context,
-                      AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: Get.height * 0.5,
-                          ),
-                          Center(
+      body: StreamBuilder<List<OffersReceivedModel>>(
+          stream: FirebaseFirestore.instance
+              .collection('offersReceived')
+              .where('ownerId', isEqualTo: userModel.userId)
+              .where('offerId', isEqualTo: widget.offersModel.offerId)
+              // .where('status', isNotEqualTo: 'ignore')
+              .snapshots()
+              .map((event) => event.docs
+                  .map((e) => OffersReceivedModel.fromJson(e))
+                  .toList()),
+          builder:
+              (context, AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
+            if (!snapshot.hasData) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                ),
+              );
+            }
+            List<OffersReceivedModel> filter = snapshot.data ?? [];
+            List<OffersReceivedModel> offers =
+                filter.where((offer) => offer.status != 'Pending').toList();
+
+            return ListView.builder(
+                itemCount: offers.length,
+                shrinkWrap: true,
+                // physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  OffersReceivedModel offersReceivedModel = offers[index];
+                  return StreamBuilder<UserModel>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(offersReceivedModel.offerBy)
+                          .snapshots()
+                          .map((newEvent) => UserModel.fromJson(newEvent)),
+                      builder: (context, snapshot2) {
+                        if (!snapshot2.hasData) {
+                          return Center(
                             child: CircularProgressIndicator(
                               color: userController.isDark
                                   ? Colors.white
                                   : primaryColor,
                             ),
-                          ),
-                        ],
-                      );
-                    }
-                    List<OffersReceivedModel> filter = snapshot.data ?? [];
-                    List<OffersReceivedModel> offers = filter
-                        .where((offer) => offer.status != 'Pending')
-                        .toList();
-
-                    return ListView.builder(
-                        itemCount: offers.length,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          OffersReceivedModel offersReceivedModel =
-                              offers[index];
-                          return StreamBuilder<UserModel>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(offersReceivedModel.offerBy)
-                                  .snapshots()
-                                  .map((newEvent) =>
-                                      UserModel.fromJson(newEvent)),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
+                          );
+                        }
+                        UserModel postedByDetails = snapshot2.data!;
+                        return Container(
+                          // color: Colors.white,
+                          padding: const EdgeInsets.all(15),
+                          child: Column(
+                            children: [
+                              if (widget.isFromNoti)
+                                Padding(
+                                  padding: const EdgeInsets.all(0.0),
+                                  child: VehicleDetailsRequest(
+                                      userController: userController,
+                                      vehicleType: vehicleType,
+                                      vehicleMake: vehicleMake,
+                                      vehicleYear: vehicleYear,
+                                      vehicleModle: vehicleModle,
+                                      offersModel: widget.offersModel),
+                                ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                // mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(200),
+                                    child: ExtendedImage.network(
+                                      postedByDetails.profileUrl,
+                                      width: 75,
+                                      height: 75,
+                                      fit: BoxFit.fill,
+                                      cache: true,
+                                      // border: Border.all(color: Colors.red, width: 1.0),
+                                      shape: BoxShape.circle,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(200.0)),
+                                      //cancelToken: cancellationToken,
                                     ),
-                                  );
-                                }
-                                UserModel postedByDetails = snapshot.data!;
-                                return Container(
-                                  // color: Colors.white,
-                                  padding: const EdgeInsets.all(15),
-                                  child: Column(
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        // mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(200),
-                                            child: ExtendedImage.network(
-                                              postedByDetails.profileUrl,
-                                              width: 75,
-                                              height: 75,
-                                              fit: BoxFit.fill,
-                                              cache: true,
-                                              // border: Border.all(color: Colors.red, width: 1.0),
-                                              shape: BoxShape.circle,
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(200.0)),
-                                              //cancelToken: cancellationToken,
+                                      Text(
+                                        postedByDetails.name,
+                                        style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Get.to(() => CommentsPage(
+                                              data: postedByDetails));
+                                        },
+                                        child: Row(
+                                          children: [
+                                            RatingBarIndicator(
+                                              rating: postedByDetails.rating,
+                                              itemBuilder: (context, index) =>
+                                                  const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                              ),
+                                              itemCount: 5,
+                                              itemSize: 25.0,
+                                              direction: Axis.horizontal,
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                postedByDetails.name,
-                                                style: TextStyle(
-                                                  color: userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text(
+                                              postedByDetails.ratings.length
+                                                  .toString(),
+                                              style: TextStyle(
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w800,
                                               ),
-                                              const SizedBox(
-                                                height: 8,
-                                              ),
-                                              InkWell(
-                                                onTap: () {
-                                                  Get.to(() => CommentsPage(
-                                                      data: postedByDetails));
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    RatingBarIndicator(
-                                                      rating: postedByDetails
-                                                          .rating,
-                                                      itemBuilder:
-                                                          (context, index) =>
-                                                              const Icon(
-                                                        Icons.star,
-                                                        color: Colors.amber,
-                                                      ),
-                                                      itemCount: 5,
-                                                      itemSize: 25.0,
-                                                      direction:
-                                                          Axis.horizontal,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      postedByDetails
-                                                          .ratings.length
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                        color: userController
-                                                                .isDark
-                                                            ? Colors.white
-                                                            : primaryColor,
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: OfferRequestDetails(
-                                            userController: userController,
-                                            offersReceivedModel:
-                                                offersReceivedModel),
-                                      ),
-                                      const SizedBox(
-                                        height: 40,
-                                      ),
-                                      OfferDetailsButtonWidget(
-                                        offersReceivedModel:
-                                            offersReceivedModel,
-                                        userModel: userModel,
-                                        postedByDetails: postedByDetails,
-                                        offersModel: widget.offersModel,
-                                      ),
-                                      const SizedBox(
-                                        height: 20,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                );
-                              });
-                        });
-                  }),
-            )
-          ],
-        ),
-      ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: OfferRequestDetails(
+                                    userController: userController,
+                                    offersReceivedModel: offersReceivedModel),
+                              ),
+                              const SizedBox(
+                                height: 40,
+                              ),
+                              OfferDetailsButtonWidget(
+                                offersReceivedModel: offersReceivedModel,
+                                userModel: userModel,
+                                postedByDetails: postedByDetails,
+                                offersModel: widget.offersModel,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        );
+                      });
+                });
+          }),
     );
   }
 }
 
-class RatingSheet extends StatefulWidget {
+class OwnerToProviderRatingSheet extends StatefulWidget {
   final OffersReceivedModel offersReceivedModel;
   final OffersModel offersModel;
-  const RatingSheet({
+
+  const OwnerToProviderRatingSheet({
     super.key,
     required this.offersReceivedModel,
     required this.offersModel,
@@ -299,10 +274,12 @@ class RatingSheet extends StatefulWidget {
   final bool isDark;
 
   @override
-  State<RatingSheet> createState() => _RatingSheetState();
+  State<OwnerToProviderRatingSheet> createState() =>
+      _OwnerToProviderRatingSheetState();
 }
 
-class _RatingSheetState extends State<RatingSheet> {
+class _OwnerToProviderRatingSheetState
+    extends State<OwnerToProviderRatingSheet> {
   File? image;
   double rating = 1.0;
   final commentController = TextEditingController();
@@ -625,13 +602,30 @@ class _RatingSheetState extends State<RatingSheet> {
                                 // String url = await UserController()
                                 //     .uploadImage(image!, userModel.userId);
                                 setState(() {});
+                                UserController().addToNotifications(
+                                    userModel,
+                                    widget.offersReceivedModel.offerBy,
+                                    'offer',
+                                    widget.offersReceivedModel.id,
+                                    'Offer Update',
+                                    '${userModel.name}, Rated the Job');
+
+                                sendNotification(
+                                    widget.offersReceivedModel.offerBy,
+                                    userModel.name,
+                                    'Offer Update',
+                                    '${userModel.name}, Rated the Job',
+                                    widget.offersReceivedModel.id,
+                                    'offer',
+                                    '');
+
                                 await FirebaseFirestore.instance
                                     .collection('offersReceived')
                                     .doc(widget.offersReceivedModel.id)
                                     .update({
                                   // 'status': 'finish',
-                                  'ratingTwo': rating,
-                                  'commentTwo': commentController.text.trim(),
+                                  'ratingOne': rating,
+                                  'commentOne': commentController.text.trim(),
                                   'media': '',
                                 });
                                 await FirebaseFirestore.instance
@@ -656,18 +650,35 @@ class _RatingSheetState extends State<RatingSheet> {
                                 String url = await UserController()
                                     .uploadImage(image!, userModel.userId);
                                 setState(() {});
+                                UserController().addToNotifications(
+                                    userModel,
+                                    widget.offersReceivedModel.offerBy,
+                                    'offer',
+                                    widget.offersReceivedModel.id,
+                                    'Offer Update',
+                                    '${userModel.name}, Rated the Job');
+
+                                sendNotification(
+                                    widget.offersReceivedModel.offerBy,
+                                    userModel.name,
+                                    'Offer Update',
+                                    '${userModel.name}, Rated the Job',
+                                    widget.offersReceivedModel.id,
+                                    'offer',
+                                    '');
+
                                 await FirebaseFirestore.instance
                                     .collection('offersReceived')
                                     .doc(widget.offersReceivedModel.id)
                                     .update({
                                   // 'status': 'finish',
-                                  'ratingTwo': rating,
-                                  'commentTwo': commentController.text.trim(),
+                                  'ratingOne': rating,
+                                  'commentOne': commentController.text.trim(),
                                   'media': url,
                                 });
                                 await FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc(widget.offersReceivedModel.ownerId)
+                                    .doc(widget.offersReceivedModel.offerBy)
                                     .update({
                                   'ratings': FieldValue.arrayUnion([
                                     {
@@ -682,15 +693,6 @@ class _RatingSheetState extends State<RatingSheet> {
                                   ])
                                 });
                               }
-
-                              sendNotification(
-                                  widget.offersReceivedModel.ownerId,
-                                  userModel.name,
-                                  'Offer Update',
-                                  '${userModel.name}, Rated the Job',
-                                  widget.offersReceivedModel.id,
-                                  'Offer',
-                                  '');
 
                               // await userController.getRequestsHistoryProvider();
 
@@ -723,10 +725,11 @@ class _RatingSheetState extends State<RatingSheet> {
   }
 }
 
-class RatingSheet2 extends StatefulWidget {
+class FromProviderToOwnerRatingSheet extends StatefulWidget {
   final OffersReceivedModel offersReceivedModel;
   final OffersModel offersModel;
-  const RatingSheet2({
+
+  const FromProviderToOwnerRatingSheet({
     super.key,
     required this.offersReceivedModel,
     required this.offersModel,
@@ -736,10 +739,12 @@ class RatingSheet2 extends StatefulWidget {
   final bool isDark;
 
   @override
-  State<RatingSheet2> createState() => _RatingSheet2State();
+  State<FromProviderToOwnerRatingSheet> createState() =>
+      _FromProviderToOwnerRatingSheetState();
 }
 
-class _RatingSheet2State extends State<RatingSheet2> {
+class _FromProviderToOwnerRatingSheetState
+    extends State<FromProviderToOwnerRatingSheet> {
   File? image;
   double rating = 1.0;
   final commentController = TextEditingController();
@@ -1056,9 +1061,27 @@ class _RatingSheet2State extends State<RatingSheet2> {
                       onPressed: commentController.text.isEmpty
                           ? null
                           : () async {
+                              Get.dialog(LoadingDialog(),
+                                  barrierDismissible: false);
+                              await UserController().addToNotifications(
+                                userModel,
+                                widget.offersReceivedModel.ownerId,
+                                'offer',
+                                widget.offersReceivedModel.id,
+                                'Offer Update',
+                                '${userModel.name}, Rated the Job',
+                              );
+
+                              await sendNotification(
+                                  widget.offersReceivedModel.ownerId,
+                                  userModel.name,
+                                  'Offer Update',
+                                  '${userModel.name}, Rated the Job',
+                                  widget.offersReceivedModel.id,
+                                  'offer',
+                                  '');
+
                               if (image == null) {
-                                Get.dialog(LoadingDialog(),
-                                    barrierDismissible: false);
                                 // String url = await UserController()
                                 //     .uploadImage(image!, userModel.userId);
                                 setState(() {});
@@ -1067,13 +1090,13 @@ class _RatingSheet2State extends State<RatingSheet2> {
                                     .doc(widget.offersReceivedModel.id)
                                     .update({
                                   // 'status': 'finish',
-                                  'ratingOne': rating,
-                                  'commentOne': commentController.text.trim(),
+                                  'ratingTwo': rating,
+                                  'commentTwo': commentController.text.trim(),
                                   'media': '',
                                 });
                                 await FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc(widget.offersReceivedModel.offerBy)
+                                    .doc(widget.offersReceivedModel.ownerId)
                                     .update({
                                   'ratings': FieldValue.arrayUnion([
                                     {
@@ -1088,8 +1111,6 @@ class _RatingSheet2State extends State<RatingSheet2> {
                                   ])
                                 });
                               } else {
-                                Get.dialog(LoadingDialog(),
-                                    barrierDismissible: false);
                                 String url = await UserController()
                                     .uploadImage(image!, userModel.userId);
                                 setState(() {});
@@ -1098,13 +1119,13 @@ class _RatingSheet2State extends State<RatingSheet2> {
                                     .doc(widget.offersReceivedModel.id)
                                     .update({
                                   // 'status': 'finish',
-                                  'ratingOne': rating,
-                                  'commentOne': commentController.text.trim(),
+                                  'ratingTwo': rating,
+                                  'commentTwo': commentController.text.trim(),
                                   'media': url,
                                 });
                                 await FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc(widget.offersReceivedModel.offerBy)
+                                    .doc(widget.offersReceivedModel.ownerId)
                                     .update({
                                   'ratings': FieldValue.arrayUnion([
                                     {
@@ -1120,18 +1141,9 @@ class _RatingSheet2State extends State<RatingSheet2> {
                                 });
                               }
 
-                              sendNotification(
-                                  widget.offersReceivedModel.offerBy,
-                                  userModel.name,
-                                  'Offer Update',
-                                  '${userModel.name}, Rated the Job',
-                                  widget.offersReceivedModel.id,
-                                  'Offer',
-                                  '');
-
                               // await userController.getRequestsHistoryProvider();
 
-                              Get.close(2);
+                              Get.close(3);
                             },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,

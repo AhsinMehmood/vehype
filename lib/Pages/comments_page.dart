@@ -70,123 +70,138 @@ class CommentsPage extends StatelessWidget {
                     );
                   }
                   UserModel commenterData = snapshot.data!;
-                  return Column(
-                    children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      ListTile(
-                        leading: ExtendedImage.network(
-                          commenterData.profileUrl,
-                          // height: 45,
-                          shape: BoxShape.circle,
-                          // borderRadius: Border,
-                          // width: 45,
+                  return Card(
+                    color: userController.isDark
+                        ? Colors.blueGrey.shade700
+                        : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 10,
                         ),
-                        title: Text(
-                          commenterData.name,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        ListTile(
+                          leading: ExtendedImage.network(
+                            commenterData.profileUrl,
+                            // height: 45,
+                            shape: BoxShape.circle,
+                            // borderRadius: Border,
+                            // width: 45,
+                          ),
+                          title: Text(
+                            commenterData.name,
+                            style: TextStyle(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  RatingBarIndicator(
+                                    rating: data.ratings[inde]['rating'],
+                                    itemBuilder: (context, _) => Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 25,
+                                    ),
+                                    itemSize: 25,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    timeago.format(DateTime.parse(
+                                        data.ratings[inde]['at'].toString())),
+                                    style: TextStyle(
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                RatingBarIndicator(
-                                  rating: data.ratings[inde]['rating'],
-                                  itemBuilder: (context, _) => Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 25,
-                                  ),
-                                  itemSize: 25,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  timeago.format(DateTime.parse(
-                                      data.ratings[inde]['at'].toString())),
-                                  style: TextStyle(
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      ReadMoreText(
-                        data.ratings[inde]['comment'],
-                        trimMode: TrimMode.Line,
-                        trimLines: 2,
-                        colorClickableText: Colors.pink,
-                        trimCollapsedText: ' Show more',
-                        trimExpandedText: ' Show less',
-                        style: TextStyle(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
-                        ),
-                        moreStyle: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                      if (data.ratings[inde]['images'] != null)
                         const SizedBox(
                           height: 5,
                         ),
-                      if (data.ratings[inde]['images'] != null)
-                        InkWell(
-                          onTap: () {
-                            List imageUrls = [];
-                            for (var element in data.ratings) {
-                              if (element['images'] != null) {
-                                imageUrls.add(element['images']);
-                              }
-                            }
-                            Get.to(() => FullImagePageView(
-                                  urls: imageUrls,
-                                  currentIndex: inde,
-                                ));
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(12),
-                              bottomRight: Radius.circular(12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ReadMoreText(
+                              data.ratings[inde]['comment'],
+                              trimMode: TrimMode.Line,
+                              trimLines: 2,
+                              colorClickableText: Colors.pink,
+                              trimCollapsedText: ' Show more',
+                              trimExpandedText: ' Show less',
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                              ),
+                              moreStyle: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
                             ),
-                            child: ExtendedImage.network(
-                              data.ratings[inde]['images'],
-
-                              height: 180,
-                              // shape: BoxShape.rectangle,
-                              fit: BoxFit.cover,
+                          ),
+                        ),
+                        if (data.ratings[inde]['images'] != null)
+                          const SizedBox(
+                            height: 5,
+                          ),
+                        if (data.ratings[inde]['images'] != null)
+                          InkWell(
+                            onTap: () {
+                              List imageUrls = [];
+                              for (var element in data.ratings) {
+                                if (element['images'] != null) {
+                                  imageUrls.add(element['images']);
+                                }
+                              }
+                              Get.to(() => FullImagePageView(
+                                    urls: imageUrls,
+                                    currentIndex: inde,
+                                  ));
+                            },
+                            child: ClipRRect(
                               borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(12),
                                 bottomRight: Radius.circular(12),
                               ),
-                              width: Get.width * 0.95,
+                              child: ExtendedImage.network(
+                                data.ratings[inde]['images'],
+
+                                height: 180,
+                                // shape: BoxShape.rectangle,
+                                fit: BoxFit.cover,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                                width: Get.width * 0.95,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   );
                 });
           }),

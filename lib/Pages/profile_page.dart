@@ -510,7 +510,9 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ));
                           } else {
+                            userController.closeStream();
                             UserController().logout(userModel);
+
                             userController.changeTabIndex(0);
                           }
                           // Get.offAll(SplashPage());
@@ -541,7 +543,7 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.47',
+                        'App Version: 3.0.3.48',
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w500,

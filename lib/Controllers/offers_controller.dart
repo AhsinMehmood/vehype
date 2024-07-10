@@ -12,7 +12,6 @@ import '../Widgets/loading_dialog.dart';
 class OffersController {
   acceptOffer(OffersReceivedModel offersReceivedModel, OffersModel offersModel,
       UserModel userModel, UserModel postedByDetails) async {
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
     await FirebaseFirestore.instance
         .collection('offersReceived')
         .doc(offersReceivedModel.id)
@@ -96,8 +95,6 @@ class OffersController {
 
   cancelOfferByOwner(
       OffersReceivedModel offersReceivedModel, UserModel userModel) async {
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-
     await FirebaseFirestore.instance
         .collection('offersReceived')
         .doc(offersReceivedModel.id)
@@ -115,7 +112,7 @@ class OffersController {
         offersReceivedModel.offerBy,
         userModel.name,
         'Offer Update',
-        '${userModel.name}, Cancelled the Request.',
+        '${userModel.name}, Cancelled the Job.',
         offersReceivedModel.id,
         'Offer',
         '');
@@ -149,8 +146,8 @@ class OffersController {
     sendNotification(
         offersReceivedModel.offerBy,
         userModel.name,
-        'Offer Update',
-        '${userModel.name}, Cancelled the Request.',
+        'Job Update',
+        '${userModel.name}, Cancelled the Job.',
         offersReceivedModel.id,
         'Offer',
         '');
