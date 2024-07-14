@@ -3,6 +3,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
@@ -199,170 +200,200 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                       ),
                                       child: Column(
                                         children: [
-                                          ListTile(
-                                            onTap: () async {
-                                              if (!notificationsModel.isRead) {
-                                                FirebaseFirestore.instance
-                                                    .collection('users')
-                                                    .doc(userModel.userId)
-                                                    .collection('notifications')
-                                                    .doc(notificationsModel.id)
-                                                    .update({
-                                                  'isRead': true,
-                                                });
-                                              }
-                                              print(notificationsModel.type);
-                                              if (notificationsModel.type ==
-                                                  'request') {
-                                                Get.dialog(LoadingDialog(),
-                                                    barrierDismissible: false);
-                                                DocumentSnapshot<
-                                                        Map<String, dynamic>>
-                                                    requestSnap =
-                                                    await FirebaseFirestore
-                                                        .instance
-                                                        .collection('offers')
-                                                        .doc(notificationsModel
-                                                            .objectId)
-                                                        .get();
-                                                OffersModel offersModel =
-                                                    OffersModel.fromJson(
-                                                        requestSnap);
-                                                Get.close(1);
-                                                UserController()
-                                                    .changeNotiOffers(
-                                                        0,
-                                                        false,
-                                                        userModel.userId,
-                                                        offersModel.offerId,
-                                                        userModel.accountType);
-                                                if (offersModel.status ==
-                                                        'active' &&
-                                                    !offersModel.ignoredBy
-                                                        .contains(
-                                                            userModel.userId) &&
-                                                    !offersModel.offersReceived
-                                                        .contains(
-                                                            userModel.userId)) {
-                                                  Get.to(() =>
-                                                      OfferReceivedDetails(
-                                                        offersModel:
-                                                            offersModel,
-                                                      ));
-                                                } else {
-                                                  toastification.show(
-                                                    title: Text(
-                                                        'The request has been moved to another page'),
-                                                    style: ToastificationStyle
-                                                        .minimal,
-                                                    autoCloseDuration: Duration(
-                                                      seconds: 3,
-                                                    ),
-                                                    context: context,
-                                                  );
-                                                }
-                                              } else if (notificationsModel
-                                                      .type ==
-                                                  'offer') {
-                                                Get.dialog(LoadingDialog(),
-                                                    barrierDismissible: false);
-                                                DocumentSnapshot<
-                                                        Map<String, dynamic>>
-                                                    offersReceivedSnap =
-                                                    await FirebaseFirestore
-                                                        .instance
-                                                        .collection(
-                                                            'offersReceived')
-                                                        .doc(notificationsModel
-                                                            .objectId)
-                                                        .get();
-                                                OffersReceivedModel
-                                                    offersReceivedModel =
-                                                    OffersReceivedModel
-                                                        .fromJson(
-                                                            offersReceivedSnap);
-
-                                                DocumentSnapshot<
-                                                        Map<String, dynamic>>
-                                                    requestSnap =
-                                                    await FirebaseFirestore
-                                                        .instance
-                                                        .collection('offers')
-                                                        .doc(offersReceivedModel
-                                                            .offerId)
-                                                        .get();
-                                                OffersModel offersModel =
-                                                    OffersModel.fromJson(
-                                                        requestSnap);
-
-                                                int id = offersReceivedModel
-                                                            .status ==
-                                                        'Pending'
-                                                    ? 1
-                                                    : offersReceivedModel
-                                                                .status ==
-                                                            'inProgress'
-                                                        ? 2
-                                                        : offersReceivedModel
-                                                                    .status ==
-                                                                'Completed'
-                                                            ? 3
-                                                            : 4;
-                                                UserController()
-                                                    .changeNotiOffers(
-                                                        id,
-                                                        false,
-                                                        userModel.userId,
-                                                        offersModel.offerId,
-                                                        userModel.accountType);
-                                                Get.close(1);
-                                                Get.to(() =>
-                                                    RequestsReceivedProviderDetails(
-                                                      offersModel: offersModel,
-                                                      offersReceivedModel:
-                                                          offersReceivedModel,
-                                                    ));
-                                              }
-                                            },
-                                            // selected: notificationsModel.isRead,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            tileColor: notificationsModel
-                                                        .isRead ==
+                                          SwipeableTile(
+                                            color: notificationsModel.isRead ==
                                                     false
                                                 ? Colors.red
                                                 : userController.isDark
                                                     ? Colors.blueGrey.shade400
                                                     : Colors.white60,
-                                            leading: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(200),
-                                              child: ExtendedImage.network(
-                                                senderModel.profileUrl,
-                                                height: 45,
-                                                width: 45,
-                                                fit: BoxFit.cover,
+                                            swipeThreshold: 0.2,
+                                            direction:
+                                                SwipeDirection.horizontal,
+                                            onSwiped: (direction) {
+                                              // Here call setState to update state
+                                              FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(userModel.userId)
+                                                  .collection('notifications')
+                                                  .doc(notificationsModel.id)
+                                                  .delete();
+                                            },
+                                            backgroundBuilder:
+                                                (context, direction, progress) {
+                                              if (direction ==
+                                                  SwipeDirection.endToStart) {
+                                                // return your widget
+                                              } else if (direction ==
+                                                  SwipeDirection.startToEnd) {
+                                                // return your widget
+                                              }
+                                              return Container();
+                                            },
+                                            key: UniqueKey(),
+                                            child: ListTile(
+                                              onTap: () async {
+                                                if (!notificationsModel
+                                                    .isRead) {
+                                                  FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(userModel.userId)
+                                                      .collection(
+                                                          'notifications')
+                                                      .doc(
+                                                          notificationsModel.id)
+                                                      .update({
+                                                    'isRead': true,
+                                                  });
+                                                }
+                                                print(notificationsModel.type);
+                                                if (notificationsModel.type ==
+                                                    'request') {
+                                                  Get.dialog(LoadingDialog(),
+                                                      barrierDismissible:
+                                                          false);
+                                                  DocumentSnapshot<
+                                                          Map<String, dynamic>>
+                                                      requestSnap =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection('offers')
+                                                          .doc(
+                                                              notificationsModel
+                                                                  .objectId)
+                                                          .get();
+                                                  OffersModel offersModel =
+                                                      OffersModel.fromJson(
+                                                          requestSnap);
+                                                  Get.close(1);
+                                                  UserController()
+                                                      .changeNotiOffers(
+                                                          0,
+                                                          false,
+                                                          userModel.userId,
+                                                          offersModel.offerId,
+                                                          userModel
+                                                              .accountType);
+                                                  if (offersModel.status ==
+                                                          'active' &&
+                                                      !offersModel.ignoredBy
+                                                          .contains(userModel
+                                                              .userId) &&
+                                                      !offersModel
+                                                          .offersReceived
+                                                          .contains(userModel
+                                                              .userId)) {
+                                                    Get.to(() =>
+                                                        OfferReceivedDetails(
+                                                          offersModel:
+                                                              offersModel,
+                                                        ));
+                                                  } else {
+                                                    toastification.show(
+                                                      title: Text(
+                                                          'The request has been moved to another page'),
+                                                      style: ToastificationStyle
+                                                          .minimal,
+                                                      autoCloseDuration:
+                                                          Duration(
+                                                        seconds: 3,
+                                                      ),
+                                                      context: context,
+                                                    );
+                                                  }
+                                                } else if (notificationsModel
+                                                        .type ==
+                                                    'offer') {
+                                                  Get.dialog(LoadingDialog(),
+                                                      barrierDismissible:
+                                                          false);
+                                                  DocumentSnapshot<
+                                                          Map<String, dynamic>>
+                                                      offersReceivedSnap =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection(
+                                                              'offersReceived')
+                                                          .doc(
+                                                              notificationsModel
+                                                                  .objectId)
+                                                          .get();
+                                                  OffersReceivedModel
+                                                      offersReceivedModel =
+                                                      OffersReceivedModel
+                                                          .fromJson(
+                                                              offersReceivedSnap);
+
+                                                  DocumentSnapshot<
+                                                          Map<String, dynamic>>
+                                                      requestSnap =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection('offers')
+                                                          .doc(
+                                                              offersReceivedModel
+                                                                  .offerId)
+                                                          .get();
+                                                  OffersModel offersModel =
+                                                      OffersModel.fromJson(
+                                                          requestSnap);
+
+                                                  int id = offersReceivedModel
+                                                              .status ==
+                                                          'Pending'
+                                                      ? 1
+                                                      : offersReceivedModel
+                                                                  .status ==
+                                                              'inProgress'
+                                                          ? 2
+                                                          : offersReceivedModel
+                                                                      .status ==
+                                                                  'Completed'
+                                                              ? 3
+                                                              : 4;
+                                                  UserController()
+                                                      .changeNotiOffers(
+                                                          id,
+                                                          false,
+                                                          userModel.userId,
+                                                          offersModel.offerId,
+                                                          userModel
+                                                              .accountType);
+                                                  Get.close(1);
+                                                  Get.to(() =>
+                                                      RequestsReceivedProviderDetails(
+                                                        offersModel:
+                                                            offersModel,
+                                                        offersReceivedModel:
+                                                            offersReceivedModel,
+                                                      ));
+                                                }
+                                              },
+                                              // selected: notificationsModel.isRead,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
                                               ),
-                                            ),
-                                            title: Text(
-                                              notificationsModel.title,
-                                              style: TextStyle(
-                                                color:
-                                                    notificationsModel.isRead ==
-                                                            false
-                                                        ? Colors.white
-                                                        : userController.isDark
-                                                            ? Colors.white
-                                                            : primaryColor,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
+                                              tileColor: notificationsModel
+                                                          .isRead ==
+                                                      false
+                                                  ? Colors.red
+                                                  : userController.isDark
+                                                      ? Colors.blueGrey.shade400
+                                                      : Colors.white60,
+                                              leading: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(200),
+                                                child: ExtendedImage.network(
+                                                  senderModel.profileUrl,
+                                                  height: 45,
+                                                  width: 45,
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
-                                            ),
-                                            subtitle: Text(
-                                              notificationsModel.subTitle,
-                                              style: TextStyle(
+                                              title: Text(
+                                                notificationsModel.title,
+                                                style: TextStyle(
                                                   color: notificationsModel
                                                               .isRead ==
                                                           false
@@ -370,23 +401,38 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                       : userController.isDark
                                                           ? Colors.white
                                                           : primaryColor,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  overflow:
-                                                      TextOverflow.ellipsis),
-                                            ),
-                                            trailing: Text(
-                                              timeago.format(createdAt),
-                                              style: TextStyle(
-                                                color:
-                                                    notificationsModel.isRead ==
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              subtitle: Text(
+                                                notificationsModel.subTitle,
+                                                style: TextStyle(
+                                                    color: notificationsModel
+                                                                .isRead ==
                                                             false
                                                         ? Colors.white
                                                         : userController.isDark
                                                             ? Colors.white
                                                             : primaryColor,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w400,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                              ),
+                                              trailing: Text(
+                                                timeago.format(createdAt),
+                                                style: TextStyle(
+                                                  color: notificationsModel
+                                                              .isRead ==
+                                                          false
+                                                      ? Colors.white
+                                                      : userController.isDark
+                                                          ? Colors.white
+                                                          : primaryColor,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -404,6 +450,42 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   });
                             }),
                       ),
+                      if (notificationsStream.isNotEmpty)
+                        Container(
+                          color: userController.isDark
+                              ? primaryColor
+                              : Colors.white,
+                          padding: const EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                            top: 15,
+                            bottom: 30,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  for (var element in notificationsStream) {
+                                    FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(userModel.userId)
+                                        .collection('notifications')
+                                        .doc(element.id)
+                                        .delete();
+                                  }
+                                },
+                                child: Text(
+                                  'Clear All',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 );

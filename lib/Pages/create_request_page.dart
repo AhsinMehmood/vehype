@@ -17,6 +17,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
@@ -29,6 +30,8 @@ import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import '../const.dart';
+import 'add_vehicle.dart';
+import 'full_image_view_page.dart';
 
 class CreateRequestPage extends StatefulWidget {
   final OffersModel? offersModel;
@@ -54,7 +57,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
 
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
-        garageController.selectedIssue = widget.offersModel!.issue;
+        garageController.selectedIssues = widget.offersModel!.issues;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
         lat = widget.offersModel!.lat;
         long = widget.offersModel!.long;
@@ -162,143 +165,198 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              // const SizedBox(
-              //   height: 40,
-              // ),
-              // InkWell(
-              //   onTap: () {
-              //     showModalBottomSheet(
-              //         context: context,
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.only(
-              //           topLeft: Radius.circular(15),
-              //           topRight: Radius.circular(15),
-              //         )),
-              //         // constraints: BoxConstraints(
-              //         //   minHeight: Get.height * 0.7,
-              //         //   maxHeight: Get.height * 0.7,
-              //         // ),
-              //         isScrollControlled: true,
-              //         // showDragHandle: true,
-              //         builder: (context) {
-              //           return SelectVehicle();
-              //         }).then((value) {
-              //       // editProfileProvider
-              //       //     .upadeteUpcomingDestinations(userModel);
-              //     });
-              //   },
-              //   child: SizedBox(
-              //     width: Get.width,
-              //     child: Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         Text(
-              //           'Select Vehicle',
-              //           style: TextStyle(
-              //             fontFamily: 'Avenir',
-              //             fontWeight: FontWeight.w400,
-              //             fontSize: 16,
-              //             color: userController.isDark
-              //                 ? Colors.white
-              //                 : primaryColor,
-              //           ),
-              //         ),
-              //         const SizedBox(
-              //           height: 10,
-              //         ),
-              //         Text(
-              //           garageController.selectedVehicle == ''
-              //               ? 'No Vehicle Selected'
-              //               : garageController.selectedVehicle,
-              //           style: TextStyle(
-              //             fontFamily: 'Avenir',
-              //             fontWeight: FontWeight.w400,
-              //             // color: changeColor(color: '7B7B7B'),
-              //             fontSize: 16,
-              //           ),
-              //         ),
-              //         const SizedBox(
-              //           height: 15,
-              //         ),
-              //         Align(
-              //           alignment: Alignment.center,
-              //           child: Container(
-              //             height: 1,
-              //             width: Get.width,
-              //             color: changeColor(color: 'D9D9D9'),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(
-              //   height: 15,
-              // ),
-              // InkWell(
-              //   onTap: () {
-              //     showModalBottomSheet(
-              //         context: context,
-              //         shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.only(
-              //           topLeft: Radius.circular(15),
-              //           topRight: Radius.circular(15),
-              //         )),
-              //         // constraints: BoxConstraints(
-              //         //   minHeight: Get.height * 0.7,
-              //         //   maxHeight: Get.height * 0.7,
-              //         // ),
-              //         isScrollControlled: true,
-              //         // showDragHandle: true,
-              //         builder: (context) {
-              //           return IssuesPicker();
-              //         }).then((value) {
-              //       // editProfileProvider
-              //       //     .upadeteUpcomingDestinations(userModel);
-              //     });
-              //   },
-              //   child: SizedBox(
-              //     width: Get.width,
-              //     child: Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         Text(
-              //           'Select Issue',
-              //           style: TextStyle(
-              //             fontFamily: 'Avenir',
-              //             fontWeight: FontWeight.w400,
-              //             fontSize: 16,
-              //           ),
-              //         ),
-              //         const SizedBox(
-              //           height: 10,
-              //         ),
-              //         Text(
-              //           garageController.selectedIssue == ''
-              //               ? 'No Issue Selected'
-              //               : garageController.selectedIssue,
-              //           style: TextStyle(
-              //             fontFamily: 'Avenir',
-              //             fontWeight: FontWeight.w400,
-              //             // color: changeColor(color: '7B7B7B'),
-              //             fontSize: 16,
-              //           ),
-              //         ),
-              //         const SizedBox(
-              //           height: 15,
-              //         ),
-              //         Align(
-              //           alignment: Alignment.center,
-              //           child: Container(
-              //             height: 1,
-              //             width: Get.width,
-              //             color: changeColor(color: 'D9D9D9'),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+              InkWell(
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      )),
+                      constraints: BoxConstraints(
+                        minHeight: Get.height * 0.85,
+                        maxHeight: Get.height * 0.85,
+                      ),
+                      isScrollControlled: true,
+                      // showDragHandle: true,
+                      builder: (context) {
+                        return SelectVehicle();
+                      }).then((value) {
+                    // editProfileProvider
+                    //     .upadeteUpcomingDestinations(userModel);
+                  });
+                },
+                child: SizedBox(
+                  width: Get.width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Select Vehicle',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        garageController.selectedVehicle == ''
+                            ? 'No Vehicle Selected'
+                            : garageController.selectedVehicle,
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w600,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: 1,
+                          width: Get.width,
+                          color: changeColor(color: 'D9D9D9'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              InkWell(
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      )),
+                      // constraints: BoxConstraints(
+                      //   minHeight: Get.height * 0.7,
+                      //   maxHeight: Get.height * 0.7,
+                      // ),
+                      isScrollControlled: true,
+                      // showDragHandle: true,
+                      builder: (context) {
+                        return IssuesPicker();
+                      }).then((value) {
+                    // editProfileProvider
+                    //     .upadeteUpcomingDestinations(userModel);
+                  });
+                },
+                child: SizedBox(
+                  width: Get.width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Select Services',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      if (garageController.selectedIssues.isEmpty)
+                        Text(
+                          'No Service Selected',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w600,
+                            // color: changeColor(color: '7B7B7B'),
+                            fontSize: 16,
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          height: 70,
+                          width: Get.width,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (var item
+                                    in garageController.selectedIssues)
+                                  Card(
+                                    color: userController.isDark
+                                        ? Colors.blueGrey.shade400
+                                        : Colors.white70,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Row(
+                                        children: [
+                                          SizedBox(
+                                            height: 40,
+                                            width: 40,
+                                            child: SvgPicture.asset(
+                                              getServices()
+                                                  .firstWhere(
+                                                      (ss) => ss.name == item)
+                                                  .image,
+                                              height: 40,
+                                              // cache: true,
+                                              // shape: BoxShape.rectangle,
+                                              // borderRadius: BorderRadius.circular(8),
+                                              width: 40,
+                                              color: userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            item,
+                                            style: TextStyle(
+                                              fontFamily: 'Avenir',
+                                              fontWeight: FontWeight.w500,
+                                              // color: changeColor(color: '7B7B7B'),
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: 1,
+                          width: Get.width,
+                          color: changeColor(color: 'D9D9D9'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(
                 height: 15,
               ),
@@ -340,17 +398,54 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text(
-                        garageController.additionalService == ''
-                            ? 'No Additional Service Selected'
-                            : garageController.additionalService,
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w400,
-                          // color: changeColor(color: '7B7B7B'),
-                          fontSize: 16,
+                      if (garageController.additionalService == '')
+                        Text(
+                          'No Additional Service Selected',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w400,
+                            // color: changeColor(color: '7B7B7B'),
+                            fontSize: 16,
+                          ),
+                        )
+                      else
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 40,
+                              width: 40,
+                              child: SvgPicture.asset(
+                                getAdditionalService()
+                                    .firstWhere((ss) =>
+                                        ss.name ==
+                                        garageController.additionalService)
+                                    .icon,
+                                height: 40,
+                                // cache: true,
+                                // shape: BoxShape.rectangle,
+                                // borderRadius: BorderRadius.circular(8),
+                                width: 40,
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              garageController.additionalService == ''
+                                  ? 'No Additional Service Selected'
+                                  : garageController.additionalService,
+                              style: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w600,
+                                // color: changeColor(color: '7B7B7B'),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
                       const SizedBox(
                         height: 15,
                       ),
@@ -847,6 +942,64 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               ),
               ElevatedButton(
                   onPressed: () async {
+                    if (garageController.selectedVehicle == '') {
+                      toastification.show(
+                        context: context,
+                        // backgroundColor:
+                        //     userController.isDark ? Colors.white : primaryColor,
+                        title: Text(
+                          'Please select a vehicle to create a request.',
+                          style: TextStyle(),
+                        ),
+                        style: ToastificationStyle.flatColored,
+                        type: ToastificationType.error,
+                        alignment: Alignment.topRight,
+                        autoCloseDuration: Duration(seconds: 3),
+                      );
+                      return;
+                    }
+                    if (garageController.selectedIssues.isEmpty) {
+                      toastification.show(
+                        context: context,
+                        // backgroundColor:
+                        //     userController.isDark ? Colors.white : primaryColor,
+                        title: Text(
+                          'Please select a service a to create a request.',
+                          style: TextStyle(
+                              // color: userController.isDark
+                              //     ? primaryColor
+                              //     : Colors.white,
+                              ),
+                        ),
+                        style: ToastificationStyle.flatColored,
+                        type: ToastificationType.error,
+                        alignment: Alignment.topRight,
+                        autoCloseDuration: Duration(seconds: 3),
+                      );
+                      return;
+                    }
+                    if (garageController.requestImages
+                        .every((ss) => ss.isLoading)) {
+                      toastification.show(
+                        context: context,
+                        // backgroundColor:
+                        //     userController.isDark ? Colors.white : primaryColor,
+                        title: Text(
+                          'Images are processing please wait...',
+                          style: TextStyle(
+                              // color: userController.isDark
+                              //     ? primaryColor
+                              //     : Colors.white,
+                              ),
+                        ),
+                        style: ToastificationStyle.flatColored,
+                        type: ToastificationType.info,
+                        alignment: Alignment.topRight,
+                        autoCloseDuration: Duration(seconds: 3),
+                      );
+                      return;
+                    }
+
                     Get.dialog(const LoadingDialog(),
                         barrierDismissible: false);
                     if (widget.offersModel != null) {
@@ -865,8 +1018,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           null,
                           garageController.garageId);
-                      await getUserProviders(
-                          requestId, garageController.selectedIssue, userModel);
+                      await getUserProviders(requestId,
+                          garageController.selectedIssues, userModel);
                       Get.close(4);
                     }
                   },
@@ -901,14 +1054,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   }
 
   Future getUserProviders(
-      String requestId, String service, UserModel userModel) async {
+      String requestId, List issues, UserModel userModel) async {
     List<UserModel> providers = [];
 
     QuerySnapshot<Map<String, dynamic>> snapshot =
         await FirebaseFirestore.instance
             .collection('users')
             .where('accountType', isEqualTo: 'provider')
-            .where('services', arrayContains: service)
+            .where('services', arrayContainsAny: issues)
             // .where('status', isEqualTo: 'active')
             .get();
 
@@ -1101,86 +1254,229 @@ class SelectVehicle extends StatelessWidget {
         Provider.of<GarageController>(context);
     final UserController userController = Provider.of<UserController>(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: userController.isDark ? primaryColor : Colors.white,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: userController.isDark ? primaryColor : Colors.white,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              for (GarageModel vehicle in garageController.vehciles)
-                InkWell(
-                  onTap: () {
-                    garageController.selectVehicle(
-                        '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
-                        vehicle.imageOne,
-                        garageController.garageId);
-                    Get.close(1);
-                  },
+              InkWell(
+                onTap: () {
+                  Get.to(() => AddVehicle(
+                        garageModel: null,
+                        addService: true,
+                      ));
+                },
+                child: Align(
+                  alignment: Alignment.centerRight,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              if (vehicle.imageOne != '')
-                                SizedBox(
-                                  height: 40,
-                                  width: 40,
-                                  child: ExtendedImage.network(
-                                    vehicle.imageOne,
-                                    height: 40,
-                                    cache: true,
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(8),
-                                    width: 40,
-                                  ),
-                                ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (garageController.selectedVehicle ==
-                            '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}')
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.green,
-                            ),
-                            child: Icon(
-                              Icons.done,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                      ],
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      'Add New',
+                      style: TextStyle(
+                        color: Colors.indigo,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              const SizedBox(
-                height: 10,
+              ),
+              Expanded(
+                child: StreamBuilder<List<GarageModel>>(
+                    stream: FirebaseFirestore.instance
+                        .collection('garages')
+                        .where('ownerId',
+                            isEqualTo: userController.userModel!.userId)
+                        .orderBy('createdAt', descending: true)
+                        .snapshots()
+                        .map((ss) => ss.docs
+                            .map((toElement) => GarageModel.fromJson(toElement))
+                            .toList()),
+                    builder:
+                        (context, AsyncSnapshot<List<GarageModel>> snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      List<GarageModel> vehicles = snapshot.data ?? [];
+                      if (vehicles.isEmpty) {
+                        return Center(
+                          child: Text('No Vehicle'),
+                        );
+                      }
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            for (GarageModel vehicle in vehicles)
+                              InkWell(
+                                onTap: () {
+                                  garageController.selectVehicle(
+                                      '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
+                                      vehicle.imageOne,
+                                      garageController.garageId);
+                                  Get.close(1);
+                                },
+                                child: Card(
+                                  color: userController.isDark
+                                      ? Colors.blueGrey.shade700
+                                      : Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      if (vehicle.imageOne != '')
+                                        SizedBox(
+                                          width: Get.width,
+                                          height: Get.width * 0.35,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Get.to(() => FullImagePageView(
+                                                    urls: [vehicle.imageOne],
+                                                  ));
+                                            },
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              child: ExtendedImage.network(
+                                                vehicle.imageOne,
+                                                width: Get.width * 0.9,
+                                                height: Get.width * 0.35,
+                                                fit: BoxFit.cover,
+                                                cache: true,
+                                                // border: Border.all(color: Colors.red, width: 1.0),
+                                                shape: BoxShape.rectangle,
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10.0)),
+                                                //cancelToken: cancellationToken,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              vehicle.bodyStyle,
+                                              style: TextStyle(
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w500,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              vehicle.make,
+                                              style: TextStyle(
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w500,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              vehicle.year,
+                                              style: TextStyle(
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w500,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              vehicle.model,
+                                              style: TextStyle(
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w500,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Align(
+                                              alignment: Alignment.center,
+                                              child: ElevatedButton(
+                                                  onPressed: () {
+                                                    garageController.selectVehicle(
+                                                        '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
+                                                        vehicle.imageOne,
+                                                        garageController
+                                                            .garageId);
+                                                    Get.close(1);
+                                                  },
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    minimumSize: Size(
+                                                        Get.width * 0.8, 45),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20)),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                  ),
+                                                  child: Text(
+                                                    garageController
+                                                                .selectedVehicle ==
+                                                            '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}'
+                                                        ? 'Selected'
+                                                        : 'Select',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
+                                                  )),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
               ),
             ],
           ),
@@ -1298,83 +1594,108 @@ class IssuesPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      height: Get.height * 0.7,
+      height: Get.height * 0.8,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              for (Service vehicle in getServices())
-                InkWell(
-                  onTap: () {
-                    garageController.selectIssue(vehicle.name);
-                    Get.close(1);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                height: 40,
-                                width: 40,
-                                child: SvgPicture.asset(
-                                  vehicle.image,
-                                  height: 40,
-                                  // cache: true,
-                                  // shape: BoxShape.rectangle,
-                                  // borderRadius: BorderRadius.circular(8),
-                                  width: 40,
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  vehicle.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (garageController.selectedIssue == vehicle.name)
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.green,
-                            ),
-                            child: Icon(
-                              Icons.done,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                      ],
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () {
+                Get.close(1);
+              },
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      color: Colors.indigo,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              const SizedBox(
-                height: 10,
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      for (Service service in getServices())
+                        Column(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                garageController.selectIssue(service.name);
+                                // appProvider.selectPrefs(pref);
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Transform.scale(
+                                    scale: 1.5,
+                                    child: Checkbox(
+                                        activeColor: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                        checkColor: userController.isDark
+                                            ? Colors.green
+                                            : Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        value: garageController.selectedIssues
+                                            .contains(service.name),
+                                        onChanged: (s) {
+                                          // appProvider.selectPrefs(pref);
+                                          garageController
+                                              .selectIssue(service.name);
+                                        }),
+                                  ),
+                                  const SizedBox(
+                                    width: 6,
+                                  ),
+                                  SvgPicture.asset(service.image,
+                                      height: 45,
+                                      width: 45,
+                                      fit: BoxFit.cover,
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor),
+                                  const SizedBox(
+                                    width: 6,
+                                  ),
+                                  Text(
+                                    service.name,
+                                    style: TextStyle(
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                          ],
+                        ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

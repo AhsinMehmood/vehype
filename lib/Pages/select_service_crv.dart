@@ -50,7 +50,7 @@ class SelectServiceCreateVehicle extends StatelessWidget {
                 color: userController.isDark ? Colors.white : primaryColor,
               )),
           title: Text(
-            'Select Service',
+            'Select Services',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
               fontSize: 18,
@@ -102,8 +102,8 @@ class SelectServiceCreateVehicle extends StatelessWidget {
                                                     BorderRadius.circular(4),
                                               ),
                                               value: garageController
-                                                      .selectedIssue ==
-                                                  service.name,
+                                                  .selectedIssues
+                                                  .contains(service.name),
                                               onChanged: (s) {
                                                 // appProvider.selectPrefs(pref);
                                                 garageController
@@ -154,7 +154,7 @@ class SelectServiceCreateVehicle extends StatelessWidget {
             ),
           ),
         ),
-        floatingActionButton: garageController.selectedIssue == ''
+        floatingActionButton: garageController.selectedIssues.isEmpty
             ? null
             : ElevatedButton(
                 onPressed: () async {

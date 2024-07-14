@@ -5,7 +5,7 @@ class OffersModel {
   final String offerId;
   final String ownerId;
   final String vehicleId;
-  final String issue;
+  final List issues;
   final double lat;
   final double long;
   final String description;
@@ -27,7 +27,7 @@ class OffersModel {
       required this.vehicleId,
       required this.additionalService,
       required this.ignoredBy,
-      required this.issue,
+      required this.issues,
       required this.imageOne,
       required this.lat,
       required this.long,
@@ -48,7 +48,7 @@ class OffersModel {
         offersReceived: data['offersReceived'] ?? [],
         ownerId: data['ownerId'] ?? '',
         vehicleId: data['vehicleName'] ?? '',
-        issue: data['issue'] ?? '',
+        issues: data['issues'] ?? [],
         additionalService: data['additionalService'] ?? '',
         imageOne: data['imageOne'] ?? '',
         status: data['status'] ?? '',

@@ -42,7 +42,7 @@ class _SelectVehicleCreateRequestState
 
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
-        garageController.selectedIssue = widget.offersModel!.issue;
+        garageController.selectedIssues = widget.offersModel!.issues;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
         // garageController.requestImages = widget.offersModel!.images;
         garageController.additionalService =

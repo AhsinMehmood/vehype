@@ -643,58 +643,131 @@ class ServicesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
 
-    return Column(
-      children: [
-        const SizedBox(
-          height: 20,
-        ),
-        Expanded(
-          child: ListView.builder(
-              itemCount: profileModel.services.length,
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(10),
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  color: userController.isDark ? primaryColor : Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                            getServices()
-                                .firstWhere((element) =>
-                                    element.name ==
-                                    profileModel.services[index])
-                                .image,
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            height: 45,
-                            width: 45),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          profileModel.services[index],
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          if (profileModel.additionalServices.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {},
+                  child: Text(
+                    'Additional Services',
+                    style: TextStyle(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                );
-              }),
-        ),
-      ],
+                ),
+              ),
+            ),
+          if (profileModel.additionalServices.isNotEmpty)
+            const SizedBox(
+              height: 10,
+            ),
+          if (profileModel.additionalServices.isNotEmpty)
+            for (var service in profileModel.additionalServices)
+              InkWell(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 1, top: 12, left: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(
+                          getAdditionalService()
+                              .firstWhere((element) => element.name == service)
+                              .icon,
+                          height: 40,
+                          width: 40,
+                          fit: BoxFit.cover,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor),
+                      const SizedBox(
+                        width: 6,
+                      ),
+                      Text(
+                        service,
+                        style: TextStyle(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          if (profileModel.additionalServices.isNotEmpty)
+            const SizedBox(
+              height: 20,
+            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () {},
+                child: Text(
+                  'My Services',
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          for (var service in profileModel.services)
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: userController.isDark ? primaryColor : Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                        getServices()
+                            .firstWhere((element) => element.name == service)
+                            .image,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        height: 45,
+                        width: 45),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Text(
+                      service,
+                      style: TextStyle(
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
     );
   }
 }

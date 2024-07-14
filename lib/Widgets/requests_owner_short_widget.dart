@@ -152,6 +152,43 @@ class RequestsOwnerShortWidgetActive extends StatelessWidget {
                   ],
                 ),
               ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Year',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      vehicleYear.trim(),
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w700,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              ),
               Row(
                 children: [
                   Column(
@@ -228,7 +265,7 @@ class RequestsOwnerShortWidgetActive extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Issue',
+                    'Services',
                     style: TextStyle(
                       fontFamily: 'Avenir',
                       fontWeight: FontWeight.w400,
@@ -240,33 +277,61 @@ class RequestsOwnerShortWidgetActive extends StatelessWidget {
                   const SizedBox(
                     height: 8,
                   ),
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                          getServices()
-                              .firstWhere((element) =>
-                                  element.name == offersModel.issue)
-                              .image,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          height: 35,
-                          width: 35),
-                      const SizedBox(
-                        width: 8,
+                  SizedBox(
+                    height: 70,
+                    width: Get.width,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (var item in offersModel.issues)
+                            Card(
+                              color: userController.isDark
+                                  ? Colors.blueGrey.shade400
+                                  : Colors.white70,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: SvgPicture.asset(
+                                        getServices()
+                                            .firstWhere((ss) => ss.name == item)
+                                            .image,
+                                        height: 40,
+                                        // cache: true,
+                                        // shape: BoxShape.rectangle,
+                                        // borderRadius: BorderRadius.circular(8),
+                                        width: 40,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      item,
+                                      style: TextStyle(
+                                        fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w500,
+                                        // color: changeColor(color: '7B7B7B'),
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      Text(
-                        offersModel.issue,
-                        style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w700,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),

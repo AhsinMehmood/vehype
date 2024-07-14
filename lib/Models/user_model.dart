@@ -35,6 +35,7 @@ class UserModel {
   final List offerIdsToCheck;
   final List favProviderIds;
   final List favBy;
+  final List additionalServices;
 
   UserModel(
     this.userId,
@@ -69,6 +70,7 @@ class UserModel {
     this.offerIdsToCheck,
     this.favProviderIds,
     this.favBy,
+    this.additionalServices,
   );
 
   factory UserModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -123,6 +125,7 @@ class UserModel {
       data['offerIdsToCheck'] ?? [],
       data['favProviderIds'] ?? [],
       data['favBy'] ?? [],
+      data['additionalServices'] ?? [],
     );
   }
 

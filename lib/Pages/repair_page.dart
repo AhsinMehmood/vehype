@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -190,6 +191,11 @@ class _RepairPageState extends State<RepairPage> {
                             Get.to(() => OwnerNotificationsPage(
                                   notifications: [],
                                 ));
+                            // toastification.dismissAll(
+                            //     // title: Text('data'),
+                            //     // context: context,
+                            //     // alignment: Alignment.bottomCenter,
+                            //     );
                           },
                           icon: Icon(
                             Icons.notifications,

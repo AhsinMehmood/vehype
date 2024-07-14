@@ -238,7 +238,7 @@ class _MessagePageState extends State<MessagePage> {
                                                                   element
                                                                       .name ==
                                                                   offersModel
-                                                                      .issue)
+                                                                      .issues.first)
                                                           .image,
                                                       color:
                                                           userController.isDark
@@ -260,7 +260,7 @@ class _MessagePageState extends State<MessagePage> {
                                                     ),
                                                   ),
                                                   Text(
-                                                    offersModel.issue,
+                                                    offersModel.issues.first,
                                                     style: TextStyle(
                                                       // color: Colors.black,
                                                       fontFamily: 'Avenir',

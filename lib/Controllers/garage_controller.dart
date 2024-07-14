@@ -488,12 +488,14 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  String selectedIssue = '';
+  List selectedIssues = [];
+
+  // String selectedIssue = '';
   selectIssue(String vehicle) {
-    if (vehicle == selectedIssue) {
-      selectedIssue = '';
+    if (selectedIssues.contains(vehicle)) {
+      selectedIssues.remove(vehicle);
     } else {
-      selectedIssue = vehicle;
+      selectedIssues.add(vehicle);
     }
     notifyListeners();
   }
@@ -506,7 +508,7 @@ class GarageController with ChangeNotifier {
 
   bool saveButtonValidation2() {
     if (selectedVehicle != '' &&
-        selectedIssue != '' &&
+        selectedIssues.isNotEmpty &&
         !requestImages.every((vv) => vv.isLoading == true)) {
       return true;
     } else {
@@ -532,7 +534,7 @@ class GarageController with ChangeNotifier {
             .update({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
-          'issue': selectedIssue,
+          'issues': selectedIssues,
           'garageId': garageId,
           'status': 'active',
           'lat': latLng.latitude,
@@ -548,7 +550,7 @@ class GarageController with ChangeNotifier {
             await FirebaseFirestore.instance.collection('offers').add({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
-          'issue': selectedIssue,
+          'issues': selectedIssues,
           'lat': latLng.latitude,
           'garageId': garageId,
           'long': latLng.longitude,

@@ -110,7 +110,7 @@ const String icWheelRepair = 'assets/rims_Repair_Bright.svg';
 const String icWheelTires = 'assets/images/ic_wheel_tires.svg';
 const String icWindshield = 'assets/images/ic_windshield.svg';
 const String icWrench = 'assets/images/ic_wrench.svg';
-const String icTransmission = 'assets/images/ic_wrench.svg';
+const String icTransmission = 'assets/transmission_Icon_Dark_4-01.svg';
 
 List<String> checkBadWords(String inputText) {
   List<String> detectedBadWords = [];

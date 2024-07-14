@@ -99,7 +99,16 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
               );
             }
             List<OffersReceivedModel> offers = snapshot.data ?? [];
-
+            if (offers.isEmpty) {
+              return Center(
+                child: Text(
+                  'Its Empty Here!',
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              );
+            }
             return Column(
               children: [
                 Expanded(
