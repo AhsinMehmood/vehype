@@ -980,8 +980,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       );
                       return;
                     }
-                    if (garageController.requestImages
-                        .every((ss) => ss.isLoading)) {
+                    if (garageController.requestImages.isNotEmpty &&
+                        garageController.requestImages
+                            .every((ss) => ss.isLoading)) {
                       toastification.show(
                         context: context,
                         // backgroundColor:
