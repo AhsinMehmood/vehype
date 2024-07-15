@@ -568,7 +568,7 @@ class GarageController with ChangeNotifier {
       return requestId;
     } catch (e) {
       print(e);
-      Get.close(1);
+      // Get.close(1);
       return '';
     }
   }

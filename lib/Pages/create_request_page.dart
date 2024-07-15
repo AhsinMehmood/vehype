@@ -35,7 +35,9 @@ import 'full_image_view_page.dart';
 
 class CreateRequestPage extends StatefulWidget {
   final OffersModel? offersModel;
-  const CreateRequestPage({super.key, required this.offersModel});
+  final GarageModel? garageModel;
+  const CreateRequestPage(
+      {super.key, required this.offersModel, this.garageModel});
 
   @override
   State<CreateRequestPage> createState() => _CreateRequestPageState();
@@ -1009,8 +1011,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           widget.offersModel!.offerId,
                           garageController.garageId);
-                      Get.close(1);
-                      Get.back();
+                      // Get.back();
                     } else {
                       String requestId = await garageController.saveRequest(
                           _descriptionController.text,
@@ -1020,8 +1021,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           garageController.garageId);
                       await getUserProviders(requestId,
                           garageController.selectedIssues, userModel);
-                      Get.close(4);
+                      // Get.close(4);
                     }
+                    Get.close(2);
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:

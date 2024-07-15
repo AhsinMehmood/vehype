@@ -13,6 +13,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/Pages/select_service_crv.dart';
 import 'package:vehype/const.dart';
 import 'package:http/http.dart' as http;
@@ -124,7 +125,7 @@ class _RepairPageState extends State<RepairPage> {
                     ),
                   ));
                 } else {
-                  Get.to(() => SelectServiceCreateVehicle(
+                  Get.to(() => CreateRequestPage(
                         offersModel: null,
                       ));
                 }

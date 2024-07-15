@@ -10,6 +10,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/add_vehicle.dart';
+import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/Pages/vehicle_request_page.dart';
 import 'package:vehype/const.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -317,7 +318,7 @@ class MyGarage extends StatelessWidget {
                                     ),
                                     onPressed: () {
                                       Get.to(
-                                        () => SelectServiceCreateVehicle(
+                                        () => CreateRequestPage(
                                           offersModel: null,
                                           garageModel: garageModel,
                                         ),

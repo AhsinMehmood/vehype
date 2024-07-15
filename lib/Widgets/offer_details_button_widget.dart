@@ -194,6 +194,14 @@ class OfferDetailsButtonWidget extends StatelessWidget {
                       offersReceivedModel.id,
                       'Offer Update',
                       '${userModel.name}, Completed a Job');
+                  sendNotification(
+                      offersReceivedModel.offerBy,
+                      userModel.name,
+                      'Offer Update',
+                      '${userModel.name} completed the job',
+                      offersReceivedModel.offerBy,
+                      'offer',
+                      'messageId');
 
                   Get.close(1);
                 },
