@@ -235,7 +235,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                     children: [
                                                       Icon(
                                                         Icons.delete,
-                                                        color: Colors.white,
+                                                        color: userController
+                                                                .isDark
+                                                            ? primaryColor
+                                                            : Colors.white,
                                                         size: 22,
                                                       ),
                                                     ],
@@ -256,7 +259,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                     children: [
                                                       Icon(
                                                         Icons.delete,
-                                                        color: Colors.white,
+                                                        color: userController
+                                                                .isDark
+                                                            ? primaryColor
+                                                            : Colors.white,
                                                         size: 22,
                                                       ),
                                                     ],

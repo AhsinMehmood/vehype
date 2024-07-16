@@ -238,7 +238,10 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                     children: [
                                                       Icon(
                                                         Icons.delete,
-                                                        color: Colors.white,
+                                                        color: userController
+                                                                .isDark
+                                                            ? primaryColor
+                                                            : Colors.white,
                                                         size: 22,
                                                       ),
                                                     ],
@@ -259,7 +262,10 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                     children: [
                                                       Icon(
                                                         Icons.delete,
-                                                        color: Colors.white,
+                                                        color: userController
+                                                                .isDark
+                                                            ? primaryColor
+                                                            : Colors.white,
                                                         size: 22,
                                                       ),
                                                     ],
