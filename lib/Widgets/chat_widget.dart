@@ -238,8 +238,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                                                                         element
                                                                             .name ==
                                                                         offersModel
-                                                                            .issues
-                                                                            .first)
+                                                                            .issue)
                                                                     .image,
                                                                 color: userController
                                                                         .isDark
@@ -252,8 +251,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                                                               width: 3,
                                                             ),
                                                             Text(
-                                                              offersModel
-                                                                  .issues.first,
+                                                              offersModel.issue,
                                                               style: TextStyle(
                                                                 // color: Colors.black,
                                                                 fontFamily:

@@ -72,8 +72,7 @@ class _NewOffersState extends State<NewOffers> {
                   !userModel.blockedUsers.contains(element.ownerId))
               .toList();
           List<OffersModel> filterByService = blockedUsers
-              .where((element) => element.issues
-                  .any((issue) => userModel.services.contains(issue)))
+              .where((element) => userModel.services.contains(element))
               .toList();
           print(userModel.lat);
           List<OffersModel> offers = userController.filterOffers(

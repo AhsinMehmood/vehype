@@ -64,7 +64,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       }
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
-        garageController.selectedIssues = widget.offersModel!.issues;
+        garageController.selectedIssue = widget.offersModel!.issue;
         garageController.imageOneUrl = widget.offersModel!.imageOne;
         lat = widget.offersModel!.lat;
         long = widget.offersModel!.long;
@@ -280,7 +280,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      if (garageController.selectedIssues.isEmpty)
+                      if (garageController.selectedIssue.isEmpty)
                         Text(
                           'No Service Selected',
                           style: TextStyle(
@@ -291,62 +291,42 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           ),
                         )
                       else
-                        SizedBox(
-                          height: 70,
-                          width: Get.width,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (var item
-                                    in garageController.selectedIssues)
-                                  Card(
-                                    color: userController.isDark
-                                        ? Colors.blueGrey.shade400
-                                        : Colors.white70,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                            height: 40,
-                                            width: 40,
-                                            child: SvgPicture.asset(
-                                              getServices()
-                                                  .firstWhere(
-                                                      (ss) => ss.name == item)
-                                                  .image,
-                                              height: 40,
-                                              // cache: true,
-                                              // shape: BoxShape.rectangle,
-                                              // borderRadius: BorderRadius.circular(8),
-                                              width: 40,
-                                              color: userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(
-                                            item,
-                                            style: TextStyle(
-                                              fontFamily: 'Avenir',
-                                              fontWeight: FontWeight.w500,
-                                              // color: changeColor(color: '7B7B7B'),
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 40,
+                                width: 40,
+                                child: SvgPicture.asset(
+                                  getServices()
+                                      .firstWhere((ss) =>
+                                          ss.name ==
+                                          garageController.selectedIssue)
+                                      .image,
+                                  height: 40,
+                                  // cache: true,
+                                  // shape: BoxShape.rectangle,
+                                  // borderRadius: BorderRadius.circular(8),
+                                  width: 40,
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                garageController.selectedIssue,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.w500,
+                                  // color: changeColor(color: '7B7B7B'),
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       const SizedBox(
@@ -965,7 +945,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       );
                       return;
                     }
-                    if (garageController.selectedIssues.isEmpty) {
+                    if (garageController.selectedIssue.isEmpty) {
                       toastification.show(
                         context: context,
                         // backgroundColor:
@@ -1025,8 +1005,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           null,
                           garageController.garageId);
-                      await getUserProviders(requestId,
-                          garageController.selectedIssues, userModel);
+                      await getUserProviders(
+                          requestId, garageController.selectedIssue, userModel);
                       // Get.close(4);
                     }
                     Get.close(2);
@@ -1062,14 +1042,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   }
 
   Future getUserProviders(
-      String requestId, List issues, UserModel userModel) async {
+      String requestId, String issue, UserModel userModel) async {
     List<UserModel> providers = [];
 
     QuerySnapshot<Map<String, dynamic>> snapshot =
         await FirebaseFirestore.instance
             .collection('users')
             .where('accountType', isEqualTo: 'provider')
-            .where('services', arrayContainsAny: issues)
+            .where('services', arrayContains: issue)
             // .where('status', isEqualTo: 'active')
             .get();
 
@@ -1607,25 +1587,6 @@ class IssuesPicker extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            InkWell(
-              onTap: () {
-                Get.close(1);
-              },
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Done',
-                    style: TextStyle(
-                      color: Colors.indigo,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -1639,6 +1600,7 @@ class IssuesPicker extends StatelessWidget {
                               onTap: () {
                                 garageController.selectIssue(service.name);
                                 // appProvider.selectPrefs(pref);
+                                Get.close(1);
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -1656,12 +1618,13 @@ class IssuesPicker extends StatelessWidget {
                                           borderRadius:
                                               BorderRadius.circular(4),
                                         ),
-                                        value: garageController.selectedIssues
-                                            .contains(service.name),
+                                        value: garageController.selectedIssue ==
+                                            service.name,
                                         onChanged: (s) {
                                           // appProvider.selectPrefs(pref);
                                           garageController
                                               .selectIssue(service.name);
+                                          Get.close(1);
                                         }),
                                   ),
                                   const SizedBox(

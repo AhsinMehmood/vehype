@@ -378,61 +378,41 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                       const SizedBox(
                         height: 8,
                       ),
-                      SizedBox(
-                        height: 70,
-                        width: Get.width,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              for (var item in offersModel.issues)
-                                Card(
-                                  color: widget.userController.isDark
-                                      ? Colors.blueGrey.shade400
-                                      : Colors.white70,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Row(
-                                      children: [
-                                        SizedBox(
-                                          height: 40,
-                                          width: 40,
-                                          child: SvgPicture.asset(
-                                            getServices()
-                                                .firstWhere(
-                                                    (ss) => ss.name == item)
-                                                .image,
-                                            height: 40,
-                                            // cache: true,
-                                            // shape: BoxShape.rectangle,
-                                            // borderRadius: BorderRadius.circular(8),
-                                            width: 40,
-                                            color: widget.userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          item,
-                                          style: TextStyle(
-                                            fontFamily: 'Avenir',
-                                            fontWeight: FontWeight.w500,
-                                            // color: changeColor(color: '7B7B7B'),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 40,
+                              width: 40,
+                              child: SvgPicture.asset(
+                                getServices()
+                                    .firstWhere(
+                                        (ss) => ss.name == offersModel.issue)
+                                    .image,
+                                height: 40,
+                                // cache: true,
+                                // shape: BoxShape.rectangle,
+                                // borderRadius: BorderRadius.circular(8),
+                                width: 40,
+                                color: widget.userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              offersModel.issue,
+                              style: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w500,
+                                // color: changeColor(color: '7B7B7B'),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
