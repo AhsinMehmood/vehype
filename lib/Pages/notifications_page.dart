@@ -203,7 +203,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                           SwipeableTile(
                                             color: notificationsModel.isRead ==
                                                     false
-                                                ? Colors.red
+                                                ? Colors.redAccent
                                                 : userController.isDark
                                                     ? Colors.blueGrey.shade400
                                                     : Colors.white60,
@@ -223,12 +223,64 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                 (context, direction, progress) {
                                               if (direction ==
                                                   SwipeDirection.endToStart) {
+                                                return Container(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  padding:
+                                                      const EdgeInsets.all(10),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.delete,
+                                                        color: Colors.white,
+                                                        size: 22,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
                                                 // return your widget
                                               } else if (direction ==
                                                   SwipeDirection.startToEnd) {
+                                                return Container(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  padding:
+                                                      const EdgeInsets.all(10),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.delete,
+                                                        color: Colors.white,
+                                                        size: 22,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
                                                 // return your widget
                                               }
-                                              return Container();
+                                              return Container(
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete,
+                                                      color:
+                                                          userController.isDark
+                                                              ? primaryColor
+                                                              : Colors.white,
+                                                      size: 22,
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
                                             },
                                             key: UniqueKey(),
                                             child: ListTile(
@@ -290,14 +342,52 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                         ));
                                                   } else {
                                                     toastification.show(
+                                                      closeButtonShowType:
+                                                          CloseButtonShowType
+                                                              .none,
                                                       title: Text(
-                                                          'The request has been moved to another page'),
+                                                          'Request was covered.'),
                                                       style: ToastificationStyle
                                                           .minimal,
+                                                      showProgressBar: false,
                                                       autoCloseDuration:
                                                           Duration(
                                                         seconds: 3,
                                                       ),
+                                                      description: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          ElevatedButton(
+                                                              onPressed: () {
+                                                                FirebaseFirestore
+                                                                    .instance
+                                                                    .collection(
+                                                                        'users')
+                                                                    .doc(userModel
+                                                                        .userId)
+                                                                    .collection(
+                                                                        'notifications')
+                                                                    .doc(
+                                                                        notificationsModel
+                                                                            .id)
+                                                                    .delete();
+                                                              },
+                                                              style: ElevatedButton
+                                                                  .styleFrom(),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        4.0),
+                                                                child: Icon(Icons
+                                                                    .delete),
+                                                              )),
+                                                        ],
+                                                      ),
+
+                                                      // icon: Icon(Icons.delete),
                                                       context: context,
                                                     );
                                                   }
@@ -374,6 +464,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
+
                                               tileColor: notificationsModel
                                                           .isRead ==
                                                       false

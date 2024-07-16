@@ -27,8 +27,10 @@ import 'package:vehype/const.dart';
 import '../Models/offers_model.dart';
 import '../Widgets/loading_dialog.dart';
 import 'inactive_offers_seeker.dart';
+import 'offers_received_details.dart';
 import 'offers_tab_page.dart';
 import 'received_offers_seeker.dart';
+import 'requests_received_provider_details.dart';
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -69,6 +71,12 @@ class _TabsPageState extends State<TabsPage> {
           } else if (notficationData['type'] == 'offer') {
             ownerNotificationOnTapOffer(notficationData);
           }
+        } else {
+          if (notficationData['type'] == 'request') {
+            providerNotificationOnTapRequest(notficationData);
+          } else if (notficationData['type'] == 'offer') {
+            providerNotificationOnTapOffer(notficationData);
+          }
         }
       }
     });
@@ -78,6 +86,74 @@ class _TabsPageState extends State<TabsPage> {
   void dispose() {
     super.dispose();
     // OneSignal.Notifications.
+  }
+
+  providerNotificationOnTapRequest(Map<String, dynamic> notficationData) async {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    final UserModel userModel = userController.userModel!;
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
+        .instance
+        .collection('offers')
+        .doc(notficationData['objectId'])
+        .get();
+    OffersModel offersModel = OffersModel.fromJson(requestSnap);
+    Get.close(1);
+    UserController().changeNotiOffers(
+        0, false, userModel.userId, offersModel.offerId, userModel.accountType);
+    if (offersModel.status == 'active' &&
+        !offersModel.ignoredBy.contains(userModel.userId) &&
+        !offersModel.offersReceived.contains(userModel.userId)) {
+      Get.to(() => OfferReceivedDetails(
+            offersModel: offersModel,
+          ));
+    } else {
+      toastification.show(
+        title: Text('The request has been moved to another page'),
+        style: ToastificationStyle.minimal,
+        autoCloseDuration: Duration(
+          seconds: 3,
+        ),
+        context: context,
+      );
+    }
+  }
+
+  providerNotificationOnTapOffer(Map<String, dynamic> notficationData) async {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    final UserModel userModel = userController.userModel!;
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    DocumentSnapshot<Map<String, dynamic>> offersReceivedSnap =
+        await FirebaseFirestore.instance
+            .collection('offersReceived')
+            .doc(notficationData['objectId'])
+            .get();
+    OffersReceivedModel offersReceivedModel =
+        OffersReceivedModel.fromJson(offersReceivedSnap);
+
+    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
+        .instance
+        .collection('offers')
+        .doc(offersReceivedModel.offerId)
+        .get();
+    OffersModel offersModel = OffersModel.fromJson(requestSnap);
+
+    int id = offersReceivedModel.status == 'Pending'
+        ? 1
+        : offersReceivedModel.status == 'inProgress'
+            ? 2
+            : offersReceivedModel.status == 'Completed'
+                ? 3
+                : 4;
+    UserController().changeNotiOffers(id, false, userModel.userId,
+        offersModel.offerId, userModel.accountType);
+    Get.close(1);
+    Get.to(() => RequestsReceivedProviderDetails(
+          offersModel: offersModel,
+          offersReceivedModel: offersReceivedModel,
+        ));
   }
 
   ownerNotificationOnTapOffer(Map<String, dynamic> notficationData) async {

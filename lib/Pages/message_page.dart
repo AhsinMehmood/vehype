@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 import 'package:intl/intl.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -41,6 +42,7 @@ import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
 import 'repair_page.dart';
+import 'tabs_page.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatModel chatModel;
@@ -66,6 +68,30 @@ class _MessagePageState extends State<MessagePage> {
     super.initState();
     // getSecondUserToken();
     getChatModel();
+  }
+
+  getNotificationSettings() {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    // String offerId =
+    //     ;
+    bool isNotAllowed = OneSignal.Notifications.permission;
+
+    UserModel userModel = userController.userModel!;
+    if (isNotAllowed == false) {
+      Future.delayed(const Duration(seconds: 3)).then((s) {
+        Get.bottomSheet(
+          NotificationSheet(userController: userController),
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+        );
+      });
+    }
   }
 
   getChatModel() async {
@@ -238,7 +264,8 @@ class _MessagePageState extends State<MessagePage> {
                                                                   element
                                                                       .name ==
                                                                   offersModel
-                                                                      .issues.first)
+                                                                      .issues
+                                                                      .first)
                                                           .image,
                                                       color:
                                                           userController.isDark

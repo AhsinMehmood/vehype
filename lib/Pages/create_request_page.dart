@@ -56,7 +56,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       final UserController userController =
           Provider.of<UserController>(context, listen: false);
       UserModel userModel = userController.userModel!;
-
+      if (widget.garageModel != null) {
+        garageController.selectVehicle(
+            '${widget.garageModel!.bodyStyle}, ${widget.garageModel!.make}, ${widget.garageModel!.year}, ${widget.garageModel!.model}',
+            widget.garageModel!.imageOne,
+            widget.garageModel!.garageId);
+      }
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
         garageController.selectedIssues = widget.offersModel!.issues;
