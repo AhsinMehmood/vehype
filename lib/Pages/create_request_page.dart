@@ -56,12 +56,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       final UserController userController =
           Provider.of<UserController>(context, listen: false);
       UserModel userModel = userController.userModel!;
-      if (widget.garageModel != null) {
-        garageController.selectVehicle(
-            '${widget.garageModel!.bodyStyle}, ${widget.garageModel!.make}, ${widget.garageModel!.year}, ${widget.garageModel!.model}',
-            widget.garageModel!.imageOne,
-            widget.garageModel!.garageId);
-      }
+
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
         garageController.selectedIssue = widget.offersModel!.issue;
@@ -83,6 +78,24 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         garageController.garageId = widget.offersModel!.garageId;
         setState(() {});
       } else {
+        if (widget.garageModel != null) {
+          garageController.selectVehicle(
+              '${widget.garageModel!.bodyStyle}, ${widget.garageModel!.make}, ${widget.garageModel!.year}, ${widget.garageModel!.model}',
+              widget.garageModel!.imageOne,
+              widget.garageModel!.garageId);
+        } else {
+          garageController.selectedVehicle = '';
+        }
+        garageController.requestImages = [];
+        garageController.additionalService = '';
+        garageController.selectedIssue = '';
+        garageController.imageOneUrl = '';
+        // lat = widget.offersModel!.lat;
+        // long = widget.offersModel!.long;
+        // _descriptionController.text = '';
+        garageController.garageId = '';
+        setState(() {});
+
         getLocations();
       }
     });
@@ -999,17 +1012,55 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           garageController.garageId);
                       // Get.back();
                     } else {
-                      String requestId = await garageController.saveRequest(
-                          _descriptionController.text,
-                          LatLng(lat, long),
-                          userModel.userId,
-                          null,
-                          garageController.garageId);
-                      await getUserProviders(
-                          requestId, garageController.selectedIssue, userModel);
+                      QuerySnapshot<Map<String, dynamic>> snapshot =
+                          await FirebaseFirestore.instance
+                              .collection('offers')
+                              .where('ownerId', isEqualTo: userModel.userId)
+                              .where('status', isEqualTo: 'active')
+                              // .where('issue',
+                              //     isEqualTo: garageController.selectedIssue)
+                              .get();
+                      List<OffersModel> offers = [];
+                      for (QueryDocumentSnapshot<
+                          Map<String, dynamic>> documentsnap in snapshot.docs) {
+                        offers.add(OffersModel.fromJson(documentsnap));
+                      }
+
+                      List<OffersModel> filterByVehicle = offers
+                          .where((offer) =>
+                              offer.vehicleId ==
+                              garageController.selectedVehicle)
+                          .toList();
+                      List<OffersModel> filterByService = filterByVehicle
+                          .where((offer) =>
+                              offer.issue == garageController.selectedIssue)
+                          .toList();
+
+                      if (filterByService.isEmpty) {
+                        String requestId = await garageController.saveRequest(
+                            _descriptionController.text,
+                            LatLng(lat, long),
+                            userModel.userId,
+                            null,
+                            garageController.garageId);
+                        await getUserProviders(requestId,
+                            garageController.selectedIssue, userModel);
+                      } else {
+                        Get.close(1);
+
+                        toastification.show(
+                          context: context,
+                          title: Text('Duplicate Request Found!'),
+                          style: ToastificationStyle.minimal,
+                          showProgressBar: false,
+                          type: ToastificationType.error,
+                          alignment: Alignment.topCenter,
+                          autoCloseDuration: Duration(seconds: 3),
+                        );
+                      }
+
                       // Get.close(4);
                     }
-                    Get.close(2);
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
