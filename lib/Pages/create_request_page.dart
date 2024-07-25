@@ -85,15 +85,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               widget.garageModel!.garageId);
         } else {
           garageController.selectedVehicle = '';
+          garageController.imageOneUrl = '';
+          garageController.garageId = '';
         }
         garageController.requestImages = [];
         garageController.additionalService = '';
+
         garageController.selectedIssue = '';
-        garageController.imageOneUrl = '';
-        // lat = widget.offersModel!.lat;
-        // long = widget.offersModel!.long;
-        // _descriptionController.text = '';
-        garageController.garageId = '';
+
         setState(() {});
 
         getLocations();
