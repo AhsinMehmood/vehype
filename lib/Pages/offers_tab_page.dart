@@ -72,11 +72,13 @@ class _NewOffersState extends State<NewOffers> {
                   !userModel.blockedUsers.contains(element.ownerId))
               .toList();
           List<OffersModel> filterByService = blockedUsers
-              .where((element) => userModel.services.contains(element))
+              .where((element) => userModel.services.contains(element.issue))
               .toList();
           print(userModel.lat);
-          List<OffersModel> offers = userController.filterOffers(
-              filterByService, userModel.lat, userModel.long, 100);
+          List<OffersModel> offers = userModel.lat == 0.0
+              ? filterByService
+              : userController.filterOffers(
+                  filterByService, userModel.lat, userModel.long, 100);
           if (userModel.services.isEmpty) {
             UserController().changeNotiOffers(0, false, widget.userModel.userId,
                 'widget.offersModel.offerId', widget.userModel.accountType);

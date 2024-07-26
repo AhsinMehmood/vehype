@@ -83,6 +83,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               '${widget.garageModel!.bodyStyle}, ${widget.garageModel!.make}, ${widget.garageModel!.year}, ${widget.garageModel!.model}',
               widget.garageModel!.imageOne,
               widget.garageModel!.garageId);
+          garageController.garageId = widget.garageModel!.garageId;
         } else {
           garageController.selectedVehicle = '';
           garageController.imageOneUrl = '';
@@ -1009,7 +1010,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           userModel.userId,
                           widget.offersModel!.offerId,
                           garageController.garageId);
-                      // Get.back();
+                      Get.back();
+                      Get.back();
                     } else {
                       QuerySnapshot<Map<String, dynamic>> snapshot =
                           await FirebaseFirestore.instance
@@ -1044,6 +1046,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             garageController.garageId);
                         await getUserProviders(requestId,
                             garageController.selectedIssue, userModel);
+                        Get.back();
+                        Get.back();
                       } else {
                         Get.close(1);
 
@@ -1110,8 +1114,11 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
     UserModel userModel = userController.userModel!;
+    List<UserModel> blockedUsers = providers
+        .where((element) => !userModel.blockedUsers.contains(element.userId))
+        .toList();
     List<UserModel> filterProviders = userController.filterProviders(
-        providers, userModel.lat, userModel.long, 100);
+        blockedUsers, userModel.lat, userModel.long, 100);
     for (var user in filterProviders) {
       UserController()
           .changeNotiOffers(0, true, user.userId, requestId, user.accountType);
@@ -1357,7 +1364,8 @@ class SelectVehicle extends StatelessWidget {
                                   garageController.selectVehicle(
                                       '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
                                       vehicle.imageOne,
-                                      garageController.garageId);
+                                      vehicle.garageId);
+
                                   Get.close(1);
                                 },
                                 child: Card(
@@ -1470,8 +1478,7 @@ class SelectVehicle extends StatelessWidget {
                                                     garageController.selectVehicle(
                                                         '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
                                                         vehicle.imageOne,
-                                                        garageController
-                                                            .garageId);
+                                                        vehicle.garageId);
                                                     Get.close(1);
                                                   },
                                                   style:

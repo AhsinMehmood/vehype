@@ -410,7 +410,7 @@ class GarageController with ChangeNotifier {
         // .where('ownerId', isEqualTo: userId)
         .where('status', isEqualTo: 'active')
         .where('garageId', isEqualTo: vehicleId)
-        .orderBy('createdAt', descending: true)
+        // .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
             (event) => event.docs.map((e) => OffersModel.fromJson(e)).toList());
