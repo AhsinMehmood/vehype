@@ -58,27 +58,21 @@ class _NewOffersState extends State<NewOffers> {
             );
           }
 
+          // Retrieve raw offers from the snapshot or initialize an empty list if null
           List<OffersModel> rawOffers = snapshot.data ?? [];
 
-          List<OffersModel> filterOffers = rawOffers
-              .where((element) =>
-                  !element.offersReceived.contains(userModel.userId))
+// Filter offers based on user criteria
+          List<OffersModel> filteredOffers = rawOffers
+              .where(
+                  (offer) => !offer.offersReceived.contains(userModel.userId))
+              .where((offer) => !offer.ignoredBy.contains(userModel.userId))
+              .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
+              .where((offer) => userModel.services.contains(offer.issue))
               .toList();
-          List<OffersModel> filterIgnore = filterOffers
-              .where((element) => !element.ignoredBy.contains(userModel.userId))
-              .toList();
-          List<OffersModel> blockedUsers = filterIgnore
-              .where((element) =>
-                  !userModel.blockedUsers.contains(element.ownerId))
-              .toList();
-          List<OffersModel> filterByService = blockedUsers
-              .where((element) => userModel.services.contains(element.issue))
-              .toList();
-          print(userModel.lat);
           List<OffersModel> offers = userModel.lat == 0.0
-              ? filterByService
+              ? filteredOffers
               : userController.filterOffers(
-                  filterByService, userModel.lat, userModel.long, 100);
+                  filteredOffers, userModel.lat, userModel.long, 100);
           if (userModel.services.isEmpty) {
             UserController().changeNotiOffers(0, false, widget.userModel.userId,
                 'widget.offersModel.offerId', widget.userModel.accountType);

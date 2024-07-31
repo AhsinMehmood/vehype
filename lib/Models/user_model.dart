@@ -86,7 +86,8 @@ class UserModel {
             0.0, (prev, element) => prev + (element['rating']));
     return UserModel(
       userId,
-      data['profileUrl'] ?? '',
+      data['profileUrl'] ??
+          'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757',
       data['name'] ?? '',
       data['email'] ?? '',
       data['phoneNumber'] ?? '',

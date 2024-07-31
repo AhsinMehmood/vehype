@@ -386,11 +386,11 @@ class _AddVehicleState extends State<AddVehicle> {
                         garageController.selectedYear != '') {
                       Get.dialog(LoadingDialog(), barrierDismissible: false);
 
-                      List<VehicleModel> vehicleMakeList =
-                          await getVehicleModel(
-                              int.parse(garageController.selectedYear),
-                              garageController.selectedVehicleMake!.title,
-                              garageController.selectedVehicleType!.title);
+                      List<VehicleModel> vehicleMakeList = await getSubModels(
+                          garageController.selectedVehicleMake!.title,
+                          '',
+                          garageController.selectedYear,
+                          garageController.selectedVehicleType!.title);
                       vehicleMakeList
                           .sort((a, b) => a.title.compareTo(b.title));
 
@@ -460,6 +460,89 @@ class _AddVehicleState extends State<AddVehicle> {
                     color: changeColor(color: 'D9D9D9'),
                   ),
                 ),
+                // const SizedBox(
+                //   height: 15,
+                // ),
+                // InkWell(
+                //   onTap: () async {
+                //     if (garageController.selectedVehicleMake != null &&
+                //         garageController.selectedYear != '') {
+                //       Get.dialog(LoadingDialog(), barrierDismissible: false);
+
+                //       List<VehicleModel> vehicleMakeList = await getSubModels(
+                //           garageController.selectedVehicleMake!.title,
+                //           garageController.selectedVehicleModel!.title,
+                //           garageController.selectedYear);
+                //       // vehicleMakeList
+                //       //     .sort((a, b) => a.title.compareTo(b.title));
+
+                //       Get.close(1);
+                //       // showModalBottomSheet(
+                //       //     context: context,
+                //       //     shape: RoundedRectangleBorder(
+                //       //         borderRadius: BorderRadius.only(
+                //       //       topLeft: Radius.circular(15),
+                //       //       topRight: Radius.circular(15),
+                //       //     )),
+                //       //     // constraints: BoxConstraints(
+                //       //     //   minHeight: Get.height * 0.7,
+                //       //     //   maxHeight: Get.height * 0.7,
+                //       //     // ),
+                //       //     isScrollControlled: true,
+                //       //     // showDragHandle: true,
+                //       //     builder: (context) {
+                //       //       return ModelPicker(
+                //       //         listOfModels: vehicleMakeList,
+                //       //       );
+                //       //     }).then((value) {
+                //       //   // editProfileProvider
+                //       //   //     .upadeteUpcomingDestinations(userModel);
+                //       // });
+                //     }
+                //   },
+                //   child: SizedBox(
+                //     width: Get.width,
+                //     child: Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text(
+                //           'Sub-model',
+                //           style: TextStyle(
+                //             fontFamily: 'Avenir',
+                //             fontWeight: FontWeight.w400,
+                //             fontSize: 16,
+                //           ),
+                //         ),
+                //         const SizedBox(
+                //           height: 10,
+                //         ),
+                //         Text(
+                //           garageController.selectedVehicleModel == null
+                //               ? 'Select Sub-model'
+                //               : garageController.selectedVehicleModel!.title,
+                //           style: TextStyle(
+                //             fontFamily: 'Avenir',
+                //             fontWeight: FontWeight.w400,
+                //             // color: changeColor(color: '7B7B7B'),
+                //             fontSize: 16,
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(
+                //   height: 15,
+                // ),
+                // Align(
+                //   alignment: Alignment.center,
+                //   child: Container(
+                //     height: 1,
+                //     width: Get.width,
+                //     color: changeColor(color: 'D9D9D9'),
+                //   ),
+                // ),
+
                 const SizedBox(
                   height: 15,
                 ),
@@ -593,10 +676,10 @@ class _AddVehicleState extends State<AddVehicle> {
                         maximumSize: Size(Get.width * 0.8, 60),
                         minimumSize: Size(Get.width * 0.8, 60),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(7),
+                          borderRadius: BorderRadius.circular(22),
                         )),
                     child: Text(
-                      'Save',
+                      'Save Vehicle',
                       style: TextStyle(
                         color:
                             userController.isDark ? primaryColor : Colors.white,
@@ -1018,7 +1101,7 @@ class _ModelPickerState extends State<ModelPicker> {
         borderRadius: BorderRadius.circular(20),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      height: Get.height * 0.7,
+      height: Get.height * 0.85,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(

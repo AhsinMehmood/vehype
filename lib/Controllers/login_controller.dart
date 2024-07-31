@@ -53,12 +53,12 @@ class LoginController {
         String? email = userCredential.user!.email;
         String? name = userCredential.user!.displayName;
 
-        // Mixpanel mixpanel = await Mixpanel.init(
-        //     'c40aeb8e3a8f1030b811314d56973f5a',
-        //     trackAutomaticEvents: true);
-        // mixpanel.identify(userId);
+        Mixpanel mixpanel = await Mixpanel.init(
+            'c40aeb8e3a8f1030b811314d56973f5a',
+            trackAutomaticEvents: true);
+        mixpanel.identify(userId);
 
-        // mixpanel.getPeople().set('\$name', name ?? '');
+        mixpanel.getPeople().set('\$name', name ?? '');
         sharedPreferences.setString('userId', userId);
         if (userCredential.additionalUserInfo!.isNewUser) {
           String? name = userCredential.user!.displayName;
@@ -70,11 +70,6 @@ class LoginController {
             'id': userId,
             'email': email,
           });
-
-          // UserController userController =
-          //     Provider.of<UserController>(context, listen: false);
-          // userController.getUserStream('${userId}provider');
-          // await Future.delayed(const Duration(seconds: 2));
 
           DocumentSnapshot<Map<String, dynamic>> snapshot =
               await FirebaseFirestore.instance
@@ -123,6 +118,12 @@ class LoginController {
             }
           }
         }
+      } else {
+        Get.close(1);
+        Get.showSnackbar(GetSnackBar(
+          message: 'Cancelled by user',
+          duration: const Duration(seconds: 2),
+        ));
       }
     } on FirebaseAuthException catch (e) {
       Get.close(1);
@@ -147,35 +148,15 @@ class LoginController {
           AppleIDAuthorizationScopes.fullName
         ],
         nonce: nonce,
-        // webAuthenticationOptions: WebAuthenticationOptions(
-        //     clientId: 'com.nomadllc.app',
-        //     redirectUri: Uri.parse(
-        //         'https://vehype-386313.firebaseapp.com/__/auth/handler')),
       );
-      // print(credential.email! + ' akslksajdklsajal');
+
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
         rawNonce: rawNonce,
       );
-      // QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-      //     .instance
-      //     .collection('users')
-      //     .where('email', isEqualTo: credential.email!)
-      //     .get();
-      // List<String> signInMethods = await FirebaseAuth.instance
-      //     .fetchSignInMethodsForEmail(credential.email!);
+
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-      // if (snapshot.docs.isNotEmpty) {
-      //   // Email exists, sign in
-      //   userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      //       email: credential.email!, password: '1234567');
-      // } else {
-      //   // Email does not exist, create a new account
-      //   userCredential = await FirebaseAuth.instance
-      //       .createUserWithEmailAndPassword(
-      //           email: credential.email!, password: '1234567');
-      // }
 
       String userId = userCredential.user!.uid;
       String? email = userCredential.user!.email;

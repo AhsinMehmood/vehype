@@ -18,7 +18,7 @@ Color changeColor({required String color}) {
 Color primaryColor = const Color(0xff2A2E43);
 Color primaryColor2 = changeColor(color: 'FF2F53');
 String carApiToken = 'ba831f89-cd77-4efc-9b3b-2a4ef151f959';
-String carApiSecret = 'fe2b4d59ddb5d026d6ba4690e596c183';
+String carApiSecret = '2670c17201df7e3ecb7c5f82c274c855';
 double maxHeightCapturedImage = 600;
 double maxWidthCapturedImage = 600;
 int qualityCapturedImage = 100;

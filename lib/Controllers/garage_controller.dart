@@ -119,7 +119,7 @@ class GarageController with ChangeNotifier {
       ImageSource imageSource, String userId, int index) async {
     final XFile? image = await picker.pickImage(source: imageSource);
     if (image != null) {
-      requestImages.removeAt(index);
+      // requestImages.removeAt(index);
       requestImages.insert(
           index,
           RequestImageModel(
@@ -294,7 +294,8 @@ class GarageController with ChangeNotifier {
   bool saveButtonValidation() {
     if (selectedVehicleType != null &&
         selectedVehicleMake != null &&
-        selectedVehicleModel != null) {
+        selectedVehicleModel != null &&
+        imageOneLoading == false) {
       return true;
     } else {
       return false;

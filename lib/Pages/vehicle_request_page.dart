@@ -8,6 +8,8 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/garage_controller.dart';
 import '../Controllers/user_controller.dart';
+import 'choose_account_type.dart';
+import 'create_request_page.dart';
 import 'repair_page.dart';
 
 class VehicleRequestsPage extends StatelessWidget {
@@ -23,6 +25,56 @@ class VehicleRequestsPage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
+        floatingActionButton: Container(
+          height: 55,
+          width: 55,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(200),
+            color: userController.isDark ? Colors.white : primaryColor,
+          ),
+          child: InkWell(
+            onTap: () async {
+              // bool dd = await OneSignal.Notifications.requestPermission(true);
+              // OneSignal.login(userModel.userId);
+              // await sendNotification(userModel.userId, userModel.name);
+              // print(dd);
+              if (userModel.email == 'No email set') {
+                Get.showSnackbar(GetSnackBar(
+                  message: 'Login to continue',
+                  duration: const Duration(
+                    seconds: 3,
+                  ),
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                  mainButton: TextButton(
+                    onPressed: () {
+                      Get.to(() => ChooseAccountTypePage());
+                      Get.closeCurrentSnackbar();
+                    },
+                    child: Text(
+                      'Login Page',
+                      style: TextStyle(
+                        color:
+                            userController.isDark ? primaryColor : Colors.white,
+                      ),
+                    ),
+                  ),
+                ));
+              } else {
+                Get.to(() => CreateRequestPage(
+                      offersModel: null,
+                      garageModel: garageModel,
+                    ));
+              }
+            },
+            child: Center(
+              child: Icon(
+                Icons.add,
+                color: userController.isDark ? primaryColor : Colors.white,
+              ),
+            ),
+          ),
+        ),
         appBar: AppBar(
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           leading: IconButton(

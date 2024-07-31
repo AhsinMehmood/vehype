@@ -287,7 +287,7 @@ class MyGarage extends StatelessWidget {
                                                   garageModel: garageModel));
                                             },
                                             child: Text(
-                                              'View Requests',
+                                              'Manage Requests',
                                               style: TextStyle(
                                                 color: userController.isDark
                                                     ? primaryColor
@@ -302,37 +302,33 @@ class MyGarage extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      fixedSize: Size(Get.width * 0.7, 45),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      elevation: 0.0,
-                                      backgroundColor: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                    ),
-                                    onPressed: () {
-                                      Get.to(
-                                        () => CreateRequestPage(
-                                          offersModel: null,
-                                          garageModel: garageModel,
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      'Create Request',
-                                      style: TextStyle(
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                      ),
-                                    ),
-                                  ),
+                                  // const SizedBox(
+                                  //   height: 10,
+                                  // ),
+                                  // ElevatedButton(
+                                  //   style: ElevatedButton.styleFrom(
+                                  //     fixedSize: Size(Get.width * 0.7, 45),
+                                  //     shape: RoundedRectangleBorder(
+                                  //       borderRadius: BorderRadius.circular(12),
+                                  //     ),
+                                  //     elevation: 0.0,
+                                  //     backgroundColor: userController.isDark
+                                  //         ? Colors.white
+                                  //         : primaryColor,
+                                  //   ),
+                                  //   onPressed: () {
+                                  //     Get.to(() =>
+                                  //         AddVehicle(garageModel: garageModel));
+                                  //   },
+                                  //   child: Text(
+                                  //     'Edit Vehicle',
+                                  //     style: TextStyle(
+                                  //       color: userController.isDark
+                                  //           ? primaryColor
+                                  //           : Colors.white,
+                                  //     ),
+                                  //   ),
+                                  // ),
                                   const SizedBox(
                                     height: 10,
                                   ),

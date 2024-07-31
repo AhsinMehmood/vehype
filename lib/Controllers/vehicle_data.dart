@@ -58,17 +58,17 @@ List<VehicleType> getVehicleType() {
 
 Future<List<VehicleModel>> getVehicleModel(
     int year, String make, String type) async {
-  String vehicleType = type == 'Passenger Vehicle' ? 'Car' : type;
+  String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
+  await Future.delayed(const Duration(seconds: 5));
 
-  String jwtToken = await getJwtToken();
+  // String jwtToken = await getJwtToken();
   List<VehicleModel> vehicleMakeList = [];
-
   http.Response response = await http.get(
       Uri.parse(
-          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/$make/vehicletype/$vehicleType?format=json'),
+          'https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/$make/modelyear/$year/vehicletype/$vehicleType?format=json'),
       headers: {
         'Content-type': 'application/json',
-        'Authorization': 'Bearer $jwtToken'
+        // 'Authorization': 'Bearer $jwtToken'
       });
   final data = jsonDecode(response.body);
   List listOfData = data['Results'] as List;
@@ -85,28 +85,81 @@ Future<List<VehicleModel>> getVehicleModel(
   return vehicleMakeList;
 }
 
+Future<List<VehicleModel>> getSubModels(
+    String make, String model, String year, String type) async {
+  String jwtToken = await getJwtToken();
+  await Future.delayed(const Duration(seconds: 5));
+
+  List<VehicleModel> vehicleMakeList = [];
+
+  String recallApi = 'https://carapi.app/api/models?make=$make?year=$year';
+  http.Response response = await http.get(Uri.parse(recallApi), headers: {
+    'Content-type': 'application/json',
+    'Authorization': 'Bearer $jwtToken'
+  });
+  final data = jsonDecode(response.body);
+  List listOfData = data['data'] as List;
+  // print(listOfData[0]);
+  for (var element in listOfData) {
+    // print(element);
+    vehicleMakeList.add(VehicleModel(
+        id: element['make_id'] ?? 0,
+        title: element['name'] ?? '',
+        icon: '',
+        vehicleTypeId: 0,
+        vehicleMakeId: element['make_id'] ?? 0));
+  }
+
+  return vehicleMakeList.isEmpty
+      ? await getVehicleModel(int.tryParse(year)!, make, type)
+      : vehicleMakeList;
+}
+
 Future<List<VehicleMake>> getVehicleMake(String type) async {
-  String vehicleType = type == 'Passenger Vehicle' ? 'Car' : type;
+  String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
+  // print(object);
+  await Future.delayed(const Duration(seconds: 5));
+
   try {
     List<VehicleMake> vehicleMakeList = [];
-
-    http.Response response = await http.get(
-        Uri.parse(
-            'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/$vehicleType?format=json'),
-        headers: {
-          'Content-type': 'application/json',
-          // 'Authorization': 'Bearer $jwtToken'
-        });
-    final data = jsonDecode(response.body);
-    List listOfData = data['Results'] as List;
-
-    for (var element in listOfData) {
-      // print(element);
-      vehicleMakeList.add(VehicleMake(
-          id: element['MakeId'] ?? 0,
-          title: element['MakeName'] ?? '',
+    if (vehicleType == 'Car') {
+      String jwtToken = await getJwtToken();
+      String recallApi = 'https://carapi.app/api/makes';
+      http.Response response = await http.get(Uri.parse(recallApi), headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $jwtToken'
+      });
+      final data = jsonDecode(response.body);
+      List listOfData = data['data'] as List;
+      print(listOfData[0]);
+      for (var element in listOfData) {
+        // print(element);
+        vehicleMakeList.add(VehicleMake(
+          id: element['id'] ?? 0,
+          title: element['name'] ?? '',
           icon: '',
-          vehicleTypeId: 0));
+          vehicleTypeId: 0,
+        ));
+      }
+    } else {
+      http.Response response = await http.get(
+          Uri.parse(
+              'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/$vehicleType?format=json'),
+          headers: {
+            'Content-type': 'application/json',
+            // 'Authorization': 'Bearer $jwtToken'
+          });
+      final data = jsonDecode(response.body);
+      List listOfData = data['Results'] as List;
+
+      for (var element in listOfData) {
+        // print(element);
+        vehicleMakeList.add(VehicleMake(
+            id: element['MakeId'] ?? 0,
+            title: element['MakeName'] ?? '',
+            icon: '',
+            vehicleTypeId: 0));
+      }
     }
 
     return vehicleMakeList;
@@ -117,59 +170,59 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
 }
 
 Future<List<int>> getVehicleYear(String make) async {
-  // String jwtToken = await getJwtToken();
+  String jwtToken = await getJwtToken();
   List<int> vehicleMakeList = [];
+  await Future.delayed(const Duration(seconds: 5));
+  http.Response response = await http
+      .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
+    'Content-type': 'application/json',
+    'Authorization': 'Bearer $jwtToken'
+  });
+  final data = jsonDecode(response.body);
+  List listOfData = data as List;
 
-  // http.Response response = await http
-  //     .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
-  //   'Content-type': 'application/json',
-  //   'Authorization': 'Bearer $jwtToken'
-  // });
-  // final data = jsonDecode(response.body);
-  // List listOfData = data as List;
+  print(listOfData.length);
+  for (var element in listOfData) {
+    print(element);
+    vehicleMakeList.add(element);
+  }
+  if (vehicleMakeList.isEmpty) {
+    List<int> years =
+        List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
 
-  // print(listOfData.length);
-  // for (var element in listOfData) {
-  //   print(element);
-  //   vehicleMakeList.add(element);
-  // }
-  // if (vehicleMakeList.isEmpty) {
-  List<int> years =
-      List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
-
-  vehicleMakeList = years;
-  // }
+    vehicleMakeList = years;
+  }
 
   return vehicleMakeList;
 }
 
 Future<String> getJwtToken() async {
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  String? jwtToken = sharedPreferences.getString('carApiToken');
-  if (jwtToken == null) {
-    http.Response response =
-        await http.post(Uri.parse('https://carapi.app/api/auth/login'),
-            headers: {
-              'Content-type': 'application/json',
-              'Accept': 'text/plain',
-            },
-            body: jsonEncode({
-              "api_token": carApiToken,
-              "api_secret": carApiSecret,
-            }));
-    if (response.statusCode == 200) {
-      print(response.body);
-      sharedPreferences.setString('carApiToken', response.body);
-      // final responses = jsonDecode(response.body);
-      return response.body;
-    } else {
-      print(response.body);
-
-      return '';
-    }
+  // String? jwtToken = sharedPreferences.getString('carApiToken');
+  // if (jwtToken == null) {
+  http.Response response =
+      await http.post(Uri.parse('https://carapi.app/api/auth/login'),
+          headers: {
+            'Content-type': 'application/json',
+            'Accept': 'text/plain',
+          },
+          body: jsonEncode({
+            "api_token": 'ba831f89-cd77-4efc-9b3b-2a4ef151f959',
+            "api_secret": 'c4234b2783a659dad7f5f13cbfc54683',
+          }));
+  if (response.statusCode == 200) {
+    print(response.body);
+    sharedPreferences.setString('carApiToken', response.body);
+    // final responses = jsonDecode(response.body);
+    return response.body;
   } else {
-    return jwtToken;
+    print(response.body);
+
+    return '';
   }
+  // } else {
+  //   return jwtToken;
+  // }
 }
 
 List<AdditionalServiceModel> getAdditionalService() {
