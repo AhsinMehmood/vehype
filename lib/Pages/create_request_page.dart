@@ -406,7 +406,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         Row(
                           children: [
                             Text(
-                              'Select Additional\nService',
+                              'Additional Service',
                               style: TextStyle(
                                 fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w400,
@@ -806,7 +806,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           await FirebaseFirestore.instance
                               .collection('offers')
                               .where('ownerId', isEqualTo: userModel.userId)
-                              .where('status', isEqualTo: 'active')
+                              .where('status',
+                                  whereIn: ['active', 'inProgress'])
+
                               // .where('issue',
                               //     isEqualTo: garageController.selectedIssue)
                               .get();
