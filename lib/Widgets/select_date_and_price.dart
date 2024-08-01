@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -522,8 +523,23 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                       showEndDateWarning = false;
                       showPriceWarning = false;
                     });
+                    if (garageController.startDate ==
+                        garageController.endDate) {
+                      toastification.show(
+                        // closeButtonShowType: CloseButtonShowType.none,
+                        title: Text('Start and End date cannot be the same.'),
+                        style: ToastificationStyle.minimal,
+                        context: context,
+                        type: ToastificationType.error,
+                        showProgressBar: true,
+                        autoCloseDuration: Duration(
+                          seconds: 3,
+                        ),
+                      );
+                    } else {
+                      applyToJob(userModel, garageController, comment);
+                    }
 
-                    applyToJob(userModel, garageController, comment);
                     // Get.close(1);
                   }
                 },

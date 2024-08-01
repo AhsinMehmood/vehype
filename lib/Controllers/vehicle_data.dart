@@ -59,7 +59,7 @@ List<VehicleType> getVehicleType() {
 Future<List<VehicleModel>> getVehicleModel(
     int year, String make, String type) async {
   String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
-  await Future.delayed(const Duration(seconds: 5));
+  // await Future.delayed(const Duration(seconds: 5));
 
   // String jwtToken = await getJwtToken();
   List<VehicleModel> vehicleMakeList = [];
@@ -88,7 +88,7 @@ Future<List<VehicleModel>> getVehicleModel(
 Future<List<VehicleModel>> getSubModels(
     String make, String model, String year, String type) async {
   String jwtToken = await getJwtToken();
-  await Future.delayed(const Duration(seconds: 5));
+  // await Future.delayed(const Duration(seconds: 5));
 
   List<VehicleModel> vehicleMakeList = [];
 
@@ -118,7 +118,7 @@ Future<List<VehicleModel>> getSubModels(
 Future<List<VehicleMake>> getVehicleMake(String type) async {
   String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
   // print(object);
-  await Future.delayed(const Duration(seconds: 5));
+  // await Future.delayed(const Duration(seconds: 5));
 
   try {
     List<VehicleMake> vehicleMakeList = [];
@@ -172,7 +172,7 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
 Future<List<int>> getVehicleYear(String make) async {
   String jwtToken = await getJwtToken();
   List<int> vehicleMakeList = [];
-  await Future.delayed(const Duration(seconds: 5));
+  // await Future.delayed(const Duration(seconds: 5));
   http.Response response = await http
       .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
     'Content-type': 'application/json',

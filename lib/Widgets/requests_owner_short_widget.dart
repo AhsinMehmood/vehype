@@ -265,7 +265,7 @@ class RequestsOwnerShortWidgetActive extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Services',
+                    'Service',
                     style: TextStyle(
                       fontFamily: 'Avenir',
                       fontWeight: FontWeight.w400,

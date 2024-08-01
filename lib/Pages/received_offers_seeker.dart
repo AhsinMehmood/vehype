@@ -55,64 +55,79 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
     final String vehicleMake = vehicleInfo[1].trim();
     final String vehicleYear = vehicleInfo[2].trim();
     final String vehicleModle = vehicleInfo[3].trim();
-    return Scaffold(
-      backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      appBar: AppBar(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
-        elevation: 0.0,
-        leading: IconButton(
-            onPressed: () {
-              // garageController.disposeController();
+        appBar: AppBar(
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          elevation: 0.0,
+          leading: IconButton(
+              onPressed: () {
+                // garageController.disposeController();
 
-              Get.back();
-            },
-            icon: Icon(
-              Icons.arrow_back_ios_new,
+                Get.back();
+              },
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: userController.isDark ? Colors.white : primaryColor,
+              )),
+          title: Text(
+            'Offers Received',
+            style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-            )),
-        title: Text(
-          'Offers Received',
-          style: TextStyle(
-            color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          bottom: TabBar(
+            // isScrollable: true,
+            indicatorColor: userController.isDark ? Colors.white : primaryColor,
+            labelColor: userController.isDark ? Colors.white : primaryColor,
+            tabs: [
+              Tab(
+                child: Text('Pending'),
+              ),
+              Tab(
+                child: Text('Ignored'),
+              ),
+            ],
           ),
         ),
-      ),
-      body: StreamBuilder<List<OffersReceivedModel>>(
-          stream: FirebaseFirestore.instance
-              .collection('offersReceived')
-              .where('ownerId', isEqualTo: userModel.userId)
-              .where('offerId', isEqualTo: widget.offersModel.offerId)
-              .where('status', isNotEqualTo: 'ignore')
-              .snapshots()
-              .map((event) => event.docs
-                  .map((e) => OffersReceivedModel.fromJson(e))
-                  .toList()),
-          builder:
-              (context, AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                ),
-              );
-            }
-            List<OffersReceivedModel> offers = snapshot.data ?? [];
-            if (offers.isEmpty) {
-              return Center(
-                child: Text(
-                  'Its Empty Here!',
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              );
-            }
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
+        body: TabBarView(
+          children: [
+            StreamBuilder<List<OffersReceivedModel>>(
+                stream: FirebaseFirestore.instance
+                    .collection('offersReceived')
+                    .where('ownerId', isEqualTo: userModel.userId)
+                    .where('offerId', isEqualTo: widget.offersModel.offerId)
+                    .where('status', isNotEqualTo: 'ignore')
+                    .snapshots()
+                    .map((event) => event.docs
+                        .map((e) => OffersReceivedModel.fromJson(e))
+                        .toList()),
+                builder: (context,
+                    AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                      ),
+                    );
+                  }
+                  List<OffersReceivedModel> offers = snapshot.data ?? [];
+                  if (offers.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Its Empty Here!',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
                       itemCount: offers.length,
                       controller: scrollController,
                       shrinkWrap: true,
@@ -505,11 +520,190 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                 ),
                               );
                             });
-                      }),
-                ),
-              ],
-            );
-          }),
+                      });
+                }),
+            StreamBuilder<List<OffersReceivedModel>>(
+                stream: FirebaseFirestore.instance
+                    .collection('offersReceived')
+                    .where('ownerId', isEqualTo: userModel.userId)
+                    .where('offerId', isEqualTo: widget.offersModel.offerId)
+                    .where('status', isEqualTo: 'ignore')
+                    .snapshots()
+                    .map((event) => event.docs
+                        .map((e) => OffersReceivedModel.fromJson(e))
+                        .toList()),
+                builder: (context,
+                    AsyncSnapshot<List<OffersReceivedModel>> snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                      ),
+                    );
+                  }
+                  List<OffersReceivedModel> offers = snapshot.data ?? [];
+                  if (offers.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Its Empty Here!',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                      itemCount: offers.length,
+                      controller: scrollController,
+                      shrinkWrap: true,
+                      // physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        OffersReceivedModel offersReceivedModel = offers[index];
+                        return StreamBuilder<UserModel>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(offersReceivedModel.offerBy)
+                                .snapshots()
+                                .map(
+                                    (newEvent) => UserModel.fromJson(newEvent)),
+                            builder:
+                                (context, AsyncSnapshot<UserModel> snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                  ),
+                                );
+                              }
+                              UserModel postedByDetails = snapshot.data!;
+                              return Card(
+                                color: widget.offersReceivedModel != null
+                                    ? Colors.red
+                                    : userController.isDark
+                                        ? Colors.blueGrey.shade700
+                                        : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Container(
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                  padding: const EdgeInsets.all(15),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        // mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(200),
+                                            child: ExtendedImage.network(
+                                              postedByDetails.profileUrl,
+                                              width: 75,
+                                              height: 75,
+                                              fit: BoxFit.fill,
+                                              cache: true,
+                                              // border: Border.all(color: Colors.red, width: 1.0),
+                                              shape: BoxShape.circle,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(200.0)),
+                                              //cancelToken: cancellationToken,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                postedByDetails.name,
+                                                style: TextStyle(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 8,
+                                              ),
+                                              InkWell(
+                                                onTap: () {
+                                                  Get.to(() => CommentsPage(
+                                                      data: postedByDetails));
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    RatingBarIndicator(
+                                                      rating: postedByDetails
+                                                          .rating,
+                                                      itemBuilder:
+                                                          (context, index) =>
+                                                              const Icon(
+                                                        Icons.star,
+                                                        color: Colors.amber,
+                                                      ),
+                                                      itemCount: 5,
+                                                      itemSize: 25.0,
+                                                      direction:
+                                                          Axis.horizontal,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      postedByDetails
+                                                          .ratings.length
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            OfferRequestDetails(
+                                                userController: userController,
+                                                offersReceivedModel:
+                                                    offersReceivedModel),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                      });
+                }),
+          ],
+        ),
+      ),
     );
   }
 

@@ -315,7 +315,7 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Services',
+                        'Service',
                         style: TextStyle(
                           fontFamily: 'Avenir',
                           fontWeight: FontWeight.w400,
@@ -435,13 +435,115 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
                             ),
                           ));
                         } else {
-                          await FirebaseFirestore.instance
-                              .collection('offers')
-                              .doc(offersModel.offerId)
-                              .update({
-                            'ignoredBy':
-                                FieldValue.arrayUnion([userModel.userId]),
-                          });
+                          showDialog(
+                              context: context,
+                              // backgroundColor: userController.isDark
+                              //     ? primaryColor
+                              //     : Colors.white,
+                              // shape: RoundedRectangleBorder(
+                              //   borderRadius: BorderRadius.only(
+                              //     topLeft: Radius.circular(22),
+                              //     topRight: Radius.circular(22),
+                              //   ),
+                              // ),
+                              builder: (context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                  backgroundColor: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(22),
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                    ),
+                                    padding: const EdgeInsets.all(15),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Are you sure you want to Ignore this Request?',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 30,
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              Get.close(1);
+                                              await FirebaseFirestore.instance
+                                                  .collection('offers')
+                                                  .doc(offersModel.offerId)
+                                                  .update({
+                                                'ignoredBy':
+                                                    FieldValue.arrayUnion(
+                                                        [userModel.userId]),
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              elevation: 1.0,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              maximumSize:
+                                                  Size(Get.width * 0.6, 50),
+                                              minimumSize:
+                                                  Size(Get.width * 0.6, 50),
+                                            ),
+                                            child: Text(
+                                              'Confirm',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontFamily: 'Avenir',
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              Get.close(1);
+                                            },
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              });
                         }
                       },
                       style: ElevatedButton.styleFrom(
