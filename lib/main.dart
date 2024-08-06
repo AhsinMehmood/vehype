@@ -20,7 +20,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/splash_page.dart';
-import 'package:json_theme/json_theme.dart';
+// import 'package:json_theme/json_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,16 +28,16 @@ void main() async {
   //   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
   // }
   await Firebase.initializeApp();
-  final themeStr = await rootBundle.loadString('assets/theme.json');
-  final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');
+  // final themeStr = await rootBundle.loadString('assets/theme.json');
+  // final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
-  final themeJson = jsonDecode(themeStr);
-  final darkThemeJson = jsonDecode(themeStrDark);
+  // final themeJson = jsonDecode(themeStr);
+  // final darkThemeJson = jsonDecode(themeStrDark);
 
-  final theme = ThemeDecoder.decodeThemeData(themeJson)!;
-  final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
+  // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
+  // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
   OneSignal.Debug.setLogLevel(OSLogLevel.none);
 
   OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
@@ -67,17 +67,17 @@ void main() async {
             create: (context) => ChatController()),
       ],
       child: MyApp(
-        theme: theme,
-        themeStrDark: darkTheme,
-      ),
+          // theme: theme,
+          // themeStrDark: darkTheme,
+          ),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final ThemeData theme;
-  final ThemeData themeStrDark;
-  const MyApp({super.key, required this.theme, required this.themeStrDark});
+  // final ThemeData theme;
+  // final ThemeData themeStrDark;
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -127,8 +127,8 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'VEHYPE',
       themeMode: userController.isDark ? ThemeMode.dark : ThemeMode.light,
-      darkTheme: widget.themeStrDark,
-      theme: widget.theme,
+      // darkTheme: widget.themeStrDark,
+      // theme: widget.theme,
       home: needToUpdate ? const AppUpdate() : const SplashPage(),
     );
   }
