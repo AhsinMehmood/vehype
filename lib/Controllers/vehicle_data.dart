@@ -86,7 +86,7 @@ Future<List<VehicleModel>> getVehicleModel(
 }
 
 Future<List<VehicleModel>> getSubModels(
-    String make, String model, String year, String type) async {
+    String make, String year, String type) async {
   String jwtToken = await getJwtToken();
   // await Future.delayed(const Duration(seconds: 5));
 

@@ -26,6 +26,317 @@ import 'offer_request_details.dart';
 import 'select_date_and_price.dart';
 // import 'vehicle_owner_request_dart';
 
+class RequestsProviderShortWidgetIgnored extends StatelessWidget {
+  final OffersModel offersModel;
+
+  const RequestsProviderShortWidgetIgnored({
+    super.key,
+    required this.offersModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+
+    List<String> vehicleInfo = offersModel.vehicleId.split(',');
+
+    final String vehicleMake = vehicleInfo[1].trim();
+    final String vehicleYear = vehicleInfo[2].trim();
+    final String vehicleModle = vehicleInfo[3].trim();
+    final createdAt = DateTime.parse(offersModel.createdAt);
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        color: userController.isDark ? Colors.blueGrey.shade700 : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: Get.width * 0.42,
+                width: Get.width,
+                child: PageView.builder(
+                    itemCount: offersModel.images.length + 1,
+                    controller: PageController(
+                        viewportFraction:
+                            offersModel.images.isEmpty ? 1 : 0.95),
+                    itemBuilder: (context, index) {
+                      List imagess = [];
+                      for (var element in offersModel.images) {
+                        imagess.add(element);
+                      }
+                      imagess.insert(0, offersModel.imageOne);
+
+                      if (index == 0) {
+                        return InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                  urls: imagess,
+                                  currentIndex: index,
+                                ));
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: ExtendedImage.network(
+                                offersModel.imageOne,
+                                fit: BoxFit.cover,
+                                width: Get.width,
+                                height: Get.width * 0.42,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        int inde = index - 1;
+                        return InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                  urls: imagess,
+                                  currentIndex: index,
+                                ));
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: ExtendedImage.network(
+                                offersModel.images[inde],
+                                fit: BoxFit.cover,
+                                width: Get.width,
+                                height: Get.width * 0.42,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    }),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Vehicle Make',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      vehicleMake.trim(),
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w700,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Year',
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w400,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      vehicleYear.trim(),
+                      style: TextStyle(
+                        fontFamily: 'Avenir',
+                        fontWeight: FontWeight.w700,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Vehicle Model',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        vehicleModle.trim(),
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w700,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 30,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Time Ago',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        timeago.format(createdAt),
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w700,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Service',
+                        style: TextStyle(
+                          fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w400,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 40,
+                              width: 40,
+                              child: SvgPicture.asset(
+                                getServices()
+                                    .firstWhere(
+                                        (ss) => ss.name == offersModel.issue)
+                                    .image,
+                                height: 40,
+                                // cache: true,
+                                // shape: BoxShape.rectangle,
+                                // borderRadius: BorderRadius.circular(8),
+                                width: 40,
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              offersModel.issue,
+                              style: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w500,
+                                // color: changeColor(color: '7B7B7B'),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class RequestsProviderShortWidgetActive extends StatelessWidget {
   final OffersModel offersModel;
   final bool isActive;
@@ -44,7 +355,7 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
     final UserController userController = Provider.of<UserController>(context);
     final UserModel userModel = userController.userModel!;
     List<String> vehicleInfo = offersModel.vehicleId.split(',');
-    final String vehicleType = vehicleInfo[0].trim();
+    // final String vehicleType = vehicleInfo[0].trim();
     final String vehicleMake = vehicleInfo[1].trim();
     final String vehicleYear = vehicleInfo[2].trim();
     final String vehicleModle = vehicleInfo[3].trim();
@@ -473,7 +784,7 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
                                           Align(
                                             alignment: Alignment.center,
                                             child: Text(
-                                              'Are you sure you want to Ignore this Request?',
+                                              'Are you sure you want to ignore this request?',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 color: userController.isDark

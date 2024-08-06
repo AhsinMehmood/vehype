@@ -15,6 +15,8 @@ Color changeColor({required String color}) {
   return myColor;
 }
 
+int currentVersion = 1;
+
 Color primaryColor = const Color(0xff2A2E43);
 Color primaryColor2 = changeColor(color: 'FF2F53');
 String carApiToken = 'ba831f89-cd77-4efc-9b3b-2a4ef151f959';

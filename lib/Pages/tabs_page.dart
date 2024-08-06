@@ -1,5 +1,7 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/app_controller.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -248,38 +251,69 @@ class _TabsPageState extends State<TabsPage> {
         Provider.of<UserController>(context, listen: false);
     bool serviceEnabled;
     LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    permission = await Geolocator.checkPermission();
-    if (isNotAllowed == false) {
-      Future.delayed(const Duration(seconds: 3)).then((s) {
-        Get.bottomSheet(
-          NotificationSheet(userController: userController),
-          backgroundColor: userController.isDark ? primaryColor : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
+    DocumentSnapshot<Map<String, dynamic>> updateSnap = await FirebaseFirestore
+        .instance
+        .collection('updates')
+        .doc('update')
+        .get();
+    if (updateSnap.exists) {
+      if (updateSnap.data()!['newVersion'] != currentVersion) {
+        await Future.delayed(const Duration(seconds: 1));
+        showModalBottomSheet(
+            context: context,
+            backgroundColor:
+                userController.isDark ? primaryColor : Colors.white,
+            // enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
             ),
-          ),
-        );
-      });
-    } else if (serviceEnabled == false ||
-        permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      Future.delayed(const Duration(seconds: 1)).then((s) {
-        Get.bottomSheet(
-          LocationPermissionSheet(userController: userController),
-          backgroundColor: userController.isDark ? primaryColor : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-          ),
-          isDismissible: false,
-          enableDrag: false,
-        );
-      });
+            isDismissible: false,
+            builder: (context) {
+              return UpdateSheet(
+                userController: userController,
+              );
+            });
+        return;
+      } else {
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        permission = await Geolocator.checkPermission();
+        if (isNotAllowed == false) {
+          Future.delayed(const Duration(seconds: 3)).then((s) {
+            Get.bottomSheet(
+              NotificationSheet(userController: userController),
+              backgroundColor:
+                  userController.isDark ? primaryColor : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+            );
+          });
+        } else if (serviceEnabled == false ||
+            permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          Future.delayed(const Duration(seconds: 1)).then((s) {
+            Get.bottomSheet(
+              LocationPermissionSheet(userController: userController),
+              backgroundColor:
+                  userController.isDark ? primaryColor : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              isDismissible: false,
+              // enableDrag: false,
+            );
+          });
+        }
+      }
     }
   }
 
@@ -815,6 +849,102 @@ class LocationPermissionSheet extends StatelessWidget {
                   fontWeight: FontWeight.w900,
                 ),
               ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class UpdateSheet extends StatelessWidget {
+  const UpdateSheet({
+    super.key,
+    required this.userController,
+  });
+
+  final UserController userController;
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          color: userController.isDark ? primaryColor : Colors.white,
+        ),
+        height: 280,
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Update Alert!',
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              'A new update is available on ${Platform.isAndroid ? 'Playstore' : 'Appstore'}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(
+              height: 40,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Get.close(1);
+                if (Platform.isAndroid) {
+                  launchUrl(Uri.parse(
+                      'https://play.google.com/store/apps/details?id=com.nomadllc.vehype'));
+                } else {
+                  toastification.show(
+                    context: context,
+                    title: Text('Please update the app from TestFlight'),
+                    style: ToastificationStyle.minimal,
+                    type: ToastificationType.info,
+                    autoCloseDuration: Duration(seconds: 3),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: Size(Get.width * 0.8, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(26),
+                  )),
+              child: Text(
+                'Update Now',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
             ),
             const SizedBox(
               height: 20,

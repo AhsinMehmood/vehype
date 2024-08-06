@@ -3,11 +3,13 @@
 import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/add_vehicle.dart';
 import 'package:vehype/Pages/create_request_page.dart';
@@ -77,7 +79,7 @@ class MyGarage extends StatelessWidget {
           height: 55,
           width: 55,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(200),
+            borderRadius: BorderRadius.circular(12),
             color: userController.isDark ? Colors.white : primaryColor,
           ),
           child: Center(
@@ -140,25 +142,30 @@ class MyGarage extends StatelessWidget {
                             PageController();
 
                         return Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(15.0),
                           child: InkWell(
                             onTap: () {
                               Get.to(
                                   () => AddVehicle(garageModel: garageModel));
                             },
-                            child: Card(
-                              color: userController.isDark
-                                  ? Colors.blueGrey.shade700
-                                  : Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                  border: Border.all(
+                                    color: userController.isDark
+                                        ? Colors.white.withOpacity(0.2)
+                                        : primaryColor.withOpacity(0.3),
+                                  )),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   if (garageModel.imageOne != '')
                                     SizedBox(
                                       width: Get.width,
-                                      height: Get.width * 0.35,
+                                      height: 220,
                                       child: InkWell(
                                         onTap: () {
                                           Get.to(() => FullImagePageView(
@@ -167,17 +174,18 @@ class MyGarage extends StatelessWidget {
                                         },
                                         child: ClipRRect(
                                           borderRadius:
-                                              BorderRadius.circular(4),
+                                              BorderRadius.circular(0),
                                           child: ExtendedImage.network(
                                             garageModel.imageOne,
-                                            width: Get.width * 0.8,
-                                            height: Get.width * 0.8,
+
                                             fit: BoxFit.cover,
                                             cache: true,
                                             // border: Border.all(color: Colors.red, width: 1.0),
                                             shape: BoxShape.rectangle,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10.0)),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(12),
+                                              topRight: Radius.circular(12),
+                                            ),
                                             //cancelToken: cancellationToken,
                                           ),
                                         ),
@@ -195,10 +203,10 @@ class MyGarage extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              garageModel.bodyStyle,
+                                              '${garageModel.make} ${garageModel.year} ${garageModel.model}',
                                               style: TextStyle(
                                                 fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w400,
+                                                fontWeight: FontWeight.w800,
                                                 color: userController.isDark
                                                     ? Colors.white
                                                     : primaryColor,
@@ -208,99 +216,65 @@ class MyGarage extends StatelessWidget {
                                             const SizedBox(
                                               height: 10,
                                             ),
-                                            Text(
-                                              garageModel.make,
-                                              style: TextStyle(
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w400,
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              garageModel.year,
-                                              style: TextStyle(
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w400,
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              garageModel.model,
-                                              style: TextStyle(
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w400,
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
+                                            Row(
+                                              children: [
+                                                SvgPicture.asset(
+                                                  getVehicleType()
+                                                      .firstWhere((dd) =>
+                                                          dd.title ==
+                                                          garageModel.bodyStyle)
+                                                      .icon,
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                ),
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Text(
+                                                  garageModel.bodyStyle,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Avenir',
+                                                    fontWeight: FontWeight.w400,
+                                                    color: userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              fixedSize:
-                                                  Size(Get.width * 0.7, 45),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              elevation: 0.0,
-                                              backgroundColor:
-                                                  userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                            ),
-                                            onPressed: () {
-                                              Get.to(() => VehicleRequestsPage(
-                                                  garageModel: garageModel));
-                                            },
-                                            child: Text(
-                                              'Manage Requests',
-                                              style: TextStyle(
-                                                color: userController.isDark
-                                                    ? primaryColor
-                                                    : Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                        ],
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(Get.width * 0.8, 45),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(1),
                                       ),
-                                    ],
+                                      elevation: 0.0,
+                                      backgroundColor: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                    ),
+                                    onPressed: () {
+                                      Get.to(() => VehicleRequestsPage(
+                                          garageModel: garageModel));
+                                    },
+                                    child: Text(
+                                      'Manage Requests',
+                                      style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                      ),
+                                    ),
                                   ),
                                   // const SizedBox(
                                   //   height: 10,

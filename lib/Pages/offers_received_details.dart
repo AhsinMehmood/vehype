@@ -278,7 +278,7 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                                 borderRadius: BorderRadius.circular(28),
                               )),
                           child: Text(
-                            'Send Offer',
+                            'Create Offer',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,

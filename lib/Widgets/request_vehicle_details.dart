@@ -365,7 +365,7 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                         height: 10,
                       ),
                       Text(
-                        'Services',
+                        'Service',
                         style: TextStyle(
                           fontFamily: 'Avenir',
                           fontWeight: FontWeight.w400,
@@ -378,42 +378,39 @@ class _VehicleDetailsRequestState extends State<VehicleDetailsRequest> {
                       const SizedBox(
                         height: 8,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            SizedBox(
+                      Row(
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            width: 40,
+                            child: SvgPicture.asset(
+                              getServices()
+                                  .firstWhere(
+                                      (ss) => ss.name == offersModel.issue)
+                                  .image,
                               height: 40,
+                              // cache: true,
+                              // shape: BoxShape.rectangle,
+                              // borderRadius: BorderRadius.circular(8),
                               width: 40,
-                              child: SvgPicture.asset(
-                                getServices()
-                                    .firstWhere(
-                                        (ss) => ss.name == offersModel.issue)
-                                    .image,
-                                height: 40,
-                                // cache: true,
-                                // shape: BoxShape.rectangle,
-                                // borderRadius: BorderRadius.circular(8),
-                                width: 40,
-                                color: widget.userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                              ),
+                              color: widget.userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
                             ),
-                            const SizedBox(
-                              width: 5,
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            offersModel.issue,
+                            style: TextStyle(
+                              fontFamily: 'Avenir',
+                              fontWeight: FontWeight.w500,
+                              // color: changeColor(color: '7B7B7B'),
+                              fontSize: 16,
                             ),
-                            Text(
-                              offersModel.issue,
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w500,
-                                // color: changeColor(color: '7B7B7B'),
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
 
                       const SizedBox(

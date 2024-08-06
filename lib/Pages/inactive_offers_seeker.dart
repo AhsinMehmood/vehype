@@ -556,6 +556,7 @@ class _OwnerToProviderRatingSheetState
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
                             maxLines: 5,
+                            maxLength: 256,
                             controller: commentController,
                             keyboardType: TextInputType.text,
                             textCapitalization: TextCapitalization.sentences,
@@ -1021,6 +1022,7 @@ class _FromProviderToOwnerRatingSheetState
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
                             maxLines: 5,
+                            maxLength: 256,
                             controller: commentController,
                             keyboardType: TextInputType.text,
                             textCapitalization: TextCapitalization.sentences,

@@ -22,6 +22,80 @@ import 'choose_account_type.dart';
 import 'full_image_view_page.dart';
 import 'offers_received_details.dart';
 
+class IgnoredOffers extends StatefulWidget {
+  const IgnoredOffers({
+    super.key,
+    required this.userController,
+    required this.userModel,
+  });
+
+  final UserController userController;
+  final UserModel userModel;
+
+  @override
+  State<IgnoredOffers> createState() => _IgnoredOffersState();
+}
+
+class _IgnoredOffersState extends State<IgnoredOffers> {
+  List selectedServices = [];
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    final UserModel userModel = userController.userModel!;
+    return StreamBuilder<List<OffersModel>>(
+        stream: userController.getOffersProvider(userModel),
+        builder: (context, AsyncSnapshot<List<OffersModel>> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: userController.isDark ? Colors.white : primaryColor,
+              ),
+            );
+          }
+
+          // Retrieve raw offers from the snapshot or initialize an empty list if null
+          List<OffersModel> rawOffers = snapshot.data ?? [];
+
+// Filter offers based on user criteria
+          List<OffersModel> filteredOffers = rawOffers
+              .where((offer) => offer.ignoredBy.contains(userModel.userId))
+              .toList();
+          List<OffersModel> offers = filteredOffers;
+
+          if (offers.isEmpty) {
+            return Center(
+              child: Text(
+                'No Ignored Offers Yet!',
+                style: TextStyle(
+                  color: userController.isDark ? Colors.white : primaryColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+              itemCount: offers.length,
+              shrinkWrap: true,
+              padding:
+                  const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
+              itemBuilder: (context, index) {
+                OffersModel offersModel = offers[index];
+
+                return RequestsProviderShortWidgetIgnored(
+                  offersModel: offersModel,
+                );
+              });
+        });
+  }
+}
+
 class NewOffers extends StatefulWidget {
   const NewOffers({
     super.key,
@@ -72,7 +146,7 @@ class _NewOffersState extends State<NewOffers> {
           List<OffersModel> offers = userModel.lat == 0.0
               ? filteredOffers
               : userController.filterOffers(
-                  filteredOffers, userModel.lat, userModel.long, 100);
+                  filteredOffers, userModel.lat, userModel.long, 50);
           if (userModel.services.isEmpty) {
             UserController().changeNotiOffers(0, false, widget.userModel.userId,
                 'widget.offersModel.offerId', widget.userModel.accountType);

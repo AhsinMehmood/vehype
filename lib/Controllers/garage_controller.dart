@@ -70,12 +70,34 @@ class GarageController with ChangeNotifier {
   VehicleMake? selectedVehicleMake;
   VehicleModel? selectedVehicleModel;
 
-  selectVehicleType(VehicleType? vehicleType) {
+  List fuelTypes = [
+    'Electric',
+    'Hybrid',
+    'Petrol',
+    'Diesel',
+    'LPG',
+    'CNG',
+  ];
+
+  String selectedFuelType = '';
+  selectFuelType(String fuelType) {
+    selectedFuelType = fuelType;
+    notifyListeners();
+  }
+
+  List<VehicleMake> vehiclesMakesByVehicleType = [];
+  List<VehicleModel> vehiclesModelsByYear = [];
+  List<int> vehicleYearsByMake = [];
+
+  selectVehicleType(VehicleType? vehicleType) async {
     selectedVehicleMake = null;
     selectedVehicleModel = null;
     selectedYear = '';
+    vehiclesMakesByVehicleType = [];
 
     selectedVehicleType = vehicleType;
+    notifyListeners();
+    vehiclesMakesByVehicleType = await getVehicleMake(vehicleType!.title);
     notifyListeners();
   }
 
@@ -87,18 +109,26 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  selectMake(VehicleMake newBodyStyle) {
+  selectMake(VehicleMake newBodyStyle) async {
     selectedVehicleMake = newBodyStyle;
     selectedYear = '';
     selectedVehicleModel = null;
+    vehicleYearsByMake = [];
+
+    notifyListeners();
+    vehicleYearsByMake = await getVehicleYear(newBodyStyle.title);
 
     notifyListeners();
   }
 
-  selectYear(String newBodyStyle) {
+  selectYear(String newBodyStyle) async {
     selectedYear = newBodyStyle;
     selectedVehicleModel = null;
+    vehiclesModelsByYear = [];
+    notifyListeners();
 
+    vehiclesModelsByYear = await getSubModels(
+        selectedVehicleMake!.title, newBodyStyle, selectedVehicleType!.title);
     notifyListeners();
   }
 
@@ -382,6 +412,8 @@ class GarageController with ChangeNotifier {
     selectedVehicleType = null;
     selectedVehicleMake = null;
     selectedVehicleModel = null;
+    endDate = null;
+    startDate = null;
     imageOneUrl = '';
     imageTwoUrl = '';
     selectedYear = '';
