@@ -147,8 +147,8 @@ flutter:
     - assets/
     - assets/images/
     - assets/fonts/
-    - assets/theme.json
-    - assets/dark_theme.json    
+    # - assets/theme.json
+    # - assets/dark_theme.json    
 
   fonts:
     - family: Poppins-Bold
