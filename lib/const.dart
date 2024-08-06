@@ -15,7 +15,7 @@ Color changeColor({required String color}) {
   return myColor;
 }
 
-int currentVersion = 1;
+int currentVersion = 2;
 
 Color primaryColor = const Color(0xff2A2E43);
 Color primaryColor2 = changeColor(color: 'FF2F53');

@@ -608,7 +608,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                           ),
                         );
                       } else {
-                        // applyToJob(userModel, garageController, comment);
+                        applyToJob(userModel, garageController, comment);
                       }
 
                       // Get.close(1);
