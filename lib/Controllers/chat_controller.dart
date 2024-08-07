@@ -33,6 +33,11 @@ class ChatController with ChangeNotifier {
       FirebaseDatabase.instance.ref().child('chats');
   final DatabaseReference _messagesRef =
       FirebaseDatabase.instance.ref().child('messages');
+  updateChatRequestId(String chatId, String offerId) async {
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'offerRequestId': offerId,
+    });
+  }
 
   Future<String> createChat(
       UserModel currentUser,

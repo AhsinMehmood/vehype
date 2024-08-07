@@ -53,6 +53,8 @@ class OffersController {
             secondUser: postedByDetails,
           ));
     } else {
+      await ChatController()
+          .updateChatRequestId(chatModel.id, offersReceivedModel.id);
       Get.close(2);
 
       Get.to(() => MessagePage(
@@ -84,6 +86,8 @@ class OffersController {
             secondUser: postedByDetails,
           ));
     } else {
+      await ChatController()
+          .updateChatRequestId(chatModel.id, offersReceivedModel.id);
       Get.close(1);
 
       Get.to(() => MessagePage(

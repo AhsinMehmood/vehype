@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
+import 'package:readmore/readmore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
@@ -30,6 +31,7 @@ import 'package:vehype/Models/message_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
+import 'package:vehype/Pages/offers_received_details.dart';
 import 'package:vehype/Pages/request_chat_details.dart';
 import 'package:vehype/Pages/request_details_seeker_chat_page.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
@@ -193,244 +195,147 @@ class _MessagePageState extends State<MessagePage> {
 
                           return title == ''
                               ? SizedBox.shrink()
-                              : Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 12, right: 12, top: 12),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(14),
-                                        bottomRight: Radius.circular(14),
-                                      ),
-                                      // border: Bord,
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                              : InkWell(
+                                  onTap: () {
+                                    if (userModel.userId ==
+                                        offersModel.ownerId) {
+                                      Get.to(() => OfferReceivedDetails(
+                                          offersModel: offersModel));
+                                    } else {
+                                      if (chatModel!.offerRequestId != '') {}
+                                    }
+                                  },
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(0),
+                                    ),
+                                    margin: const EdgeInsets.all(0),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    child: Container(
+                                      padding: const EdgeInsets.only(
+                                          left: 12, right: 12, top: 12),
+                                      decoration: BoxDecoration(),
+                                      child: Column(
                                         children: [
-                                          if (offersModel.imageOne != '')
-                                            InkWell(
-                                              onTap: () {
-                                                Get.to(() => FullImagePageView(
-                                                      urls: [
-                                                        offersModel.imageOne
-                                                      ],
-                                                      currentIndex: 0,
-                                                    ));
-                                              },
-                                              child: ExtendedImage.network(
-                                                offersModel.imageOne,
-                                                height: 65,
-                                                width: 65,
-                                                // fit: BoxFit.cover,
-                                                cache: true,
-                                                shape: BoxShape.rectangle,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                          const SizedBox(
-                                            width: 8,
-                                          ),
-                                          Column(
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.center,
                                             children: [
-                                              Text(
-                                                title.trim(),
-                                                style: TextStyle(
-                                                  // color: Colors.black,
-                                                  fontFamily: 'Avenir',
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16,
+                                              if (offersModel.imageOne != '')
+                                                InkWell(
+                                                  onTap: () {
+                                                    Get.to(() =>
+                                                        FullImagePageView(
+                                                          urls: [
+                                                            offersModel.imageOne
+                                                          ],
+                                                          currentIndex: 0,
+                                                        ));
+                                                  },
+                                                  child: ExtendedImage.network(
+                                                    offersModel.imageOne,
+                                                    height: 50,
+                                                    width: 50,
+                                                    fit: BoxFit.cover,
+                                                    cache: true,
+                                                    shape: BoxShape.rectangle,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                  ),
+                                                ),
+                                              const SizedBox(
+                                                width: 8,
+                                              ),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      title.trim(),
+                                                      maxLines: 2,
+                                                      style: TextStyle(
+                                                        // color: Colors.black,
+                                                        fontFamily: 'Avenir',
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontSize: 15,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        SvgPicture.asset(
+                                                            getServices()
+                                                                .firstWhere((element) =>
+                                                                    element
+                                                                        .name ==
+                                                                    offersModel
+                                                                        .issue)
+                                                                .image,
+                                                            color: userController
+                                                                    .isDark
+                                                                ? Colors.white
+                                                                : primaryColor,
+                                                            height: 25,
+                                                            width: 25),
+                                                        const SizedBox(
+                                                          width: 3,
+                                                        ),
+                                                        Text(
+                                                          ' ',
+                                                          style: TextStyle(
+                                                            // color: Colors.black,
+                                                            fontFamily:
+                                                                'Avenir',
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            fontSize: 14,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          offersModel.issue,
+                                                          style: TextStyle(
+                                                            // color: Colors.black,
+                                                            fontFamily:
+                                                                'Avenir',
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            fontSize: 14,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    )
+                                                  ],
                                                 ),
                                               ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  SvgPicture.asset(
-                                                      getServices()
-                                                          .firstWhere(
-                                                              (element) =>
-                                                                  element
-                                                                      .name ==
-                                                                  offersModel
-                                                                      .issue
-                                                                      )
-                                                          .image,
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
-                                                      height: 25,
-                                                      width: 25),
-                                                  const SizedBox(
-                                                    width: 3,
-                                                  ),
-                                                  Text(
-                                                    'Issue: ',
-                                                    style: TextStyle(
-                                                      // color: Colors.black,
-                                                      fontFamily: 'Avenir',
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    offersModel.issue,
-                                                    style: TextStyle(
-                                                      // color: Colors.black,
-                                                      fontFamily: 'Avenir',
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              if (chatModel != null)
-                                                StreamBuilder<
-                                                        OffersReceivedModel>(
-                                                    stream: userModel.userId ==
-                                                            offersModel.ownerId
-                                                        ? FirebaseFirestore.instance
-                                                            .collection(
-                                                                'offersReceived')
-                                                            .where('ownerId',
-                                                                isEqualTo: userModel
-                                                                    .userId)
-                                                            .where('offerId',
-                                                                isEqualTo: offersModel
-                                                                    .offerId)
-                                                            .snapshots()
-                                                            .map((event) =>
-                                                                OffersReceivedModel.fromJson(event
-                                                                    .docs
-                                                                    .first))
-                                                        : FirebaseFirestore.instance
-                                                            .collection('offersReceived')
-                                                            .where('offerBy', isEqualTo: userModel.userId)
-                                                            .where('offerId', isEqualTo: offersModel.offerId)
-                                                            .snapshots()
-                                                            .map((event) => OffersReceivedModel.fromJson(event.docs.first)),
-                                                    builder: (context, AsyncSnapshot<OffersReceivedModel> snapshot) {
-                                                      if (snapshot.hasData ==
-                                                          false) {
-                                                        if (userModel.userId !=
-                                                            offersModel
-                                                                .ownerId) {
-                                                          return ElevatedButton(
-                                                              onPressed: () {
-                                                                Get.to(
-                                                                  () =>
-                                                                      SelectDateAndPrice(
-                                                                    offersModel:
-                                                                        offersModel,
-                                                                    chatId: widget
-                                                                        .chatModel
-                                                                        .id,
-                                                                    ownerModel:
-                                                                        widget
-                                                                            .secondUser,
-                                                                    offersReceivedModel:
-                                                                        null,
-                                                                  ),
-                                                                );
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                minimumSize:
-                                                                    Size(120,
-                                                                        40),
-                                                                backgroundColor:
-                                                                    const Color
-                                                                        .fromARGB(
-                                                                        255,
-                                                                        28,
-                                                                        131,
-                                                                        31),
-                                                              ),
-                                                              child: Text(
-                                                                'Send Offer',
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w800,
-                                                                ),
-                                                              ));
-                                                        } else {
-                                                          return Container();
-                                                        }
-                                                      }
-                                                      OffersReceivedModel
-                                                          offersReceivedModel =
-                                                          snapshot.data!;
-                                                      if (offersReceivedModel
-                                                                  .ownerId ==
-                                                              userModel
-                                                                  .userId &&
-                                                          offersReceivedModel
-                                                                  .status ==
-                                                              'Pending') {
-                                                        return RequestDetailsButtonOwner(
-                                                          widget: widget,
-                                                          offersReceivedModel:
-                                                              offersReceivedModel,
-                                                          offersModel:
-                                                              offersModel,
-                                                          userModel: userModel,
-                                                        );
-                                                      } else if (offersReceivedModel
-                                                              .status ==
-                                                          'Pending') {
-                                                        return RequestDetailsButtonProvider(
-                                                          widget: widget,
-                                                          offersReceivedModel:
-                                                              offersReceivedModel,
-                                                          offersModel:
-                                                              offersModel,
-                                                          userModel: userModel,
-                                                        );
-                                                      } else {
-                                                        return SizedBox
-                                                            .shrink();
-                                                      }
-                                                    })
+                                              IconButton(
+                                                  onPressed: () {},
+                                                  icon: Icon(
+                                                    Icons
+                                                        .arrow_forward_ios_rounded,
+                                                    size: 22,
+                                                  ))
                                             ],
                                           ),
                                         ],
                                       ),
-                                      Container(
-                                        margin: const EdgeInsets.only(
-                                          top: 7,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
-                                        ),
-                                        height: 1,
-                                        width: Get.width,
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 );
                         }
@@ -438,9 +343,9 @@ class _MessagePageState extends State<MessagePage> {
                       }),
               ],
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            // const SizedBox(
+            //   height: 10,
+            // ),
             Expanded(
               child: StreamBuilder<List<MessageModel>>(
                   stream: ChatController().paginatedMessageStream(
@@ -1590,7 +1495,7 @@ class TopBarMessage extends StatelessWidget {
                   size: 24,
                 )),
             const SizedBox(
-              width: 10,
+              width: 0,
             ),
             InkWell(
               onTap: () {
@@ -1605,21 +1510,21 @@ class TopBarMessage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(200),
                     child: ExtendedImage.network(
                       secondUser.profileUrl,
-                      height: 40,
-                      width: 40,
+                      height: 45,
+                      width: 45,
                       fit: BoxFit.cover,
                     ),
                   ),
                   const SizedBox(
-                    width: 10,
+                    width: 5,
                   ),
                   Text(
                     secondUser.name,
                     style: TextStyle(
                       // color: Colors.black,
                       fontFamily: 'Avenir',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -1832,7 +1737,7 @@ class TopBarMessage extends StatelessWidget {
                   isScrollControlled: true);
             },
             icon: const Icon(
-              Icons.more_horiz_outlined,
+              Icons.more_vert_rounded,
               size: 24,
             ))
       ],

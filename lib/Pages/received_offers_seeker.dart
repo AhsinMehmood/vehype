@@ -223,6 +223,9 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                               secondUser: postedByDetails,
                                             ));
                                       } else {
+                                        await ChatController()
+                                            .updateChatRequestId(chatModel.id,
+                                                offersReceivedModel.id);
                                         Get.close(2);
 
                                         Get.to(() => MessagePage(

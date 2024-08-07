@@ -20,6 +20,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/splash_page.dart';
+import 'package:vehype/const.dart';
 // import 'package:json_theme/json_theme.dart';
 
 void main() async {
@@ -123,12 +124,62 @@ class _MyAppState extends State<MyApp> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     final UserController userController = Provider.of<UserController>(context);
+
+    TextTheme textTheme = TextTheme(
+      displayLarge: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      displayMedium: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      displaySmall: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      headlineLarge: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      headlineMedium: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      headlineSmall: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      titleLarge: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      titleMedium: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      titleSmall: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      bodyLarge: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      bodyMedium: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      bodySmall: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      labelLarge: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      labelMedium: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+      labelSmall: TextStyle(
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+    );
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VEHYPE',
       themeMode: userController.isDark ? ThemeMode.dark : ThemeMode.light,
-      // darkTheme: widget.themeStrDark,
-      // theme: widget.theme,
+      darkTheme: ThemeData.dark().copyWith(textTheme: textTheme),
+      theme: ThemeData().copyWith(
+        textTheme: textTheme,
+      ),
       home: needToUpdate ? const AppUpdate() : const SplashPage(),
     );
   }

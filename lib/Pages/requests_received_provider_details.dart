@@ -238,6 +238,8 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                                           secondUser: ownerDetails,
                                         ));
                                   } else {
+                                    await ChatController().updateChatRequestId(
+                                        chatModel.id, offersReceivedModel.id);
                                     Get.close(1);
 
                                     Get.to(() => MessagePage(
@@ -466,6 +468,8 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                                           secondUser: ownerDetails,
                                         ));
                                   } else {
+                                    await ChatController().updateChatRequestId(
+                                        chatModel.id, offersReceivedModel.id);
                                     Get.close(1);
 
                                     Get.to(() => MessagePage(

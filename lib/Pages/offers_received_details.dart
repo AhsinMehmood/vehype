@@ -8,8 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:maps_launcher/maps_launcher.dart';
+
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/chat_model.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -22,10 +21,10 @@ import 'package:vehype/const.dart';
 import '../Controllers/chat_controller.dart';
 import '../Controllers/garage_controller.dart';
 import '../Controllers/user_controller.dart';
-import '../Controllers/vehicle_data.dart';
+
 import '../Models/user_model.dart';
 import 'comments_page.dart';
-import 'full_image_view_page.dart';
+
 import 'message_page.dart';
 
 class OfferReceivedDetails extends StatefulWidget {

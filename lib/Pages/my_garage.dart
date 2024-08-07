@@ -194,60 +194,62 @@ class MyGarage extends StatelessWidget {
                                   const SizedBox(
                                     height: 10,
                                   ),
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
                                           children: [
-                                            Text(
-                                              '${garageModel.make} ${garageModel.year} ${garageModel.model}',
-                                              style: TextStyle(
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w800,
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Row(
-                                              children: [
-                                                SvgPicture.asset(
-                                                  getVehicleType()
-                                                      .firstWhere((dd) =>
-                                                          dd.title ==
-                                                          garageModel.bodyStyle)
-                                                      .icon,
+                                            Expanded(
+                                              child: Text(
+                                                '${garageModel.make} ${garageModel.year} ${garageModel.model}',
+                                                style: TextStyle(
+                                                  fontFamily: 'Avenir',
+                                                  fontWeight: FontWeight.w800,
                                                   color: userController.isDark
                                                       ? Colors.white
                                                       : primaryColor,
+                                                  fontSize: 16,
                                                 ),
-                                                const SizedBox(
-                                                  width: 8,
-                                                ),
-                                                Text(
-                                                  garageModel.bodyStyle,
-                                                  style: TextStyle(
-                                                    fontFamily: 'Avenir',
-                                                    fontWeight: FontWeight.w400,
-                                                    color: userController.isDark
-                                                        ? Colors.white
-                                                        : primaryColor,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ],
+                                              ),
                                             ),
                                           ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          children: [
+                                            SvgPicture.asset(
+                                              getVehicleType()
+                                                  .firstWhere((dd) =>
+                                                      dd.title ==
+                                                      garageModel.bodyStyle)
+                                                  .icon,
+                                              color: userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
+                                            ),
+                                            const SizedBox(
+                                              width: 8,
+                                            ),
+                                            Text(
+                                              garageModel.bodyStyle,
+                                              style: TextStyle(
+                                                fontFamily: 'Avenir',
+                                                fontWeight: FontWeight.w400,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   const SizedBox(
                                     height: 20,

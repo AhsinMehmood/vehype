@@ -66,18 +66,18 @@ class _ChatPageState extends State<ChatPage> {
                   child: Text('Nothing here!'),
                 );
               }
-      
+
               // List<ChatModel> chats =
               //     snap.data!.where((element) => element.).toList();
-      
+
               return ListView.builder(
                   itemCount: snap.data!.length,
                   // physics:const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(0),
                   itemBuilder: (context, index) {
                     ChatModel chat = snap.data![index];
-      
+
                     return ChatWidget(
                       user: userModel,
                       chat: chat,
