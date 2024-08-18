@@ -34,7 +34,7 @@ class AddVehicle extends StatefulWidget {
 
 class _AddVehicleState extends State<AddVehicle> {
   TextEditingController _vinController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +44,7 @@ class _AddVehicleState extends State<AddVehicle> {
       if (widget.garageModel != null) {
         garageController.initVehicle(widget.garageModel!);
         _vinController.text = widget.garageModel!.vin;
-        _descriptionController.text = widget.garageModel!.description;
+
         setState(() {});
       }
     });
@@ -108,8 +108,8 @@ class _AddVehicleState extends State<AddVehicle> {
                         border: garageController.imageOneUrl == ''
                             ? Border.all(
                                 color: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
+                                    ? Colors.white.withOpacity(0.4)
+                                    : primaryColor.withOpacity(0.4),
                               )
                             : null),
                     child: garageController.imageOneLoading
@@ -137,8 +137,8 @@ class _AddVehicleState extends State<AddVehicle> {
                                       borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
                                         color: userController.isDark
-                                            ? Colors.white
-                                            : primaryColor,
+                                            ? Colors.white.withOpacity(0.4)
+                                            : primaryColor.withOpacity(0.4),
                                       ),
                                     ),
                                     padding: const EdgeInsets.all(10),
@@ -214,8 +214,8 @@ class _AddVehicleState extends State<AddVehicle> {
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
+                                  ? Colors.white.withOpacity(0.4)
+                                  : primaryColor.withOpacity(0.4),
                             )),
                         padding: const EdgeInsets.all(12),
                         child: Row(
@@ -301,22 +301,25 @@ class _AddVehicleState extends State<AddVehicle> {
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
+                                  ? Colors.white.withOpacity(0.4)
+                                  : primaryColor.withOpacity(0.4),
                             )),
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              garageController.selectedVehicleMake == null
-                                  ? 'Choose'
-                                  : garageController.selectedVehicleMake!.title,
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                // color: changeColor(color: '7B7B7B'),
-                                fontSize: 16,
+                            Expanded(
+                              child: Text(
+                                garageController.selectedVehicleMake == null
+                                    ? 'Choose'
+                                    : garageController
+                                        .selectedVehicleMake!.title,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.w400,
+                                  // color: changeColor(color: '7B7B7B'),
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             Icon(
@@ -387,8 +390,8 @@ class _AddVehicleState extends State<AddVehicle> {
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
+                                  ? Colors.white.withOpacity(0.4)
+                                  : primaryColor.withOpacity(0.4),
                             )),
                         padding: const EdgeInsets.all(12),
                         child: Row(
@@ -482,8 +485,8 @@ class _AddVehicleState extends State<AddVehicle> {
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
+                                  ? Colors.white.withOpacity(0.4)
+                                  : primaryColor.withOpacity(0.4),
                             )),
                         padding: const EdgeInsets.all(12),
                         child: Row(
@@ -514,6 +517,104 @@ class _AddVehicleState extends State<AddVehicle> {
                     ],
                   ),
                 ),
+                const SizedBox(
+                  height: 20,
+                ),
+                if (garageController.vehicleSubModels.isNotEmpty)
+                  InkWell(
+                    onTap: () async {
+                      if (garageController.selectedVehicleModel != null) {
+                        // List<VehicleModel> vehicleMakeList = await getSubModels(
+                        //     garageController.selectedVehicleMake!.title,
+                        //     '',
+                        //     garageController.selectedYear,
+                        //     garageController.selectedVehicleType!.title);
+
+                        showModalBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
+                            )),
+                            // constraints: BoxConstraints(
+                            //   minHeight: Get.height * 0.7,
+                            //   maxHeight: Get.height * 0.7,
+                            // ),
+                            isScrollControlled: true,
+                            // showDragHandle: true,
+                            builder: (context) {
+                              return SubModelPicker(
+                                  // listOfModels: vehicleMakeList,
+                                  );
+                            }).then((value) {
+                          // editProfileProvider
+                          //     .upadeteUpcomingDestinations(userModel);
+                        });
+                      } else {
+                        toastification.show(
+                          context: context,
+                          title: Text('Please select model first'),
+                          autoCloseDuration: Duration(seconds: 3),
+                        );
+                      }
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sub-Model *',
+                          style: TextStyle(
+                            fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.4)
+                                    : primaryColor.withOpacity(0.4),
+                              )),
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  garageController.selectedSubModel == null
+                                      ? 'Choose'
+                                      : garageController
+                                          .selectedSubModel!.title,
+                                  style: TextStyle(
+                                    fontFamily: 'Avenir',
+                                    fontWeight: FontWeight.w400,
+                                    // color: changeColor(color: '7B7B7B'),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                size: 24,
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -591,11 +692,8 @@ class _AddVehicleState extends State<AddVehicle> {
                       ElevatedButton(
                           onPressed: () async {
                             if (garageController.saveButtonValidation()) {
-                              garageController.saveVehicle(
-                                  userModel,
-                                  _vinController.text,
-                                  _descriptionController.text,
-                                  widget.addService);
+                              garageController.saveVehicle(userModel,
+                                  _vinController.text, widget.addService);
                             } else {
                               toastification.show(
                                 context: context,
@@ -1241,6 +1339,219 @@ class _ModelPickerState extends State<ModelPicker> {
                                             null &&
                                         garageController
                                                 .selectedVehicleModel!.title ==
+                                            bodyStyle.title)
+                                      Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(200),
+                                          color: Colors.green,
+                                        ),
+                                        child: Icon(
+                                          Icons.done,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Container(
+                                height: 1,
+                                width: Get.width * 0.9,
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.3)
+                                    : primaryColor.withOpacity(0.3),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      itemCount: vehicleModels.length,
+                    )),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+class SubModelPicker extends StatefulWidget {
+  const SubModelPicker({super.key});
+
+  @override
+  State<SubModelPicker> createState() => _SubModelPickerState();
+}
+
+class _SubModelPickerState extends State<SubModelPicker> {
+  List<VehicleModel> _filteredList = [];
+
+  void _filterSearchResults(
+    String query,
+    List<VehicleModel> vehicleModelList,
+  ) {
+    List<VehicleModel> vehicleList = vehicleModelList;
+
+    List<VehicleModel> searchResult = <VehicleModel>[];
+
+    if (query.isEmpty) {
+      searchResult.addAll(vehicleList);
+    } else {
+      searchResult = vehicleList.where((c) => c.startsWith(query)).toList();
+    }
+
+    setState(() => _filteredList = searchResult);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final GarageController garageController =
+        Provider.of<GarageController>(context);
+    final UserController userController = Provider.of<UserController>(context);
+    List<VehicleModel> vehicleModels = garageController.vehicleSubModels;
+    vehicleModels.sort((a, b) => a.title.compareTo(b.title));
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: userController.isDark ? primaryColor : Colors.white,
+      ),
+      height: Get.height * 0.85,
+      child: vehicleModels.isEmpty
+          ? Center(
+              child: CircularProgressIndicator(
+                color: userController.isDark ? Colors.white : primaryColor,
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  TextFormField(
+                    onChanged: (String text) {
+                      _filterSearchResults(text, vehicleModels);
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Search',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  if (_filteredList.isNotEmpty)
+                    // for (VehicleModel bodyStyle in _filteredList)
+                    Expanded(
+                        child: ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        VehicleModel bodyStyle = _filteredList[index];
+                        return InkWell(
+                          onTap: () {
+                            garageController.selectSubModel(bodyStyle);
+                            Get.close(1);
+                          },
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        bodyStyle.title,
+                                        style: TextStyle(
+                                          fontFamily: 'Avenir',
+                                          fontWeight: FontWeight.w400,
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    if (garageController.selectedSubModel !=
+                                            null &&
+                                        garageController
+                                                .selectedSubModel!.title ==
+                                            bodyStyle.title)
+                                      Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(200),
+                                          color: Colors.green,
+                                        ),
+                                        child: Icon(
+                                          Icons.done,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Container(
+                                height: 1,
+                                width: Get.width * 0.9,
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.3)
+                                    : primaryColor.withOpacity(0.3),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      itemCount: _filteredList.length,
+                    )),
+                  if (_filteredList.isEmpty)
+                    // for (VehicleModel bodyStyle in widget.listOfModels)
+                    Expanded(
+                        child: ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        VehicleModel bodyStyle = vehicleModels[index];
+                        return InkWell(
+                          onTap: () {
+                            garageController.selectSubModel(bodyStyle);
+                            Get.close(1);
+                          },
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        bodyStyle.title,
+                                        style: TextStyle(
+                                          fontFamily: 'Avenir',
+                                          fontWeight: FontWeight.w400,
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    if (garageController.selectedSubModel !=
+                                            null &&
+                                        garageController
+                                                .selectedSubModel!.title ==
                                             bodyStyle.title)
                                       Container(
                                         padding: const EdgeInsets.all(2),

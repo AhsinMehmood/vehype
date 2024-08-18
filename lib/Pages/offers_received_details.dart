@@ -196,45 +196,7 @@ class _OfferReceivedDetailsState extends State<OfferReceivedDetails> {
                       children: [
                         if (widget.isChat == false)
                           InkWell(
-                            onTap: () async {
-                              Get.dialog(LoadingDialog(),
-                                  barrierDismissible: false);
-                              ChatModel? chatModel = await ChatController()
-                                  .getChat(
-                                      userModel.userId,
-                                      ownerDetails.userId,
-                                      widget.offersModel.offerId);
-                              if (chatModel == null) {
-                                await ChatController().createChat(
-                                    userModel,
-                                    ownerDetails,
-                                    '',
-                                    widget.offersModel,
-                                    'New Message',
-                                    '${userModel.name} started a chat for ${widget.offersModel.vehicleId}',
-                                    'chat');
-                                ChatModel? newchat =
-                                    await ChatController().getChat(
-                                  userModel.userId,
-                                  ownerDetails.userId,
-                                  widget.offersModel.offerId,
-                                );
-                                // ChatController(). updateOfferId(newchat!, userModel.userId);
-
-                                Get.close(1);
-                                Get.to(() => MessagePage(
-                                      chatModel: newchat!,
-                                      secondUser: ownerDetails,
-                                    ));
-                              } else {
-                                Get.close(1);
-
-                                Get.to(() => MessagePage(
-                                      chatModel: chatModel,
-                                      secondUser: ownerDetails,
-                                    ));
-                              }
-                            },
+                            onTap: () async {},
                             child: Card(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(300),

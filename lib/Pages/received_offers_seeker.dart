@@ -220,6 +220,7 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                         Get.close(2);
                                         Get.to(() => MessagePage(
                                               chatModel: chatModel!,
+                                              offersModel: widget.offersModel,
                                               secondUser: postedByDetails,
                                             ));
                                       } else {
@@ -229,6 +230,7 @@ class _ReceivedOffersSeekerState extends State<ReceivedOffersSeeker> {
                                         Get.close(2);
 
                                         Get.to(() => MessagePage(
+                                              offersModel: widget.offersModel,
                                               chatModel: chatModel!,
                                               secondUser: postedByDetails,
                                             ));

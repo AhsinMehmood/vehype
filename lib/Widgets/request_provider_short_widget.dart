@@ -17,7 +17,7 @@ import '../Pages/choose_account_type.dart';
 import '../Pages/full_image_view_page.dart';
 import '../Pages/inactive_offers_seeker.dart';
 import '../Pages/message_page.dart';
-import '../Pages/new_request_details_service.dart';
+import '../Pages/service_request_details.dart';
 import '../Pages/offers_received_details.dart';
 import '../Pages/request_details_page.dart';
 import '../Pages/requests_received_provider_details.dart';
@@ -1006,6 +1006,7 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
                                 Get.close(1);
                                 Get.to(() => MessagePage(
                                       chatModel: newchat!,
+                                      offersModel: offersModel,
                                       secondUser: ownerDetails,
                                     ));
                               } else {
@@ -1016,6 +1017,7 @@ class RequestsProviderShortWidgetActive extends StatelessWidget {
                                 Get.to(() => MessagePage(
                                       chatModel: chatModel,
                                       secondUser: ownerDetails,
+                                      offersModel: offersModel,
                                     ));
                               }
                             },

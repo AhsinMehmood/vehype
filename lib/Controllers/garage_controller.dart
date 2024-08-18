@@ -69,6 +69,7 @@ class GarageController with ChangeNotifier {
   VehicleType? selectedVehicleType;
   VehicleMake? selectedVehicleMake;
   VehicleModel? selectedVehicleModel;
+  VehicleModel? selectedSubModel;
 
   List fuelTypes = [
     'Electric',
@@ -88,24 +89,39 @@ class GarageController with ChangeNotifier {
   List<VehicleMake> vehiclesMakesByVehicleType = [];
   List<VehicleModel> vehiclesModelsByYear = [];
   List<int> vehicleYearsByMake = [];
-
+  List<VehicleModel> vehicleSubModels = [];
+  String jwtToken = '';
   selectVehicleType(VehicleType? vehicleType) async {
     selectedVehicleMake = null;
     selectedVehicleModel = null;
     selectedYear = '';
     vehiclesMakesByVehicleType = [];
+    selectedSubModel = null;
 
     selectedVehicleType = vehicleType;
     notifyListeners();
-    vehiclesMakesByVehicleType = await getVehicleMake(vehicleType!.title);
+    jwtToken = await getJwtToken();
+
+    vehiclesMakesByVehicleType =
+        await getVehicleMake(vehicleType!.title, jwtToken);
     notifyListeners();
   }
 
-  selectModel(VehicleModel newBodyStyle) {
+  selectModel(VehicleModel newBodyStyle) async {
     selectedVehicleModel = newBodyStyle;
+    selectedSubModel = null;
+    notifyListeners();
+
+    vehicleSubModels = await getTrims(selectedVehicleMake!.title, selectedYear,
+        selectedVehicleType!.title, newBodyStyle.title, jwtToken);
+    notifyListeners();
+
     // selectedVehicleMake = null;
     // selectedYear = '';
+  }
 
+  selectSubModel(VehicleModel newBodyStyle) async {
+    selectedSubModel = newBodyStyle;
     notifyListeners();
   }
 
@@ -114,9 +130,10 @@ class GarageController with ChangeNotifier {
     selectedYear = '';
     selectedVehicleModel = null;
     vehicleYearsByMake = [];
+    selectedSubModel = null;
 
     notifyListeners();
-    vehicleYearsByMake = await getVehicleYear(newBodyStyle.title);
+    vehicleYearsByMake = await getVehicleYear(newBodyStyle.title, jwtToken);
 
     notifyListeners();
   }
@@ -125,10 +142,13 @@ class GarageController with ChangeNotifier {
     selectedYear = newBodyStyle;
     selectedVehicleModel = null;
     vehiclesModelsByYear = [];
+    selectedSubModel = null;
+
     notifyListeners();
 
-    vehiclesModelsByYear = await getSubModels(
-        selectedVehicleMake!.title, newBodyStyle, selectedVehicleType!.title);
+    vehiclesModelsByYear = await getSubModels(selectedVehicleMake!.title,
+        newBodyStyle, selectedVehicleType!.title, jwtToken);
+
     notifyListeners();
   }
 
@@ -334,8 +354,7 @@ class GarageController with ChangeNotifier {
 
   GarageModel? editGarage;
 
-  saveVehicle(UserModel userModel, String vin, String descp,
-      bool isCreateRequest) async {
+  saveVehicle(UserModel userModel, String vin, bool isCreateRequest) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
     if (editGarage != null) {
       String id = editGarage!.garageId;
@@ -345,8 +364,8 @@ class GarageController with ChangeNotifier {
         'make': selectedVehicleMake!.title,
         'year': selectedYear,
         'model': selectedVehicleModel!.title,
+        'subModel': selectedSubModel!.title,
         'vin': vin,
-        'description': descp,
         'imageOne': imageOneUrl,
         'imageTwo': imageTwoUrl,
         'updatedAt': DateTime.now().toUtc().toIso8601String(),
@@ -358,19 +377,15 @@ class GarageController with ChangeNotifier {
         'make': selectedVehicleMake!.title,
         'year': selectedYear,
         'model': selectedVehicleModel!.title,
+        'subModel': selectedSubModel!.title,
         'vin': vin,
-        'description': descp,
         'imageOne': imageOneUrl,
         'imageTwo': imageTwoUrl,
         'createdAt': DateTime.now().toUtc().toIso8601String(),
       });
     }
-    if (isCreateRequest) {
-      // selectVehicle(vehicle);
-    }
 
     Get.close(2);
-    // selectedImages.clear();
 
     disposeController();
   }
@@ -401,8 +416,14 @@ class GarageController with ChangeNotifier {
         icon: 'icon',
         vehicleMakeId: 0,
         vehicleTypeId: 0);
-    imageOneUrl = garageModel.imageOne;
-    imageTwoUrl = garageModel.imageTwo;
+    selectedSubModel = VehicleModel(
+        id: 1,
+        title: garageModel.submodel,
+        icon: 'icon',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0);
+    imageOneUrl = garageModel.imageUrl;
+
     selectedYear = garageModel.year;
     editGarage = garageModel;
     notifyListeners();
@@ -412,6 +433,7 @@ class GarageController with ChangeNotifier {
     selectedVehicleType = null;
     selectedVehicleMake = null;
     selectedVehicleModel = null;
+    selectedSubModel = null;
     endDate = null;
     startDate = null;
     imageOneUrl = '';

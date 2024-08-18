@@ -1,4 +1,5 @@
 const functions = require("firebase-functions");
+const cors = require('cors')({ origin: true });
 
 const admin = require('firebase-admin');
 // For details and booking, please call at 0300 9464109 & 0328 4233372
@@ -9,6 +10,75 @@ const axios = require('axios');
 admin.initializeApp();
 const ONE_SIGNAL_APP_ID = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
 const ONE_SIGNAL_API_KEY = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
+
+
+const puppeteer = require('puppeteer');
+const functions = require('firebase-functions');
+
+exports.scrapeEbayGarage = functions.https.onRequest(async (req, res) => {
+    try
+    {
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
+
+        // Step 1: Navigate to the login page
+        await page.goto('https://www.ebay.com/signin/', { waitUntil: 'networkidle2' });
+
+        // Step 2: Fill in the login form
+        await page.type('#userid', 'your-email@example.com'); // Replace with your email
+        await page.type('#pass', 'your-password'); // Replace with your password
+
+        // Step 3: Submit the login form
+        await page.click('#signin-continue-btn');
+
+        // Wait for navigation after login
+        await page.waitForNavigation({ waitUntil: 'networkidle2' });
+
+        // Step 4: Navigate to the eBay Garage page
+        await page.goto('https://www.ebay.com/motors/garage', { waitUntil: 'networkidle2' });
+
+        // Step 5: Scrape the data (example for scraping years)
+        const years = await page.evaluate(() => {
+            const options = Array.from(document.querySelectorAll('select#year option'));
+            return options.map(option => option.textContent.trim()).filter(year => year);
+        });
+
+        // Similarly, scrape makes, models, trims, etc.
+
+        await browser.close();
+
+        res.status(200).json({ years });
+
+    } catch (error)
+    {
+        console.error('Error scraping eBay Garage:', error);
+        res.status(500).send('Error occurred while scraping eBay Garage');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exports.sendPushNotifications = functions.https.onRequest(async (req, res) => {
     try

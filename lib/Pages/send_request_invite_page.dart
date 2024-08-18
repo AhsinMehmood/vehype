@@ -123,6 +123,7 @@ class SendRequestInvitePage extends StatelessWidget {
                                         offersModel.offerId);
                                 Get.close(2);
                                 Get.to(() => MessagePage(
+                                      offersModel: offersModel,
                                       chatModel: newchat!,
                                       secondUser: profileModel,
                                     ));
@@ -130,6 +131,7 @@ class SendRequestInvitePage extends StatelessWidget {
                                 Get.close(2);
 
                                 Get.to(() => MessagePage(
+                                      offersModel: offersModel,
                                       chatModel: chatModel,
                                       secondUser: profileModel,
                                     ));

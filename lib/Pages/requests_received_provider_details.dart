@@ -236,6 +236,7 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                                     Get.to(() => MessagePage(
                                           chatModel: newchat!,
                                           secondUser: ownerDetails,
+                                          offersModel: offersModel,
                                         ));
                                   } else {
                                     await ChatController().updateChatRequestId(
@@ -244,6 +245,7 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
 
                                     Get.to(() => MessagePage(
                                           chatModel: chatModel,
+                                          offersModel: offersModel,
                                           secondUser: ownerDetails,
                                         ));
                                   }
@@ -464,6 +466,7 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                                             offersModel.offerId);
                                     Get.close(1);
                                     Get.to(() => MessagePage(
+                                          offersModel: offersModel,
                                           chatModel: newchat!,
                                           secondUser: ownerDetails,
                                         ));
@@ -473,6 +476,7 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                                     Get.close(1);
 
                                     Get.to(() => MessagePage(
+                                          offersModel: offersModel,
                                           chatModel: chatModel,
                                           secondUser: ownerDetails,
                                         ));
@@ -666,26 +670,8 @@ class RequestsReceivedProviderDetails extends StatelessWidget {
                             ),
                           if (offersReceivedModelStream.status == 'Completed' &&
                               offersReceivedModelStream.ratingTwo == 0.0)
-                            _getButton(Colors.white, () {
-                              showModalBottomSheet(
-                                  context: context,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  constraints: BoxConstraints(
-                                    maxHeight: Get.height * 0.9,
-                                    minHeight: Get.height * 0.9,
-                                    minWidth: Get.width,
-                                  ),
-                                  isScrollControlled: true,
-                                  builder: (contex) {
-                                    return FromProviderToOwnerRatingSheet(
-                                        offersReceivedModel:
-                                            offersReceivedModelStream,
-                                        offersModel: offersModel,
-                                        isDark: userController.isDark);
-                                  });
-                            }, 'Give Rating', primaryColor, context),
+                            _getButton(Colors.white, () {}, 'Give Rating',
+                                primaryColor, context),
                           if (offersReceivedModelStream.status == 'Completed' &&
                               offersReceivedModelStream.ratingTwo != 0.0)
                             RatingBarIndicator(

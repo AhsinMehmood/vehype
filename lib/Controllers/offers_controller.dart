@@ -50,6 +50,7 @@ class OffersController {
       Get.close(2);
       Get.to(() => MessagePage(
             chatModel: newchat!,
+            offersModel: offersModel,
             secondUser: postedByDetails,
           ));
     } else {
@@ -59,6 +60,7 @@ class OffersController {
 
       Get.to(() => MessagePage(
             chatModel: chatModel,
+            offersModel: offersModel,
             secondUser: postedByDetails,
           ));
     }
@@ -83,6 +85,7 @@ class OffersController {
       Get.close(1);
       Get.to(() => MessagePage(
             chatModel: newchat!,
+            offersModel: offersModel,
             secondUser: postedByDetails,
           ));
     } else {
@@ -92,6 +95,7 @@ class OffersController {
 
       Get.to(() => MessagePage(
             chatModel: chatModel,
+            offersModel: offersModel,
             secondUser: postedByDetails,
           ));
     }

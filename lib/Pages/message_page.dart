@@ -20,37 +20,42 @@ import 'package:intl/intl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
-import 'package:readmore/readmore.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/message_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
-import 'package:vehype/Pages/offers_received_details.dart';
-import 'package:vehype/Pages/request_chat_details.dart';
-import 'package:vehype/Pages/request_details_seeker_chat_page.dart';
+import 'package:vehype/Pages/service_request_details.dart';
+
 import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/Widgets/offer_request_details.dart';
-import 'package:vehype/Widgets/request_vehicle_details.dart';
+
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/video_player.dart';
-import 'package:vehype/bad_words.dart';
+
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
+import '../Widgets/service_your_offer_widget.dart';
 import 'repair_page.dart';
 import 'tabs_page.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatModel chatModel;
   final UserModel secondUser;
+  final OffersModel offersModel;
   const MessagePage(
-      {super.key, required this.chatModel, required this.secondUser});
+      {super.key,
+      required this.chatModel,
+      required this.secondUser,
+      required this.offersModel});
 
   @override
   State<MessagePage> createState() => _MessagePageState();
@@ -79,7 +84,6 @@ class _MessagePageState extends State<MessagePage> {
     //     ;
     bool isNotAllowed = OneSignal.Notifications.permission;
 
-    UserModel userModel = userController.userModel!;
     if (isNotAllowed == false) {
       Future.delayed(const Duration(seconds: 3)).then((s) {
         Get.bottomSheet(
@@ -163,589 +167,792 @@ class _MessagePageState extends State<MessagePage> {
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         body: SafeArea(
-            child: Column(
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            Column(
-              children: [
-                TopBarMessage(
-                    chatController: chatController,
-                    userController: userController,
-                    widget: widget,
-                    userModel: userModel,
-                    secondUser: widget.secondUser),
-                if (widget.chatModel.offerId != '')
-                  StreamBuilder<OffersModel>(
+            child: StreamBuilder<OffersModel>(
+                initialData: widget.offersModel,
+                stream: FirebaseFirestore.instance
+                    .collection('offers')
+                    .doc(chatModel == null
+                        ? widget.chatModel.offerId
+                        : chatModel!.offerId)
+                    .snapshots()
+                    .map((event) => OffersModel.fromJson(event)),
+                builder: (context, snapshot) {
+                  OffersModel offersModel = snapshot.data!;
+                  String vehicleId = offersModel.vehicleId;
+                  return StreamBuilder<OffersReceivedModel>(
                       stream: FirebaseFirestore.instance
-                          .collection('offers')
-                          .doc(chatModel == null
-                              ? widget.chatModel.offerId
-                              : chatModel!.offerId)
+                          .collection('offersReceived')
+                          .doc(chatModel!.offerRequestId == ''
+                              ? 'null'
+                              : chatModel!.offerRequestId)
                           .snapshots()
-                          .map((event) => OffersModel.fromJson(event)),
-                      builder: (context, snapshot) {
-                        // if(snapshot.)
-                        if (snapshot.hasData && snapshot.data != null) {
-                          OffersModel offersModel = snapshot.data!;
-                          String title = offersModel.vehicleId != ''
-                              ? '${offersModel.vehicleId.split(',')[1]} ${offersModel.vehicleId.split(',')[3]}'
-                              : '';
-
-                          return title == ''
-                              ? SizedBox.shrink()
-                              : InkWell(
-                                  onTap: () {
-                                    if (userModel.userId ==
-                                        offersModel.ownerId) {
-                                      Get.to(() => OfferReceivedDetails(
-                                          offersModel: offersModel));
-                                    } else {
-                                      if (chatModel!.offerRequestId != '') {}
-                                    }
-                                  },
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(0),
-                                    ),
-                                    margin: const EdgeInsets.all(0),
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                    child: Container(
-                                      padding: const EdgeInsets.only(
-                                          left: 12, right: 12, top: 12),
-                                      decoration: BoxDecoration(),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              if (offersModel.imageOne != '')
-                                                InkWell(
-                                                  onTap: () {
-                                                    Get.to(() =>
-                                                        FullImagePageView(
-                                                          urls: [
-                                                            offersModel.imageOne
-                                                          ],
-                                                          currentIndex: 0,
-                                                        ));
-                                                  },
-                                                  child: ExtendedImage.network(
-                                                    offersModel.imageOne,
-                                                    height: 50,
-                                                    width: 50,
-                                                    fit: BoxFit.cover,
-                                                    cache: true,
-                                                    shape: BoxShape.rectangle,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            6),
-                                                  ),
-                                                ),
-                                              const SizedBox(
-                                                width: 8,
-                                              ),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      title.trim(),
-                                                      maxLines: 2,
-                                                      style: TextStyle(
-                                                        // color: Colors.black,
-                                                        fontFamily: 'Avenir',
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                        fontSize: 15,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SvgPicture.asset(
-                                                            getServices()
-                                                                .firstWhere((element) =>
-                                                                    element
-                                                                        .name ==
-                                                                    offersModel
-                                                                        .issue)
-                                                                .image,
-                                                            color: userController
-                                                                    .isDark
-                                                                ? Colors.white
-                                                                : primaryColor,
-                                                            height: 25,
-                                                            width: 25),
-                                                        const SizedBox(
-                                                          width: 3,
-                                                        ),
-                                                        Text(
-                                                          ' ',
-                                                          style: TextStyle(
-                                                            // color: Colors.black,
-                                                            fontFamily:
-                                                                'Avenir',
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            fontSize: 14,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          offersModel.issue,
-                                                          style: TextStyle(
-                                                            // color: Colors.black,
-                                                            fontFamily:
-                                                                'Avenir',
-                                                            fontWeight:
-                                                                FontWeight.w800,
-                                                            fontSize: 14,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 5,
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                              IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    Icons
-                                                        .arrow_forward_ios_rounded,
-                                                    size: 22,
-                                                  ))
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                          .map((convert) =>
+                              OffersReceivedModel.fromJson(convert)),
+                      builder: (context, offerSnap) {
+                        OffersReceivedModel? offersReceivedModel =
+                            offerSnap.data;
+                        return StreamBuilder<GarageModel>(
+                            stream: null,
+                            builder: (context, snapshot) {
+                              return Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 10,
                                   ),
-                                );
-                        }
-                        return Container();
-                      }),
-              ],
-            ),
-            // const SizedBox(
-            //   height: 10,
-            // ),
-            Expanded(
-              child: StreamBuilder<List<MessageModel>>(
-                  stream: ChatController().paginatedMessageStream(
-                      userModel.userId, widget.chatModel.id, 3),
-                  builder:
-                      (context, AsyncSnapshot<List<MessageModel>> snapshot) {
-                    Map<String, List<MessageModel>> groupedMessages = {};
-                    if (!snapshot.hasData) {
-                      return Text('');
-                    }
-                    for (MessageModel message in snapshot.data!) {
-                      String formattedDate = DateFormat('E, MMM d, yyyy')
-                          .format(DateTime.parse(message.sentAt).toLocal());
-
-                      if (!groupedMessages.containsKey(formattedDate)) {
-                        groupedMessages[formattedDate] = [];
-                      }
-
-                      groupedMessages[formattedDate]!.add(message);
-                    }
-
-                    // if(snapshot)
-                    return ListView.builder(
-                        itemCount: groupedMessages.length,
-                        shrinkWrap: true,
-                        controller: messageScrollController,
-                        reverse: true,
-                        itemBuilder: (context, dateIndex) {
-                          String date =
-                              groupedMessages.keys.elementAt(dateIndex);
-                          List<MessageModel> messagesForDate =
-                              groupedMessages[date]!;
-                          // messagesLengthTotal = messagesForDate.length;
-
-                          return Column(
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                date,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontFamily: 'Avenir',
-                                  fontSize: 15,
-                                  fontStyle: FontStyle.italic,
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : changeColor(color: '797979'),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              ListView.builder(
-                                  itemCount: messagesForDate.length,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  reverse: true,
-                                  itemBuilder: (context, index) {
-                                    MessageModel message =
-                                        messagesForDate[index];
-                                    if (message.isSystemMessage) {
-                                      return systemMessage(
-                                          'Start the chat with',
-                                          widget.secondUser,
-                                          userModel);
-                                    }
-
-                                    if (message.sentById == userModel.userId) {
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          currentUserMessage(
-                                              message,
-                                              chatModel == null
-                                                  ? widget.chatModel
-                                                  : chatModel!,
-                                              widget.secondUser),
-                                        ],
-                                      );
-                                    } else {
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          secondUserMessage(
-                                              message, widget.secondUser),
-                                        ],
-                                      );
-                                    }
-                                  }),
-                            ],
-                          );
-                        });
-                  }),
-            ),
-            Container(
-              // height: 50,
-              width: Get.width,
-              // color: Colors.green,
-
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (chatController.pickedMedia.isNotEmpty)
-                    Container(
-                      height: 200,
-                      width: Get.width,
-                      decoration: BoxDecoration(
-                        // color: Colors.grey,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListView.builder(
-                        itemCount: chatController.pickedMedia.length,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          MediaModel mediaModel =
-                              chatController.pickedMedia[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 7),
-                            child: Stack(
-                              children: [
-                                if (mediaModel.isVideo == false)
-                                  ExtendedImage.file(
-                                    mediaModel.file,
-                                    shape: BoxShape.rectangle,
-                                    borderRadius: BorderRadius.circular(12),
-                                    fit: BoxFit.cover,
-                                    height: 200,
-                                    width: Get.width * 0.45,
-                                  )
-                                else
-                                  VideoPlayerLocal(
-                                      height: 200,
-                                      widht: Get.width * 0.45,
-                                      file: mediaModel.file),
-
-                                Align(
-                                  alignment: Alignment.topRight,
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  Column(
                                     children: [
+                                      TopBarMessage(
+                                          chatController: chatController,
+                                          userController: userController,
+                                          widget: widget,
+                                          userModel: userModel,
+                                          secondUser: widget.secondUser),
                                       InkWell(
                                         onTap: () {
-                                          chatController
-                                              .removeMedia(mediaModel);
+                                          if (userModel.userId ==
+                                              offersModel.ownerId) {
+                                          } else {
+                                            Get.to(() => ServiceRequestDetails(
+                                                  offersModel: offersModel,
+                                                  chatId: chatModel!.id,
+                                                  offersReceivedModel:
+                                                      offersReceivedModel,
+                                                ));
+                                          }
                                         },
-                                        child: Container(
-                                          height: 30,
-                                          width: 30,
-                                          decoration: BoxDecoration(
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(200),
-                                            color: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
+                                                BorderRadius.circular(0),
                                           ),
-                                          child: Icon(
-                                            Icons.close,
-                                            // size: 90,
-                                            color: userController.isDark
-                                                ? primaryColor
-                                                : Colors.white,
+                                          margin: const EdgeInsets.all(0),
+                                          color: userController.isDark
+                                              ? primaryColor
+                                              : Colors.white,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 12, right: 12, top: 12),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    if (offersModel.imageOne !=
+                                                        '')
+                                                      InkWell(
+                                                        onTap: () {
+                                                          Get.to(() =>
+                                                              FullImagePageView(
+                                                                urls: [
+                                                                  offersModel
+                                                                      .imageOne
+                                                                ],
+                                                                currentIndex: 0,
+                                                              ));
+                                                        },
+                                                        child: ExtendedImage
+                                                            .network(
+                                                          offersModel.imageOne,
+                                                          height: 50,
+                                                          width: 50,
+                                                          fit: BoxFit.cover,
+                                                          cache: true,
+                                                          shape: BoxShape
+                                                              .rectangle,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                        ),
+                                                      ),
+                                                    const SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            vehicleId.trim(),
+                                                            maxLines: 2,
+                                                            style: TextStyle(
+                                                              // color: Colors.black,
+                                                              fontFamily:
+                                                                  'Avenir',
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w800,
+                                                              fontSize: 15,
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                  getServices()
+                                                                      .firstWhere((element) =>
+                                                                          element
+                                                                              .name ==
+                                                                          offersModel
+                                                                              .issue)
+                                                                      .image,
+                                                                  color: userController
+                                                                          .isDark
+                                                                      ? Colors
+                                                                          .white
+                                                                      : primaryColor,
+                                                                  height: 25,
+                                                                  width: 25),
+                                                              const SizedBox(
+                                                                width: 3,
+                                                              ),
+                                                              Text(
+                                                                ' ',
+                                                                style:
+                                                                    TextStyle(
+                                                                  // color: Colors.black,
+                                                                  fontFamily:
+                                                                      'Avenir',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                offersModel
+                                                                    .issue,
+                                                                style:
+                                                                    TextStyle(
+                                                                  // color: Colors.black,
+                                                                  fontFamily:
+                                                                      'Avenir',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                        onPressed: () {},
+                                                        icon: Icon(
+                                                          Icons
+                                                              .arrow_forward_ios_rounded,
+                                                          size: 22,
+                                                        ))
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                if (mediaModel.uploading)
-                                  Positioned(
-                                    // alignment: Alignment.center,
-                                    right: 0,
-                                    left: 0,
-                                    bottom: 0,
-                                    // width: 40,
-                                    // height: 40,
-                                    top: 0,
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      // color: Colors.white,
-                                      height: 40,
-                                      width: 40,
-                                      child: CircularProgressIndicator(),
-                                    ),
+                                  Expanded(
+                                    child: StreamBuilder<List<MessageModel>>(
+                                        stream: ChatController()
+                                            .paginatedMessageStream(
+                                                userModel.userId,
+                                                widget.chatModel.id,
+                                                3),
+                                        builder: (context,
+                                            AsyncSnapshot<List<MessageModel>>
+                                                snapshot) {
+                                          Map<String, List<MessageModel>>
+                                              groupedMessages = {};
+                                          if (!snapshot.hasData) {
+                                            return Text('');
+                                          }
+                                          for (MessageModel message
+                                              in snapshot.data!) {
+                                            String formattedDate =
+                                                DateFormat('E, MMM d, yyyy')
+                                                    .format(DateTime.parse(
+                                                            message.sentAt)
+                                                        .toLocal());
+
+                                            if (!groupedMessages
+                                                .containsKey(formattedDate)) {
+                                              groupedMessages[formattedDate] =
+                                                  [];
+                                            }
+
+                                            groupedMessages[formattedDate]!
+                                                .add(message);
+                                          }
+
+                                          // if(snapshot)
+                                          return ListView.builder(
+                                              itemCount: groupedMessages.length,
+                                              shrinkWrap: true,
+                                              controller:
+                                                  messageScrollController,
+                                              reverse: true,
+                                              itemBuilder:
+                                                  (context, dateIndex) {
+                                                String date = groupedMessages
+                                                    .keys
+                                                    .elementAt(dateIndex);
+                                                List<MessageModel>
+                                                    messagesForDate =
+                                                    groupedMessages[date]!;
+                                                // messagesLengthTotal = messagesForDate.length;
+
+                                                return Column(
+                                                  children: [
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Text(
+                                                      date,
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        fontFamily: 'Avenir',
+                                                        fontSize: 15,
+                                                        fontStyle:
+                                                            FontStyle.italic,
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : changeColor(
+                                                                color:
+                                                                    '797979'),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    ListView.builder(
+                                                        itemCount:
+                                                            messagesForDate
+                                                                .length,
+                                                        physics:
+                                                            const NeverScrollableScrollPhysics(),
+                                                        shrinkWrap: true,
+                                                        reverse: true,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          MessageModel message =
+                                                              messagesForDate[
+                                                                  index];
+                                                          if (message
+                                                              .isSystemMessage) {
+                                                            return systemMessage(
+                                                                'Start the chat with',
+                                                                widget
+                                                                    .secondUser,
+                                                                userModel);
+                                                          }
+
+                                                          if (message
+                                                                  .sentById ==
+                                                              userModel
+                                                                  .userId) {
+                                                            return Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .end,
+                                                              children: [
+                                                                currentUserMessage(
+                                                                    message,
+                                                                    chatModel ==
+                                                                            null
+                                                                        ? widget
+                                                                            .chatModel
+                                                                        : chatModel!,
+                                                                    widget
+                                                                        .secondUser),
+                                                              ],
+                                                            );
+                                                          } else {
+                                                            return Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                secondUserMessage(
+                                                                    message,
+                                                                    widget
+                                                                        .secondUser),
+                                                              ],
+                                                            );
+                                                          }
+                                                        }),
+                                                  ],
+                                                );
+                                              });
+                                        }),
                                   ),
-                                // Positioned(child: )
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  if (chatController.pickedMedia.isNotEmpty)
-                    const SizedBox(
-                      height: 5,
-                    ),
-                  Row(
-                    children: [
-                      // if (chatController.pickedMedia.isEmpty)
-                      IconButton(
-                          onPressed: () async {
-                            chatController.pickMediaMessage(userModel);
-                          },
-                          icon: Icon(Icons.attach_file)),
-                      Expanded(
-                        child: CupertinoTextField(
-                          padding: const EdgeInsets.all(15),
-                          // autofocus: true,
-                          onTapOutside: (s) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                          },
-                          onSubmitted: (s) {
-                            if (checkBadWords(s).isNotEmpty) {
-                              Get.showSnackbar(GetSnackBar(
-                                message:
-                                    'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                duration: const Duration(seconds: 3),
-                                snackPosition: SnackPosition.TOP,
-                              ));
-                              return;
-                            } else {
-                              if (chatController.pickedMedia.isEmpty) {
-                                if (s.isNotEmpty) {
-                                  // chatController.cleanController();
-                                  chatController.sendMessage(
-                                      userModel,
-                                      widget.chatModel,
-                                      s.trim(),
-                                      widget.secondUser,
-                                      '',
-                                      '',
-                                      false);
+                                  Stack(
+                                    children: [
+                                      Positioned(
+                                        bottom: 400,
+                                        child: Container(
+                                          color: Colors.green,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                // yourOfferExpanded =
+                                                //     !yourOfferExpanded;
+                                              });
+                                            },
+                                            child: ServiceYourOfferWidget(
+                                                offersModel: offersModel,
+                                                offersReceivedModel:
+                                                    offersReceivedModel!,
+                                                yourOfferExpanded: false),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        // height: 50,
+                                        width: Get.width,
+                                        // color: Colors.green,
 
-                                  messageScrollController.jumpTo(0);
-                                  // MixpanelProvider().messageSentEvent(
-                                  //     senderUser: userModel,
-                                  //     receiverUser: secondUser!,
-                                  //     messageText: s.trim(),
-                                  //     totalMessages: messagesLengthTotal);
-                                  textMessageController.clear();
-                                }
-                              } else {
-                                for (MediaModel element
-                                    in chatController.pickedMedia) {
-                                  chatController.sendMessage(
-                                      userModel,
-                                      widget.chatModel,
-                                      s.trim(),
-                                      widget.secondUser,
-                                      element.uploadedUrl,
-                                      element.thumbnailUrl,
-                                      element.isVideo);
-                                  messageScrollController.jumpTo(0);
-                                  chatController.removeMedia(element);
-                                  // MixpanelProvider().messageSentEvent(
-                                  //     senderUser: userModel,
-                                  //     receiverUser: secondUser!,
-                                  //     messageText: s.trim(),
-                                  //     totalMessages: messagesLengthTotal);
-                                  textMessageController.clear();
-                                }
-                              }
-                            }
-                          },
-                          textCapitalization: TextCapitalization.sentences,
-                          placeholder: 'Send a message',
-                          // maxLength: 200,
-                          // cou
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                          ),
-                          controller: textMessageController,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(46),
-                              border: Border.all(
-                                color: changeColor(color: 'A9A9A9'),
-                                width: 2,
-                              )),
-                        ),
-                      ),
-                      // const SizedBox(
-                      //   width: 8,
-                      // ),
-                      // InkWell(
-                      //   onTap: () {
+                                        padding: const EdgeInsets.all(10),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (chatController
+                                                .pickedMedia.isNotEmpty)
+                                              Container(
+                                                height: 200,
+                                                width: Get.width,
+                                                decoration: BoxDecoration(
+                                                  // color: Colors.grey,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: ListView.builder(
+                                                  itemCount: chatController
+                                                      .pickedMedia.length,
+                                                  shrinkWrap: true,
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    MediaModel mediaModel =
+                                                        chatController
+                                                            .pickedMedia[index];
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 7),
+                                                      child: Stack(
+                                                        children: [
+                                                          if (mediaModel
+                                                                  .isVideo ==
+                                                              false)
+                                                            ExtendedImage.file(
+                                                              mediaModel.file,
+                                                              shape: BoxShape
+                                                                  .rectangle,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12),
+                                                              fit: BoxFit.cover,
+                                                              height: 200,
+                                                              width: Get.width *
+                                                                  0.45,
+                                                            )
+                                                          else
+                                                            VideoPlayerLocal(
+                                                                height: 200,
+                                                                widht:
+                                                                    Get.width *
+                                                                        0.45,
+                                                                file: mediaModel
+                                                                    .file),
 
-                      //   },
-                      //   child: Container(
-                      //     height: 50,
-                      //     width: 50,
-                      //     decoration: BoxDecoration(
-                      //       borderRadius: BorderRadius.circular(200),
-                      //       color: Colors.white,
-                      //     ),
-                      //     child: ,
-                      //   ),
-                      // ),
-                      if (chatController.pickedMedia.isNotEmpty &&
-                          chatController.pickedMedia.firstWhereOrNull(
-                                  (element) => element.uploading == true) !=
-                              null)
-                        InkWell(
-                          // onTap: () {},
-                          child: Container(
-                            height: 30,
-                            margin: const EdgeInsets.all(6),
-                            width: 30,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                            child: CupertinoActivityIndicator(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                            ),
-                          ),
-                        )
-                      else
-                        IconButton(
-                            padding: const EdgeInsets.all(0),
-                            onPressed: () {
-                              if (checkBadWords(textMessageController.text)
-                                  .isNotEmpty) {
-                                Get.showSnackbar(GetSnackBar(
-                                  message:
-                                      'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                  duration: const Duration(seconds: 3),
-                                  snackPosition: SnackPosition.TOP,
-                                ));
-                                return;
-                              }
-                              if (chatController.pickedMedia.isEmpty) {
-                                if (textMessageController.text.isNotEmpty) {
-                                  chatController.sendMessage(
-                                      userModel,
-                                      widget.chatModel,
-                                      textMessageController.text.trim(),
-                                      widget.secondUser,
-                                      '',
-                                      '',
-                                      false);
+                                                          Align(
+                                                            alignment: Alignment
+                                                                .topRight,
+                                                            child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                InkWell(
+                                                                  onTap: () {
+                                                                    chatController
+                                                                        .removeMedia(
+                                                                            mediaModel);
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    height: 30,
+                                                                    width: 30,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              200),
+                                                                      color: userController
+                                                                              .isDark
+                                                                          ? Colors
+                                                                              .white
+                                                                          : primaryColor,
+                                                                    ),
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .close,
+                                                                      // size: 90,
+                                                                      color: userController
+                                                                              .isDark
+                                                                          ? primaryColor
+                                                                          : Colors
+                                                                              .white,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          if (mediaModel
+                                                              .uploading)
+                                                            Positioned(
+                                                              // alignment: Alignment.center,
+                                                              right: 0,
+                                                              left: 0,
+                                                              bottom: 0,
+                                                              // width: 40,
+                                                              // height: 40,
+                                                              top: 0,
+                                                              child: Container(
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                // color: Colors.white,
+                                                                height: 40,
+                                                                width: 40,
+                                                                child:
+                                                                    CircularProgressIndicator(),
+                                                              ),
+                                                            ),
+                                                          // Positioned(child: )
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            if (chatController
+                                                .pickedMedia.isNotEmpty)
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                            Row(
+                                              children: [
+                                                // if (chatController.pickedMedia.isEmpty)
+                                                IconButton(
+                                                    onPressed: () async {
+                                                      chatController
+                                                          .pickMediaMessage(
+                                                              userModel);
+                                                    },
+                                                    icon: Icon(
+                                                        Icons.attach_file)),
+                                                Expanded(
+                                                  child: CupertinoTextField(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
+                                                    // autofocus: true,
+                                                    onTapOutside: (s) {
+                                                      FocusScope.of(context)
+                                                          .requestFocus(
+                                                              FocusNode());
+                                                    },
+                                                    onSubmitted: (s) {
+                                                      if (checkBadWords(s)
+                                                          .isNotEmpty) {
+                                                        Get.showSnackbar(
+                                                            GetSnackBar(
+                                                          message:
+                                                              'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                                          duration:
+                                                              const Duration(
+                                                                  seconds: 3),
+                                                          snackPosition:
+                                                              SnackPosition.TOP,
+                                                        ));
+                                                        return;
+                                                      } else {
+                                                        if (chatController
+                                                            .pickedMedia
+                                                            .isEmpty) {
+                                                          if (s.isNotEmpty) {
+                                                            // chatController.cleanController();
+                                                            chatController.sendMessage(
+                                                                userModel,
+                                                                widget
+                                                                    .chatModel,
+                                                                s.trim(),
+                                                                widget
+                                                                    .secondUser,
+                                                                '',
+                                                                '',
+                                                                false);
 
-                                  messageScrollController.jumpTo(0);
-                                  // MixpanelProvider().messageSentEvent(
-                                  //     senderUser: userModel,
-                                  //     receiverUser: secondUser!,
-                                  //     messageText: s.trim(),
-                                  //     totalMessages: messagesLengthTotal);
-                                  textMessageController.clear();
+                                                            messageScrollController
+                                                                .jumpTo(0);
+                                                            // MixpanelProvider().messageSentEvent(
+                                                            //     senderUser: userModel,
+                                                            //     receiverUser: secondUser!,
+                                                            //     messageText: s.trim(),
+                                                            //     totalMessages: messagesLengthTotal);
+                                                            textMessageController
+                                                                .clear();
+                                                          }
+                                                        } else {
+                                                          for (MediaModel element
+                                                              in chatController
+                                                                  .pickedMedia) {
+                                                            chatController.sendMessage(
+                                                                userModel,
+                                                                widget
+                                                                    .chatModel,
+                                                                s.trim(),
+                                                                widget
+                                                                    .secondUser,
+                                                                element
+                                                                    .uploadedUrl,
+                                                                element
+                                                                    .thumbnailUrl,
+                                                                element
+                                                                    .isVideo);
+                                                            messageScrollController
+                                                                .jumpTo(0);
+                                                            chatController
+                                                                .removeMedia(
+                                                                    element);
+                                                            // MixpanelProvider().messageSentEvent(
+                                                            //     senderUser: userModel,
+                                                            //     receiverUser: secondUser!,
+                                                            //     messageText: s.trim(),
+                                                            //     totalMessages: messagesLengthTotal);
+                                                            textMessageController
+                                                                .clear();
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    textCapitalization:
+                                                        TextCapitalization
+                                                            .sentences,
+                                                    placeholder:
+                                                        'Send a message',
+                                                    // maxLength: 200,
+                                                    // cou
+                                                    style: TextStyle(
+                                                      color:
+                                                          userController.isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                    ),
+                                                    controller:
+                                                        textMessageController,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(46),
+                                                        border: Border.all(
+                                                          color: changeColor(
+                                                              color: 'A9A9A9'),
+                                                          width: 2,
+                                                        )),
+                                                  ),
+                                                ),
+                                                // const SizedBox(
+                                                //   width: 8,
+                                                // ),
+                                                // InkWell(
+                                                //   onTap: () {
 
-                                  // chatController.cleanController();
-                                }
-                              } else {
-                                List<MediaModel> copiedList =
-                                    List.from(chatController.pickedMedia);
-                                for (MediaModel element in copiedList) {
-                                  chatController.sendMessage(
-                                      userModel,
-                                      widget.chatModel,
-                                      textMessageController.text.trim(),
-                                      widget.secondUser,
-                                      element.uploadedUrl,
-                                      element.thumbnailUrl,
-                                      element.isVideo);
+                                                //   },
+                                                //   child: Container(
+                                                //     height: 50,
+                                                //     width: 50,
+                                                //     decoration: BoxDecoration(
+                                                //       borderRadius: BorderRadius.circular(200),
+                                                //       color: Colors.white,
+                                                //     ),
+                                                //     child: ,
+                                                //   ),
+                                                // ),
+                                                if (chatController.pickedMedia
+                                                        .isNotEmpty &&
+                                                    chatController.pickedMedia
+                                                            .firstWhereOrNull(
+                                                                (element) =>
+                                                                    element
+                                                                        .uploading ==
+                                                                    true) !=
+                                                        null)
+                                                  InkWell(
+                                                    // onTap: () {},
+                                                    child: Container(
+                                                      height: 30,
+                                                      margin:
+                                                          const EdgeInsets.all(
+                                                              6),
+                                                      width: 30,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(200),
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                      ),
+                                                      child:
+                                                          CupertinoActivityIndicator(
+                                                        color: userController
+                                                                .isDark
+                                                            ? primaryColor
+                                                            : Colors.white,
+                                                      ),
+                                                    ),
+                                                  )
+                                                else
+                                                  IconButton(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              0),
+                                                      onPressed: () {
+                                                        if (checkBadWords(
+                                                                textMessageController
+                                                                    .text)
+                                                            .isNotEmpty) {
+                                                          Get.showSnackbar(
+                                                              GetSnackBar(
+                                                            message:
+                                                                'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                                            duration:
+                                                                const Duration(
+                                                                    seconds: 3),
+                                                            snackPosition:
+                                                                SnackPosition
+                                                                    .TOP,
+                                                          ));
+                                                          return;
+                                                        }
+                                                        if (chatController
+                                                            .pickedMedia
+                                                            .isEmpty) {
+                                                          if (textMessageController
+                                                              .text
+                                                              .isNotEmpty) {
+                                                            chatController.sendMessage(
+                                                                userModel,
+                                                                widget
+                                                                    .chatModel,
+                                                                textMessageController
+                                                                    .text
+                                                                    .trim(),
+                                                                widget
+                                                                    .secondUser,
+                                                                '',
+                                                                '',
+                                                                false);
 
-                                  messageScrollController.jumpTo(0);
-                                  chatController.removeMedia(element);
-                                  // MixpanelProvider().messageSentEvent(
-                                  //     senderUser: userModel,
-                                  //     receiverUser: secondUser!,
-                                  //     messageText: s.trim(),
-                                  //     totalMessages: messagesLengthTotal);
-                                  textMessageController.clear();
-                                }
-                              }
-                            },
-                            icon: Image.asset(
-                              'assets/send.png',
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ))
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        )),
+                                                            messageScrollController
+                                                                .jumpTo(0);
+                                                            // MixpanelProvider().messageSentEvent(
+                                                            //     senderUser: userModel,
+                                                            //     receiverUser: secondUser!,
+                                                            //     messageText: s.trim(),
+                                                            //     totalMessages: messagesLengthTotal);
+                                                            textMessageController
+                                                                .clear();
+
+                                                            // chatController.cleanController();
+                                                          }
+                                                        } else {
+                                                          List<MediaModel>
+                                                              copiedList =
+                                                              List.from(
+                                                                  chatController
+                                                                      .pickedMedia);
+                                                          for (MediaModel element
+                                                              in copiedList) {
+                                                            chatController.sendMessage(
+                                                                userModel,
+                                                                widget
+                                                                    .chatModel,
+                                                                textMessageController
+                                                                    .text
+                                                                    .trim(),
+                                                                widget
+                                                                    .secondUser,
+                                                                element
+                                                                    .uploadedUrl,
+                                                                element
+                                                                    .thumbnailUrl,
+                                                                element
+                                                                    .isVideo);
+
+                                                            messageScrollController
+                                                                .jumpTo(0);
+                                                            chatController
+                                                                .removeMedia(
+                                                                    element);
+                                                            // MixpanelProvider().messageSentEvent(
+                                                            //     senderUser: userModel,
+                                                            //     receiverUser: secondUser!,
+                                                            //     messageText: s.trim(),
+                                                            //     totalMessages: messagesLengthTotal);
+                                                            textMessageController
+                                                                .clear();
+                                                          }
+                                                        }
+                                                      },
+                                                      icon: Image.asset(
+                                                        'assets/send.png',
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                      ))
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // if (chatModel!.offerRequestId != '' ||
+                                      //     chatController.pickedMedia.isEmpty)
+                                    ],
+                                  )
+                                ],
+                              );
+                            });
+                      });
+                })),
       ),
     );
   }

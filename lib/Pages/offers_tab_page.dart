@@ -13,6 +13,7 @@ import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/Widgets/requests_owner_short_widget.dart';
+import 'package:vehype/Widgets/service_request_widget.dart';
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -88,7 +89,7 @@ class _IgnoredOffersState extends State<IgnoredOffers> {
               itemBuilder: (context, index) {
                 OffersModel offersModel = offers[index];
 
-                return RequestsProviderShortWidgetIgnored(
+                return ServiceRequestWidget(
                   offersModel: offersModel,
                 );
               });
@@ -362,21 +363,10 @@ class _NewOffersState extends State<NewOffers> {
                   const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
               itemBuilder: (context, index) {
                 OffersModel offersModel = offers[index];
-                List<String> vehicleInfo = offersModel.vehicleId.split(',');
-                final String vehicleType = vehicleInfo[0].trim();
-                final String vehicleMake = vehicleInfo[1].trim();
-                final String vehicleYear = vehicleInfo[2].trim();
-                final String vehicleModle = vehicleInfo[3].trim();
-                // final PageController imagePageController = PageController();
 
-                return NewOfferWidget(
-                    userController: userController,
-                    offersModel: offersModel,
-                    vehicleType: vehicleType,
-                    vehicleMake: vehicleMake,
-                    vehicleYear: vehicleYear,
-                    vehicleModle: vehicleModle,
-                    userModel: userModel);
+                return ServiceRequestWidget(
+                  offersModel: offersModel,
+                );
               });
         });
   }

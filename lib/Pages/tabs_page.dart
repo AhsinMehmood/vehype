@@ -758,6 +758,7 @@ class LocationPermissionSheet extends StatelessWidget {
         return false;
       },
       child: Container(
+        width: Get.width,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -875,6 +876,7 @@ class UpdateSheet extends StatelessWidget {
         return false;
       },
       child: Container(
+        width: Get.width,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -974,7 +976,8 @@ class NotificationSheet extends StatelessWidget {
         ),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      height: 280,
+      height: 300,
+      width: Get.width,
       padding: const EdgeInsets.all(15),
       child: Column(
         children: [

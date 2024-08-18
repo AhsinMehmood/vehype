@@ -157,10 +157,8 @@ class _SelectVehicleCreateRequestState
                           padding: const EdgeInsets.all(8.0),
                           child: InkWell(
                             onTap: () {
-                              garageController.selectVehicle(
-                                  '${garageModel.bodyStyle}, ${garageModel.make}, ${garageModel.year}, ${garageModel.model}',
-                                  garageModel.imageOne,
-                                  garageModel.garageId);
+                              garageController.selectVehicle(garageModel.title,
+                                  garageModel.imageUrl, garageModel.garageId);
                               Get.to(() => CreateRequestPage(
                                     offersModel: widget.offersModel,
                                   ));
@@ -174,34 +172,32 @@ class _SelectVehicleCreateRequestState
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  if (garageModel.imageOne != '')
-                                    SizedBox(
-                                      width: Get.width,
-                                      height: Get.width * 0.35,
-                                      child: InkWell(
-                                        onTap: () {
-                                          Get.to(() => FullImagePageView(
-                                                urls: [garageModel.imageOne],
-                                              ));
-                                        },
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                          child: ExtendedImage.network(
-                                            garageModel.imageOne,
-                                            width: Get.width * 0.9,
-                                            height: Get.width * 0.35,
-                                            fit: BoxFit.cover,
-                                            cache: true,
-                                            // border: Border.all(color: Colors.red, width: 1.0),
-                                            shape: BoxShape.rectangle,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10.0)),
-                                            //cancelToken: cancellationToken,
-                                          ),
+                                  SizedBox(
+                                    width: Get.width,
+                                    height: Get.width * 0.35,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Get.to(() => FullImagePageView(
+                                              urls: [garageModel.imageUrl],
+                                            ));
+                                      },
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: ExtendedImage.network(
+                                          garageModel.imageUrl,
+                                          width: Get.width * 0.9,
+                                          height: Get.width * 0.35,
+                                          fit: BoxFit.cover,
+                                          cache: true,
+                                          // border: Border.all(color: Colors.red, width: 1.0),
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10.0)),
+                                          //cancelToken: cancellationToken,
                                         ),
                                       ),
                                     ),
+                                  ),
                                   const SizedBox(
                                     height: 10,
                                   ),

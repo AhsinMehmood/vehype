@@ -79,10 +79,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         setState(() {});
       } else {
         if (widget.garageModel != null) {
-          garageController.selectVehicle(
-              '${widget.garageModel!.bodyStyle}, ${widget.garageModel!.make}, ${widget.garageModel!.year}, ${widget.garageModel!.model}',
-              widget.garageModel!.imageOne,
-              widget.garageModel!.garageId);
+          garageController.selectVehicle(widget.garageModel!.title,
+              widget.garageModel!.imageUrl, widget.garageModel!.garageId);
           garageController.garageId = widget.garageModel!.garageId;
         } else {
           garageController.selectedVehicle = '';
@@ -258,7 +256,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                '${garageController.selectedVehicle.split(',')[2]}${garageController.selectedVehicle.split(',')[1]}${garageController.selectedVehicle.split(',')[3]}',
+                                                garageController
+                                                    .selectedVehicle,
                                                 style: TextStyle(
                                                   fontFamily: 'Avenir',
                                                   fontWeight: FontWeight.w600,
@@ -1573,10 +1572,8 @@ class SelectVehicle extends StatelessWidget {
                             for (GarageModel vehicle in vehicles)
                               InkWell(
                                 onTap: () {
-                                  garageController.selectVehicle(
-                                      '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
-                                      vehicle.imageOne,
-                                      vehicle.garageId);
+                                  garageController.selectVehicle(vehicle.title,
+                                      vehicle.imageUrl, vehicle.garageId);
 
                                   Get.close(1);
                                 },
@@ -1590,34 +1587,33 @@ class SelectVehicle extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      if (vehicle.imageOne != '')
-                                        SizedBox(
-                                          width: Get.width,
-                                          height: Get.width * 0.35,
-                                          child: InkWell(
-                                            onTap: () {
-                                              Get.to(() => FullImagePageView(
-                                                    urls: [vehicle.imageOne],
-                                                  ));
-                                            },
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              child: ExtendedImage.network(
-                                                vehicle.imageOne,
-                                                width: Get.width * 0.9,
-                                                height: Get.width * 0.35,
-                                                fit: BoxFit.cover,
-                                                cache: true,
-                                                // border: Border.all(color: Colors.red, width: 1.0),
-                                                shape: BoxShape.rectangle,
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10.0)),
-                                                //cancelToken: cancellationToken,
-                                              ),
+                                      SizedBox(
+                                        width: Get.width,
+                                        height: Get.width * 0.35,
+                                        child: InkWell(
+                                          onTap: () {
+                                            Get.to(() => FullImagePageView(
+                                                  urls: [vehicle.imageUrl],
+                                                ));
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            child: ExtendedImage.network(
+                                              vehicle.imageUrl,
+                                              width: Get.width * 0.9,
+                                              height: Get.width * 0.35,
+                                              fit: BoxFit.cover,
+                                              cache: true,
+                                              // border: Border.all(color: Colors.red, width: 1.0),
+                                              shape: BoxShape.rectangle,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10.0)),
+                                              //cancelToken: cancellationToken,
                                             ),
                                           ),
                                         ),
+                                      ),
                                       const SizedBox(
                                         height: 10,
                                       ),
@@ -1687,10 +1683,11 @@ class SelectVehicle extends StatelessWidget {
                                               alignment: Alignment.center,
                                               child: ElevatedButton(
                                                   onPressed: () {
-                                                    garageController.selectVehicle(
-                                                        '${vehicle.bodyStyle}, ${vehicle.make}, ${vehicle.year}, ${vehicle.model}',
-                                                        vehicle.imageOne,
-                                                        vehicle.garageId);
+                                                    garageController
+                                                        .selectVehicle(
+                                                            vehicle.title,
+                                                            vehicle.imageUrl,
+                                                            vehicle.garageId);
                                                     Get.close(1);
                                                   },
                                                   style:

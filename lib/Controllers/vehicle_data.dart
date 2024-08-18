@@ -86,28 +86,29 @@ Future<List<VehicleModel>> getVehicleModel(
 }
 
 Future<List<VehicleModel>> getSubModels(
-    String make, String year, String type) async {
-  String jwtToken = await getJwtToken();
+    String make, String year, String type, String jwtToken) async {
   // await Future.delayed(const Duration(seconds: 5));
 
   List<VehicleModel> vehicleMakeList = [];
+  if (type == 'Passenger vehicle') {
+    String recallApi = 'https://carapi.app/api/models?year=$year&make=$make';
+    http.Response response = await http.get(Uri.parse(recallApi), headers: {
+      'Content-type': 'application/json',
+      'Authorization': 'Bearer $jwtToken'
+    });
+    final data = jsonDecode(response.body);
+    print(data);
 
-  String recallApi = 'https://carapi.app/api/models?make=$make?year=$year';
-  http.Response response = await http.get(Uri.parse(recallApi), headers: {
-    'Content-type': 'application/json',
-    'Authorization': 'Bearer $jwtToken'
-  });
-  final data = jsonDecode(response.body);
-  List listOfData = data['data'] as List;
-  // print(listOfData[0]);
-  for (var element in listOfData) {
-    // print(element);
-    vehicleMakeList.add(VehicleModel(
-        id: element['make_id'] ?? 0,
-        title: element['name'] ?? '',
-        icon: '',
-        vehicleTypeId: 0,
-        vehicleMakeId: element['make_id'] ?? 0));
+    List listOfData = data['data'] as List;
+    for (var element in listOfData) {
+      // print(element);
+      vehicleMakeList.add(VehicleModel(
+          id: element['make_id'] ?? 0,
+          title: element['name'] ?? '',
+          icon: '',
+          vehicleTypeId: 0,
+          vehicleMakeId: element['make_id'] ?? 0));
+    }
   }
 
   return vehicleMakeList.isEmpty
@@ -115,7 +116,37 @@ Future<List<VehicleModel>> getSubModels(
       : vehicleMakeList;
 }
 
-Future<List<VehicleMake>> getVehicleMake(String type) async {
+Future<List<VehicleModel>> getTrims(String make, String year, String type,
+    String model, String jwtToken) async {
+  // await Future.delayed(const Duration(seconds: 5));
+
+  List<VehicleModel> vehicleMakeList = [];
+
+  String recallApi =
+      'https://carapi.app/api/trims?year=$year&make=$make&model=$model';
+  http.Response response = await http.get(Uri.parse(recallApi), headers: {
+    'Content-type': 'application/json',
+    'Authorization': 'Bearer $jwtToken'
+  });
+  final data = jsonDecode(response.body);
+  print(data);
+  List listOfData = data['data'] as List;
+  // print(listOfData[0]);
+  for (var element in listOfData) {
+    print(element);
+    vehicleMakeList.add(VehicleModel(
+        id: element['make_model_id'] ?? 0,
+        title: element['description'] ?? '',
+        icon: '',
+        vehicleTypeId: 0,
+        vehicleMakeId: element['make_id'] ?? 0));
+    print(element);
+  }
+  // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
+  return vehicleMakeList;
+}
+
+Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
   String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
   // print(object);
   // await Future.delayed(const Duration(seconds: 5));
@@ -123,7 +154,6 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
   try {
     List<VehicleMake> vehicleMakeList = [];
     if (vehicleType == 'Car') {
-      String jwtToken = await getJwtToken();
       String recallApi = 'https://carapi.app/api/makes';
       http.Response response = await http.get(Uri.parse(recallApi), headers: {
         'Content-type': 'application/json',
@@ -169,8 +199,7 @@ Future<List<VehicleMake>> getVehicleMake(String type) async {
   }
 }
 
-Future<List<int>> getVehicleYear(String make) async {
-  String jwtToken = await getJwtToken();
+Future<List<int>> getVehicleYear(String make, String jwtToken) async {
   List<int> vehicleMakeList = [];
   // await Future.delayed(const Duration(seconds: 5));
   http.Response response = await http
@@ -185,6 +214,9 @@ Future<List<int>> getVehicleYear(String make) async {
   for (var element in listOfData) {
     print(element);
     vehicleMakeList.add(element);
+  }
+  if (vehicleMakeList.contains(2025)) {
+    vehicleMakeList.remove(2025);
   }
   if (vehicleMakeList.isEmpty) {
     List<int> years =

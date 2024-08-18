@@ -28,6 +28,7 @@ import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/vehicle_data.dart';
+import '../Widgets/service_request_widget.dart';
 import 'full_image_view_page.dart';
 import 'inactive_offers_seeker.dart';
 import 'notifications_page.dart';
@@ -45,24 +46,13 @@ class OrdersHistoryProvider extends StatefulWidget {
 
 class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
   @override
-  void initState() {
-    super.initState();
-    getHistory();
-  }
-
-  getHistory() async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    await userController.getRequestsHistoryProvider();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = userController.userModel!;
 
     return DefaultTabController(
-      length: 5,
+      length: 6,
+      initialIndex: 1,
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         appBar: AppBar(
@@ -170,7 +160,15 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
             isScrollable: true,
             indicatorColor: userController.isDark ? Colors.white : primaryColor,
             labelColor: userController.isDark ? Colors.white : primaryColor,
+            tabAlignment: TabAlignment.start,
             tabs: [
+              Tab(
+                child: Row(
+                  children: [
+                    Text('Ignored'),
+                  ],
+                ),
+              ),
               Tab(
                 child: Row(
                   children: [
@@ -289,6 +287,9 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
               }
               List<OffersReceivedModel> offersReceivedList =
                   snapshot.data ?? [];
+              // List<OffersReceivedModel> ignoredOffers = offersReceivedList
+              //     .where((element) => element.status == 'ignore')
+              //     .toList();
               List<OffersReceivedModel> offersPending = offersReceivedList
                   .where((element) => element.status == 'Pending')
                   .toList();
@@ -304,6 +305,8 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
 
               return TabBarView(
                 children: [
+                  IgnoredOffers(
+                      userController: userController, userModel: userModel),
                   NewOffers(
                       userController: userController, userModel: userModel),
                   Offers(
@@ -362,7 +365,50 @@ class _OffersState extends State<Offers> {
   @override
   Widget build(BuildContext context) {
     UserModel userModel = widget.userController.userModel!;
-
+    if (widget.offersPending.isEmpty) {
+      Future.delayed(const Duration(seconds: 1)).then((e) {
+        if (widget.id == 1) {
+          // if (userModel.isActivePending) {
+          UserController().changeNotiOffers(
+              widget.id,
+              false,
+              widget.userController.userModel!.userId,
+              'offersModel.offerId',
+              userModel.accountType);
+        }
+        // }
+        if (widget.id == 2) {
+          // if (userModel.isActiveInProgress) {
+          UserController().changeNotiOffers(
+              widget.id,
+              false,
+              widget.userController.userModel!.userId,
+              'offersModel.offerId',
+              userModel.accountType);
+          // }
+        }
+        if (widget.id == 3) {
+          // if (userModel.isActiveCompleted) {
+          UserController().changeNotiOffers(
+              widget.id,
+              false,
+              widget.userController.userModel!.userId,
+              'offersModel.offerId',
+              userModel.accountType);
+          // }
+        }
+        if (widget.id == 4) {
+          // if (userModel.isActiveCancelled) {
+          UserController().changeNotiOffers(
+              widget.id,
+              false,
+              widget.userController.userModel!.userId,
+              'offersModel.offerId',
+              userModel.accountType);
+          // }
+        }
+      });
+    }
     return widget.offersPending.isEmpty
         ? Center(
             child: Text(
@@ -379,7 +425,7 @@ class _OffersState extends State<Offers> {
             itemCount: widget.offersPending.length,
             shrinkWrap: true,
             padding:
-                const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 0),
+                const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
             itemBuilder: (context, index) {
               OffersReceivedModel offersReceivedModel =
                   widget.offersPending[index];
@@ -404,103 +450,52 @@ class _OffersState extends State<Offers> {
                         OffersModel.fromJson(offerSnap.data);
                     Future.delayed(const Duration(seconds: 4)).then((e) {
                       if (widget.id == 1) {
-                        // if (userModel.isActivePending) {
-                        UserController().changeNotiOffers(
-                            widget.id,
-                            false,
-                            widget.userController.userModel!.userId,
-                            offersModel.offerId,
-                            userModel.accountType);
+                        if (userModel.isActivePending) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId,
+                              userModel.accountType);
+                        }
                       }
-                      // }
                       if (widget.id == 2) {
-                        // if (userModel.isActiveInProgress) {
-                        UserController().changeNotiOffers(
-                            widget.id,
-                            false,
-                            widget.userController.userModel!.userId,
-                            offersModel.offerId,
-                            userModel.accountType);
-                        // }
+                        if (userModel.isActiveInProgress) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId,
+                              userModel.accountType);
+                        }
                       }
                       if (widget.id == 3) {
-                        // if (userModel.isActiveCompleted) {
-                        UserController().changeNotiOffers(
-                            widget.id,
-                            false,
-                            widget.userController.userModel!.userId,
-                            offersModel.offerId,
-                            userModel.accountType);
-                        // }
+                        if (userModel.isActiveCompleted) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId,
+                              userModel.accountType);
+                        }
                       }
                       if (widget.id == 4) {
-                        // if (userModel.isActiveCancelled) {
-                        UserController().changeNotiOffers(
-                            widget.id,
-                            false,
-                            widget.userController.userModel!.userId,
-                            offersModel.offerId,
-                            userModel.accountType);
-                        // }
+                        if (userModel.isActiveCancelled) {
+                          UserController().changeNotiOffers(
+                              widget.id,
+                              false,
+                              widget.userController.userModel!.userId,
+                              offersModel.offerId,
+                              userModel.accountType);
+                        }
                       }
                     });
 
-                    return OffersHistoryWidget(
-                        userController: widget.userController,
-                        offersModel: offersModel,
-                        id: widget.id,
-                        offersReceivedModel: offersReceivedModel);
+                    return ServiceRequestWidget(
+                      offersModel: offersModel,
+                      offersReceivedModel: offersReceivedModel,
+                    );
                   });
             });
-  }
-}
-
-class OffersHistoryWidget extends StatelessWidget {
-  const OffersHistoryWidget({
-    super.key,
-    required this.userController,
-    required this.offersModel,
-    required this.offersReceivedModel,
-    required this.id,
-  });
-
-  final UserController userController;
-
-  final OffersModel offersModel;
-  final int id;
-  final OffersReceivedModel offersReceivedModel;
-
-  @override
-  Widget build(BuildContext context) {
-    List<String> vehicleInfo = offersModel.vehicleId.split(',');
-    final String vehicleType = vehicleInfo[0].trim();
-    final String vehicleMake = vehicleInfo[1].trim();
-    final String vehicleYear = vehicleInfo[2].trim();
-    final String vehicleModle = vehicleInfo[3].trim();
-    final UserController userController = Provider.of<UserController>(context);
-    UserModel userModel = userController.userModel!;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0, top: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RequestsProviderShortWidgetActive(
-                  offersModel: offersModel,
-                  title: '',
-                  offersReceivedModel: offersReceivedModel,
-                ),
-              ],
-            ),
-          ),
-
-          // OfferReceivedDetails(offersModel: offersModel),
-        ],
-      ),
-    );
   }
 }

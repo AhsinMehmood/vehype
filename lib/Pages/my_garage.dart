@@ -162,35 +162,33 @@ class MyGarage extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  if (garageModel.imageOne != '')
-                                    SizedBox(
-                                      width: Get.width,
-                                      height: 220,
-                                      child: InkWell(
-                                        onTap: () {
-                                          Get.to(() => FullImagePageView(
-                                                urls: [garageModel.imageOne],
-                                              ));
-                                        },
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(0),
-                                          child: ExtendedImage.network(
-                                            garageModel.imageOne,
+                                  SizedBox(
+                                    width: Get.width,
+                                    height: 220,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Get.to(() => FullImagePageView(
+                                              urls: [garageModel.imageUrl],
+                                            ));
+                                      },
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(0),
+                                        child: ExtendedImage.network(
+                                          garageModel.imageUrl,
 
-                                            fit: BoxFit.cover,
-                                            cache: true,
-                                            // border: Border.all(color: Colors.red, width: 1.0),
-                                            shape: BoxShape.rectangle,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(12),
-                                              topRight: Radius.circular(12),
-                                            ),
-                                            //cancelToken: cancellationToken,
+                                          fit: BoxFit.cover,
+                                          cache: true,
+                                          // border: Border.all(color: Colors.red, width: 1.0),
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(12),
+                                            topRight: Radius.circular(12),
                                           ),
+                                          //cancelToken: cancellationToken,
                                         ),
                                       ),
                                     ),
+                                  ),
                                   const SizedBox(
                                     height: 10,
                                   ),
@@ -204,7 +202,7 @@ class MyGarage extends StatelessWidget {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                '${garageModel.make} ${garageModel.year} ${garageModel.model}',
+                                                garageModel.title,
                                                 style: TextStyle(
                                                   fontFamily: 'Avenir',
                                                   fontWeight: FontWeight.w800,
