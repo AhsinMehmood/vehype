@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
@@ -91,11 +92,13 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 //   loginSheet(1),
                                 //   isScrollControlled: true,
                                 // );
-                                LoginController.signInWithGoogle(context);
-                                UserController userController =
-                                    Provider.of<UserController>(context,
-                                        listen: false);
-                                userController.changeTabIndex(0);
+                                // LoginController.signInWithGoogle(context);
+                                // UserController userController =
+                                //     Provider.of<UserController>(context,
+                                //         listen: false);
+                                // userController.changeTabIndex(0);
+                                GarageController()
+                                    .callGetAndSaveDataToFirestore();
                                 // Get.to(() => const CompleteProfile());
                               },
                               child: Card(

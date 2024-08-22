@@ -85,6 +85,28 @@ Future<List<VehicleModel>> getVehicleModel(
   return vehicleMakeList;
 }
 
+Future<List> getModelsToStoreData(
+    String make, String year, String jwtToken) async {
+  // await Future.delayed(const Duration(seconds: 5));
+
+  List vehicleMakeList = [];
+
+  String recallApi = 'https://carapi.app/api/models?year=$year&make=$make';
+  http.Response response = await http.get(Uri.parse(recallApi), headers: {
+    'Content-type': 'application/json',
+    'Authorization': 'Bearer $jwtToken'
+  });
+  final data = jsonDecode(response.body);
+
+  List listOfData = data['data'] as List;
+  for (var element in listOfData) {
+    // print(element);
+    vehicleMakeList.add(element);
+  }
+
+  return vehicleMakeList;
+}
+
 Future<List<VehicleModel>> getSubModels(
     String make, String year, String type, String jwtToken) async {
   // await Future.delayed(const Duration(seconds: 5));
@@ -116,6 +138,29 @@ Future<List<VehicleModel>> getSubModels(
       : vehicleMakeList;
 }
 
+Future<List> getTrimsToStoreData(String make, String year, String type,
+    String model, String jwtToken) async {
+  // await Future.delayed(const Duration(seconds: 5));
+
+  List vehicleMakeList = [];
+
+  String recallApi =
+      'https://carapi.app/api/trims?year=$year&make=$make&model=$model';
+  http.Response response = await http.get(Uri.parse(recallApi), headers: {
+    'Content-type': 'application/json',
+    'Authorization': 'Bearer $jwtToken'
+  });
+  final data = jsonDecode(response.body);
+
+  List listOfData = data['data'] as List;
+
+  for (var element in listOfData) {
+    vehicleMakeList.add(element);
+  }
+  // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
+  return vehicleMakeList;
+}
+
 Future<List<VehicleModel>> getTrims(String make, String year, String type,
     String model, String jwtToken) async {
   // await Future.delayed(const Duration(seconds: 5));
@@ -144,6 +189,35 @@ Future<List<VehicleModel>> getTrims(String make, String year, String type,
   }
   // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
   return vehicleMakeList;
+}
+
+Future<List> getVehicleMakeToSaveData(String type, String jwtToken) async {
+  String vehicleType = type == 'Passenger vehicle' ? 'Car' : type;
+  // print(object);
+  // await Future.delayed(const Duration(seconds: 5));
+
+  try {
+    List<Map<String, dynamic>> vehicleMakeList = [];
+    if (vehicleType == 'Car') {
+      String recallApi = 'https://carapi.app/api/makes';
+      http.Response response = await http.get(Uri.parse(recallApi), headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $jwtToken'
+      });
+      final data = jsonDecode(response.body);
+      List listOfData = data['data'] as List;
+      print(listOfData[0]);
+      for (var element in listOfData) {
+        // print(element);
+        vehicleMakeList.add(element);
+      }
+    }
+
+    return vehicleMakeList;
+  } catch (e) {
+    print(e);
+    return [];
+  }
 }
 
 Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
@@ -210,9 +284,9 @@ Future<List<int>> getVehicleYear(String make, String jwtToken) async {
   final data = jsonDecode(response.body);
   List listOfData = data as List;
 
-  print(listOfData.length);
+  // print(listOfData.length);
   for (var element in listOfData) {
-    print(element);
+    // print(element);
     vehicleMakeList.add(element);
   }
   if (vehicleMakeList.contains(2025)) {
@@ -229,9 +303,6 @@ Future<List<int>> getVehicleYear(String make, String jwtToken) async {
 }
 
 Future<String> getJwtToken() async {
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  // String? jwtToken = sharedPreferences.getString('carApiToken');
-  // if (jwtToken == null) {
   http.Response response =
       await http.post(Uri.parse('https://carapi.app/api/auth/login'),
           headers: {
@@ -243,18 +314,10 @@ Future<String> getJwtToken() async {
             "api_secret": 'c4234b2783a659dad7f5f13cbfc54683',
           }));
   if (response.statusCode == 200) {
-    print(response.body);
-    sharedPreferences.setString('carApiToken', response.body);
-    // final responses = jsonDecode(response.body);
     return response.body;
   } else {
-    print(response.body);
-
     return '';
   }
-  // } else {
-  //   return jwtToken;
-  // }
 }
 
 List<AdditionalServiceModel> getAdditionalService() {

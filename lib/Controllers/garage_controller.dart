@@ -107,6 +107,39 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> callGetAndSaveDataToFirestore() async {
+    try {
+      // The URL for the region where your Cloud Function is deployed.
+      final url = Uri.parse(
+          'https://us-central1-vehype-386313.cloudfunctions.net/getAndSaveDataToFirestore');
+
+      // Since this is an onCall function, we need to send a POST request
+      final http.Response response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(
+            {}), // Sending an empty payload, as no data is required for this function
+      );
+
+      // Check the response
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          print('Data successfully saved to Firestore');
+        } else {
+          print('Failed to save data: ${responseData['error']}');
+        }
+      } else {
+        print(
+            'Failed to call function: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      print('Error calling Cloud Function: $e');
+    }
+  }
+
   selectModel(VehicleModel newBodyStyle) async {
     selectedVehicleModel = newBodyStyle;
     selectedSubModel = null;
