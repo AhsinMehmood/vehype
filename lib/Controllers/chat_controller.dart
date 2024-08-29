@@ -382,7 +382,8 @@ class ChatController with ChangeNotifier {
         senderUser: secondUser,
         receiverUser: currentUser,
         offersModel: offersModel,
-        chatId: chatModel.id);
+        chatId: chatModel.id,
+        messageId: reference.key!);
     await FirebaseFirestore.instance
         .collection('chats')
         .doc(chatModel.id)

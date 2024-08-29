@@ -6,13 +6,14 @@ import '../Models/offers_model.dart';
 import '../Models/user_model.dart';
 
 class NotificationController {
-  Future<void> sendNotification(
-      {required UserModel senderUser,
-      required UserModel receiverUser,
-      required String offerId,
-      required String? requestId,
-      required String title,
-      required String subtitle, }) async {
+  Future<void> sendNotification({
+    required UserModel senderUser,
+    required UserModel receiverUser,
+    required String offerId,
+    required String? requestId,
+    required String title,
+    required String subtitle,
+  }) async {
     const appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
     const restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
     // OneSignal.login(externalId)
@@ -48,6 +49,7 @@ class NotificationController {
     required UserModel receiverUser,
     required OffersModel offersModel,
     required String chatId,
+    required String messageId,
   }) async {
     const appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
     const restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
@@ -55,8 +57,8 @@ class NotificationController {
     final message = {
       'app_id': appId,
       'headings': {'en': 'New Message: ${offersModel.issue}'},
-      'contents': {'en': '${senderUser.name} sent you a message'},
-      'include_external_user_ids': [receiverUser.userId],
+      'contents': {'en': '${receiverUser.name} sent you a message'},
+      'include_external_user_ids': [senderUser.userId],
       'data': {
         'chatId': chatId,
         'type': 'chat',
