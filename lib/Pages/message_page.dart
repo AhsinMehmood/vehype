@@ -94,7 +94,6 @@ class _MessagePageState extends State<MessagePage> {
     return WillPopScope(
       onWillPop: () async {
         chatController.cleanController();
-        ChatController().updateChatTime(userModel, widget.chatModel);
 
         // FirebaseFirestore.instance
         //     .collection('users')
@@ -117,6 +116,8 @@ class _MessagePageState extends State<MessagePage> {
                 );
               }
               ChatModel chatModel = chatSnap.data ?? widget.chatModel;
+              ChatController().updateChatTime(userModel, widget.chatModel);
+
               return SafeArea(
                   child: StreamBuilder<OffersModel>(
                       initialData: widget.offersModel,

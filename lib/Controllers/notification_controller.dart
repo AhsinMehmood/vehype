@@ -62,6 +62,7 @@ class NotificationController {
       'data': {
         'chatId': chatId,
         'type': 'chat',
+        'messageId': messageId,
       },
     };
 
