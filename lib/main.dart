@@ -1,23 +1,20 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:get/get.dart';
-import 'package:map_location_picker/map_location_picker.dart';
-import 'package:mixpanel_flutter/mixpanel_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+// import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
-import 'package:vehype/Controllers/notification_controller.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
+
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:vehype/const.dart';
@@ -39,13 +36,14 @@ void main() async {
 
   // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
   // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
-  OneSignal.Debug.setLogLevel(OSLogLevel.none);
+  OneSignal.Debug.setLogLevel(OSLogLevel.debug);
 
   OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
-  await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
-      trackAutomaticEvents: true);
+  // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
+  //     trackAutomaticEvents: true);
   // await SentryFlutter.init(
   //   (options) {
+
   //     options.dsn =
   //         'https://c6ac471a08028bb3ecd01426b474eaf5@o4507069896523776.ingest.us.sentry.io/4507069897965568';
   //     // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
@@ -62,6 +60,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider<UserController>(
             create: (context) => UserController()),
+        ChangeNotifierProvider<OffersProvider>(
+            create: (context) => OffersProvider()),
         ChangeNotifierProvider<GarageController>(
             create: (context) => GarageController()),
         ChangeNotifierProvider<ChatController>(
@@ -126,49 +126,49 @@ class _MyAppState extends State<MyApp> {
     final UserController userController = Provider.of<UserController>(context);
 
     TextTheme textTheme = TextTheme(
-      displayLarge: TextStyle(
+      displayLarge: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      displayMedium: TextStyle(
+      displayMedium: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      displaySmall: TextStyle(
+      displaySmall: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineLarge: TextStyle(
+      headlineLarge: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineMedium: TextStyle(
+      headlineMedium: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineSmall: TextStyle(
+      headlineSmall: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleLarge: TextStyle(
+      titleLarge: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleMedium: TextStyle(
+      titleMedium: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleSmall: TextStyle(
+      titleSmall: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodyLarge: TextStyle(
+      bodyLarge: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodyMedium: TextStyle(
+      bodyMedium: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodySmall: TextStyle(
+      bodySmall: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelLarge: TextStyle(
+      labelLarge: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelMedium: TextStyle(
+      labelMedium: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelSmall: TextStyle(
+      labelSmall: GoogleFonts.notoSansOsage(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
     );

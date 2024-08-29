@@ -1,5 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:vehype/bad_words.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:math';
+
+double haversine(double lat1, double lon1, double lat2, double lon2) {
+  const double R = 6371; // Radius of Earth in kilometers
+  double dLat = _degToRad(lat2 - lat1);
+  double dLon = _degToRad(lon2 - lon1);
+  double a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(_degToRad(lat1)) *
+          cos(_degToRad(lat2)) *
+          sin(dLon / 2) *
+          sin(dLon / 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  return R * c; // Distance in kilometers
+}
+
+double _degToRad(double deg) {
+  return deg * (pi / 180);
+}
+
+bool areLocationsDifferent(
+    double lat1, double lon1, double lat2, double lon2, double thresholdKm) {
+  double distance = haversine(lat1, lon1, lat2, lon2);
+  return distance <= thresholdKm;
+}
 
 Color changeColor({required String color}) {
   String hexColor = color;
@@ -159,4 +185,31 @@ TextStyle textButtonStyle() {
       fontFamily: poppinsMedium,
       fontWeight: FontWeight.w600,
       color: Colors.black54);
+}
+
+Future<String> getAddressFromLatLng(double latitude, double longitude) async {
+  String apiKey =
+      'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E'; // Replace with your Google Maps API key
+  String url =
+      'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+
+  try {
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var json = jsonDecode(response.body);
+      if (json['status'] == 'OK' &&
+          json['results'] != null &&
+          json['results'].isNotEmpty) {
+        return json['results'][2]['formatted_address'];
+      } else {
+        return 'Address not found';
+      }
+    } else {
+      return 'Error retrieving address';
+    }
+  } catch (e) {
+    print(e);
+    return 'Failed to fetch address';
+  }
 }

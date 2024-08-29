@@ -1,20 +1,29 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:readmore/readmore.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/user_model.dart';
 
+import '../Pages/full_image_view_page.dart';
 import '../const.dart';
 import 'select_date_and_price.dart';
 
 class ServiceYourOfferWidget extends StatelessWidget {
   final OffersModel offersModel;
   final OffersReceivedModel offersReceivedModel;
+  // final GarageModel garageModel;
+  final UserModel ownerModel;
   final bool yourOfferExpanded;
   const ServiceYourOfferWidget(
       {super.key,
       required this.offersModel,
       required this.offersReceivedModel,
+      required this.ownerModel,
       required this.yourOfferExpanded});
 
   @override
@@ -31,7 +40,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
           milliseconds: 400,
         ),
         curve: Curves.bounceInOut,
-        height: yourOfferExpanded ? Get.height * 0.6 : 60,
+        height: yourOfferExpanded ? Get.height * 0.76 : 60,
         width: Get.width,
         decoration: BoxDecoration(
           color: userController.isDark ? primaryColor : Colors.white,
@@ -69,39 +78,28 @@ class ServiceYourOfferWidget extends StatelessWidget {
             : SingleChildScrollView(
                 child: Column(
                   children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Your Offer',
+                          'Offer Details',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        AnimatedSwitcher(
-                          duration: Duration(milliseconds: 300),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return ScaleTransition(
-                                scale: animation, child: child);
-                          },
-                          child: yourOfferExpanded
-                              ? Icon(
-                                  Icons.expand_more_outlined,
-                                  size: 32.0,
-                                  key: ValueKey('down'),
-                                )
-                              : Icon(
-                                  Icons.arrow_forward_ios_outlined,
-                                  size: 32.0,
-                                  key: ValueKey('right'),
-                                ),
+                        Icon(
+                          Icons.keyboard_arrow_down_sharp,
+                          size: 35,
                         ),
                       ],
                     ),
                     const SizedBox(
-                      height: 30,
+                      height: 20,
                     ),
                     Row(
                       children: [
@@ -111,7 +109,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
                             Text(
                               'Price',
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -121,7 +119,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
                             Text(
                               '\$${offersReceivedModel.price}',
                               style: TextStyle(
-                                fontSize: 17,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -140,7 +138,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
                             Text(
                               'Start At',
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -170,7 +168,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
                             Text(
                               'End At',
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -198,11 +196,13 @@ class ServiceYourOfferWidget extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Details',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
+                              InkWell(
+                                child: Text(
+                                  'Description',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
                               const SizedBox(
@@ -214,7 +214,7 @@ class ServiceYourOfferWidget extends StatelessWidget {
                                     : offersReceivedModel.comment,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -222,32 +222,36 @@ class ServiceYourOfferWidget extends StatelessWidget {
                         )
                       ],
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    if (offersReceivedModel.status == 'Completed')
+                    if (offersReceivedModel.status == 'Cancelled')
+                      const SizedBox(
+                        height: 15,
+                      ),
+                    if (offersReceivedModel.status == 'Cancelled')
                       Row(
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Cancellation Reason',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.red,
+                                InkWell(
+                                  child: Text(
+                                    'Cancellation Reason',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 5,
                                 ),
                                 Text(
-                                  'I have cancelled this job because I dont have enough time to countinue working on this forever.',
+                                  offersReceivedModel.cancelReason == ''
+                                      ? 'No reason provided'
+                                      : offersReceivedModel.cancelReason,
                                   style: TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -255,39 +259,231 @@ class ServiceYourOfferWidget extends StatelessWidget {
                           )
                         ],
                       ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    if (offersReceivedModel.status == 'Completed')
+                    if (offersReceivedModel.status == 'Cancelled')
+                      const SizedBox(
+                        height: 15,
+                      ),
+                    if (offersReceivedModel.status == 'Cancelled')
                       Row(
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Cancelled By',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
+                                InkWell(
+                                  child: Text(
+                                    'Cancelled By',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 5,
                                 ),
                                 Text(
-                                  offersReceivedModel.cancelBy ==
-                                          userController.userModel!.userId
-                                      ? 'This request was cancelled by ${userController.userModel!.name}.'
-                                      : 'This request was cancelled by Service Owner.',
+                                  offersReceivedModel.cancelBy == 'provider'
+                                      ? 'This offer was cancelled by You.'
+                                      : 'This offer was cancelled by ${ownerModel.name}',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                          )
+                          ),
+                        ],
+                      ),
+                    if (offersReceivedModel.ratingTwo != 0.0)
+                      Column(
+                        children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'Your Feedback',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              RatingBarIndicator(
+                                rating: offersReceivedModel.ratingTwo,
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 25,
+                                ),
+                                itemSize: 25,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ReadMoreText(
+                                offersReceivedModel.commentTwo,
+                                trimMode: TrimMode.Line,
+                                trimLines: 2,
+                                colorClickableText: Colors.pink,
+                                trimCollapsedText: ' Show more',
+                                trimExpandedText: ' Show less',
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                moreStyle: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          if (offersReceivedModel.ratingTwoImage != '')
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          if (offersReceivedModel.ratingTwoImage != '')
+                            InkWell(
+                              onTap: () {
+                                Get.to(() => FullImagePageView(
+                                      urls: [
+                                        offersReceivedModel.ratingTwoImage
+                                      ],
+                                      currentIndex: 0,
+                                    ));
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: ExtendedImage.network(
+                                  offersReceivedModel.ratingTwoImage,
+
+                                  height: 220,
+                                  // shape: BoxShape.rectangle,
+                                  fit: BoxFit.cover,
+                                  // borderRadius: BorderRadius.only(
+                                  //   bottomLeft: Radius.circular(6),
+                                  //   bottomRight: Radius.circular(6),
+                                  // ),
+                                  width: Get.width * 0.95,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (offersReceivedModel.ratingOne != 0.0)
+                      Column(
+                        children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${ownerModel.name}\'s Feedback',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              RatingBarIndicator(
+                                rating: offersReceivedModel.ratingOne,
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 25,
+                                ),
+                                itemSize: 25,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ReadMoreText(
+                                offersReceivedModel.commentOne,
+                                trimMode: TrimMode.Line,
+                                trimLines: 2,
+                                colorClickableText: Colors.pink,
+                                trimCollapsedText: ' Show more',
+                                trimExpandedText: ' Show less',
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                moreStyle: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          if (offersReceivedModel.ratingOneImage != '')
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          if (offersReceivedModel.ratingOneImage != '')
+                            InkWell(
+                              onTap: () {
+                                Get.to(() => FullImagePageView(
+                                      urls: [
+                                        offersReceivedModel.ratingOneImage
+                                      ],
+                                      currentIndex: 0,
+                                    ));
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: ExtendedImage.network(
+                                  offersReceivedModel.ratingOneImage,
+
+                                  height: 220,
+                                  // shape: BoxShape.rectangle,
+                                  fit: BoxFit.cover,
+                                  // borderRadius: BorderRadius.only(
+                                  //   bottomLeft: Radius.circular(6),
+                                  //   bottomRight: Radius.circular(6),
+                                  // ),
+                                  width: Get.width * 0.95,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                   ],

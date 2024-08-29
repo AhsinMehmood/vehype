@@ -1,54 +1,97 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:vehype/Controllers/chat_controller.dart';
-import 'package:vehype/Controllers/garage_controller.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Models/chat_model.dart';
-import 'package:vehype/Models/notifications_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/message_page.dart';
-import 'package:vehype/Pages/repair_page.dart';
-import 'package:vehype/Widgets/loading_dialog.dart';
-import 'package:vehype/Widgets/offer_request_details.dart';
-import 'package:vehype/Widgets/request_provider_short_widget.dart';
-import 'package:vehype/Widgets/request_vehicle_details.dart';
-import 'package:vehype/Widgets/select_date_and_price.dart';
+
 import 'package:vehype/const.dart';
 
-import '../Controllers/vehicle_data.dart';
+import '../Widgets/ignored_offers_widget.dart';
 import '../Widgets/service_request_widget.dart';
-import 'full_image_view_page.dart';
-import 'inactive_offers_seeker.dart';
 import 'notifications_page.dart';
-import 'offers_received_details.dart';
-import 'offers_tab_page.dart';
-import 'received_offers_seeker.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
-class OrdersHistoryProvider extends StatefulWidget {
+import 'new_offers_page.dart';
+
+class OrdersHistoryProvider extends StatelessWidget {
   const OrdersHistoryProvider({super.key});
 
   @override
-  State<OrdersHistoryProvider> createState() => _OrdersHistoryProviderState();
-}
-
-class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
-  @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+
     UserModel userModel = userController.userModel!;
+    List<OffersModel> rawOffers = offersProvider.offers;
+
+// Filter offers based on user criteria
+    List<OffersModel> ignoredOffers = rawOffers
+        .where((offer) => offer.ignoredBy.contains(userModel.userId))
+        .toList();
+    // List<OffersModel> ignoredOffers = filterIgnoredOffers;
+    List<OffersModel> filteredOffers = rawOffers
+        .where((offer) => !offer.offersReceived.contains(userModel.userId))
+        .where((offer) => !offer.ignoredBy.contains(userModel.userId))
+        .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
+        .where((offer) => userModel.services.contains(offer.issue))
+        .toList();
+
+    List<OffersModel> newOffers = userModel.lat == 0.0
+        ? filteredOffers
+        : userController.filterOffers(
+            filteredOffers, userModel.lat, userModel.long, 50);
+    List<OffersModel> notificationToCheckOffersNewOffers = newOffers
+        .where((offer) => offer.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
+    List<OffersReceivedModel> offersReceivedList =
+        offersProvider.offersReceived;
+    // List<OffersReceivedModel> ignoredOffers = offersReceivedList
+    //     .where((element) => element.status == 'ignore')
+    //     .toList();
+    List<OffersReceivedModel> offersPending = offersReceivedList
+        .where((element) => element.status == 'Pending')
+        .toList();
+
+    List<OffersReceivedModel> offersCompleted = offersReceivedList
+        .where((element) => element.status == 'Completed')
+        .toList();
+    List<OffersReceivedModel> offersCencelled = offersReceivedList
+        .where((element) => element.status == 'Cancelled')
+        .toList();
+    List<OffersReceivedModel> upcomingOffers = offersReceivedList
+        .where((element) => element.status == 'Upcoming')
+        .toList();
+    List<OffersReceivedModel> pendingOffersNotifications = offersPending
+        .where((element) => element.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
+    List<OffersReceivedModel> completedOffersNotifications = offersCompleted
+        .where((element) => element.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
+   
+    
+    List<OffersReceivedModel> upcomingOffersNotifications = upcomingOffers
+        .where((element) => element.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
+    List<OffersReceivedModel> cencelledOffersNotifications = offersCencelled
+        .where((element) => element.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
+    List<OffersReceivedModel> notificationsOffersReceived =
+        pendingOffersNotifications +
+            completedOffersNotifications +
+            upcomingOffersNotifications +
+            cencelledOffersNotifications;
 
     return DefaultTabController(
       length: 6,
@@ -63,100 +106,52 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
             'Requests',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userModel.userId)
-                      .collection('notifications')
-                      .where('isRead', isEqualTo: false)
-                      .snapshots(),
-                  builder: (context,
-                      AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
-                          notificationSnap) {
-                    List<NotificationsModel> notifications = [];
-                    if (!notificationSnap.hasData) {
-                      return IconButton(
-                        onPressed: () {
-                          Get.to(() => NotificationsPage(
-                                notifications: [],
-                              ));
-                        },
-                        icon: Icon(
-                          Icons.notifications,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          size: 30,
-                        ),
-                      );
-                    }
-                    for (var notificationData in notificationSnap.data!.docs) {
-                      notifications
-                          .add(NotificationsModel.fromJson(notificationData));
-                    }
-                    if (notifications.isEmpty) {
-                      return IconButton(
-                        onPressed: () {
-                          Get.to(() => NotificationsPage(
-                                notifications: [],
-                              ));
-                        },
-                        icon: Icon(
-                          Icons.notifications,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          size: 30,
-                        ),
-                      );
-                    }
-                    return InkWell(
-                      onTap: () {
-                        Get.to(() => NotificationsPage(
-                              notifications: notifications,
-                            ));
-                      },
-                      child: Stack(
-                        children: [
-                          Icon(
-                            Icons.notifications,
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            size: 30,
+                padding: const EdgeInsets.all(8.0),
+                child: InkWell(
+                  onTap: () {
+                    Get.to(() => NotificationsPage(
+                          notifications: [],
+                        ));
+                  },
+                  child: Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications_outlined,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        size: 26,
+                      ),
+                      if (notificationsOffersReceived.isNotEmpty)
+                        Container(
+                          height: 16,
+                          width: 16,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.red,
                           ),
-                          Container(
-                            height: 20,
-                            width: 20,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.red,
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            child: Center(
-                              child: Text(
-                                notifications.length.toString(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                ),
+                          padding: const EdgeInsets.all(1),
+                          child: Center(
+                            child: Text(
+                              notificationsOffersReceived.length.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
                               ),
                             ),
-                          )
-                        ],
-                      ),
-                    );
-                  }),
-            )
+                          ),
+                        )
+                    ],
+                  ),
+                ))
           ],
           bottom: TabBar(
+            enableFeedback: true,
             isScrollable: true,
             indicatorColor: userController.isDark ? Colors.white : primaryColor,
             labelColor: userController.isDark ? Colors.white : primaryColor,
@@ -173,11 +168,11 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                 child: Row(
                   children: [
                     Text('New'),
-                    if (userModel.isActiveNew)
+                    if (notificationToCheckOffersNewOffers.isNotEmpty)
                       const SizedBox(
-                        width: 5,
+                        width: 2,
                       ),
-                    if (userModel.isActiveNew)
+                    if (notificationToCheckOffersNewOffers.isNotEmpty)
                       Container(
                         height: 12,
                         width: 12,
@@ -193,11 +188,11 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                 child: Row(
                   children: [
                     Text('Pending'),
-                    if (userModel.isActivePending)
+                    if (pendingOffersNotifications.isNotEmpty)
                       const SizedBox(
-                        width: 5,
+                        width: 2,
                       ),
-                    if (userModel.isActivePending)
+                    if (pendingOffersNotifications.isNotEmpty)
                       Container(
                         height: 12,
                         width: 12,
@@ -213,11 +208,11 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                 child: Row(
                   children: [
                     Text('In Progress'),
-                    if (userModel.isActiveInProgress)
+                    if (upcomingOffersNotifications.isNotEmpty)
                       const SizedBox(
-                        width: 5,
+                        width: 2,
                       ),
-                    if (userModel.isActiveInProgress)
+                    if (upcomingOffersNotifications.isNotEmpty)
                       Container(
                         height: 12,
                         width: 12,
@@ -233,11 +228,11 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                 child: Row(
                   children: [
                     Text('Completed'),
-                    if (userModel.isActiveCompleted)
+                    if (completedOffersNotifications.isNotEmpty)
                       const SizedBox(
-                        width: 5,
+                        width: 2,
                       ),
-                    if (userModel.isActiveCompleted)
+                    if (completedOffersNotifications.isNotEmpty)
                       Container(
                         height: 12,
                         width: 12,
@@ -253,11 +248,11 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
                 child: Row(
                   children: [
                     Text('Cancelled'),
-                    if (userModel.isActiveCancelled)
+                    if (cencelledOffersNotifications.isNotEmpty)
                       const SizedBox(
-                        width: 5,
+                        width: 2,
                       ),
-                    if (userModel.isActiveCancelled)
+                    if (cencelledOffersNotifications.isNotEmpty)
                       Container(
                         height: 12,
                         width: 12,
@@ -272,72 +267,46 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
             ],
           ),
         ),
-        body: StreamBuilder<List<OffersReceivedModel>>(
-            stream: FirebaseFirestore.instance
-                .collection('offersReceived')
-                .where('offerBy', isEqualTo: userModel.userId)
-                .orderBy('createdAt', descending: true)
-                .snapshots()
-                .map((event) => event.docs
-                    .map((e) => OffersReceivedModel.fromJson(e))
-                    .toList()),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-              List<OffersReceivedModel> offersReceivedList =
-                  snapshot.data ?? [];
-              // List<OffersReceivedModel> ignoredOffers = offersReceivedList
-              //     .where((element) => element.status == 'ignore')
-              //     .toList();
-              List<OffersReceivedModel> offersPending = offersReceivedList
-                  .where((element) => element.status == 'Pending')
-                  .toList();
-              List<OffersReceivedModel> offersCompleted = offersReceivedList
-                  .where((element) => element.status == 'Completed')
-                  .toList();
-              List<OffersReceivedModel> offersCencelled = offersReceivedList
-                  .where((element) => element.status == 'Cancelled')
-                  .toList();
-              List<OffersReceivedModel> upcomingOffers = offersReceivedList
-                  .where((element) => element.status == 'Upcoming')
-                  .toList();
-
-              return TabBarView(
-                children: [
-                  IgnoredOffers(
-                      userController: userController, userModel: userModel),
-                  NewOffers(
-                      userController: userController, userModel: userModel),
-                  Offers(
-                      userController: userController,
-                      emptyText: 'No Pending Offers Yet!',
-                      id: 1,
-                      offersPending: offersPending),
-                  Offers(
-                      userController: userController,
-                      emptyText: 'No Accepted Offers Yet!',
-                      id: 2,
-                      offersPending: upcomingOffers),
-                  Offers(
-                      userController: userController,
-                      id: 3,
-                      emptyText: 'No Completed Offers Yet!',
-                      offersPending: offersCompleted),
-                  Offers(
-                      userController: userController,
-                      id: 4,
-                      emptyText: 'No Cancelled Offers Yet!',
-                      offersPending: offersCencelled),
-                ],
-              );
-            }),
+        body: TabBarView(
+          children: [
+            IgnoredOffers(
+              userController: userController,
+              userModel: userModel,
+              ignoredOffers: ignoredOffers,
+            ),
+            NewOffers(
+              userController: userController,
+              userModel: userModel,
+              newOffers: newOffers,
+            ),
+            Offers(
+                userController: userController,
+                emptyText: 'No Pending Offers Yet!',
+                id: 1,
+                offersPending: offersPending),
+            Offers(
+                userController: userController,
+                emptyText: 'No Accepted Offers Yet!',
+                id: 2,
+                offersPending: upcomingOffers),
+            Offers(
+                userController: userController,
+                id: 3,
+                emptyText: 'No Completed Offers Yet!',
+                offersPending: offersCompleted),
+            Offers(
+                userController: userController,
+                id: 4,
+                emptyText: 'No Cancelled Offers Yet!',
+                offersPending: offersCencelled),
+          ],
+        ),
       ),
     );
   }
 }
 
-class Offers extends StatefulWidget {
+class Offers extends StatelessWidget {
   final int id;
   const Offers({
     super.key,
@@ -353,82 +322,26 @@ class Offers extends StatefulWidget {
   final List<OffersReceivedModel> offersPending;
 
   @override
-  State<Offers> createState() => _OffersState();
-}
-
-class _OffersState extends State<Offers> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    UserModel userModel = widget.userController.userModel!;
-    if (widget.offersPending.isEmpty) {
-      Future.delayed(const Duration(seconds: 1)).then((e) {
-        if (widget.id == 1) {
-          // if (userModel.isActivePending) {
-          UserController().changeNotiOffers(
-              widget.id,
-              false,
-              widget.userController.userModel!.userId,
-              'offersModel.offerId',
-              userModel.accountType);
-        }
-        // }
-        if (widget.id == 2) {
-          // if (userModel.isActiveInProgress) {
-          UserController().changeNotiOffers(
-              widget.id,
-              false,
-              widget.userController.userModel!.userId,
-              'offersModel.offerId',
-              userModel.accountType);
-          // }
-        }
-        if (widget.id == 3) {
-          // if (userModel.isActiveCompleted) {
-          UserController().changeNotiOffers(
-              widget.id,
-              false,
-              widget.userController.userModel!.userId,
-              'offersModel.offerId',
-              userModel.accountType);
-          // }
-        }
-        if (widget.id == 4) {
-          // if (userModel.isActiveCancelled) {
-          UserController().changeNotiOffers(
-              widget.id,
-              false,
-              widget.userController.userModel!.userId,
-              'offersModel.offerId',
-              userModel.accountType);
-          // }
-        }
-      });
-    }
-    return widget.offersPending.isEmpty
+    offersPending.sort((a, b) => b.offerAt.compareTo(a.offerAt));
+    return offersPending.isEmpty
         ? Center(
             child: Text(
-              widget.emptyText,
+              emptyText,
               style: TextStyle(
-                color:
-                    widget.userController.isDark ? Colors.white : primaryColor,
+                color: userController.isDark ? Colors.white : primaryColor,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
             ),
           )
         : ListView.builder(
-            itemCount: widget.offersPending.length,
+            itemCount: offersPending.length,
             shrinkWrap: true,
             padding:
                 const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
             itemBuilder: (context, index) {
-              OffersReceivedModel offersReceivedModel =
-                  widget.offersPending[index];
+              OffersReceivedModel offersReceivedModel = offersPending[index];
               // OffersModel offersModel = userController.historyOffers
               //     .firstWhere((element) =>
               //         element.offerId == offersReceivedModel.offerId);
@@ -448,48 +361,6 @@ class _OffersState extends State<Offers> {
                     }
                     OffersModel offersModel =
                         OffersModel.fromJson(offerSnap.data);
-                    Future.delayed(const Duration(seconds: 4)).then((e) {
-                      if (widget.id == 1) {
-                        if (userModel.isActivePending) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
-                      }
-                      if (widget.id == 2) {
-                        if (userModel.isActiveInProgress) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
-                      }
-                      if (widget.id == 3) {
-                        if (userModel.isActiveCompleted) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
-                      }
-                      if (widget.id == 4) {
-                        if (userModel.isActiveCancelled) {
-                          UserController().changeNotiOffers(
-                              widget.id,
-                              false,
-                              widget.userController.userModel!.userId,
-                              offersModel.offerId,
-                              userModel.accountType);
-                        }
-                      }
-                    });
 
                     return ServiceRequestWidget(
                       offersModel: offersModel,

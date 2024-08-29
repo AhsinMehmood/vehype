@@ -18,7 +18,7 @@ import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/message_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/offers_received_details.dart';
+// import 'package:vehype/Pages/offers_received_details.dart';
 import 'package:path/path.dart' as p;
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:video_compress/video_compress.dart';
@@ -36,6 +36,16 @@ class ChatController with ChangeNotifier {
   updateChatRequestId(String chatId, String offerId) async {
     await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
       'offerRequestId': offerId,
+    });
+  }
+
+  Future updateChatToClose(
+    String chatId,
+    String closeReason,
+  ) async {
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'isClosed': true,
+      'closeReason': closeReason,
     });
   }
 
@@ -74,15 +84,15 @@ class ChatController with ChangeNotifier {
       'chatId': currentUser.userId + secondUser.userId + offersModel.offerId,
       'state': 0,
     });
-
-    sendNotification(
-        secondUser.userId,
-        currentUser.name,
-        'New Message',
-        '${currentUser.name}, Sent you a message',
-        reference.id,
-        'Message',
-        'systemMessage');
+//TODO Send New Chat Notification
+    // sendNotification(
+    //     secondUser.userId,
+    //     currentUser.name,
+    //     'New Message',
+    //     '${currentUser.name}, Sent you a message',
+    //     reference.id,
+    //     'Message',
+    //     'systemMessage');
     return reference.id;
   }
 
@@ -367,15 +377,16 @@ class ChatController with ChangeNotifier {
     });
 
     // notifyListeners();
-    sendNotification(
-      secondUser.userId,
-      currentUser.name,
-      'New Message',
-      '${currentUser.name}, Sent you a message',
-      chatModel.id,
-      'Message',
-      reference.key!,
-    );
+    //TODO Send New Message Notification
+    // sendNotification(
+    //   secondUser.userId,
+    //   currentUser.name,
+    //   'New Message',
+    //   '${currentUser.name}, Sent you a message',
+    //   chatModel.id,
+    //   'Message',
+    //   reference.key!,
+    // );
 
     await FirebaseFirestore.instance
         .collection('chats')

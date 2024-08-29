@@ -10,7 +10,7 @@ import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:mixpanel_flutter/mixpanel_flutter.dart';
+// import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,12 +53,12 @@ class LoginController {
         String? email = userCredential.user!.email;
         String? name = userCredential.user!.displayName;
 
-        Mixpanel mixpanel = await Mixpanel.init(
-            'c40aeb8e3a8f1030b811314d56973f5a',
-            trackAutomaticEvents: true);
-        mixpanel.identify(userId);
+        // Mixpanel mixpanel = await Mixpanel.init(
+        //     'c40aeb8e3a8f1030b811314d56973f5a',
+        //     trackAutomaticEvents: true);
+        // mixpanel.identify(userId);
 
-        mixpanel.getPeople().set('\$name', name ?? '');
+        // mixpanel.getPeople().set('\$name', name ?? '');
         sharedPreferences.setString('userId', userId);
         if (userCredential.additionalUserInfo!.isNewUser) {
           String? name = userCredential.user!.displayName;

@@ -31,8 +31,8 @@ class _ChatPageState extends State<ChatPage> {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
 
-    bool isNotAllowed = await OneSignal.Notifications.canRequest();
-    userController.changeIsShow(isNotAllowed);
+    // bool isNotAllowed = await OneSignal.Notifications.canRequest();
+    // userController.changeIsShow(isNotAllowed);
   }
 
   @override
@@ -50,9 +50,8 @@ class _ChatPageState extends State<ChatPage> {
           'Messages',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
-            fontFamily: 'Avenir',
-            fontWeight: FontWeight.w900,
-            fontSize: 22,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -70,13 +69,15 @@ class _ChatPageState extends State<ChatPage> {
               // List<ChatModel> chats =
               //     snap.data!.where((element) => element.).toList();
 
+              List<ChatModel> chats = snap.data ?? [];
+              chats.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
               return ListView.builder(
-                  itemCount: snap.data!.length,
+                  itemCount: chats.length,
                   // physics:const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   padding: const EdgeInsets.all(0),
                   itemBuilder: (context, index) {
-                    ChatModel chat = snap.data![index];
+                    ChatModel chat = chats[index];
 
                     return ChatWidget(
                       user: userModel,

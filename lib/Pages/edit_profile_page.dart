@@ -67,7 +67,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             'Manage Profile',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -84,6 +84,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
           bottom: TabBar(
             isScrollable: true,
             indicatorColor: userController.isDark ? Colors.white : primaryColor,
+            tabAlignment: userModel.accountType == 'provider'
+                ? TabAlignment.start
+                : TabAlignment.center,
             labelColor: userController.isDark ? Colors.white : primaryColor,
             tabs: userModel.accountType == 'provider'
                 ? [
@@ -258,8 +261,8 @@ class ServicesTab extends StatelessWidget {
                 'Additional Services',
                 style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -356,7 +359,7 @@ class ServicesTab extends StatelessWidget {
                       style: TextStyle(
                         color:
                             userController.isDark ? Colors.white : primaryColor,
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -396,12 +399,12 @@ class ServicesTab extends StatelessWidget {
               child: Text(
                 userController.userModel!.services.length ==
                         getServices().length
-                    ? 'Clear'.toUpperCase()
-                    : 'Select All'.toUpperCase(),
+                    ? 'Clear'
+                    : 'Select All',
                 style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -481,8 +484,8 @@ class ServicesTab extends StatelessWidget {
                               width: 6,
                             ),
                             SvgPicture.asset(service.image,
-                                height: 45,
-                                width: 45,
+                                height: 40,
+                                width: 40,
                                 color: userController.isDark
                                     ? Colors.white
                                     : primaryColor),
@@ -495,7 +498,7 @@ class ServicesTab extends StatelessWidget {
                                 color: userController.isDark
                                     ? Colors.white
                                     : primaryColor,
-                                fontSize: 17,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -554,8 +557,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       context, userController.userModel!, 0);
                 },
                 child: SizedBox(
-                  width: 130,
-                  height: 130,
+                  width: 90,
+                  height: 90,
                   child: Stack(
                     children: [
                       ClipRRect(
@@ -582,13 +585,17 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                 ? Colors.white
                                 : primaryColor,
                           ),
-                          height: 30,
-                          width: 30,
-                          child: Icon(
-                            Icons.edit,
-                            color: userController.isDark
-                                ? primaryColor
-                                : Colors.white,
+                          padding: const EdgeInsets.all(2),
+                          height: 24,
+                          width: 24,
+                          child: Center(
+                            child: Icon(
+                              Icons.edit,
+                              color: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
@@ -828,7 +835,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                 child: const Text(
                   'Account Type',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -867,7 +874,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(200),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Container(
                           height: 50,
@@ -879,7 +886,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                           ),
                           width: Get.width * 0.7,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
+                              borderRadius: BorderRadius.circular(12),
                               color: Colors.white,
                               border: Border.all(
                                 color: Colors.black,
@@ -900,7 +907,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                 style: TextStyle(
                                   fontFamily: 'Avenir',
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 17,
+                                  fontSize: 16,
                                   color: Colors.black.withOpacity(0.8),
                                 ),
                               ),
@@ -956,12 +963,13 @@ class _EditProfileTabState extends State<EditProfileTab> {
                           'accountType': 'seeker',
                         });
                         userController.closeStream();
+                        // userController.getUserStream(userId)/
                         Get.close(1);
                         Get.offAll(() => SplashPage());
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(200),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Container(
                           height: 50,
@@ -973,7 +981,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                           ),
                           width: Get.width * 0.7,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
+                              borderRadius: BorderRadius.circular(12),
                               color: Color.fromARGB(255, 3, 0, 10),
                               border: Border.all(
                                 color: Color.fromARGB(255, 3, 0, 10),
@@ -994,7 +1002,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                 style: TextStyle(
                                   fontFamily: 'Avenir',
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 17,
+                                  fontSize: 16,
                                   color: Colors.white,
                                 ),
                               ),
@@ -1040,8 +1048,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                               'Location',
                               style: TextStyle(
                                 fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18,
                               ),
                             ),
                             const SizedBox(
@@ -1193,16 +1201,16 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(22),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    minimumSize: Size(Get.width * 0.8, 55),
+                                    minimumSize: Size(Get.width * 0.7, 50),
                                   ),
                                   child: Text(
                                     'Change Location',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   )),
                             ),

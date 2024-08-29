@@ -1,5 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:vehype/Pages/offers_received_details.dart';
+
+// import 'package:vehype/Pages/offers_received_details.dart';/s
+class OffersNotification {
+  final String checkById;
+  final bool isRead;
+  final String title;
+  final String subtitle;
+
+  OffersNotification(
+      {required this.checkById,
+      required this.isRead,
+      required this.title,
+      required this.subtitle});
+
+  factory OffersNotification.fromDb(data) {
+    return OffersNotification(
+        checkById: data['checkById'],
+        isRead: data['isRead'],
+        title: data['title'],
+        subtitle: data['subtitle']);
+  }
+}
 
 class OffersModel {
   final String offerId;
@@ -17,10 +38,15 @@ class OffersModel {
   final String status;
   final String createdAt;
   final String garageId;
+  final List<OffersNotification> checkByList;
+  final String offerReceivedIdJob;
+  final String address;
 
   OffersModel(
       {required this.offerId,
       required this.offersReceived,
+      required this.offerReceivedIdJob,
+      required this.address,
       required this.ownerId,
       required this.garageId,
       required this.status,
@@ -33,11 +59,17 @@ class OffersModel {
       required this.long,
       required this.description,
       required this.createdAt,
+      required this.checkByList,
       required this.images});
 
   factory OffersModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> data = snapshot.data() ?? {};
+    List<OffersNotification> offersNotifications = [];
+    List checkByMap = data['checkByList'] ?? [];
+    for (var element in checkByMap) {
+      offersNotifications.add(OffersNotification.fromDb(element));
+    }
     // print(data.toString());
     String id = snapshot.id;
     return OffersModel(
@@ -48,13 +80,16 @@ class OffersModel {
         offersReceived: data['offersReceived'] ?? [],
         ownerId: data['ownerId'] ?? '',
         vehicleId: data['vehicleName'] ?? '',
+        address: data['address'] ?? '',
         issue: data['issue'] ?? '',
         additionalService: data['additionalService'] ?? '',
+        offerReceivedIdJob: data['offerReceivedIdJob'] ?? 'nothing',
         imageOne: data['imageOne'] ?? '',
         status: data['status'] ?? '',
         lat: data['lat'] ?? 0.0,
         long: data['long'] ?? 0.0,
         description: data['description'] ?? '',
+        checkByList: offersNotifications,
         images: data['images'] ?? []);
   }
 }
@@ -68,6 +103,8 @@ class OffersModel {
 class OffersReceivedModel {
   final String offerBy;
   final String offerAt;
+  final List<OffersNotification> checkByList;
+
   final double price;
   final String startDate;
   final String ownerId;
@@ -81,13 +118,18 @@ class OffersReceivedModel {
   final String status;
   final String commentOne;
   final String commentTwo;
+  final String cancelReason;
+  final String ratingOneImage;
+  final String ratingTwoImage;
   final bool isDone;
   OffersReceivedModel(
       {required this.offerBy,
+      required this.cancelReason,
       required this.commentOne,
       required this.commentTwo,
       required this.ratingOne,
       required this.ratingTwo,
+      required this.checkByList,
       required this.offerAt,
       required this.comment,
       required this.ownerId,
@@ -98,11 +140,18 @@ class OffersReceivedModel {
       required this.startDate,
       required this.endDate,
       required this.isDone,
+      required this.ratingOneImage,
+      required this.ratingTwoImage,
       required this.status});
 
   factory OffersReceivedModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snap) {
     Map<String, dynamic> data = snap.data() ?? {};
+    List<OffersNotification> offersNotifications = [];
+    List checkByMap = data['checkByList'] ?? [];
+    for (var element in checkByMap) {
+      offersNotifications.add(OffersNotification.fromDb(element));
+    }
     // print(data.toString());
     // String id = snap.id;
     return OffersReceivedModel(
@@ -110,13 +159,17 @@ class OffersReceivedModel {
         ratingTwo: data['ratingTwo'] ?? 0.0,
         offerBy: data['offerBy'],
         comment: data['comment'] ?? '',
+        cancelReason: data['cancelReason'] ?? '',
         offerAt: data['offerAt'],
         price: data['price'],
         id: snap.id,
         cancelBy: data['cancelBy'] ?? '',
         startDate: data['startDate'],
         endDate: data['endDate'],
+        checkByList: offersNotifications,
         status: data['status'],
+        ratingOneImage: data['ratingOneImage'] ?? '',
+        ratingTwoImage: data['ratingTwoImage'] ?? '',
         ownerId: data['ownerId'] ?? '',
         commentOne: data['commentOne'] ?? '',
         isDone: data['isDone'] ?? false,

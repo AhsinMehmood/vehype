@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Widgets/request_vehicle_details.dart';
+// import 'package:vehype/Widgets/request_vehicle_details.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
@@ -14,7 +14,7 @@ import '../Models/chat_model.dart';
 import '../Widgets/loading_dialog.dart';
 import 'message_page.dart';
 import 'repair_page.dart';
-import 'select_service_crv.dart';
+// import 'select_service_crv.dart';
 
 class SendRequestInvitePage extends StatelessWidget {
   final UserModel profileModel;
@@ -93,13 +93,6 @@ class SendRequestInvitePage extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
-                          VehicleDetailsRequest(
-                              userController: userController,
-                              vehicleType: vehicleType,
-                              vehicleMake: vehicleMake,
-                              vehicleYear: vehicleYear,
-                              vehicleModle: vehicleModle,
-                              offersModel: offersModel),
                           ElevatedButton(
                             onPressed: () async {
                               Get.dialog(LoadingDialog(),
@@ -122,19 +115,19 @@ class SendRequestInvitePage extends StatelessWidget {
                                         profileModel.userId,
                                         offersModel.offerId);
                                 Get.close(2);
-                                Get.to(() => MessagePage(
-                                      offersModel: offersModel,
-                                      chatModel: newchat!,
-                                      secondUser: profileModel,
-                                    ));
+                                // Get.to(() => MessagePage(
+                                //       offersModel: offersModel,
+                                //       chatModel: newchat!,
+                                //       secondUser: profileModel,
+                                //     ));
                               } else {
                                 Get.close(2);
 
-                                Get.to(() => MessagePage(
-                                      offersModel: offersModel,
-                                      chatModel: chatModel,
-                                      secondUser: profileModel,
-                                    ));
+                                // Get.to(() => MessagePage(
+                                //       offersModel: offersModel,
+                                //       chatModel: chatModel,
+                                //       secondUser: profileModel,
+                                //     ));
                               }
                             },
                             style: ElevatedButton.styleFrom(

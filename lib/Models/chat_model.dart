@@ -11,6 +11,8 @@ class ChatModel {
   final String offerRequestId;
   final String offerId;
   final Map userRoles;
+  final bool isClosed;
+  final String closeReason;
 
   ChatModel(
       {required this.id,
@@ -18,6 +20,8 @@ class ChatModel {
       required this.members,
       required this.lastMessageMe,
       required this.lastMessageAt,
+      required this.closeReason,
+      required this.isClosed,
       required this.offerId,
       required this.offerRequestId,
       required this.userRoles,
@@ -29,6 +33,8 @@ class ChatModel {
     return ChatModel(
         id: id,
         userRoles: {},
+        isClosed: data['isClosed'] ?? false,
+        closeReason: data['closeReason'] ?? '',
         members: data['members'] ?? [],
         offerId: data['offerId'] ?? '',
         offerRequestId: data['offerRequestId'] ?? '',

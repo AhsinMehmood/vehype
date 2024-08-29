@@ -1,14 +1,44 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vehype/Models/chat_model.dart';
-import 'package:vehype/Pages/message_page.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:http/http.dart' as http;
 
-import '../Widgets/loading_dialog.dart';
-import 'chat_controller.dart';
+import '../Models/user_model.dart';
 
-class NotificationController {}
+class NotificationController {
+  Future<void> sendNotification(
+      {required UserModel senderUser,
+      required UserModel receiverUser,
+      required String offerId,
+      required String? requestId,
+      required String title,
+      required String subtitle}) async {
+    const appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
+    const restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
+    // OneSignal.login(externalId)
+    final message = {
+      'app_id': appId,
+      'headings': {'en': title},
+      'contents': {'en': subtitle},
+      'include_external_user_ids': [receiverUser.userId],
+      'data': {
+        'offerId': offerId,
+        'type': 'request',
+        'requestId': requestId,
+      },
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://onesignal.com/api/v1/notifications'),
+        body: jsonEncode(message),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic $restApiKey',
+        },
+      );
+      print('Notification sent: ${response.body}');
+    } catch (error) {
+      print('Error sending notification: $error');
+    }
+  }
+}

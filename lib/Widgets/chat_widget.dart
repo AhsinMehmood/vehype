@@ -5,7 +5,8 @@ import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+// import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
+// import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -14,11 +15,13 @@ import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/message_page.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/const.dart';
+import 'package:intl/intl.dart';
 
 class ChatWidget extends StatefulWidget {
   const ChatWidget({
@@ -35,6 +38,19 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
+  String formatDateTime(DateTime sentAt) {
+    final now = DateTime.now();
+    final difference = now.difference(sentAt.toLocal());
+
+    if (difference.inHours >= 24) {
+      // Return date in format like "21 Aug"
+      return DateFormat('d MMM').format(sentAt);
+    } else {
+      // Return time in format like "4:26 PM"
+      return DateFormat('h:mm a').format(sentAt);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -44,7 +60,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     FontWeight fontWeight =
         lastMessageAt != lastOpen ? FontWeight.w800 : FontWeight.w400;
-
+    print(widget.chat.id);
     return StreamBuilder<UserModel>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -52,9 +68,9 @@ class _ChatWidgetState extends State<ChatWidget> {
                 .firstWhere((element) => element != widget.user.userId))
             .snapshots()
             .map((event) => UserModel.fromJson(event)),
-        builder: (context, AsyncSnapshot<UserModel> snapshot) {
-          if (snapshot.data != null) {
-            UserModel secondUserData = snapshot.data!;
+        builder: (context, AsyncSnapshot<UserModel> userSnap) {
+          if (userSnap.data != null) {
+            UserModel secondUserData = userSnap.data!;
             return StreamBuilder<OffersModel>(
                 stream: FirebaseFirestore.instance
                     .collection('offers')
@@ -64,334 +80,258 @@ class _ChatWidgetState extends State<ChatWidget> {
                 builder: (context, AsyncSnapshot<OffersModel> snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     OffersModel offersModel = snapshot.data!;
-                    String title = offersModel.vehicleId != ''
-                        ? offersModel.vehicleId.split(',')[1]
-                        : '';
 
-                    return InkWell(
-                      onTap: () {
-                        if (getUnread(
-                            widget.chat.lastMessageAt,
-                            widget.chat.lastOpen[widget.user.userId],
-                            context)) {
-                          FlutterAppBadger.removeBadge();
-                        }
-                        Get.to(() => MessagePage(
-                              chatModel: widget.chat,
-                              secondUser: secondUserData,
-                              offersModel: offersModel,
-                            ));
-                      },
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
+                    return StreamBuilder<GarageModel>(
+                        stream: FirebaseFirestore.instance
+                            .collection('garages')
+                            .doc(offersModel.garageId)
+                            .snapshots()
+                            .map((convert) => GarageModel.fromJson(convert)),
+                        builder:
+                            (context, AsyncSnapshot<GarageModel> garageSnap) {
+                          final GarageModel garageModel = garageSnap.data ??
+                              GarageModel(
+                                  ownerId: offersModel.ownerId,
+                                  submodel: 'submodel',
+                                  title: 'Fetching',
+                                  imageUrl: offersModel.imageOne,
+                                  bodyStyle: '',
+                                  make: 'make',
+                                  year: 'year',
+                                  model: 'model',
+                                  vin: 'vin',
+                                  garageId: offersModel.garageId);
+                          return InkWell(
+                            onTap: () {
+                              if (getUnread(
+                                  widget.chat.lastMessageAt,
+                                  widget.chat.lastOpen[widget.user.userId],
+                                  context)) {
+                                // FlutterAppBadger.removeBadge();
+                                // FlutterAppIconBadge.removeBadge();
+                              }
+                              Get.to(() => MessagePage(
+                                    chatModel: widget.chat,
+                                    garageModel: garageModel,
+                                    secondUser: secondUserData,
+                                    offersModel: offersModel,
+                                  ));
+                            },
+                            child: Column(
                               children: [
-                                InkWell(
-                                  onTap: () {
-                                    Get.to(() => SecondUserProfile(
-                                        userId: secondUserData.userId));
-                                  },
-                                  child: Container(
-                                    height: 55,
-                                    width: 55,
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          child: ExtendedImage.network(
-                                            offersModel.imageOne,
-                                            fit: BoxFit.cover,
-                                            height: 50,
-                                            width: 50,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          bottom: 0,
-                                          right: 0,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(200),
-                                            child: ExtendedImage.network(
-                                              secondUserData.profileUrl,
-                                              fit: BoxFit.cover,
-                                              height: 25,
-                                              width: 25,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
                                     children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            secondUserData.name,
-                                            style: TextStyle(
-                                              color: userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                              fontFamily: 'Avenir',
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                      InkWell(
+                                        onTap: () {
+                                          Get.to(() => SecondUserProfile(
+                                              userId: secondUserData.userId));
+                                        },
+                                        child: Container(
+                                          height: 55,
+                                          width: 55,
+                                          child: Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                child: ExtendedImage.network(
+                                                  garageModel.imageUrl,
+                                                  fit: BoxFit.cover,
+                                                  height: 50,
+                                                  width: 50,
+                                                ),
+                                              ),
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          200),
+                                                  child: ExtendedImage.network(
+                                                    secondUserData.profileUrl,
+                                                    fit: BoxFit.cover,
+                                                    height: 25,
+                                                    width: 25,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                       ),
                                       const SizedBox(
-                                        height: 5,
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  secondUserData.name,
+                                                  style: TextStyle(
+                                                    color: userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    garageModel.title,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                    textAlign: TextAlign.start,
+                                                    style: TextStyle(
+                                                      color:
+                                                          userController.isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    widget.chat.text.contains(
+                                                            'Start the chat with')
+                                                        ? '${widget.chat.text} ' +
+                                                            secondUserData.name
+                                                        : getText(
+                                                            widget.chat.text,
+                                                            widget.chat
+                                                                    .lastMessageMe ==
+                                                                widget.user
+                                                                    .userId),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1,
+                                                    style: TextStyle(
+                                                      color:
+                                                          userController.isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                      fontSize: 14,
+                                                      fontWeight: getUnread(
+                                                              widget.chat
+                                                                  .lastMessageAt,
+                                                              widget.chat
+                                                                      .lastOpen[
+                                                                  widget.user
+                                                                      .userId],
+                                                              context)
+                                                          ? FontWeight.bold
+                                                          : FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
                                         children: [
-                                          Expanded(
-                                            child: Text(
-                                              title.trim(),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontFamily: 'Avenir',
-                                                fontSize: 16,
-                                                fontWeight: getUnread(
-                                                        widget
-                                                            .chat.lastMessageAt,
-                                                        widget.chat.lastOpen[
-                                                            widget.user.userId],
-                                                        context)
-                                                    ? FontWeight.bold
-                                                    : FontWeight.w900,
-                                              ),
+                                          Container(
+                                            height: 70,
+                                            // margin: const Ed,
+                                            width: 90,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                if (getUnread(
+                                                    widget.chat.lastMessageAt,
+                                                    widget.chat.lastOpen[
+                                                        widget.user.userId],
+                                                    context))
+                                                  Container(
+                                                    height: 10,
+                                                    width: 10,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              200),
+                                                    ),
+                                                  ),
+                                                Text(
+                                                  formatDateTime(
+                                                    DateTime.parse(widget
+                                                            .chat.lastMessageAt)
+                                                        .toLocal(),
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                SvgPicture.asset(
+                                                  getServices()
+                                                      .firstWhere((dd) =>
+                                                          dd.name ==
+                                                          offersModel.issue)
+                                                      .image,
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  height: 30,
+                                                  width: 30,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
-                                      ),
-                                      const SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              widget.chat.text.contains(
-                                                      'Start the chat with')
-                                                  ? '${widget.chat.text} ' +
-                                                      secondUserData.name
-                                                  : getText(
-                                                      widget.chat.text,
-                                                      widget.chat
-                                                              .lastMessageMe ==
-                                                          widget.user.userId),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                              style: TextStyle(
-                                                color: userController.isDark
-                                                    ? Colors.white
-                                                    : primaryColor,
-                                                fontFamily: 'Avenir',
-                                                fontSize: 14,
-                                                fontWeight: getUnread(
-                                                        widget
-                                                            .chat.lastMessageAt,
-                                                        widget.chat.lastOpen[
-                                                            widget.user.userId],
-                                                        context)
-                                                    ? FontWeight.bold
-                                                    : FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      )
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      height: 85,
-                                      // margin: const Ed,
-                                      width: 90,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          if (getUnread(
-                                              widget.chat.lastMessageAt,
-                                              widget.chat
-                                                  .lastOpen[widget.user.userId],
-                                              context))
-                                            Container(
-                                              height: 10,
-                                              width: 10,
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(200),
-                                              ),
-                                            )
-                                          else
-                                            SizedBox(),
-                                          SvgPicture.asset(
-                                            getServices()
-                                                .firstWhere((dd) =>
-                                                    dd.name ==
-                                                    offersModel.issue)
-                                                .image,
-                                            color: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
-                                            height: 35,
-                                            width: 35,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
+                                const SizedBox(
+                                  height: 0,
+                                ),
+                                Container(
+                                    height: 0.6,
+                                    margin: const EdgeInsets.all(0),
+                                    width: Get.width,
+                                    color: userController.isDark
+                                        ? Colors.white.withOpacity(0.1)
+                                        : primaryColor.withOpacity(0.1)),
                               ],
                             ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Container(
-                              height: 0.6,
-                              margin: const EdgeInsets.all(0),
-                              width: Get.width,
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.1)
-                                  : primaryColor.withOpacity(0.1)),
-                        ],
-                      ),
-                    );
+                          );
+                        });
                   } else {
-                    return InkWell(
-                      onTap: () {
-                        if (getUnread(
-                            widget.chat.lastMessageAt,
-                            widget.chat.lastOpen[widget.user.userId],
-                            context)) {
-                          FlutterAppBadger.removeBadge();
-                        }
-                      },
-                      // child: Column(
-                      //   children: [
-                      //     Row(
-                      //       children: [
-                      //         InkWell(
-                      //           onTap: () {
-                      //             Get.to(() => SecondUserProfile(
-                      //                 userId: secondUserData.userId));
-                      //           },
-                      //           child: Stack(
-                      //             children: [
-                      //               ClipRRect(
-                      //                 borderRadius: BorderRadius.circular(200),
-                      //                 child: ExtendedImage.network(
-                      //                   secondUserData.profileUrl,
-                      //                   fit: BoxFit.cover,
-                      //                   height: 40,
-                      //                   width: 40,
-                      //                 ),
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ),
-                      //         const SizedBox(
-                      //           width: 15,
-                      //         ),
-                      //         Expanded(
-                      //           child: Column(
-                      //             crossAxisAlignment: CrossAxisAlignment.start,
-                      //             children: [
-                      //               Row(
-                      //                 mainAxisAlignment:
-                      //                     MainAxisAlignment.spaceBetween,
-                      //                 children: [
-                      //                   Expanded(
-                      //                     child: Text(
-                      //                       secondUserData.name,
-                      //                       style: TextStyle(
-                      //                         // color: Colors.black,
-                      //                         fontFamily: 'Avenir',
-                      //                         fontSize: 18,
-                      //                         fontWeight: FontWeight.w700,
-                      //                       ),
-                      //                     ),
-                      //                   ),
-                      //                 ],
-                      //               ),
-
-                      //               const SizedBox(
-                      //                 height: 5,
-                      //               ),
-                      //               Row(
-                      //                 children: [
-                      //                   Expanded(
-                      //                     child: Text(
-                      //                       widget.chat.text.contains(
-                      //                               'Start the chat with')
-                      //                           ? '${widget.chat.text} ' +
-                      //                               secondUserData.name
-                      //                           : getText(
-                      //                               widget.chat.text,
-                      //                               widget.chat.lastMessageMe ==
-                      //                                   widget.user.userId),
-                      //                       overflow: TextOverflow.ellipsis,
-                      //                       maxLines: 2,
-                      //                       style: TextStyle(
-                      //                         // color: Colors.black,
-                      //                         fontFamily: 'Avenir',
-                      //                         fontSize: 14,
-                      //                         fontWeight: getUnread(
-                      //                                 widget.chat.lastMessageAt,
-                      //                                 widget.chat.lastOpen[
-                      //                                     widget.user.userId],
-                      //                                 context)
-                      //                             ? FontWeight.bold
-                      //                             : FontWeight.w400,
-                      //                       ),
-                      //                     ),
-                      //                   ),
-                      //                 ],
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ),
-
-                      //       ],
-                      //     ),
-                      //     Container(
-                      //         height: 0.5,
-                      //         margin: const EdgeInsets.all(10),
-                      //         width: Get.width,
-                      //         color: Colors.grey.shade300),
-                      //   ],
-                      // ),
-                    );
+                    return SizedBox();
                   }
                 });
           } else {

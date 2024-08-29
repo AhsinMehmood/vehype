@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,14 +16,15 @@ import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
-import 'package:image_select/image_selector.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+// import 'package:image_select/image_selector.dart';
+// import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:http/http.dart' as http;
+import 'package:vehype/const.dart';
 
 Future<LatLng> getPlaceLatLng(String placeId) async {
   // Use Google Maps Geocoding API to get lat/lng from place ID
@@ -187,9 +189,7 @@ class GarageController with ChangeNotifier {
 
   bool imageOneLoading = false;
   bool imageTwoLoading = false;
-  ImageSelect imageSelector = ImageSelect(
-    compressImage: false,
-  );
+
   List<RequestImageModel> requestImages = [];
   removeRequestImage(int index) {
     requestImages.removeAt(index);
@@ -302,16 +302,12 @@ class GarageController with ChangeNotifier {
   }
 
   uploadRequestImage(RequestImageModel requestImageModel, String userId) async {
-    File compressedFile = await FlutterNativeImage.compressImage(
-      requestImageModel.imageFile!.absolute.path,
-      quality: 100,
-      percentage: 50,
-    );
+    // File compressed
     final storageRef = FirebaseStorage.instance.ref();
 
     final ref = storageRef
         .child("users/$userId/${DateTime.now().microsecondsSinceEpoch}.jpg");
-    UploadTask uploadTask = ref.putFile(compressedFile);
+    UploadTask uploadTask = ref.putFile(requestImageModel.imageFile!);
 
     uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
       double progress = snapshot.bytesTransferred / snapshot.totalBytes;
@@ -333,37 +329,40 @@ class GarageController with ChangeNotifier {
   }
 
   selectImage(BuildContext context, UserModel userModel, int index) async {
-    File? selectedFile = await imageSelector.pickImage(
-        context: context, source: ImageFrom.gallery);
-    if (selectedFile != null) {
+    XFile? xFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (xFile != null) {
+      File selectedFile = File(xFile.path);
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
-      File file = await FlutterNativeImage.compressImage(
-        selectedFile.absolute.path,
-        quality: 100,
-        percentage: 50,
-        // targetHeight: 720,
-        // targetWidth: 720,
-      );
+      // File file = await FlutterNativeImage.compressImage(
+      //   selectedFile.absolute.path,
+      //   quality: 100,
+      //   percentage: 50,
+      //   // targetHeight: 720,
+      //   // targetWidth: 720,
+      // );
       Get.close(1);
       if (index == 0) {
-        selectedImageOne = file;
+        selectedImageOne = selectedFile;
         imageOneUrl = '';
         imageOneLoading = true;
         notifyListeners();
 
-        String secondImageUrl = await uploadImage(file, userModel.userId);
+        String secondImageUrl =
+            await uploadImage(selectedFile, userModel.userId);
         imageOneUrl = secondImageUrl;
         imageOneLoading = false;
 
         notifyListeners();
       } else {
-        selectedImageTwo = file;
+        selectedImageTwo = selectedFile;
         imageTwoUrl = '';
         imageTwoLoading = true;
 
         notifyListeners();
 
-        String secondImageUrl = await uploadImage(file, userModel.userId);
+        String secondImageUrl =
+            await uploadImage(selectedFile, userModel.userId);
         imageTwoUrl = secondImageUrl;
         imageTwoLoading = false;
 
@@ -608,11 +607,15 @@ class GarageController with ChangeNotifier {
       String? offerId, String garageId) async {
     try {
       String requestId = '';
+      String address =
+          await getAddressFromLatLng(latLng.latitude, latLng.longitude);
       print(userId);
       List images = [];
       for (var element in requestImages) {
         images.add(element.imageUrl);
       }
+      final GeoFirePoint geoFirePoint =
+          GeoFirePoint(GeoPoint(latLng.latitude, latLng.longitude));
 
       if (offerId != null) {
         requestId = offerId;
@@ -622,6 +625,8 @@ class GarageController with ChangeNotifier {
             .update({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
+          'address': address,
+          'geo': geoFirePoint.data,
           'issue': selectedIssue,
           'garageId': garageId,
           'status': 'active',
@@ -643,6 +648,8 @@ class GarageController with ChangeNotifier {
           'garageId': garageId,
           'long': latLng.longitude,
           'description': desc,
+          'geo': geoFirePoint.data,
+          'address': address,
           'imageOne': imageOneUrl,
           'status': 'active',
           'images': images,

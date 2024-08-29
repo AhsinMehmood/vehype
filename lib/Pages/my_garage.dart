@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ import 'package:vehype/const.dart';
 import '../Models/user_model.dart';
 import 'choose_account_type.dart';
 import 'full_image_view_page.dart';
-import 'select_service_crv.dart';
+// import 'select_service_crv.dart';
 
 class MyGarage extends StatelessWidget {
   const MyGarage({super.key});
@@ -172,18 +173,15 @@ class MyGarage extends StatelessWidget {
                                             ));
                                       },
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(0),
-                                        child: ExtendedImage.network(
-                                          garageModel.imageUrl,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          topRight: Radius.circular(12),
+                                        ),
+                                        child: CachedNetworkImage(
+                                          imageUrl: garageModel.imageUrl,
 
                                           fit: BoxFit.cover,
-                                          cache: true,
-                                          // border: Border.all(color: Colors.red, width: 1.0),
-                                          shape: BoxShape.rectangle,
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(12),
-                                          ),
+
                                           //cancelToken: cancellationToken,
                                         ),
                                       ),
@@ -205,7 +203,7 @@ class MyGarage extends StatelessWidget {
                                                 garageModel.title,
                                                 style: TextStyle(
                                                   fontFamily: 'Avenir',
-                                                  fontWeight: FontWeight.w800,
+                                                  fontWeight: FontWeight.w700,
                                                   color: userController.isDark
                                                       ? Colors.white
                                                       : primaryColor,

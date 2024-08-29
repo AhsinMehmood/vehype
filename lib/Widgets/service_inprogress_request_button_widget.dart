@@ -4,8 +4,11 @@ import 'package:get/get.dart';
 import 'package:manage_calendar_events/manage_calendar_events.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
+import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/service_request_details.dart';
+import 'package:vehype/Widgets/service_cancel_request_confirmation_sheet.dart';
 import 'package:vehype/Widgets/service_ignore_confirm.dart';
 
 import '../Models/chat_model.dart';
@@ -21,11 +24,13 @@ import 'select_date_and_price.dart';
 class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
   final String? chatId;
+  final GarageModel garageModel;
   final OffersReceivedModel offersReceivedModel;
 
   const ServiceInprogressRequestPageButtonWidget(
       {super.key,
       required this.offersModel,
+      required this.garageModel,
       this.chatId,
       required this.offersReceivedModel});
 
@@ -63,125 +68,13 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
                     return BottomSheet(
                         onClosing: () {},
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         builder: (s) {
-                          return Container(
-                            width: Get.width,
-                            decoration: BoxDecoration(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.all(14),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    'Are you sure? The vehicle owner will be notified, and they can still rate you.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      Get.dialog(LoadingDialog(),
-                                          barrierDismissible: false);
-
-                                      await FirebaseFirestore.instance
-                                          .collection('offersReceived')
-                                          .doc(offersReceivedModel.id)
-                                          .update({
-                                        'status': 'Cancelled',
-                                        'cancelBy': 'provider',
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('offers')
-                                          .doc(offersReceivedModel.offerId)
-                                          .update({
-                                        'status': 'inactive',
-                                      });
-                                      UserController().addToNotifications(
-                                          userController.userModel!,
-                                          offersReceivedModel.ownerId,
-                                          'offer',
-                                          offersReceivedModel.id,
-                                          'Offer Update',
-                                          '${userController.userModel!.name} Cancelled the Offer.');
-                                      sendNotification(
-                                          offersModel.ownerId,
-                                          userController.userModel!.name,
-                                          'Cancelled The Offer',
-                                          'contents',
-                                          offersReceivedModel.id,
-                                          'offer',
-                                          '');
-                                      Get.close(2);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        elevation: 1.0,
-                                        maximumSize: Size(Get.width * 0.6, 50),
-                                        minimumSize: Size(Get.width * 0.6, 50),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        )),
-                                    child: Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 30,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      Get.close(1);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: userController.isDark
-                                            ? Colors.white
-                                            : primaryColor,
-                                        elevation: 1.0,
-                                        maximumSize: Size(Get.width * 0.6, 50),
-                                        minimumSize: Size(Get.width * 0.6, 50),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        )),
-                                    child: Text(
-                                      'Cancel',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                ],
-                              ),
-                            ),
-                          );
+                          return ServiceCancelRequestConfirmationSheet(
+                              userController: userController,
+                              offersModel: offersModel,
+                              offersReceivedModel: offersReceivedModel);
                         });
                   });
             },
@@ -242,6 +135,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
                   Get.to(() => MessagePage(
                         chatModel: newchat!,
                         offersModel: offersModel,
+                        garageModel: garageModel,
                         secondUser: ownerDetails,
                       ));
                 } else {
@@ -252,6 +146,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
                   Get.to(() => MessagePage(
                         chatModel: chatModel,
                         secondUser: ownerDetails,
+                        garageModel: garageModel,
                         offersModel: offersModel,
                       ));
                 }
@@ -339,10 +234,11 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
   final String? chatId;
   final OffersReceivedModel offersReceivedModel;
-
+  final GarageModel garageModel;
   const ServiceInprogressRequestButtonWidget(
       {super.key,
       required this.offersModel,
+      required this.garageModel,
       this.chatId,
       required this.offersReceivedModel});
 
@@ -368,6 +264,14 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
+              OffersController().updateNotificationForOffers(
+                  offerId: offersModel.offerId,
+                  userId: userController.userModel!.userId,
+                  offersReceived: offersReceivedModel.id,
+                  checkByList: offersModel.checkByList,
+                  isAdd: false,
+                  notificationTitle: '',
+                  notificationSubtitle: '');
               showModalBottomSheet(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -379,125 +283,13 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                     return BottomSheet(
                         onClosing: () {},
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         builder: (s) {
-                          return Container(
-                            width: Get.width,
-                            decoration: BoxDecoration(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.all(14),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Text(
-                                    'Are you sure? The vehicle owner will be notified, and they can still rate you.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      Get.dialog(LoadingDialog(),
-                                          barrierDismissible: false);
-
-                                      await FirebaseFirestore.instance
-                                          .collection('offersReceived')
-                                          .doc(offersReceivedModel.id)
-                                          .update({
-                                        'status': 'Cancelled',
-                                        'cancelBy': 'provider',
-                                      });
-                                      await FirebaseFirestore.instance
-                                          .collection('offers')
-                                          .doc(offersReceivedModel.offerId)
-                                          .update({
-                                        'status': 'inactive',
-                                      });
-                                      UserController().addToNotifications(
-                                          userController.userModel!,
-                                          offersReceivedModel.ownerId,
-                                          'offer',
-                                          offersReceivedModel.id,
-                                          'Offer Update',
-                                          '${userController.userModel!.name} Cancelled the Offer.');
-                                      sendNotification(
-                                          offersModel.ownerId,
-                                          userController.userModel!.name,
-                                          'Cancelled The Offer',
-                                          'contents',
-                                          offersReceivedModel.id,
-                                          'offer',
-                                          '');
-                                      Get.close(2);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        elevation: 1.0,
-                                        maximumSize: Size(Get.width * 0.6, 50),
-                                        minimumSize: Size(Get.width * 0.6, 50),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        )),
-                                    child: Text(
-                                      'Confirm',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 30,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      Get.close(1);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: userController.isDark
-                                            ? Colors.white
-                                            : primaryColor,
-                                        elevation: 1.0,
-                                        maximumSize: Size(Get.width * 0.6, 50),
-                                        minimumSize: Size(Get.width * 0.6, 50),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        )),
-                                    child: Text(
-                                      'Cancel',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                ],
-                              ),
-                            ),
-                          );
+                          return ServiceCancelRequestConfirmationSheet(
+                              userController: userController,
+                              offersModel: offersModel,
+                              offersReceivedModel: offersReceivedModel);
                         });
                   });
             },
@@ -554,13 +346,32 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       userController.userModel!.userId,
                       ownerDetails.userId,
                       offersModel.offerId);
+                  OffersController().updateNotificationForOffers(
+                      offerId: offersModel.offerId,
+                      userId: userController.userModel!.userId,
+                      offersReceived: offersReceivedModel.id,
+                      checkByList: offersModel.checkByList,
+                      isAdd: false,
+                      notificationTitle: '',
+                      notificationSubtitle: '');
+
                   Get.close(1);
                   Get.to(() => MessagePage(
                         chatModel: newchat!,
+                        garageModel: garageModel,
                         offersModel: offersModel,
                         secondUser: ownerDetails,
                       ));
                 } else {
+                  OffersController().updateNotificationForOffers(
+                      offerId: offersModel.offerId,
+                      userId: userController.userModel!.userId,
+                      isAdd: false,
+                      offersReceived: offersReceivedModel.id,
+                      checkByList: offersModel.checkByList,
+                      notificationTitle: '',
+                      notificationSubtitle: '');
+
                   await ChatController().updateChatRequestId(
                       chatModel.id, offersReceivedModel.id);
                   Get.close(1);
@@ -568,6 +379,7 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                   Get.to(() => MessagePage(
                         chatModel: chatModel,
                         secondUser: ownerDetails,
+                        garageModel: garageModel,
                         offersModel: offersModel,
                       ));
                 }
@@ -608,6 +420,14 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
             ),
           InkWell(
             onTap: () async {
+              OffersController().updateNotificationForOffers(
+                  offerId: offersModel.offerId,
+                  userId: userController.userModel!.userId,
+                  isAdd: false,
+                  offersReceived: offersReceivedModel.id,
+                  checkByList: offersModel.checkByList,
+                  notificationTitle: '',
+                  notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(
                   offersModel: offersModel,
                   offersReceivedModel: offersReceivedModel));

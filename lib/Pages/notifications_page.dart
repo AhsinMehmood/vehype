@@ -14,11 +14,6 @@ import '../Models/notifications_model.dart';
 import '../Models/user_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'inactive_offers_seeker.dart';
-import 'offers_received_details.dart';
-import 'received_offers_seeker.dart';
-import 'requests_received_provider_details.dart';
-
 class NotificationsPage extends StatefulWidget {
   final List<NotificationsModel> notifications;
   const NotificationsPage({super.key, required this.notifications});
@@ -324,14 +319,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                       OffersModel.fromJson(
                                                           requestSnap);
                                                   Get.close(1);
-                                                  UserController()
-                                                      .changeNotiOffers(
-                                                          0,
-                                                          false,
-                                                          userModel.userId,
-                                                          offersModel.offerId,
-                                                          userModel
-                                                              .accountType);
+
                                                   if (offersModel.status ==
                                                           'active' &&
                                                       !offersModel.ignoredBy
@@ -341,11 +329,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                           .offersReceived
                                                           .contains(userModel
                                                               .userId)) {
-                                                    Get.to(() =>
-                                                        OfferReceivedDetails(
-                                                          offersModel:
-                                                              offersModel,
-                                                        ));
+                                                    // Get.to(() =>
+                                                    //     OfferReceivedDetails(
+                                                    //       offersModel:
+                                                    //           offersModel,
+                                                    //     ));
                                                   } else {
                                                     toastification.show(
                                                       closeButtonShowType:
@@ -447,22 +435,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                                   'Completed'
                                                               ? 3
                                                               : 4;
-                                                  UserController()
-                                                      .changeNotiOffers(
-                                                          id,
-                                                          false,
-                                                          userModel.userId,
-                                                          offersModel.offerId,
-                                                          userModel
-                                                              .accountType);
+
                                                   Get.close(1);
-                                                  Get.to(() =>
-                                                      RequestsReceivedProviderDetails(
-                                                        offersModel:
-                                                            offersModel,
-                                                        offersReceivedModel:
-                                                            offersReceivedModel,
-                                                      ));
+                                                  // Get.to(() =>
+                                                  //     RequestsReceivedProviderDetails(
+                                                  //       offersModel:
+                                                  //           offersModel,
+                                                  //       offersReceivedModel:
+                                                  //           offersReceivedModel,
+                                                  //     ));
                                                 }
                                               },
                                               // selected: notificationsModel.isRead,

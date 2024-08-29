@@ -1,0 +1,81 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/orders_history_provider.dart';
+import 'package:vehype/Widgets/owner_request_widget.dart';
+import 'package:vehype/const.dart';
+
+import '../Controllers/offers_provider.dart';
+import '../Models/garage_model.dart';
+
+class OwnerInactiveOffersPageWidget extends StatelessWidget {
+  const OwnerInactiveOffersPageWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+    final UserController userController = Provider.of<UserController>(context);
+
+    final List<OffersModel> inActiveOffers = offersProvider.ownerOffers
+        .where((offer) => offer.status == 'inactive')
+        .toList();
+    inActiveOffers.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (inActiveOffers.isEmpty) {
+      return Center(
+        child: Text(
+          'No History Yet!',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: userController.isDark ? Colors.white : primaryColor,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+        itemCount: inActiveOffers.length,
+        padding: const EdgeInsets.only(top: 15, bottom: 80),
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return StreamBuilder<OffersReceivedModel>(
+              stream: FirebaseFirestore.instance
+                  .collection('offersReceived')
+                  .doc(inActiveOffers[index].offerReceivedIdJob)
+                  .snapshots()
+                  .map((convert) => OffersReceivedModel.fromJson(convert)),
+              builder: (context, AsyncSnapshot<OffersReceivedModel> snapshot) {
+                OffersReceivedModel? offersReceivedModel = snapshot.data;
+
+                return StreamBuilder<GarageModel>(
+                    stream: FirebaseFirestore.instance
+                        .collection('garages')
+                        .doc(inActiveOffers[index].garageId)
+                        .snapshots()
+                        .map((cc) => GarageModel.fromJson(cc)),
+                    builder: (context, snapshot) {
+                      GarageModel? garageModel = snapshot.data;
+                      return OwnerRequestWidget(
+                        offersModel: inActiveOffers[index],
+                        garageModel: garageModel,
+                        offersReceivedModel: offersReceivedModel,
+                      );
+                    });
+              });
+        });
+    //  SafeArea(
+    //           child: StreamBuilder<List<OffersModel>>(
+    //               stream: GarageController()
+    //                   .getRepairOffersPostedInactive(userModel.userId),
+    //               builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
+
+    //                 List<OffersModel> offersPosted = snap.data ?? [];
+    //                 List<OffersModel> filterOffers = [];
+
+    //               }),
+    //         ),
+  }
+}

@@ -57,7 +57,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: userController.isDark ? Colors.white : primaryColor,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -78,7 +78,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                       // padding: const EdgeInsets.all(25),
                       width: Get.width,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(6),
                         color:
                             userController.isDark ? primaryColor : Colors.white,
                       ),
@@ -92,19 +92,20 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 //   loginSheet(1),
                                 //   isScrollControlled: true,
                                 // );
-                                // LoginController.signInWithGoogle(context);
-                                // UserController userController =
-                                //     Provider.of<UserController>(context,
-                                //         listen: false);
-                                // userController.changeTabIndex(0);
-                                GarageController()
-                                    .callGetAndSaveDataToFirestore();
+                                LoginController.signInWithGoogle(context);
+                                UserController userController =
+                                    Provider.of<UserController>(context,
+                                        listen: false);
+                                userController.changeTabIndex(0);
+                                // GarageController()
+                                //     .callGetAndSaveDataToFirestore();
                                 // Get.to(() => const CompleteProfile());
                               },
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(200),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
+                                elevation: 0.0,
                                 child: Container(
                                   height: 50,
                                   padding: const EdgeInsets.only(
@@ -115,13 +116,16 @@ class ChooseAccountTypePage extends StatelessWidget {
                                   ),
                                   width: Get.width * 0.8,
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(200),
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: userController.isDark
-                                            ? Colors.yellowAccent
-                                            : Colors.green,
-                                      )),
+                                    borderRadius: BorderRadius.circular(6),
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    // border: Border.all(
+                                    //   color: userController.isDark
+                                    //       ? Colors.yellowAccent
+                                    //       : Colors.green,
+                                    // ),
+                                  ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -135,11 +139,11 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       Text(
                                         'Sign in with Google',
                                         style: TextStyle(
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 17,
-                                          color: Colors.black.withOpacity(0.8),
-                                        ),
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
+                                            color: userController.isDark
+                                                ? primaryColor
+                                                : Colors.white),
                                       )
                                     ],
                                   ),
@@ -151,7 +155,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                             ),
                             if (Platform.isIOS)
                               InkWell(
-                                borderRadius: BorderRadius.circular(200),
+                                borderRadius: BorderRadius.circular(6),
                                 onTap: () {
                                   LoginController().loginWithApple(context);
                                   UserController userController =
@@ -161,8 +165,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 },
                                 child: Card(
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(200),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
+                                  elevation: 0.0,
                                   child: Container(
                                     height: 50,
                                     padding: const EdgeInsets.only(
@@ -173,14 +178,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     ),
                                     width: Get.width * 0.8,
                                     decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(200),
-                                        color: Colors.black,
-                                        border: Border.all(
-                                          color: userController.isDark
-                                              ? Colors.yellowAccent
-                                              : Colors.green,
-                                        )),
+                                      borderRadius: BorderRadius.circular(6),
+                                      color: Colors.black,
+                                    ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -195,9 +195,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         Text(
                                           'Sign in with Apple',
                                           style: TextStyle(
-                                            fontFamily: 'Avenir',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
                                             color: Colors.white,
                                           ),
                                         )
@@ -248,7 +247,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 // userController.getUserStream(user.uid);
                               },
                               child: Text(
-                                'Continue As a Guest',
+                                'Continue as a Guest',
                                 style: TextStyle(
                                   decoration: TextDecoration.underline,
                                   // textBaseline: TextBaseline.ideographic,
@@ -280,9 +279,9 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       text:
                                           'By tapping ‘Sign in’, you agree to our ',
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
+                                        // fontFamily: 'Avenir',ss
                                         fontWeight: FontWeight.w400,
-                                        fontSize: Get.width * 0.04,
+                                        fontSize: 16,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -295,15 +294,12 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             : primaryColor.withOpacity(0.8),
                                         () {
                                       // Handle tap on 'world'
-                                      // launchUrl(Uri.parse(
-                                      //     'https://www.fairytrail.app/terms.html'));
-                                      // setState(() {});
+
                                       // launchUrl('');
                                     }),
                                     TextSpan(
                                       text: '.',
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: 14,
                                         color: userController.isDark
@@ -315,9 +311,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       text:
                                           '\nLearn how we process your data in our',
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: Get.width * 0.04,
+                                        fontSize: 16,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -329,10 +324,6 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             ? Colors.white.withOpacity(0.8)
                                             : primaryColor.withOpacity(0.8),
                                         () {
-                                      // launchUrl(Uri.parse(
-                                      //     'https://www.fairytrail.app/terms.html#privacy'));
-                                      // Handle tap on 'clickable'
-
                                       // launchUrl(
                                       //    );
                                     }),
@@ -341,7 +332,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       style: TextStyle(
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: Get.width * 0.04,
+                                        fontSize: 16,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -353,9 +344,6 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             ? Colors.white.withOpacity(0.8)
                                             : primaryColor.withOpacity(0.8),
                                         () {
-                                      // launchUrl(Uri.parse(
-                                      //     'https://www.fairytrail.app/terms.html#cookies'));
-                                      // Handle tap on 'clickable'
                                       // launchUrl(
                                       //     );
                                     }),
@@ -364,7 +352,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       style: TextStyle(
                                         fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: Get.width * 0.04,
+                                        fontSize: 16,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -566,6 +554,7 @@ class ChooseAccountTypePage extends StatelessWidget {
       text: '$text ',
       style: TextStyle(
         color: color,
+        fontSize: 16,
         decoration: TextDecoration.underline,
       ),
       recognizer: TapGestureRecognizer()..onTap = onTap,

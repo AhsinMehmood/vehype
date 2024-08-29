@@ -12,15 +12,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+// import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:image_select/image_selector.dart';
-import 'package:mixpanel_flutter/mixpanel_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+// import 'package:image_select/image_selector.dart';
+// import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
@@ -121,13 +122,11 @@ class UserController with ChangeNotifier {
 
   selectAndUploadImage(
       BuildContext context, UserModel userModel, int index) async {
-    ImageSelect imageSelector = ImageSelect(
-      compressImage: false,
-    );
-    File? selectedFile = await imageSelector.pickImage(
-        context: context, source: ImageFrom.gallery);
+    XFile? selectedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (selectedFile != null) {
-      Get.to(() => CropImagePage(imageData: selectedFile, imageField: ''));
+      File file = File(selectedFile.path);
+      Get.to(() => CropImagePage(imageData: file, imageField: ''));
     }
 
     // notifyListeners();
@@ -136,27 +135,22 @@ class UserController with ChangeNotifier {
   logout(UserModel userModel) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userModel.userId)
-        .update({
-      'pushToken': '',
-    });
-    if (streamSubscription != null) {
-      streamSubscription!.cancel();
-    }
+    streamSubscription?.cancel();
+
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.clear();
-    GoogleSignIn().disconnect();
 
-    Mixpanel mixpanel = await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
-        trackAutomaticEvents: true);
-    mixpanel.reset();
+    // Mixpanel mixpanel = await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
+    //     trackAutomaticEvents: true);
+    // mixpanel.reset();
     await FirebaseAuth.instance.signOut();
-    OneSignal.logout();
+
+    await OneSignal.logout();
+    await GoogleSignIn().disconnect();
+
     Get.close(1);
 
-    Get.offAll(() => const ChooseAccountTypePage());
+    Get.offAll(() => const SplashPage());
   }
 
   updateTexts(UserModel userModel, String fieldName, String value) async {
@@ -433,8 +427,8 @@ class UserController with ChangeNotifier {
         .update({
       'blockedUsers': FieldValue.arrayUnion([secondUserId])
     });
-    DocumentReference<Map<String, dynamic>> reference =
-        await FirebaseFirestore.instance.collection('reports').add({
+
+    await FirebaseFirestore.instance.collection('reports').add({
       'createdAt': DateTime.now().toUtc().toIso8601String(),
       'status': 'Active',
       'reportBy': currentUserId,
@@ -443,54 +437,6 @@ class UserController with ChangeNotifier {
     });
 
     FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
-  }
-
-  List fieldNames = [
-    'isActiveNew',
-    'isActivePending',
-    'isActiveInProgress',
-    'isActiveCompleted',
-    'isActiveCancelled',
-    'isActive',
-    'isHistoryActive',
-  ];
-
-  addToNotifications(
-      UserModel notificationSender,
-      String notificationReceiverId,
-      String type,
-      String objectId,
-      String title,
-      String subtitle) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(notificationReceiverId)
-        .collection('notifications')
-        .add({
-      'title': title,
-      'subTitle': subtitle,
-      'createdAt': DateTime.now().toLocal().toIso8601String(),
-      'senderId': notificationSender.userId,
-      'senderName': notificationSender.name,
-      'type': type,
-      'isRead': false,
-      'objectId': objectId,
-    });
-  }
-
-  changeNotiOffers(int fieldNameIndex, bool value, String userId,
-      String requestId, String userAccountType) {
-    if (value == true) {
-      FirebaseFirestore.instance.collection('users').doc(userId).update({
-        fieldNames[fieldNameIndex]: value,
-        'offerIdsToCheck': FieldValue.arrayUnion([requestId]),
-      });
-    } else {
-      FirebaseFirestore.instance.collection('users').doc(userId).update({
-        fieldNames[fieldNameIndex]: value,
-        'offerIdsToCheck': FieldValue.arrayRemove([requestId]),
-      });
-    }
   }
 
   late Uint8List favMarkar;

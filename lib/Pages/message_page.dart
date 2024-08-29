@@ -1,14 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'dart:async';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 
 // import 'package:flutter/widgets.dart';
@@ -17,7 +14,6 @@ import 'package:get/get.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 import 'package:intl/intl.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
 
@@ -28,33 +24,36 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/garage_model.dart';
+
 import 'package:vehype/Models/message_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
+import 'package:vehype/Pages/owner_active_request_details.dart';
+import 'package:vehype/Pages/owner_request_details_inprogress_inactive_page.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 
 import 'package:vehype/Pages/second_user_profile.dart';
-import 'package:vehype/Widgets/offer_request_details.dart';
+import 'package:vehype/Widgets/delete_chat_confirmation_sheet.dart';
+// import 'package:vehype/Widgets/offer_request_details.dart';
 
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/video_player.dart';
 
 import 'package:vehype/const.dart';
 
-import '../Widgets/loading_dialog.dart';
-import '../Widgets/service_your_offer_widget.dart';
-import 'repair_page.dart';
-import 'tabs_page.dart';
+import '../Widgets/report_confirmation_sheet.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatModel chatModel;
   final UserModel secondUser;
+  final GarageModel garageModel;
   final OffersModel offersModel;
   const MessagePage(
       {super.key,
       required this.chatModel,
       required this.secondUser,
+      required this.garageModel,
       required this.offersModel});
 
   @override
@@ -66,79 +65,20 @@ class _MessagePageState extends State<MessagePage> {
   ScrollController messageScrollController = ScrollController();
 
   // UserModel? secondUser;
-  ChatModel? chatModel;
-  int messagesLengthTotal = 0;
-  bool loading = true;
-  late StreamSubscription<ChatModel> subscription;
+
   @override
   void initState() {
     super.initState();
-    // getSecondUserToken();
+
     getChatModel();
   }
 
-  getNotificationSettings() {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    // String offerId =
-    //     ;
-    bool isNotAllowed = OneSignal.Notifications.permission;
-
-    if (isNotAllowed == false) {
-      Future.delayed(const Duration(seconds: 3)).then((s) {
-        Get.bottomSheet(
-          NotificationSheet(userController: userController),
-          backgroundColor: userController.isDark ? primaryColor : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-          ),
-        );
-      });
-    }
-  }
-
   getChatModel() async {
-    subscription = ChatController()
-        .getSingleChatStream(widget.chatModel.id)
-        .listen((event) {
-      chatModel = event;
-      setState(() {});
-    });
-
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
-    // String offerId =
-    //     ;
 
     UserModel userModel = userController.userModel!;
     ChatController().updateChatTime(userModel, widget.chatModel);
-  }
-
-  // getSecondUserToken() async {
-  //   final UserController userController =
-  //       Provider.of<UserController>(context, listen: false);
-
-  //   UserModel userModel = userController.userModel!;
-  //   DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-  //       .instance
-  //       .collection('users')
-  //       .doc(widget.chatModel.members
-  //           .firstWhere((element) => element != userModel.userId))
-  //       .get();
-
-  //   secondUser = UserModel.fromJson(snapshot);
-  //   setState(() {
-  //     loading = false;
-  //   });
-  // }
-
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -166,34 +106,41 @@ class _MessagePageState extends State<MessagePage> {
       },
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
-        body: SafeArea(
-            child: StreamBuilder<OffersModel>(
-                initialData: widget.offersModel,
-                stream: FirebaseFirestore.instance
-                    .collection('offers')
-                    .doc(chatModel == null
-                        ? widget.chatModel.offerId
-                        : chatModel!.offerId)
-                    .snapshots()
-                    .map((event) => OffersModel.fromJson(event)),
-                builder: (context, snapshot) {
-                  OffersModel offersModel = snapshot.data!;
-                  String vehicleId = offersModel.vehicleId;
-                  return StreamBuilder<OffersReceivedModel>(
+        body: StreamBuilder<ChatModel>(
+            initialData: widget.chatModel,
+            stream: ChatController().getSingleChatStream(widget.chatModel.id),
+            builder: (context, AsyncSnapshot<ChatModel> chatSnap) {
+              if (!chatSnap.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              ChatModel chatModel = chatSnap.data ?? widget.chatModel;
+              return SafeArea(
+                  child: StreamBuilder<OffersModel>(
+                      initialData: widget.offersModel,
                       stream: FirebaseFirestore.instance
-                          .collection('offersReceived')
-                          .doc(chatModel!.offerRequestId == ''
-                              ? 'null'
-                              : chatModel!.offerRequestId)
+                          .collection('offers')
+                          .doc(widget.offersModel.offerId)
                           .snapshots()
-                          .map((convert) =>
-                              OffersReceivedModel.fromJson(convert)),
-                      builder: (context, offerSnap) {
-                        OffersReceivedModel? offersReceivedModel =
-                            offerSnap.data;
-                        return StreamBuilder<GarageModel>(
-                            stream: null,
-                            builder: (context, snapshot) {
+                          .map((event) => OffersModel.fromJson(event)),
+                      builder: (context, snapshot) {
+                        OffersModel offersModel =
+                            snapshot.data ?? widget.offersModel;
+                        String vehicleId = offersModel.vehicleId;
+                        return StreamBuilder<OffersReceivedModel>(
+                            // s
+                            stream: FirebaseFirestore.instance
+                                .collection('offersReceived')
+                                .doc(chatModel.offerRequestId == ''
+                                    ? 'null'
+                                    : chatModel.offerRequestId)
+                                .snapshots()
+                                .map((convert) =>
+                                    OffersReceivedModel.fromJson(convert)),
+                            builder: (context, offerSnap) {
+                              OffersReceivedModel? offersReceivedModel =
+                                  offerSnap.data;
                               return Column(
                                 children: [
                                   const SizedBox(
@@ -211,10 +158,30 @@ class _MessagePageState extends State<MessagePage> {
                                         onTap: () {
                                           if (userModel.userId ==
                                               offersModel.ownerId) {
+                                            if (offersModel.status ==
+                                                'active') {
+                                              Get.to(() =>
+                                                  OwnerActiveRequestDetails(
+                                                    offersModel: offersModel,
+                                                    chatId: widget.chatModel.id,
+                                                    // offersReceivedModel:
+                                                    //     offersReceivedModel,
+                                                  ));
+                                            } else {
+                                              Get.to(() =>
+                                                  OwnerRequestDetailsInprogressInactivePage(
+                                                    offersModel: offersModel,
+                                                    chatId: widget.chatModel.id,
+                                                    garageModel:
+                                                        widget.garageModel,
+                                                    offersReceivedModel:
+                                                        offersReceivedModel!,
+                                                  ));
+                                            }
                                           } else {
                                             Get.to(() => ServiceRequestDetails(
                                                   offersModel: offersModel,
-                                                  chatId: chatModel!.id,
+                                                  chatId: chatModel.id,
                                                   offersReceivedModel:
                                                       offersReceivedModel,
                                                 ));
@@ -240,33 +207,33 @@ class _MessagePageState extends State<MessagePage> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
-                                                    if (offersModel.imageOne !=
-                                                        '')
-                                                      InkWell(
-                                                        onTap: () {
-                                                          Get.to(() =>
-                                                              FullImagePageView(
-                                                                urls: [
-                                                                  offersModel
-                                                                      .imageOne
-                                                                ],
-                                                                currentIndex: 0,
-                                                              ));
-                                                        },
-                                                        child: ExtendedImage
-                                                            .network(
-                                                          offersModel.imageOne,
-                                                          height: 50,
-                                                          width: 50,
-                                                          fit: BoxFit.cover,
-                                                          cache: true,
-                                                          shape: BoxShape
-                                                              .rectangle,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(6),
-                                                        ),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        Get.to(() =>
+                                                            FullImagePageView(
+                                                              urls: [
+                                                                widget
+                                                                    .garageModel
+                                                                    .imageUrl
+                                                              ],
+                                                              currentIndex: 0,
+                                                            ));
+                                                      },
+                                                      child:
+                                                          ExtendedImage.network(
+                                                        widget.garageModel
+                                                            .imageUrl,
+                                                        height: 50,
+                                                        width: 50,
+                                                        fit: BoxFit.cover,
+                                                        cache: true,
+                                                        shape:
+                                                            BoxShape.rectangle,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6),
                                                       ),
+                                                    ),
                                                     const SizedBox(
                                                       width: 8,
                                                     ),
@@ -277,12 +244,12 @@ class _MessagePageState extends State<MessagePage> {
                                                                 .start,
                                                         children: [
                                                           Text(
-                                                            vehicleId.trim(),
+                                                            widget.garageModel
+                                                                .title,
                                                             maxLines: 2,
                                                             style: TextStyle(
                                                               // color: Colors.black,
-                                                              fontFamily:
-                                                                  'Avenir',
+
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w800,
@@ -323,8 +290,7 @@ class _MessagePageState extends State<MessagePage> {
                                                                 style:
                                                                     TextStyle(
                                                                   // color: Colors.black,
-                                                                  fontFamily:
-                                                                      'Avenir',
+
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w500,
@@ -337,8 +303,7 @@ class _MessagePageState extends State<MessagePage> {
                                                                 style:
                                                                     TextStyle(
                                                                   // color: Colors.black,
-                                                                  fontFamily:
-                                                                      'Avenir',
+
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w800,
@@ -477,11 +442,7 @@ class _MessagePageState extends State<MessagePage> {
                                                               children: [
                                                                 currentUserMessage(
                                                                     message,
-                                                                    chatModel ==
-                                                                            null
-                                                                        ? widget
-                                                                            .chatModel
-                                                                        : chatModel!,
+                                                                    chatModel,
                                                                     widget
                                                                         .secondUser),
                                                               ],
@@ -507,25 +468,6 @@ class _MessagePageState extends State<MessagePage> {
                                   ),
                                   Stack(
                                     children: [
-                                      Positioned(
-                                        bottom: 400,
-                                        child: Container(
-                                          color: Colors.green,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                // yourOfferExpanded =
-                                                //     !yourOfferExpanded;
-                                              });
-                                            },
-                                            child: ServiceYourOfferWidget(
-                                                offersModel: offersModel,
-                                                offersReceivedModel:
-                                                    offersReceivedModel!,
-                                                yourOfferExpanded: false),
-                                          ),
-                                        ),
-                                      ),
                                       Container(
                                         // height: 50,
                                         width: Get.width,
@@ -665,189 +607,98 @@ class _MessagePageState extends State<MessagePage> {
                                               const SizedBox(
                                                 height: 5,
                                               ),
-                                            Row(
-                                              children: [
-                                                // if (chatController.pickedMedia.isEmpty)
-                                                IconButton(
-                                                    onPressed: () async {
-                                                      chatController
-                                                          .pickMediaMessage(
-                                                              userModel);
-                                                    },
-                                                    icon: Icon(
-                                                        Icons.attach_file)),
-                                                Expanded(
-                                                  child: CupertinoTextField(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            15),
-                                                    // autofocus: true,
-                                                    onTapOutside: (s) {
-                                                      FocusScope.of(context)
-                                                          .requestFocus(
-                                                              FocusNode());
-                                                    },
-                                                    onSubmitted: (s) {
-                                                      if (checkBadWords(s)
-                                                          .isNotEmpty) {
-                                                        Get.showSnackbar(
-                                                            GetSnackBar(
-                                                          message:
-                                                              'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                                          duration:
-                                                              const Duration(
-                                                                  seconds: 3),
-                                                          snackPosition:
-                                                              SnackPosition.TOP,
-                                                        ));
-                                                        return;
-                                                      } else {
-                                                        if (chatController
-                                                            .pickedMedia
-                                                            .isEmpty) {
-                                                          if (s.isNotEmpty) {
-                                                            // chatController.cleanController();
-                                                            chatController.sendMessage(
-                                                                userModel,
-                                                                widget
-                                                                    .chatModel,
-                                                                s.trim(),
-                                                                widget
-                                                                    .secondUser,
-                                                                '',
-                                                                '',
-                                                                false);
-
-                                                            messageScrollController
-                                                                .jumpTo(0);
-                                                            // MixpanelProvider().messageSentEvent(
-                                                            //     senderUser: userModel,
-                                                            //     receiverUser: secondUser!,
-                                                            //     messageText: s.trim(),
-                                                            //     totalMessages: messagesLengthTotal);
-                                                            textMessageController
-                                                                .clear();
-                                                          }
-                                                        } else {
-                                                          for (MediaModel element
-                                                              in chatController
-                                                                  .pickedMedia) {
-                                                            chatController.sendMessage(
-                                                                userModel,
-                                                                widget
-                                                                    .chatModel,
-                                                                s.trim(),
-                                                                widget
-                                                                    .secondUser,
-                                                                element
-                                                                    .uploadedUrl,
-                                                                element
-                                                                    .thumbnailUrl,
-                                                                element
-                                                                    .isVideo);
-                                                            messageScrollController
-                                                                .jumpTo(0);
-                                                            chatController
-                                                                .removeMedia(
-                                                                    element);
-                                                            // MixpanelProvider().messageSentEvent(
-                                                            //     senderUser: userModel,
-                                                            //     receiverUser: secondUser!,
-                                                            //     messageText: s.trim(),
-                                                            //     totalMessages: messagesLengthTotal);
-                                                            textMessageController
-                                                                .clear();
-                                                          }
-                                                        }
-                                                      }
-                                                    },
-                                                    textCapitalization:
-                                                        TextCapitalization
-                                                            .sentences,
-                                                    placeholder:
-                                                        'Send a message',
-                                                    // maxLength: 200,
-                                                    // cou
-                                                    style: TextStyle(
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
+                                            if (chatModel.isClosed)
+                                              Container(
+                                                width: Get.width,
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                // color: Colors.red,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                          .withOpacity(0.4)
+                                                      : primaryColor
+                                                          .withOpacity(0.4),
+                                                )),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      chatModel.closeReason,
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
                                                     ),
-                                                    controller:
-                                                        textMessageController,
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(46),
-                                                        border: Border.all(
-                                                          color: changeColor(
-                                                              color: 'A9A9A9'),
-                                                          width: 2,
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          Get.bottomSheet(
+                                                              DeleteChatConfirmationSheet(
+                                                                  chatId:
+                                                                      chatModel
+                                                                          .id));
+                                                        },
+                                                        style: ElevatedButton.styleFrom(
+                                                            minimumSize: Size(
+                                                                Get.width * 0.6,
+                                                                45),
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            6)),
+                                                            backgroundColor:
+                                                                userController
+                                                                        .isDark
+                                                                    ? Colors
+                                                                        .white
+                                                                    : primaryColor),
+                                                        child: Text(
+                                                          'Delete Chat',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color: userController
+                                                                    .isDark
+                                                                ? primaryColor
+                                                                : Colors.white,
+                                                          ),
                                                         )),
-                                                  ),
+                                                  ],
                                                 ),
-                                                // const SizedBox(
-                                                //   width: 8,
-                                                // ),
-                                                // InkWell(
-                                                //   onTap: () {
-
-                                                //   },
-                                                //   child: Container(
-                                                //     height: 50,
-                                                //     width: 50,
-                                                //     decoration: BoxDecoration(
-                                                //       borderRadius: BorderRadius.circular(200),
-                                                //       color: Colors.white,
-                                                //     ),
-                                                //     child: ,
-                                                //   ),
-                                                // ),
-                                                if (chatController.pickedMedia
-                                                        .isNotEmpty &&
-                                                    chatController.pickedMedia
-                                                            .firstWhereOrNull(
-                                                                (element) =>
-                                                                    element
-                                                                        .uploading ==
-                                                                    true) !=
-                                                        null)
-                                                  InkWell(
-                                                    // onTap: () {},
-                                                    child: Container(
-                                                      height: 30,
-                                                      margin:
-                                                          const EdgeInsets.all(
-                                                              6),
-                                                      width: 30,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(200),
-                                                        color: userController
-                                                                .isDark
-                                                            ? Colors.white
-                                                            : primaryColor,
-                                                      ),
-                                                      child:
-                                                          CupertinoActivityIndicator(
-                                                        color: userController
-                                                                .isDark
-                                                            ? primaryColor
-                                                            : Colors.white,
-                                                      ),
-                                                    ),
-                                                  )
-                                                else
+                                              )
+                                            else
+                                              Row(
+                                                children: [
+                                                  // if (chatController.pickedMedia.isEmpty)
                                                   IconButton(
+                                                      onPressed: () async {
+                                                        chatController
+                                                            .pickMediaMessage(
+                                                                userModel);
+                                                      },
+                                                      icon: Icon(
+                                                          Icons.attach_file)),
+                                                  Expanded(
+                                                    child: CupertinoTextField(
                                                       padding:
                                                           const EdgeInsets.all(
-                                                              0),
-                                                      onPressed: () {
-                                                        if (checkBadWords(
-                                                                textMessageController
-                                                                    .text)
+                                                              15),
+                                                      // autofocus: true,
+                                                      onTapOutside: (s) {
+                                                        FocusScope.of(context)
+                                                            .requestFocus(
+                                                                FocusNode());
+                                                      },
+                                                      onSubmitted: (s) {
+                                                        if (checkBadWords(s)
                                                             .isNotEmpty) {
                                                           Get.showSnackbar(
                                                               GetSnackBar(
@@ -861,86 +712,250 @@ class _MessagePageState extends State<MessagePage> {
                                                                     .TOP,
                                                           ));
                                                           return;
-                                                        }
-                                                        if (chatController
-                                                            .pickedMedia
-                                                            .isEmpty) {
-                                                          if (textMessageController
-                                                              .text
-                                                              .isNotEmpty) {
-                                                            chatController.sendMessage(
-                                                                userModel,
-                                                                widget
-                                                                    .chatModel,
-                                                                textMessageController
-                                                                    .text
-                                                                    .trim(),
-                                                                widget
-                                                                    .secondUser,
-                                                                '',
-                                                                '',
-                                                                false);
-
-                                                            messageScrollController
-                                                                .jumpTo(0);
-                                                            // MixpanelProvider().messageSentEvent(
-                                                            //     senderUser: userModel,
-                                                            //     receiverUser: secondUser!,
-                                                            //     messageText: s.trim(),
-                                                            //     totalMessages: messagesLengthTotal);
-                                                            textMessageController
-                                                                .clear();
-
-                                                            // chatController.cleanController();
-                                                          }
                                                         } else {
-                                                          List<MediaModel>
-                                                              copiedList =
-                                                              List.from(
-                                                                  chatController
-                                                                      .pickedMedia);
-                                                          for (MediaModel element
-                                                              in copiedList) {
-                                                            chatController.sendMessage(
-                                                                userModel,
-                                                                widget
-                                                                    .chatModel,
-                                                                textMessageController
-                                                                    .text
-                                                                    .trim(),
-                                                                widget
-                                                                    .secondUser,
-                                                                element
-                                                                    .uploadedUrl,
-                                                                element
-                                                                    .thumbnailUrl,
-                                                                element
-                                                                    .isVideo);
+                                                          if (chatController
+                                                              .pickedMedia
+                                                              .isEmpty) {
+                                                            if (s.isNotEmpty) {
+                                                              // chatController.cleanController();
+                                                              chatController
+                                                                  .sendMessage(
+                                                                      userModel,
+                                                                      widget
+                                                                          .chatModel,
+                                                                      s.trim(),
+                                                                      widget
+                                                                          .secondUser,
+                                                                      '',
+                                                                      '',
+                                                                      false);
 
-                                                            messageScrollController
-                                                                .jumpTo(0);
-                                                            chatController
-                                                                .removeMedia(
-                                                                    element);
-                                                            // MixpanelProvider().messageSentEvent(
-                                                            //     senderUser: userModel,
-                                                            //     receiverUser: secondUser!,
-                                                            //     messageText: s.trim(),
-                                                            //     totalMessages: messagesLengthTotal);
-                                                            textMessageController
-                                                                .clear();
+                                                              messageScrollController
+                                                                  .jumpTo(0);
+                                                              // MixpanelProvider().messageSentEvent(
+                                                              //     senderUser: userModel,
+                                                              //     receiverUser: secondUser!,
+                                                              //     messageText: s.trim(),
+                                                              //     totalMessages: messagesLengthTotal);
+                                                              textMessageController
+                                                                  .clear();
+                                                            }
+                                                          } else {
+                                                            for (MediaModel element
+                                                                in chatController
+                                                                    .pickedMedia) {
+                                                              chatController.sendMessage(
+                                                                  userModel,
+                                                                  widget
+                                                                      .chatModel,
+                                                                  s.trim(),
+                                                                  widget
+                                                                      .secondUser,
+                                                                  element
+                                                                      .uploadedUrl,
+                                                                  element
+                                                                      .thumbnailUrl,
+                                                                  element
+                                                                      .isVideo);
+                                                              messageScrollController
+                                                                  .jumpTo(0);
+                                                              chatController
+                                                                  .removeMedia(
+                                                                      element);
+                                                              // MixpanelProvider().messageSentEvent(
+                                                              //     senderUser: userModel,
+                                                              //     receiverUser: secondUser!,
+                                                              //     messageText: s.trim(),
+                                                              //     totalMessages: messagesLengthTotal);
+                                                              textMessageController
+                                                                  .clear();
+                                                            }
                                                           }
                                                         }
                                                       },
-                                                      icon: Image.asset(
-                                                        'assets/send.png',
+                                                      textCapitalization:
+                                                          TextCapitalization
+                                                              .sentences,
+                                                      placeholder:
+                                                          'Send a message',
+                                                      // maxLength: 200,
+                                                      // cou
+                                                      style: TextStyle(
                                                         color: userController
                                                                 .isDark
                                                             ? Colors.white
                                                             : primaryColor,
-                                                      ))
-                                              ],
-                                            ),
+                                                      ),
+                                                      controller:
+                                                          textMessageController,
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(46),
+                                                          border: Border.all(
+                                                            color: changeColor(
+                                                                color:
+                                                                    'A9A9A9'),
+                                                            width: 2,
+                                                          )),
+                                                    ),
+                                                  ),
+                                                  // const SizedBox(
+                                                  //   width: 8,
+                                                  // ),
+                                                  // InkWell(
+                                                  //   onTap: () {
+
+                                                  //   },
+                                                  //   child: Container(
+                                                  //     height: 50,
+                                                  //     width: 50,
+                                                  //     decoration: BoxDecoration(
+                                                  //       borderRadius: BorderRadius.circular(200),
+                                                  //       color: Colors.white,
+                                                  //     ),
+                                                  //     child: ,
+                                                  //   ),
+                                                  // ),
+                                                  if (chatController.pickedMedia
+                                                          .isNotEmpty &&
+                                                      chatController.pickedMedia
+                                                              .firstWhereOrNull(
+                                                                  (element) =>
+                                                                      element
+                                                                          .uploading ==
+                                                                      true) !=
+                                                          null)
+                                                    InkWell(
+                                                      // onTap: () {},
+                                                      child: Container(
+                                                        height: 30,
+                                                        margin: const EdgeInsets
+                                                            .all(6),
+                                                        width: 30,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      200),
+                                                          color: userController
+                                                                  .isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                        ),
+                                                        child:
+                                                            CupertinoActivityIndicator(
+                                                          color: userController
+                                                                  .isDark
+                                                              ? primaryColor
+                                                              : Colors.white,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  else
+                                                    IconButton(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(0),
+                                                        onPressed: () {
+                                                          if (checkBadWords(
+                                                                  textMessageController
+                                                                      .text)
+                                                              .isNotEmpty) {
+                                                            Get.showSnackbar(
+                                                                GetSnackBar(
+                                                              message:
+                                                                  'Vulgar language detected in your input. Please refrain from using inappropriate language.',
+                                                              duration:
+                                                                  const Duration(
+                                                                      seconds:
+                                                                          3),
+                                                              snackPosition:
+                                                                  SnackPosition
+                                                                      .TOP,
+                                                            ));
+                                                            return;
+                                                          }
+                                                          if (chatController
+                                                              .pickedMedia
+                                                              .isEmpty) {
+                                                            if (textMessageController
+                                                                .text
+                                                                .isNotEmpty) {
+                                                              chatController.sendMessage(
+                                                                  userModel,
+                                                                  widget
+                                                                      .chatModel,
+                                                                  textMessageController
+                                                                      .text
+                                                                      .trim(),
+                                                                  widget
+                                                                      .secondUser,
+                                                                  '',
+                                                                  '',
+                                                                  false);
+
+                                                              messageScrollController
+                                                                  .jumpTo(0);
+                                                              // MixpanelProvider().messageSentEvent(
+                                                              //     senderUser: userModel,
+                                                              //     receiverUser: secondUser!,
+                                                              //     messageText: s.trim(),
+                                                              //     totalMessages: messagesLengthTotal);
+                                                              textMessageController
+                                                                  .clear();
+
+                                                              // chatController.cleanController();
+                                                            }
+                                                          } else {
+                                                            List<MediaModel>
+                                                                copiedList =
+                                                                List.from(
+                                                                    chatController
+                                                                        .pickedMedia);
+                                                            for (MediaModel element
+                                                                in copiedList) {
+                                                              chatController.sendMessage(
+                                                                  userModel,
+                                                                  widget
+                                                                      .chatModel,
+                                                                  textMessageController
+                                                                      .text
+                                                                      .trim(),
+                                                                  widget
+                                                                      .secondUser,
+                                                                  element
+                                                                      .uploadedUrl,
+                                                                  element
+                                                                      .thumbnailUrl,
+                                                                  element
+                                                                      .isVideo);
+
+                                                              messageScrollController
+                                                                  .jumpTo(0);
+                                                              chatController
+                                                                  .removeMedia(
+                                                                      element);
+                                                              // MixpanelProvider().messageSentEvent(
+                                                              //     senderUser: userModel,
+                                                              //     receiverUser: secondUser!,
+                                                              //     messageText: s.trim(),
+                                                              //     totalMessages: messagesLengthTotal);
+                                                              textMessageController
+                                                                  .clear();
+                                                            }
+                                                          }
+                                                        },
+                                                        icon: Image.asset(
+                                                          'assets/send.png',
+                                                          color: userController
+                                                                  .isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                        ))
+                                                ],
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -951,8 +966,8 @@ class _MessagePageState extends State<MessagePage> {
                                 ],
                               );
                             });
-                      });
-                })),
+                      }));
+            }),
       ),
     );
   }
@@ -1248,10 +1263,6 @@ class RequestDetailsButtonOwner extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () async {
-        Get.dialog(AcceptOfferConfirm(
-          offersModel: offersModel,
-          offersReceivedModel: offersReceivedModel,
-        ));
         // Get.dialog(LoadingDialog(), barrierDismissible: false);
         // await FirebaseFirestore.instance
         //     .collection('offersReceived')
@@ -1286,158 +1297,6 @@ class RequestDetailsButtonOwner extends StatelessWidget {
         style: TextStyle(
           color: Colors.green,
           fontSize: 14,
-        ),
-      ),
-    );
-  }
-}
-
-class AcceptOfferConfirm extends StatelessWidget {
-  final OffersReceivedModel offersReceivedModel;
-  final OffersModel offersModel;
-
-  const AcceptOfferConfirm(
-      {super.key,
-      required this.offersModel,
-      required this.offersReceivedModel});
-
-  @override
-  Widget build(BuildContext context) {
-    final UserController userController = Provider.of<UserController>(context);
-
-    UserModel userModel = userController.userModel!;
-    return Dialog(
-      // insetPadding: const EdgeInsets.all(4),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 15,
-              ),
-              Text(
-                'Confirm Offer Acceptance',
-                style: TextStyle(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OfferRequestDetails(
-                          userController: userController,
-                          offersReceivedModel: offersReceivedModel),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Get.close(1);
-                      },
-                      child: Text('Cancel'),
-                    ),
-                    const SizedBox(
-                      width: 15,
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        // Get.dialog(AcceptOfferConfirm());
-                        Get.dialog(LoadingDialog(), barrierDismissible: false);
-                        await FirebaseFirestore.instance
-                            .collection('offersReceived')
-                            .doc(offersReceivedModel.id)
-                            .update({
-                          'status': 'Upcoming',
-                        });
-                        await FirebaseFirestore.instance
-                            .collection('offers')
-                            .doc(offersModel.offerId)
-                            .update({
-                          'status': 'inProgress',
-                        });
-                        UserController().addToNotifications(
-                            userModel,
-                            offersReceivedModel.offerBy,
-                            'offer',
-                            offersReceivedModel.id,
-                            'Offer Update',
-                            '${userModel.name}, Accepted your offer');
-                        sendNotification(
-                            offersReceivedModel.offerBy,
-                            userModel.name,
-                            'Offer Update',
-                            '${userModel.name}, Accepted your offer',
-                            offersReceivedModel.id,
-                            'offer',
-                            '');
-                        Get.close(1);
-                        Get.close(1);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.withOpacity(0.2),
-                          elevation: 0.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(3),
-                          )),
-                      child: Text(
-                        'Accept Offer',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 14,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Text(
-                'You can review our rating policy here.',
-                style: TextStyle(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              InkWell(
-                onTap: () {
-                  launchUrl(Uri.parse('https://vehype.com/help#'));
-                },
-                child: Text(
-                  'Rating Policy',
-                  style: TextStyle(
-                      color: Colors.red, decoration: TextDecoration.underline),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -1524,7 +1383,7 @@ class SecondUserMessageWidget extends StatelessWidget {
       // ),
       margin: const EdgeInsets.only(top: 12, left: 1),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(6),
         color: changeColor(color: 'F1F1F1'),
       ),
       child: message.mediaUrl == ''
@@ -1538,16 +1397,16 @@ class SecondUserMessageWidget extends StatelessWidget {
                 // width: Get.width * 0.75,
 
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(6),
                   color: changeColor(color: 'F1F1F1'),
                 ),
                 child: RichText(
                   text: TextSpan(
                     children: textSpans,
                     style: TextStyle(
-                      fontFamily: 'Avenir',
+                      // fontFamily: 'Avenir',
                       color: Colors.black,
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -1575,10 +1434,10 @@ class SecondUserMessageWidget extends StatelessWidget {
                               shape: BoxShape.rectangle,
                               borderRadius: message.text != ''
                                   ? BorderRadius.only(
-                                      topLeft: Radius.circular(14),
-                                      topRight: Radius.circular(14),
+                                      topLeft: Radius.circular(6),
+                                      topRight: Radius.circular(6),
                                     )
-                                  : BorderRadius.circular(14),
+                                  : BorderRadius.circular(6),
                               fit: BoxFit.cover,
                               height: 200,
                               width: Get.width * 0.75,
@@ -1617,10 +1476,10 @@ class SecondUserMessageWidget extends StatelessWidget {
                       shape: BoxShape.rectangle,
                       borderRadius: message.text != ''
                           ? BorderRadius.only(
-                              topLeft: Radius.circular(14),
-                              topRight: Radius.circular(14),
+                              topLeft: Radius.circular(6),
+                              topRight: Radius.circular(6),
                             )
-                          : BorderRadius.circular(14),
+                          : BorderRadius.circular(6),
                       fit: BoxFit.cover,
                       height: 200,
                       width: Get.width * 0.75,
@@ -1637,8 +1496,8 @@ class SecondUserMessageWidget extends StatelessWidget {
 
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(14),
-                        bottomRight: Radius.circular(14),
+                        bottomLeft: Radius.circular(6),
+                        bottomRight: Radius.circular(6),
                       ),
                       color: changeColor(color: 'F1F1F1'),
                     ),
@@ -1646,9 +1505,9 @@ class SecondUserMessageWidget extends StatelessWidget {
                       text: TextSpan(
                         children: textSpans,
                         style: TextStyle(
-                          fontFamily: 'Avenir',
+                          // fontFamily: 'Avenir',
                           color: Colors.black,
-                          fontSize: 17,
+                          fontSize: 16,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -1729,8 +1588,8 @@ class TopBarMessage extends StatelessWidget {
                     secondUser.name,
                     style: TextStyle(
                       // color: Colors.black,
-                      fontFamily: 'Avenir',
-                      fontWeight: FontWeight.w800,
+                      // fontFamily: 'Avenir',
+                      fontWeight: FontWeight.w900,
                       fontSize: 16,
                     ),
                   ),
@@ -1746,6 +1605,7 @@ class TopBarMessage extends StatelessWidget {
                       onClosing: () {},
                       builder: (cc) {
                         return Container(
+                          width: Get.width,
                           decoration: BoxDecoration(
                             color: userController.isDark
                                 ? primaryColor
@@ -1762,7 +1622,7 @@ class TopBarMessage extends StatelessWidget {
                                   onTap: () {
                                     Get.close(1);
                                     Get.to(() => SecondUserProfile(
-                                        userId: userModel.userId));
+                                        userId: widget.secondUser.userId));
                                   },
                                   child: Text(
                                     'View Profile',
@@ -1781,17 +1641,8 @@ class TopBarMessage extends StatelessWidget {
                                   onTap: () {
                                     Get.close(1);
 
-                                    showModalBottomSheet(
-                                        context: context,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        builder: (context) {
-                                          return reportBottomSheet(
-                                            userModel,
-                                          );
-                                        });
+                                    Get.bottomSheet(
+                                        reportBottomSheet(userModel));
                                   },
                                   child: Text(
                                     'Block & Report',
@@ -1809,119 +1660,8 @@ class TopBarMessage extends StatelessWidget {
                                 InkWell(
                                   onTap: () {
                                     Get.close(1);
-                                    showModalBottomSheet(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        context: context,
-                                        backgroundColor: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        builder: (context) {
-                                          return BottomSheet(
-                                              onClosing: () {},
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              builder: (s) {
-                                                return Container(
-                                                  width: Get.width,
-                                                  decoration: BoxDecoration(
-                                                    color: userController.isDark
-                                                        ? primaryColor
-                                                        : Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.all(14),
-                                                  child: SingleChildScrollView(
-                                                    child: Column(
-                                                      children: [
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          'Are you sure? You won\'t be able to contact each other anymore',
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontFamily:
-                                                                'Avenir',
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        ElevatedButton(
-                                                          onPressed: () async {
-                                                            Get.close(1);
-                                                            Get.close(1);
-
-                                                            chatController
-                                                                .deleteChat(widget
-                                                                    .chatModel
-                                                                    .id);
-                                                          },
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            backgroundColor:
-                                                                Colors.red,
-                                                            elevation: 1.0,
-                                                            maximumSize: Size(
-                                                                Get.width * 0.6,
-                                                                50),
-                                                            minimumSize: Size(
-                                                                Get.width * 0.6,
-                                                                50),
-                                                          ),
-                                                          child: Text(
-                                                            'Confirm',
-                                                            style: TextStyle(
-                                                              fontSize: 20,
-                                                              fontFamily:
-                                                                  'Avenir',
-                                                              color:
-                                                                  Colors.white,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () {
-                                                            Get.close(1);
-                                                          },
-                                                          child: Text(
-                                                            'Cancel',
-                                                            style: TextStyle(
-                                                              fontSize: 20,
-                                                              fontFamily:
-                                                                  'Avenir',
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 20),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              });
-                                        });
+                                    Get.bottomSheet(DeleteChatConfirmationSheet(
+                                        chatId: widget.chatModel.id));
                                   },
                                   child: Text(
                                     'Delete Chat',
@@ -1952,493 +1692,267 @@ class TopBarMessage extends StatelessWidget {
   }
 
   reportBottomSheet(UserModel userModel) {
-    return BottomSheet(
-        onClosing: () {},
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        builder: (context) {
-          return Container(
-            // height: Get.height * 0.,
-            width: Get.width,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      'What’s wrong with this\nprofile?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: changeColor(color: '888888'),
-                        fontSize: 22,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 1,
-                    width: Get.width * 0.8,
-                    color: changeColor(color: 'D9D9D9'),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      Get.close(1);
-                      showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          builder: (context) {
-                            return BottomSheet(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                onClosing: () {},
-                                builder: (contexr) {
-                                  return Container(
-                                    // height: Get.height * 0.25,
-                                    width: Get.width,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    padding: const EdgeInsets.all(14),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            'Are you sure? You won\'t be able to contact each other anymore',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 22,
-                                              fontFamily: 'Avenir',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              Get.close(1);
-                                              Get.close(1);
-                                              userController.blockAndReport(
-                                                  widget.chatModel.id,
-                                                  userModel.userId,
-                                                  widget.secondUser.userId,
-                                                  widget.secondUser,
-                                                  'Distasteful');
-                                              Get.to(
-                                                  () => ReportConfirmation());
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primaryColor,
-                                              elevation: 1.0,
-                                              maximumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                              minimumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                            ),
-                                            child: Text(
-                                              'Confirm',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              Get.close(1);
-                                            },
-                                            child: Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                });
-                          });
-                    },
-                    child: Text(
-                      'Distasteful',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Get.close(1);
-                      showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          builder: (context) {
-                            return BottomSheet(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                onClosing: () {},
-                                builder: (c) {
-                                  return Container(
-                                    // height: 260,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    padding: const EdgeInsets.all(14),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            'Are you sure? You won\'t be able to contact each other anymore',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 22,
-                                              fontFamily: 'Avenir',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              Get.close(1);
-                                              Get.close(1);
-                                              userController.blockAndReport(
-                                                  widget.chatModel.id,
-                                                  userModel.userId,
-                                                  widget.secondUser.userId,
-                                                  widget.secondUser,
-                                                  'Fake or Scam');
-                                              Get.to(
-                                                  () => ReportConfirmation());
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primaryColor,
-                                              maximumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                              minimumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                            ),
-                                            child: Text(
-                                              'Confirm',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              Get.close(1);
-                                            },
-                                            child: Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                });
-                          });
-                    },
-                    child: Text(
-                      'Fake or Scam',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Get.close(1);
-                      showModalBottomSheet(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          context: context,
-                          builder: (context) {
-                            return BottomSheet(
-                                onClosing: () {},
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                builder: (context) {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    padding: const EdgeInsets.all(14),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            'Are you sure? You won\'t be able to contact each other anymore',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 22,
-                                              fontFamily: 'Avenir',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () async {
-                                              Get.close(1);
-                                              Get.close(1);
-                                              userController.blockAndReport(
-                                                  widget.chatModel.id,
-                                                  userModel.userId,
-                                                  widget.secondUser.userId,
-                                                  widget.secondUser,
-                                                  'Other');
-                                              Get.to(
-                                                  () => ReportConfirmation());
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primaryColor,
-                                              elevation: 1.0,
-                                              maximumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                              minimumSize:
-                                                  Size(Get.width * 0.6, 50),
-                                            ),
-                                            child: Text(
-                                              'Confirm',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              Get.close(1);
-                                            },
-                                            child: Text(
-                                              'Cancel',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 22,
-                                                fontFamily: 'Avenir',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                });
-                          });
-                    },
-                    child: Text(
-                      'Other',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Get.close(1);
-                    },
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
-}
-
-class ReportConfirmation extends StatefulWidget {
-  const ReportConfirmation({super.key});
-
-  @override
-  State<ReportConfirmation> createState() => _ReportConfirmationState();
-}
-
-class _ReportConfirmationState extends State<ReportConfirmation> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
+    return Container(
+      height: Get.height * 0.8,
+      width: Get.width,
+      decoration: BoxDecoration(
         color: Colors.white,
-        height: Get.height,
-        width: Get.width,
-        padding: const EdgeInsets.all(15),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [],
-              ),
-              SizedBox(
-                width: Get.width * 0.65,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Thanks for keeping our community safe.',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Avenir',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Text(
-                      'We’ll investigate this profile.',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Avenir',
-                        fontSize: 26,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                  ],
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Text(
+                'What’s wrong with this profile?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
                 ),
               ),
-              Column(
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        // UserController().addPushToken(userModel.id);
-                        Get.close(1);
-                        // Get.to(() => AddProfileImagesPage());
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          maximumSize: Size(Get.width * 0.8, 60),
-                          minimumSize: Size(Get.width * 0.8, 60),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7),
-                          )),
-                      child: const Text(
-                        'Continue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w800,
-                        ),
-                      )),
-                  SizedBox(
-                    height: 30,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
+              height: 1,
+              width: Get.width * 0.8,
+              color: changeColor(color: 'D9D9D9'),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            InkWell(
+              onTap: () async {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Fake or Scam',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Fake or Scam',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ],
+                ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Harassment or Abuse',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Harassment or Abuse',
+                    style: TextStyle(
+                      // color: Colors.black,
+                      fontSize: 16,
+
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Inappropriate Content',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Inappropriate Content',
+                    style: TextStyle(
+                      // color: Colors.black,
+                      fontSize: 16,
+
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Fraudulent Activity',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Fraudulent Activity',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Violation of Terms',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Violation of Terms',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Unprofessional Conduct',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Unprofessional Conduct',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+                Get.bottomSheet(ReportConfirmationSheet(
+                    userController: userController,
+                    reason: 'Spam or Unwanted Contact',
+                    widget: widget));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                width: Get.width * 0.8,
+                height: 50,
+                padding: const EdgeInsets.all(6),
+                child: Center(
+                  child: Text(
+                    'Spam or Unwanted Contact',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 40,
+            ),
+          ],
         ),
       ),
     );
@@ -2465,14 +1979,14 @@ class MessageWidget extends StatelessWidget {
 
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: changeColor(color: '767AD8'),
+                  borderRadius: BorderRadius.circular(6),
+                  color: primaryColor,
                 ),
                 child: RichText(
                   text: TextSpan(
                     children: textSpans,
                     style: TextStyle(
-                      fontFamily: 'Avenir',
+                      // fontFamily: 'Avenir',
                       color: Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w400,
@@ -2501,10 +2015,10 @@ class MessageWidget extends StatelessWidget {
                                 shape: BoxShape.rectangle,
                                 borderRadius: message.text != ''
                                     ? BorderRadius.only(
-                                        topLeft: Radius.circular(14),
-                                        topRight: Radius.circular(14),
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
                                       )
-                                    : BorderRadius.circular(14),
+                                    : BorderRadius.circular(6),
                                 fit: BoxFit.cover,
                                 height: 200,
                                 width: Get.width * 0.75,
@@ -2544,10 +2058,10 @@ class MessageWidget extends StatelessWidget {
                         shape: BoxShape.rectangle,
                         borderRadius: message.text != ''
                             ? BorderRadius.only(
-                                topLeft: Radius.circular(14),
-                                topRight: Radius.circular(14),
+                                topLeft: Radius.circular(6),
+                                topRight: Radius.circular(6),
                               )
-                            : BorderRadius.circular(14),
+                            : BorderRadius.circular(6),
                         fit: BoxFit.cover,
                         height: 200,
                         width: Get.width * 0.75,
@@ -2564,16 +2078,16 @@ class MessageWidget extends StatelessWidget {
 
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(14),
-                          bottomRight: Radius.circular(14),
+                          bottomLeft: Radius.circular(6),
+                          bottomRight: Radius.circular(6),
                         ),
-                        color: changeColor(color: '767AD8'),
+                        color: primaryColor,
                       ),
                       child: RichText(
                         text: TextSpan(
                           children: textSpans,
                           style: TextStyle(
-                            fontFamily: 'Avenir',
+                            // fontFamily: 'Avenir',
                             color: Colors.white,
                             fontSize: 17,
                             fontWeight: FontWeight.w400,

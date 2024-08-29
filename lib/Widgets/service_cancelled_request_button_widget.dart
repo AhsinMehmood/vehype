@@ -5,9 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 
+import '../Controllers/offers_controller.dart';
 import '../Models/offers_model.dart';
 
-import '../Pages/inactive_offers_seeker.dart';
+// import '../Pages/inactive_offers_seeker.dart';
 import '../const.dart';
 import 'service_to_owner_rating_sheet.dart';
 
@@ -46,18 +47,27 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
               offersReceivedModel.cancelBy != 'provider')
             InkWell(
               onTap: () {
+                OffersController().updateNotificationForOffers(
+                    offerId: offersModel.offerId,
+                    userId: userController.userModel!.userId,
+                    isAdd: false,
+                    offersReceived: offersReceivedModel.id,
+                    checkByList: offersModel.checkByList,
+                    notificationTitle: '',
+                    notificationSubtitle: '');
                 showModalBottomSheet(
                     context: context,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    constraints: BoxConstraints(
-                      maxHeight: Get.height * 0.9,
-                      minHeight: Get.height * 0.9,
-                      minWidth: Get.width,
-                    ),
+                    // constraints: BoxConstraints(
+                    //   maxHeight: Get.height * 0.95,
+                    //   minHeight: Get.height * 0.95,
+                    //   minWidth: Get.width,
+                    // ),
                     isScrollControlled: true,
-                    showDragHandle: true,
+                    // showDragHandle: true,
+                    enableDrag: true,
                     builder: (contex) {
                       return ServiceToOwnerRatingSheet(
                           offersReceivedModel: offersReceivedModel,
@@ -79,7 +89,7 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Rate this Request',
+                      'Submit Feedback',
                       style: TextStyle(
                         color:
                             userController.isDark ? Colors.white : primaryColor,
@@ -94,6 +104,14 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
             ),
           InkWell(
             onTap: () async {
+              OffersController().updateNotificationForOffers(
+                  offerId: offersModel.offerId,
+                  userId: userController.userModel!.userId,
+                  isAdd: false,
+                  offersReceived: offersReceivedModel.id,
+                  checkByList: offersModel.checkByList,
+                  notificationTitle: '',
+                  notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(
                   offersModel: offersModel,
                   offersReceivedModel: offersReceivedModel));
@@ -103,7 +121,7 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
               width: offersReceivedModel.ratingTwo == 0.0 &&
                       offersReceivedModel.cancelBy != 'provider'
                   ? Get.width * 0.42
-                  : Get.width * 0.8,
+                  : Get.width * 0.88,
               decoration: BoxDecoration(
                 color: userController.isDark ? Colors.white : primaryColor,
                 borderRadius: BorderRadius.circular(6),

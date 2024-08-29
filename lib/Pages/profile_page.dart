@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,9 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
 import 'package:vehype/Pages/explore_page.dart';
@@ -25,7 +28,7 @@ import 'admin_home_page.dart';
 import 'comments_page.dart';
 import 'delete_account_page.dart';
 import 'my_fav_page.dart';
-import 'orders_history_seeker.dart';
+// import 'orders_history_seeker.dart';
 import 'splash_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -121,8 +124,8 @@ class ProfilePage extends StatelessWidget {
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(
@@ -167,7 +170,7 @@ class ProfilePage extends StatelessWidget {
                                 color: Colors.amber,
                               ),
                               itemCount: 5,
-                              itemSize: 25.0,
+                              itemSize: 24.0,
                               direction: Axis.horizontal,
                             ),
                             const SizedBox(
@@ -179,8 +182,8 @@ class ProfilePage extends StatelessWidget {
                                 color: userController.isDark
                                     ? Colors.white
                                     : primaryColor,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -230,9 +233,8 @@ class ProfilePage extends StatelessWidget {
                                 color: userController.isDark
                                     ? Colors.white
                                     : primaryColor,
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 17,
                               ),
                             ),
                             SizedBox(
@@ -292,9 +294,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -312,9 +313,8 @@ class ProfilePage extends StatelessWidget {
                               color: userController.isDark
                                   ? Colors.white
                                   : primaryColor,
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 17,
                             ),
                           ),
                         ),
@@ -356,9 +356,8 @@ class ProfilePage extends StatelessWidget {
                               color: userController.isDark
                                   ? Colors.white
                                   : primaryColor,
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 17,
                             ),
                           ),
                         ),
@@ -391,9 +390,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -410,9 +408,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -429,9 +426,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -474,9 +470,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -484,38 +479,17 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       InkWell(
+                        // 89
                         onTap: () async {
-                          if (userModel.email == 'No email set') {
-                            Get.showSnackbar(GetSnackBar(
-                              message: 'Login to continue',
-                              duration: const Duration(
-                                seconds: 3,
-                              ),
-                              backgroundColor: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              mainButton: TextButton(
-                                onPressed: () {
-                                  Get.to(() => ChooseAccountTypePage());
-                                  Get.closeCurrentSnackbar();
-                                },
-                                child: Text(
-                                  'Login Page',
-                                  style: TextStyle(
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ));
-                          } else {
-                            userController.closeStream();
-                            UserController().logout(userModel);
+                          OffersProvider offersProvider =
+                              Provider.of<OffersProvider>(context,
+                                  listen: false);
+                          userController.closeStream();
+                          offersProvider.stopListening();
+                          UserController().logout(userModel);
 
-                            userController.changeTabIndex(0);
-                          }
-                          // Get.offAll(SplashPage());
+                          userController.changeTabIndex(0);
+                          Get.offAll(SplashPage());
                         },
                         child: Text(
                           'Log Out',
@@ -523,9 +497,8 @@ class ProfilePage extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
                           ),
                         ),
                       ),

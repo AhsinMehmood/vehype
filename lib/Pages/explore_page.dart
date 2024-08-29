@@ -237,30 +237,30 @@ class _ExplorePageState extends State<ExplorePage> {
             );
             return Stack(
               children: [
-                GoogleMap(
-                  markers: markers.toSet(),
-                  liteModeEnabled: false,
-                  compassEnabled: false,
-                  myLocationEnabled: false,
-                  mapType: isSatLite ? MapType.satellite : MapType.normal,
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: true,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(lat, long),
-                    zoom: 14.0,
-                  ),
-                  onTap: (s) {
-                    if (selectedMarker != null) {
-                      selectedMarker = null;
-                      setState(() {});
-                    }
-                  },
-                  onMapCreated: (controller) {
-                    if (!_controller.isCompleted) {
-                      _controller.complete(controller);
-                    }
-                  },
-                ),
+                // GoogleMap(
+                //   markers: markers.toSet(),
+                //   liteModeEnabled: false,
+                //   compassEnabled: false,
+                //   myLocationEnabled: false,
+                //   mapType: isSatLite ? MapType.satellite : MapType.normal,
+                //   zoomControlsEnabled: false,
+                //   zoomGesturesEnabled: true,
+                //   initialCameraPosition: CameraPosition(
+                //     target: LatLng(lat, long),
+                //     zoom: 14.0,
+                //   ),
+                //   onTap: (s) {
+                //     if (selectedMarker != null) {
+                //       selectedMarker = null;
+                //       setState(() {});
+                //     }
+                //   },
+                //   onMapCreated: (controller) {
+                //     if (!_controller.isCompleted) {
+                //       _controller.complete(controller);
+                //     }
+                //   },
+                // ),
                 Align(
                     alignment: Alignment.topCenter,
                     child: SafeArea(

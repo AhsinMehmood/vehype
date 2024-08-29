@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 
@@ -38,6 +39,8 @@ class _SplashPageState extends State<SplashPage> {
 
       UserController userController =
           Provider.of<UserController>(context, listen: false);
+      OffersProvider offersProvider =
+          Provider.of<OffersProvider>(context, listen: false);
       userController.getCustomMarkers();
       if (userId == null) {
         // sharedPreferences.setBool('newUpdate', true);
@@ -79,6 +82,15 @@ class _SplashPageState extends State<SplashPage> {
               //   'long': position.longitude,
               // });
               userController.getUserStream(userId + userModel.accountType);
+              if (userModel.accountType == 'provider') {
+                offersProvider.startListening(userModel);
+                offersProvider
+                    .startListeningOffers(userId + userModel.accountType);
+              } else {
+                offersProvider
+                    .startListeningOwnerOffers(userId + userModel.accountType);
+              }
+
               await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());
             } else {
@@ -110,6 +122,15 @@ class _SplashPageState extends State<SplashPage> {
               //   'long': position.longitude,
               // });
               userController.getUserStream(userId + userModel.accountType);
+              if (userModel.accountType == 'provider') {
+                offersProvider.startListening(userModel);
+                offersProvider
+                    .startListeningOffers(userId + userModel.accountType);
+              } else {
+                offersProvider
+                    .startListeningOwnerOffers(userId + userModel.accountType);
+              }
+
               await Future.delayed(const Duration(seconds: 1));
               Get.offAll(() => const TabsPage());
             }

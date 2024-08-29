@@ -37,7 +37,7 @@ class SelectAccountType extends StatelessWidget {
             const Text(
               'Select Your Account Type',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -47,7 +47,7 @@ class SelectAccountType extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   InkWell(
-                    borderRadius: BorderRadius.circular(200),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () async {
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
@@ -92,7 +92,7 @@ class SelectAccountType extends StatelessWidget {
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Container(
                         height: 50,
@@ -104,7 +104,7 @@ class SelectAccountType extends StatelessWidget {
                         ),
                         width: Get.width * 0.7,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
+                            borderRadius: BorderRadius.circular(12),
                             color: Colors.white,
                             border: Border.all(
                               color: Colors.black,
@@ -130,7 +130,7 @@ class SelectAccountType extends StatelessWidget {
                     height: 10,
                   ),
                   InkWell(
-                    borderRadius: BorderRadius.circular(200),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () async {
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
@@ -171,7 +171,7 @@ class SelectAccountType extends StatelessWidget {
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Container(
                         height: 50,
@@ -183,7 +183,7 @@ class SelectAccountType extends StatelessWidget {
                         ),
                         width: Get.width * 0.7,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
+                            borderRadius: BorderRadius.circular(6),
                             color: const Color.fromARGB(255, 3, 0, 10),
                             border: Border.all(
                               color: const Color.fromARGB(255, 3, 0, 10),

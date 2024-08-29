@@ -148,9 +148,7 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return ActiveOffers(
-                      offersPosted: offersPosted,
-                      userController: userController);
+                  return Container();
                 }),
           ),
           SafeArea(
@@ -189,10 +187,7 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return InActiveOffers(
-                      title: 'Check Progress',
-                      offersPosted: offersPosted,
-                      userController: userController);
+                  return Container();
                 }),
           ),
           SafeArea(
@@ -231,10 +226,7 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return InActiveOffers(
-                      title: 'Rated',
-                      offersPosted: offersPosted,
-                      userController: userController);
+                  return Container();
                 }),
           ),
         ]),

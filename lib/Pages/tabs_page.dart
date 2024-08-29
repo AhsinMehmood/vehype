@@ -2,10 +2,8 @@
 
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,8 +12,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vehype/Controllers/app_controller.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/user_model.dart';
@@ -29,11 +27,6 @@ import 'package:vehype/const.dart';
 
 import '../Models/offers_model.dart';
 import '../Widgets/loading_dialog.dart';
-import 'inactive_offers_seeker.dart';
-import 'offers_received_details.dart';
-import 'offers_tab_page.dart';
-import 'received_offers_seeker.dart';
-import 'requests_received_provider_details.dart';
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -60,189 +53,6 @@ class _TabsPageState extends State<TabsPage> {
   void initState() {
     super.initState();
     getNotificationSetting();
-    OneSignal.Notifications.addClickListener(
-        (OSNotificationClickEvent onClick) {
-      final UserController userController =
-          Provider.of<UserController>(context, listen: false);
-      final UserModel userModel = userController.userModel!;
-      Map<String, dynamic>? notficationData =
-          onClick.notification.additionalData;
-      if (notficationData != null) {
-        if (userModel.accountType.toLowerCase() == 'seeker') {
-          if (notficationData['type'] == 'request') {
-            ownerNotificationOnTapRequest(notficationData);
-          } else if (notficationData['type'] == 'offer') {
-            ownerNotificationOnTapOffer(notficationData);
-          }
-        } else {
-          if (notficationData['type'] == 'request') {
-            providerNotificationOnTapRequest(notficationData);
-          } else if (notficationData['type'] == 'offer') {
-            providerNotificationOnTapOffer(notficationData);
-          }
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    // OneSignal.Notifications.
-  }
-
-  providerNotificationOnTapRequest(Map<String, dynamic> notficationData) async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    final UserModel userModel = userController.userModel!;
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
-        .instance
-        .collection('offers')
-        .doc(notficationData['objectId'])
-        .get();
-    OffersModel offersModel = OffersModel.fromJson(requestSnap);
-    Get.close(1);
-    UserController().changeNotiOffers(
-        0, false, userModel.userId, offersModel.offerId, userModel.accountType);
-    if (offersModel.status == 'active' &&
-        !offersModel.ignoredBy.contains(userModel.userId) &&
-        !offersModel.offersReceived.contains(userModel.userId)) {
-      Get.to(() => OfferReceivedDetails(
-            offersModel: offersModel,
-          ));
-    } else {
-      toastification.show(
-        title: Text('The request has been moved to another page'),
-        style: ToastificationStyle.minimal,
-        autoCloseDuration: Duration(
-          seconds: 3,
-        ),
-        context: context,
-      );
-    }
-  }
-
-  providerNotificationOnTapOffer(Map<String, dynamic> notficationData) async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    final UserModel userModel = userController.userModel!;
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-    DocumentSnapshot<Map<String, dynamic>> offersReceivedSnap =
-        await FirebaseFirestore.instance
-            .collection('offersReceived')
-            .doc(notficationData['objectId'])
-            .get();
-    OffersReceivedModel offersReceivedModel =
-        OffersReceivedModel.fromJson(offersReceivedSnap);
-
-    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
-        .instance
-        .collection('offers')
-        .doc(offersReceivedModel.offerId)
-        .get();
-    OffersModel offersModel = OffersModel.fromJson(requestSnap);
-
-    int id = offersReceivedModel.status == 'Pending'
-        ? 1
-        : offersReceivedModel.status == 'inProgress'
-            ? 2
-            : offersReceivedModel.status == 'Completed'
-                ? 3
-                : 4;
-    UserController().changeNotiOffers(id, false, userModel.userId,
-        offersModel.offerId, userModel.accountType);
-    Get.close(1);
-    Get.to(() => RequestsReceivedProviderDetails(
-          offersModel: offersModel,
-          offersReceivedModel: offersReceivedModel,
-        ));
-  }
-
-  ownerNotificationOnTapOffer(Map<String, dynamic> notficationData) async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    final UserModel userModel = userController.userModel!;
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-
-    DocumentSnapshot<Map<String, dynamic>> offersReceivedSnap =
-        await FirebaseFirestore.instance
-            .collection('offersReceived')
-            .doc(notficationData['objectId'])
-            .get();
-    OffersReceivedModel offersReceivedModel =
-        OffersReceivedModel.fromJson(offersReceivedSnap);
-
-    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
-        .instance
-        .collection('offers')
-        .doc(offersReceivedModel.offerId)
-        .get();
-    OffersModel offersModel = OffersModel.fromJson(requestSnap);
-
-    UserController().changeNotiOffers(
-        6,
-        false,
-        userController.userModel!.userId,
-        offersModel.offerId,
-        userController.userModel!.accountType);
-    Get.close(1);
-    if (offersReceivedModel.status == 'Pending') {
-      UserController().changeNotiOffers(
-          5,
-          false,
-          userController.userModel!.userId,
-          offersModel.offerId,
-          userController.userModel!.accountType);
-      Get.to(() => ReceivedOffersSeeker(
-            offersModel: offersModel,
-            offersReceivedModel: offersReceivedModel,
-          ));
-    } else {
-      Get.to(() => InActiveOffersSeeker(
-            offersModel: offersModel,
-            isFromNoti: true,
-            offersReceivedModel: offersReceivedModel,
-            tittle: offersReceivedModel.status == 'ignore'
-                ? 'Ignored'
-                : offersReceivedModel.status,
-          ));
-    }
-  }
-
-  ownerNotificationOnTapRequest(Map<String, dynamic> notficationData) async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    final UserModel userModel = userController.userModel!;
-    Get.dialog(LoadingDialog(), barrierDismissible: false);
-    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
-        .instance
-        .collection('offers')
-        .doc(notficationData['objectId'])
-        .get();
-    OffersModel offersModel = OffersModel.fromJson(requestSnap);
-    Get.close(1);
-
-    if (offersModel.status == 'active') {
-      UserController().changeNotiOffers(
-          5,
-          false,
-          userController.userModel!.userId,
-          offersModel.offerId,
-          userController.userModel!.accountType);
-      Get.to(() => ReceivedOffersSeeker(
-            offersModel: offersModel,
-          ));
-    } else {
-      toastification.show(
-        title: Text('The request has been moved to another page'),
-        style: ToastificationStyle.minimal,
-        autoCloseDuration: Duration(
-          seconds: 3,
-        ),
-        context: context,
-      );
-    }
   }
 
   getNotificationSetting() async {
@@ -343,14 +153,15 @@ class _TabsPageState extends State<TabsPage> {
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       selectedItemColor: userController.isDark ? Colors.white : Colors.black,
-      selectedFontSize: 13,
-      unselectedFontSize: 13,
+      selectedFontSize: 12,
+      unselectedFontSize: 12,
       // unselectedItemColor: C,
       selectedIconTheme: IconThemeData(
         color: changeColor(color: colorPurple),
       ),
       selectedLabelStyle: TextStyle(
-        fontSize: 13,
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
         color: userController.isDark ? Colors.white : Colors.black,
       ),
       currentIndex: userController.tabIndex,
@@ -403,37 +214,29 @@ class _TabsPageState extends State<TabsPage> {
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       selectedItemColor: userController.isDark ? Colors.white : Colors.black,
-      selectedFontSize: 13,
-      unselectedFontSize: 13,
-      // unselectedItemColor: C,
+      selectedFontSize: 12,
+      unselectedFontSize: 12,
       selectedIconTheme: IconThemeData(
         color: changeColor(color: colorPurple),
       ),
       selectedLabelStyle: TextStyle(
-        fontSize: 13,
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
         color: userController.isDark ? Colors.white : Colors.black,
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
-        print(userModel.userId);
-        print(userModel.offerIdsToCheck);
-
-        // userController.checkIsAdmin(userModel.email);
         userController.changeTabIndex(index);
-        // FlutterAppBadger.updateBadgeCount(10);
-        // OneSignal.login(userModel.userId);
-        // sendNotification(userModel.userId, 'Ahsinnn', 'Has', 'contents',
-        //     'chatId', 'type', 'messageId');
-        print(userModel.userId);
       },
       items: seekerTabs(),
-
       type: BottomNavigationBarType.fixed,
     );
   }
 
   List<BottomNavigationBarItem> providerTabs() {
     final UserController userController = Provider.of<UserController>(context);
+    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+
     final UserModel userModel = Provider.of<UserController>(context).userModel!;
     return [
       // if (userModel.accountType == 'seeker')
@@ -442,42 +245,63 @@ class _TabsPageState extends State<TabsPage> {
             children: [
               Icon(
                 Icons.online_prediction_rounded,
-                size: 28,
+                size: 24,
                 // ignore: deprecated_member_use
                 color: labelAndIconColorDark(0),
               ),
-              userModel.offerIdsToCheck.isNotEmpty
-                  ? Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Visibility(
-                        visible: userModel.offerIdsToCheck.isNotEmpty,
-                        child: Container(
-                          height: 18,
-                          width: 18,
-                          decoration: BoxDecoration(
-                            color: userModel.offerIdsToCheck.isNotEmpty
-                                ? Colors.red
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(200),
-                          ),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              userModel.offerIdsToCheck.length >= 100
-                                  ? '99+'
-                                  : userModel.offerIdsToCheck.length.toString(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
+              // if (offersProvider.offers.every(
+              //         (offer) => offer.checkBy.contains(userModel.userId)) ||
+              //     offersProvider.offersReceived.every(
+              //         (offer) => offer.checkBy.contains(userModel.userId)))
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Visibility(
+                  visible: offersProvider.offers
+                          .where((offer) => offer.checkByList.any(
+                              (check) => check.checkById == userModel.userId))
+                          .toList()
+                          .isNotEmpty ||
+                      offersProvider.offersReceived
+                          .where((offer) => offer.checkByList.any(
+                              (check) => check.checkById == userModel.userId))
+                          .toList()
+                          .isNotEmpty,
+                  child: Container(
+                    height: 18,
+                    width: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(200),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        (offersProvider.offers
+                                    .where((offer) => offer.checkByList.any(
+                                        (check) =>
+                                            check.checkById ==
+                                            userModel.userId))
+                                    .toList()
+                                    .length +
+                                offersProvider.offersReceived
+                                    .where((offer) => offer.checkByList.any(
+                                        (check) =>
+                                            check.checkById ==
+                                            userModel.userId))
+                                    .toList()
+                                    .length)
+                            .toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
                         ),
                       ),
-                    )
-                  : const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
           label: 'Requests'),
@@ -496,8 +320,8 @@ class _TabsPageState extends State<TabsPage> {
             children: [
               SvgPicture.asset(
                 'assets/messages.svg',
-                height: 28,
-                width: 28,
+                height: 24,
+                width: 24,
                 // ignore: deprecated_member_use
                 color: labelAndIconColorDark(1),
               ),
@@ -516,8 +340,8 @@ class _TabsPageState extends State<TabsPage> {
                         child: Visibility(
                           visible: unreadMessages.isNotEmpty,
                           child: Container(
-                            height: 18,
-                            width: 18,
+                            height: 16,
+                            width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
                                   ? Colors.red
@@ -549,8 +373,8 @@ class _TabsPageState extends State<TabsPage> {
       BottomNavigationBarItem(
         icon: Image.asset(
           'assets/profile.png',
-          height: 28,
-          width: 28,
+          height: 24,
+          width: 24,
           // ignore: deprecated_member_use
           color: labelAndIconColorDark(2),
         ),
@@ -573,62 +397,65 @@ class _TabsPageState extends State<TabsPage> {
 
   List<BottomNavigationBarItem> seekerTabs() {
     final UserController userController = Provider.of<UserController>(context);
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
-    bool haveUnread = false;
+    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+
+    UserModel userModel = userController.userModel!;
+
+    final List<OffersModel> ownerOffersNeedsToCheck = offersProvider.ownerOffers
+        .where((offer) => offer.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
 
     return [
       // if (userModel.accountType == 'seeker')
       BottomNavigationBarItem(
-          icon: Stack(
-            children: [
-              Image.asset(
-                'assets/repair.png',
-                height: 28,
-                width: 28,
-                // ignore: deprecated_member_use
-                color: labelAndIconColorDark(0),
-              ),
-              userModel.offerIdsToCheck.isNotEmpty
-                  ? Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Visibility(
-                        visible: userModel.offerIdsToCheck.isNotEmpty,
-                        child: Container(
-                          height: 18,
-                          width: 18,
-                          decoration: BoxDecoration(
-                            color: userModel.offerIdsToCheck.isNotEmpty
-                                ? Colors.red
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(200),
-                          ),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              userModel.offerIdsToCheck.length >= 100
-                                  ? '99+'
-                                  : userModel.offerIdsToCheck.length.toString(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
+        icon: Stack(
+          children: [
+            Image.asset(
+              'assets/repair.png',
+              height: 24,
+              width: 24,
+              // ignore: deprecated_member_use
+              color: labelAndIconColorDark(0),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Visibility(
+                visible: ownerOffersNeedsToCheck.isNotEmpty,
+                child: Container(
+                  height: 16,
+                  width: 16,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(200),
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      ownerOffersNeedsToCheck.length >= 100
+                          ? '99+'
+                          : ownerOffersNeedsToCheck.length.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
                       ),
-                    )
-                  : const SizedBox.shrink(),
-            ],
-          ),
-          label: 'Repair'),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        label: 'Repair',
+      ),
 
       BottomNavigationBarItem(
           icon: Image.asset(
             'assets/garage.png',
-            height: 28,
-            width: 28,
+            height: 24,
+            width: 24,
             // ignore: deprecated_member_use
             color: labelAndIconColorDark(1),
           ),
@@ -636,7 +463,7 @@ class _TabsPageState extends State<TabsPage> {
       BottomNavigationBarItem(
           icon: Icon(
             Icons.location_on_outlined,
-            size: 28,
+            size: 24,
             // width: 28,
             // ignore: deprecated_member_use
             color: labelAndIconColorDark(2),
@@ -656,8 +483,8 @@ class _TabsPageState extends State<TabsPage> {
             children: [
               SvgPicture.asset(
                 'assets/messages.svg',
-                height: 28,
-                width: 28,
+                height: 24,
+                width: 24,
                 // ignore: deprecated_member_use
                 color: labelAndIconColorDark(3),
               ),
@@ -676,8 +503,8 @@ class _TabsPageState extends State<TabsPage> {
                         child: Visibility(
                           visible: unreadMessages.isNotEmpty,
                           child: Container(
-                            height: 18,
-                            width: 18,
+                            height: 16,
+                            width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
                                   ? Colors.red
@@ -709,8 +536,8 @@ class _TabsPageState extends State<TabsPage> {
       BottomNavigationBarItem(
         icon: Image.asset(
           'assets/profile.png',
-          height: 28,
-          width: 28,
+          height: 24,
+          width: 24,
           // ignore: deprecated_member_use
           color: labelAndIconColorDark(4),
         ),
@@ -742,6 +569,8 @@ class _TabsPageState extends State<TabsPage> {
   }
   // : const SizedBox.shrink();
 }
+
+String notificationsCount = '0';
 
 class LocationPermissionSheet extends StatelessWidget {
   const LocationPermissionSheet({

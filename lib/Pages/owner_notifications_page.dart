@@ -15,11 +15,11 @@ import '../Models/notifications_model.dart';
 import '../Models/user_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'inactive_offers_seeker.dart';
-import 'offers_received_details.dart';
-import 'received_offers_seeker.dart';
+// import 'inactive_offers_seeker.dart';
+// import 'offers_received_details.dart';
+// import 'received_offers_seeker.dart';
 import 'repair_page.dart';
-import 'requests_received_provider_details.dart';
+// import 'requests_received_provider_details.dart';
 
 class OwnerNotificationsPage extends StatefulWidget {
   final List<NotificationsModel> notifications;
@@ -329,22 +329,11 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
 
                                                   if (offersModel.status ==
                                                       'active') {
-                                                    UserController()
-                                                        .changeNotiOffers(
-                                                            5,
-                                                            false,
-                                                            userController
-                                                                .userModel!
-                                                                .userId,
-                                                            offersModel.offerId,
-                                                            userController
-                                                                .userModel!
-                                                                .accountType);
-                                                    Get.to(() =>
-                                                        ReceivedOffersSeeker(
-                                                          offersModel:
-                                                              offersModel,
-                                                        ));
+                                                    // Get.to(() =>
+                                                    //     ReceivedOffersSeeker(
+                                                    //       offersModel:
+                                                    //           offersModel,
+                                                    //     ));
                                                   } else {
                                                     toastification.show(
                                                       closeButtonShowType:
@@ -433,54 +422,32 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                       OffersModel.fromJson(
                                                           requestSnap);
 
-                                                  UserController()
-                                                      .changeNotiOffers(
-                                                          6,
-                                                          false,
-                                                          userController
-                                                              .userModel!
-                                                              .userId,
-                                                          offersModel.offerId,
-                                                          userController
-                                                              .userModel!
-                                                              .accountType);
                                                   Get.close(1);
                                                   if (offersReceivedModel
                                                           .status ==
                                                       'Pending') {
-                                                    UserController()
-                                                        .changeNotiOffers(
-                                                            5,
-                                                            false,
-                                                            userController
-                                                                .userModel!
-                                                                .userId,
-                                                            offersModel.offerId,
-                                                            userController
-                                                                .userModel!
-                                                                .accountType);
-                                                    Get.to(() =>
-                                                        ReceivedOffersSeeker(
-                                                          offersModel:
-                                                              offersModel,
-                                                          offersReceivedModel:
-                                                              offersReceivedModel,
-                                                        ));
+                                                    // Get.to(() =>
+                                                    // ReceivedOffersSeeker(
+                                                    //   offersModel:
+                                                    //       offersModel,
+                                                    //   offersReceivedModel:
+                                                    //       offersReceivedModel,
+                                                    // ));
                                                   } else {
-                                                    Get.to(() =>
-                                                        InActiveOffersSeeker(
-                                                          offersModel:
-                                                              offersModel,
-                                                          isFromNoti: true,
-                                                          offersReceivedModel:
-                                                              offersReceivedModel,
-                                                          tittle: offersReceivedModel
-                                                                      .status ==
-                                                                  'ignore'
-                                                              ? 'Ignored'
-                                                              : offersReceivedModel
-                                                                  .status,
-                                                        ));
+                                                    // Get.to(() =>
+                                                    //     InActiveOffersSeeker(
+                                                    //       offersModel:
+                                                    //           offersModel,
+                                                    //       isFromNoti: true,
+                                                    //       offersReceivedModel:
+                                                    //           offersReceivedModel,
+                                                    //       tittle: offersReceivedModel
+                                                    //                   .status ==
+                                                    //               'ignore'
+                                                    //           ? 'Ignored'
+                                                    //           : offersReceivedModel
+                                                    //               .status,
+                                                    //     ));
                                                   }
                                                 }
                                               },

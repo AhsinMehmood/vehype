@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -15,18 +17,20 @@ import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
+import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Pages/repair_page.dart';
-import 'package:vehype/Widgets/offer_request_details.dart';
+// import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
+import '../Controllers/notification_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
 import 'loading_dialog.dart';
-import 'request_vehicle_details.dart';
+// import 'request_vehicle_details.dart';
 
 class SelectDateAndPrice extends StatefulWidget {
   final OffersModel offersModel;
@@ -77,9 +81,6 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
     final GarageController garageController =
         Provider.of<GarageController>(context);
 
-    String title = widget.offersModel.vehicleId != ''
-        ? '${widget.offersModel.vehicleId.split(',')[1].trim()} ${widget.offersModel.vehicleId.split(',')[2].trim()} ${widget.offersModel.vehicleId.split(',')[3].trim()}'
-        : '';
     return WillPopScope(
       onWillPop: () async {
         garageController.disposeController();
@@ -147,7 +148,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                title.trim(),
+                                'widget.offersModel.title',
                                 maxLines: 2,
                                 style: TextStyle(
                                   // color: Colors.black,
@@ -238,9 +239,14 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                           FocusScope.of(context).requestFocus(FocusNode());
                         },
                         controller: priceController,
-                        maxLength: 6,
+                        maxLength: 12,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*')),
+                        ],
                         decoration: InputDecoration(
                             border: InputBorder.none,
+                            counter: const SizedBox.shrink(),
                             focusedBorder: InputBorder.none,
                             prefixText: '\$ ',
                             hintStyle: TextStyle(
@@ -264,6 +270,21 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                           fontSize: 28,
                         ),
                         // maxLength: 25,
+                        onChanged: (String value) {
+                          if (value.isEmpty) {
+                            setState(() {
+                              // showDateWarning = false;
+                              // showEndDateWarning = false;
+                              showPriceWarning = true;
+                            });
+                          } else {
+                            setState(() {
+                              // showDateWarning = false;
+                              // showEndDateWarning = false;
+                              showPriceWarning = false;
+                            });
+                          }
+                        },
                         // onChanged: (String value) =>
                         //     garageController.selectPrcie(double.parse(value)),
                       ),
@@ -271,15 +292,19 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         height: 10,
                       ),
                       if (showPriceWarning)
-                        Text(
-                          'Price is required.*',
-                          style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w400,
-                            color: Colors.red,
-                            // color: Colors.black,
-                            fontSize: 16,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'Price is required.*',
+                              style: TextStyle(
+                                fontFamily: 'Avenir',
+                                fontWeight: FontWeight.w400,
+                                color: Colors.red,
+                                // color: Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       const SizedBox(
                         height: 1,
@@ -318,6 +343,12 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             decoration: InputDecoration(
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,
+                                hintStyle: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.w400,
+                                  color: changeColor(color: '7B7B7B'),
+                                  fontSize: 14,
+                                ),
                                 hintText:
                                     'Explain the details. e.g. Service, Parts'
                                 // counter: const SizedBox.shrink(),
@@ -397,6 +428,11 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                 );
                                 if (dateTime != null) {
                                   garageController.selectStartDate(dateTime);
+                                  setState(() {
+                                    showDateWarning = false;
+                                    // showEndDateWarning = false;
+                                    // showPriceWarning = false;
+                                  });
                                 }
                               },
                               child: Container(
@@ -527,6 +563,11 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                             'End date and time cannot be same or after start date and time'));
                                   } else {
                                     garageController.selectEndDate(dateTime);
+                                    setState(() {
+                                      // showDateWarning = false;
+                                      showEndDateWarning = false;
+                                      // showPriceWarning = false;
+                                    });
                                   }
                                 }
                               },
@@ -580,7 +621,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Transform.scale(
-                              scale: 1.2,
+                              scale: 1.8,
                               child: Checkbox(
                                   activeColor: userController.isDark
                                       ? Colors.white
@@ -598,42 +639,53 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                   }),
                             ),
                             const SizedBox(
-                              width: 15,
+                              width: 3,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'I agree to VEHYPE ratings policy.',
-                                  style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
-                                    // color: Colors.black,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    await launchUrl(
-                                        Uri.parse('https://vehype.com/help#'));
-                                  },
-                                  child: Text(
-                                    ' See how rating works.',
-                                    style: TextStyle(
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Colors.red,
-                                      fontFamily: 'Avenir',
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w400,
-                                      // color: Colors.black,
-                                      fontSize: 16,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              'I acknowledge VEHYPE\'s ratings policy. ',
+                                          style: TextStyle(
+                                              fontFamily: 'Avenir',
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 16,
+                                              color: userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor
+                                              //  color: Colors.black,
+                                              ),
+                                        ),
+                                        TextSpan(
+                                          text: 'See how rating works',
+                                          style: TextStyle(
+                                            fontFamily: 'Avenir',
+                                            decorationColor: Colors.blueAccent,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16,
+                                            color: Colors.blueAccent,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () async {
+                                              await launchUrl(Uri.parse(
+                                                  'https://vehype.com/help#'));
+                                            },
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -655,8 +707,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             setState(() {});
                           }
                           if (garageController.startDate == null ||
-                              garageController.endDate == null ||
-                              !garageController.agreement) {
+                              garageController.endDate == null) {
                             setState(() {
                               if (garageController.startDate == null) {
                                 showDateWarning = true;
@@ -695,7 +746,36 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                 ),
                               );
                             } else {
-                              applyToJob(userModel, garageController, comment);
+                              if (garageController.agreement) {
+                                if (priceController.text == '.' ||
+                                    priceController.text == '.0') {
+                                  toastification.show(
+                                    title: Text('Price is invalid'),
+                                    style: ToastificationStyle.minimal,
+                                    context: context,
+                                    type: ToastificationType.error,
+                                    showProgressBar: true,
+                                    autoCloseDuration: Duration(
+                                      seconds: 3,
+                                    ),
+                                  );
+                                } else {
+                                  applyToJob(
+                                      userModel, garageController, comment);
+                                }
+                              } else {
+                                toastification.show(
+                                  title: Text(
+                                      'To continue sending offers, please review and acknowledge our VEHYPE ratings policy. Your acceptance is required to ensure a smooth experience and to comply with our guidelines.'),
+                                  style: ToastificationStyle.minimal,
+                                  context: context,
+                                  type: ToastificationType.error,
+                                  showProgressBar: true,
+                                  autoCloseDuration: Duration(
+                                    seconds: 7,
+                                  ),
+                                );
+                              }
                             }
                           }
                         },
@@ -737,7 +817,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
   applyToJob(
       UserModel userModel, GarageController garageController, comment) async {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
-
+    UserController userController =
+        Provider.of<UserController>(context, listen: false);
     if (widget.offersReceivedModel != null) {
       await FirebaseFirestore.instance
           .collection('offersReceived')
@@ -748,29 +829,31 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
       });
-      // userController.getRequestsHistoryProvider();
-      UserController().addToNotifications(
-          userModel,
-          widget.ownerModel.userId,
-          'offer',
-          widget.offersReceivedModel!.id,
-          'Offer Update',
-          '${userModel.name} updated his offer.');
-      sendNotification(
-          widget.ownerModel.userId,
-          userModel.name,
-          'Offer Update',
-          '${userModel.name} updated his offer.',
-          widget.offersReceivedModel!.id,
-          'offer',
-          'messageId');
-      UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
-          widget.offersModel.offerId, userModel.accountType);
+
+      NotificationController().sendNotification(
+          senderUser: userModel,
+          receiverUser: widget.ownerModel,
+          offerId: widget.offersModel.offerId,
+          requestId: widget.offersReceivedModel!.id,
+          title: 'Service Offer Updated',
+          subtitle:
+              '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
+
+      OffersController().updateNotificationForOffers(
+          offerId: widget.offersModel.offerId,
+          userId: widget.ownerModel.userId,
+          isAdd: true,
+          offersReceived: widget.offersReceivedModel!.id,
+          checkByList: widget.offersModel.checkByList,
+          notificationTitle: '${userModel.name} updated his offer.',
+          notificationSubtitle:
+              '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
+
       Get.close(2);
 
       garageController.closeOfferSubmit();
     } else {
-      await FirebaseFirestore.instance
+      await FirebaseFirestore.instance 
           .collection('offers')
           .doc(widget.offersModel.offerId)
           .update({
@@ -789,29 +872,27 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'endDate': garageController.endDate!.toUtc().toIso8601String(),
         'comment': comment.text,
       });
-      UserController().addToNotifications(
-          userModel,
-          widget.ownerModel.userId,
-          'offer',
-          reference.id,
-          'Offer Update',
-          '${userModel.name} Sent you an offer.');
+
       garageController.closeOfferSubmit();
-      sendNotification(
-          widget.ownerModel.userId,
-          userModel.name,
-          'Offer Update',
-          '${userModel.name} Sent you an offer.',
-          reference.id,
-          'offer',
-          'messageId');
-      UserController().changeNotiOffers(5, true, widget.ownerModel.userId,
-          widget.offersModel.offerId, userModel.accountType);
-      if (widget.chatId != null) {
-        if (widget.chatId != null) {
-          ChatController().updateChatRequestId(widget.chatId!, reference.id);
-        }
-      }
+      await NotificationController().sendNotification(
+          senderUser: userModel,
+          receiverUser: widget.ownerModel,
+          offerId: widget.offersModel.offerId,
+          requestId: reference.id,
+          title: 'New Offer for Your Request',
+          subtitle:
+              '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
+      OffersController().updateNotificationForOffers(
+          offerId: widget.offersModel.offerId,
+          userId: widget.ownerModel.userId,
+          isAdd: true,
+          offersReceived: reference.id,
+          checkByList: widget.offersModel.checkByList,
+          notificationTitle: '${userModel.name} has submitted an offer.',
+          notificationSubtitle:
+              'Tap here to review and respond.');
+
+      // ChatController().updateChatRequestId(widget.chatId!, reference.id);
       // if (widget.chatId != null) {
       Get.close(3);
       // } else {

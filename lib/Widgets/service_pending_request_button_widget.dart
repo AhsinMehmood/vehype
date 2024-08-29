@@ -6,7 +6,10 @@ import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 
+import '../Controllers/notification_controller.dart';
+import '../Controllers/offers_controller.dart';
 import '../Models/chat_model.dart';
+import '../Models/garage_model.dart';
 import '../Models/offers_model.dart';
 import '../Models/user_model.dart';
 
@@ -20,10 +23,11 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
   final String? chatId;
   final OffersReceivedModel offersReceivedModel;
-
+  final GarageModel garageModel;
   const ServicePendingPageButtonWidget(
       {super.key,
       required this.offersModel,
+      required this.garageModel,
       this.chatId,
       required this.offersReceivedModel});
 
@@ -79,7 +83,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                     height: 10,
                                   ),
                                   Text(
-                                    'Are you sure? The vehicle owner will be notified, and they can still rate you.',
+                                    'Cancel Offer Confirmation',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 20,
@@ -102,22 +106,26 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                         'status': 'Cancelled',
                                         'cancelBy': 'provider',
                                       });
+                                      ChatModel? chatModel =
+                                          await ChatController().getChat(
+                                              userController.userModel!.userId,
+                                              offersModel.ownerId,
+                                              offersModel.offerId);
+                                      if (chatModel != null) {
+                                        ChatController().updateChatToClose(
+                                            chatModel.id,
+                                            '${userController.userModel!.name} has withdrawn their offer.');
+                                      }
+                                      //TODO Send Rating by Owner to Provider
 
-                                      UserController().addToNotifications(
-                                          userController.userModel!,
-                                          offersReceivedModel.ownerId,
-                                          'offer',
-                                          offersReceivedModel.id,
-                                          'Offer Update',
-                                          '${userController.userModel!.name} Cancelled the Offer.');
-                                      sendNotification(
-                                          offersModel.ownerId,
-                                          userController.userModel!.name,
-                                          'Cancelled The Offer',
-                                          'contents',
-                                          offersReceivedModel.id,
-                                          'offer',
-                                          '');
+                                      // sendNotification(
+                                      //     offersModel.ownerId,
+                                      //     userController.userModel!.name,
+                                      //     'Cancelled The Offer',
+                                      //     'contents',
+                                      //     offersReceivedModel.id,
+                                      //     'offer',
+                                      //     '');
                                       Get.close(2);
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -212,6 +220,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                         .collection('users')
                         .doc(offersReceivedModel.ownerId)
                         .get();
+
                 UserModel ownerDetails = UserModel.fromJson(snap);
                 ChatModel? chatModel = await ChatController().getChat(
                     userController.userModel!.userId,
@@ -235,6 +244,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                         chatModel: newchat!,
                         offersModel: offersModel,
                         secondUser: ownerDetails,
+                        garageModel: garageModel,
                       ));
                 } else {
                   await ChatController().updateChatRequestId(
@@ -243,6 +253,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
 
                   Get.to(() => MessagePage(
                         chatModel: chatModel,
+                        garageModel: garageModel,
                         secondUser: ownerDetails,
                         offersModel: offersModel,
                       ));
@@ -285,6 +296,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
           InkWell(
             onTap: () async {
               Get.dialog(LoadingDialog(), barrierDismissible: false);
+
               DocumentSnapshot<Map<String, dynamic>> ownerSnap =
                   await FirebaseFirestore.instance
                       .collection('users')
@@ -329,9 +341,11 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
   final String? chatId;
   final OffersReceivedModel offersReceivedModel;
+  final GarageModel garageModel;
 
   const ServicePendingRequestButtonWidget(
       {super.key,
+      required this.garageModel,
       required this.offersModel,
       this.chatId,
       required this.offersReceivedModel});
@@ -358,6 +372,14 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
+              OffersController().updateNotificationForOffers(
+                  offerId: offersModel.offerId,
+                  userId: userController.userModel!.userId,
+                  isAdd: false,
+                  notificationTitle: '',
+                  offersReceived: offersReceivedModel.id,
+                  checkByList: offersModel.checkByList,
+                  notificationSubtitle: '');
               showModalBottomSheet(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -388,7 +410,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                     height: 10,
                                   ),
                                   Text(
-                                    'Are you sure? The vehicle owner will be notified, and they can still rate you.',
+                                    'Cancel Offer Confirmations',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 20,
@@ -411,22 +433,32 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                         'status': 'Cancelled',
                                         'cancelBy': 'provider',
                                       });
+                                      // DocumentSnapshot<Map<String, dynamic>>
+                                      //     offerByQuery = await FirebaseFirestore
+                                      //         .instance
+                                      //         .collection('users')
+                                      //         .doc(offersReceivedModel.ownerId)
+                                      //         .get();
+                                      // NotificationController().sendNotification(
+                                      //     senderUser: userController.userModel!,
+                                      //     receiverUser:
+                                      //         UserModel.fromJson(offerByQuery),
+                                      //     offerId: offersModel.offerId,
+                                      //     requestId: offersReceivedModel.id,
+                                      //     title: 'Offer Update',
+                                      //     subtitle:
+                                      //         '${userController.userModel!.name} has withdrawn their offer.');
+                                      ChatModel? chatModel =
+                                          await ChatController().getChat(
+                                              userController.userModel!.userId,
+                                              offersModel.ownerId,
+                                              offersModel.offerId);
+                                      if (chatModel != null) {
+                                        ChatController().updateChatToClose(
+                                            chatModel.id,
+                                            '${userController.userModel!.name} has withdrawn their offer.');
+                                      }
 
-                                      UserController().addToNotifications(
-                                          userController.userModel!,
-                                          offersReceivedModel.ownerId,
-                                          'offer',
-                                          offersReceivedModel.id,
-                                          'Offer Update',
-                                          '${userController.userModel!.name} Cancelled the Offer.');
-                                      sendNotification(
-                                          offersModel.ownerId,
-                                          userController.userModel!.name,
-                                          'Cancelled The Offer',
-                                          'contents',
-                                          offersReceivedModel.id,
-                                          'offer',
-                                          '');
                                       Get.close(2);
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -521,6 +553,15 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                         .collection('users')
                         .doc(offersReceivedModel.ownerId)
                         .get();
+
+                OffersController().updateNotificationForOffers(
+                    offerId: offersModel.offerId,
+                    userId: userController.userModel!.userId,
+                    isAdd: false,
+                    offersReceived: offersReceivedModel.id,
+                    checkByList: offersModel.checkByList,
+                    notificationTitle: '',
+                    notificationSubtitle: '');
                 UserModel ownerDetails = UserModel.fromJson(snap);
                 ChatModel? chatModel = await ChatController().getChat(
                     userController.userModel!.userId,
@@ -542,6 +583,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                   Get.close(1);
                   Get.to(() => MessagePage(
                         chatModel: newchat!,
+                        garageModel: garageModel,
                         offersModel: offersModel,
                         secondUser: ownerDetails,
                       ));
@@ -554,6 +596,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                         chatModel: chatModel,
                         secondUser: ownerDetails,
                         offersModel: offersModel,
+                        garageModel: garageModel,
                       ));
                 }
               },
@@ -593,6 +636,14 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
             ),
           InkWell(
             onTap: () async {
+              OffersController().updateNotificationForOffers(
+                  offerId: offersModel.offerId,
+                  userId: userController.userModel!.userId,
+                  isAdd: false,
+                  offersReceived: offersReceivedModel.id,
+                  checkByList: offersModel.checkByList,
+                  notificationTitle: '',
+                  notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(
                   offersModel: offersModel,
                   offersReceivedModel: offersReceivedModel));
