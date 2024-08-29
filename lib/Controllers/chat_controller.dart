@@ -13,6 +13,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:vehype/Controllers/notification_controller.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/message_model.dart';
@@ -361,7 +362,8 @@ class ChatController with ChangeNotifier {
       UserModel secondUser,
       String mediaUrls,
       String thumbnailUrl,
-      bool isVide) async {
+      bool isVide,
+      OffersModel offersModel) async {
     DatabaseReference reference = _messagesRef.child(chatModel.id).push();
     await reference.set({
       'sentAt': DateTime.now().toUtc().toIso8601String(),
@@ -376,18 +378,11 @@ class ChatController with ChangeNotifier {
       'state': 0,
     });
 
-    // notifyListeners();
-    //TODO Send New Message Notification
-    // sendNotification(
-    //   secondUser.userId,
-    //   currentUser.name,
-    //   'New Message',
-    //   '${currentUser.name}, Sent you a message',
-    //   chatModel.id,
-    //   'Message',
-    //   reference.key!,
-    // );
-
+    NotificationController().sendMessageNotification(
+        senderUser: secondUser,
+        receiverUser: currentUser,
+        offersModel: offersModel,
+        chatId: chatModel.id);
     await FirebaseFirestore.instance
         .collection('chats')
         .doc(chatModel.id)

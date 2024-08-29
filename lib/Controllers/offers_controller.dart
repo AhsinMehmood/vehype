@@ -154,12 +154,12 @@ class OffersController {
             .updateChatRequestId(chatModel.id, offersReceivedModel.id);
         Get.close(2);
 
-        Get.to(() => MessagePage(
-              chatModel: chatModel,
-              offersModel: offersModel,
-              secondUser: postedByDetails,
-              garageModel: garageModel,
-            ));
+        // Get.to(() => MessagePage(
+        //       chatModel: chatModel,
+        //       offersModel: offersModel,
+        //       secondUser: postedByDetails,
+        //       garageModel: garageModel,
+        //     ));
       }
     }
   }

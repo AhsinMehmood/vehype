@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
@@ -49,6 +50,14 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                       Get.dialog(LoadingDialog(), barrierDismissible: false);
                       await OwnerOffersController()
                           .ignoreOffer(offersModel, offersReceivedModel);
+                      OffersController().updateNotificationForOffers(
+                          offerId: offersModel.offerId,
+                          userId: userController.userModel!.userId,
+                          checkByList: offersModel.checkByList,
+                          isAdd: false,
+                          offersReceived: offersReceivedModel.id,
+                          notificationTitle: '',
+                          notificationSubtitle: '');
                       ChatModel? chatModel = await ChatController().getChat(
                           userController.userModel!.userId,
                           offersModel.ownerId,

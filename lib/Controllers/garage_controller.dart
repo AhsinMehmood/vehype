@@ -703,6 +703,7 @@ class GarageController with ChangeNotifier {
     endDate = null;
     startDate = null;
     price = 0.0;
+    agreement = false;
     notifyListeners();
   }
 }

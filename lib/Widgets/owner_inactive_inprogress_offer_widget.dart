@@ -21,6 +21,7 @@ import '../Pages/full_image_view_page.dart';
 import '../Pages/second_user_profile.dart';
 import '../const.dart';
 import 'owner_cancel_offer_confirmation_sheet.dart';
+import 'owner_ignore_offer_confirmation_widget.dart';
 import 'select_date_and_price.dart';
 
 class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
@@ -576,6 +577,161 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
+                      if (offersReceivedModel.status == 'ignore')
+                        Column(
+                          children: [
+                            const SizedBox(
+                              height: 40,
+                            ),
+                            Text(
+                              'This offer was ignored by ${userModel.name}',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
+                      if (offersReceivedModel.status == 'Pending')
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                Get.bottomSheet(
+                                    OwnerIgnoreOfferConfirmationWidget(
+                                        userController: userController,
+                                        offersModel: offersModel,
+                                        offersReceivedModel:
+                                            offersReceivedModel));
+                              },
+                              child: Container(
+                                height: 50,
+                                width: chatId != null
+                                    ? Get.width * 0.43
+                                    : Get.width * 0.28,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Ignore',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (chatId == null)
+                              InkWell(
+                                onTap: () async {
+                                  DocumentSnapshot<Map<String, dynamic>>
+                                      offerByQuery = await FirebaseFirestore
+                                          .instance
+                                          .collection('users')
+                                          .doc(offersReceivedModel.offerBy)
+                                          .get();
+                                  // Get.close(1);
+
+                                  await OffersController().chatWithOffer(
+                                      userModel,
+                                      UserModel.fromJson(offerByQuery),
+                                      offersModel,
+                                      offersReceivedModel,
+                                      garageModel);
+                                },
+                                child: Container(
+                                  height: 50,
+                                  width: Get.width * 0.28,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Chat',
+                                      style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            InkWell(
+                              onTap: () async {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    offerByQuery = await FirebaseFirestore
+                                        .instance
+                                        .collection('users')
+                                        .doc(offersReceivedModel.offerBy)
+                                        .get();
+                                OffersController().acceptOffer(
+                                    offersReceivedModel,
+                                    offersModel,
+                                    userModel,
+                                    UserModel.fromJson(offerByQuery),
+                                    chatId,
+                                    garageModel);
+
+                                NotificationController().sendNotification(
+                                    senderUser: userController.userModel!,
+                                    receiverUser:
+                                        UserModel.fromJson(offerByQuery),
+                                    offerId: offersModel.offerId,
+                                    requestId: offersReceivedModel.id,
+                                    title: 'Good News: Offer Accepted',
+                                    subtitle:
+                                        '${userController.userModel!.name} has accepted your offer. Tap here to review.');
+
+                                OffersController().updateNotificationForOffers(
+                                    offerId: offersModel.offerId,
+                                    userId:
+                                        UserModel.fromJson(offerByQuery).userId,
+                                    isAdd: true,
+                                    offersReceived: offersReceivedModel.id,
+                                    checkByList: offersModel.checkByList,
+                                    notificationTitle:
+                                        '${userController.userModel!.name} has accepted your offer',
+                                    notificationSubtitle:
+                                        '${userController.userModel!.name} has accepted your offer. Tap here to review.');
+                              },
+                              child: Container(
+                                height: 50,
+                                width: chatId != null
+                                    ? Get.width * 0.43
+                                    : Get.width * 0.28,
+                                decoration: BoxDecoration(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Accept',
+                                    style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       if (offersReceivedModel.status == 'Upcoming')
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

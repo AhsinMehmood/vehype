@@ -60,73 +60,6 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              const SizedBox(
-                width: 10,
-              ),
-              InkWell(
-                onTap: () {
-                  if (isAll) {
-                  } else {
-                    setState(() {
-                      isAll = true;
-                    });
-                  }
-                },
-                child: Container(
-                  height: 30,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: isAll ? Colors.green : Colors.blueGrey,
-                  ),
-                  // padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                  child: Center(
-                    child: Text(
-                      'All',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              InkWell(
-                onTap: () {
-                  if (isAll) {
-                    setState(() {
-                      isAll = false;
-                    });
-                  } else {}
-                },
-                child: Container(
-                  height: 30,
-                  width: 90,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: isAll ? Colors.blueGrey : Colors.green,
-                  ),
-                  // padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                  child: Center(
-                    child: Text(
-                      'Unread',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
           // const SizedB
           StreamBuilder<List<NotificationsModel>>(
               initialData: widget.notifications,
@@ -167,12 +100,12 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                 return Expanded(
                   child: Column(
                     children: [
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      // const SizedBox(
+                      //   height: 15,
+                      // ),
+                      // const SizedBox(
+                      //   height: 10,
+                      // ),
                       Expanded(
                         child: ListView.builder(
                             itemCount: notificationsStream.length,

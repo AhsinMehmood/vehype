@@ -19,6 +19,7 @@ import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Pages/repair_page.dart';
@@ -848,12 +849,18 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           notificationTitle: '${userModel.name} updated his offer.',
           notificationSubtitle:
               '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
-
+      // ChatController().updateChatRequestId(widget.chatId!, widget.offersModel.offerId);
+      ChatModel? chatModel = await ChatController().getChat(userModel.userId,
+          widget.ownerModel.userId, widget.offersModel.offerId);
+      if (chatModel != null) {
+        ChatController()
+            .updateChatRequestId(chatModel.id, widget.offersReceivedModel!.id);
+      }
       Get.close(2);
 
       garageController.closeOfferSubmit();
     } else {
-      await FirebaseFirestore.instance 
+      await FirebaseFirestore.instance
           .collection('offers')
           .doc(widget.offersModel.offerId)
           .update({
@@ -873,7 +880,6 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         'comment': comment.text,
       });
 
-      garageController.closeOfferSubmit();
       await NotificationController().sendNotification(
           senderUser: userModel,
           receiverUser: widget.ownerModel,
@@ -889,10 +895,14 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           offersReceived: reference.id,
           checkByList: widget.offersModel.checkByList,
           notificationTitle: '${userModel.name} has submitted an offer.',
-          notificationSubtitle:
-              'Tap here to review and respond.');
+          notificationSubtitle: 'Tap here to review and respond.');
+      ChatModel? chatModel = await ChatController().getChat(userModel.userId,
+          widget.ownerModel.userId, widget.offersModel.offerId);
+      if (chatModel != null) {
+        ChatController().updateChatRequestId(chatModel.id, reference.id);
+      }
+      garageController.closeOfferSubmit();
 
-      // ChatController().updateChatRequestId(widget.chatId!, reference.id);
       // if (widget.chatId != null) {
       Get.close(3);
       // } else {

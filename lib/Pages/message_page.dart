@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -161,14 +162,6 @@ class _MessagePageState extends State<MessagePage> {
                                             if (offersModel.status ==
                                                 'active') {
                                               Get.to(() =>
-                                                  OwnerActiveRequestDetails(
-                                                    offersModel: offersModel,
-                                                    chatId: widget.chatModel.id,
-                                                    // offersReceivedModel:
-                                                    //     offersReceivedModel,
-                                                  ));
-                                            } else {
-                                              Get.to(() =>
                                                   OwnerRequestDetailsInprogressInactivePage(
                                                     offersModel: offersModel,
                                                     chatId: widget.chatModel.id,
@@ -177,14 +170,63 @@ class _MessagePageState extends State<MessagePage> {
                                                     offersReceivedModel:
                                                         offersReceivedModel!,
                                                   ));
+                                            } else if (offersModel.status ==
+                                                    'inProgress' ||
+                                                offersModel.status ==
+                                                    'inactive') {
+                                              if (offersModel
+                                                  .offersReceived.isNotEmpty) {
+                                                Get.to(() =>
+                                                    OwnerRequestDetailsInprogressInactivePage(
+                                                      offersModel: offersModel,
+                                                      chatId:
+                                                          widget.chatModel.id,
+                                                      garageModel:
+                                                          widget.garageModel,
+                                                      offersReceivedModel:
+                                                          offersReceivedModel!,
+                                                    ));
+                                              } else {
+                                                toastification.show(
+                                                  context: context,
+                                                  title: Text(
+                                                      'This request was deleted.'),
+                                                  autoCloseDuration:
+                                                      const Duration(
+                                                          seconds: 3),
+                                                );
+                                              }
                                             }
                                           } else {
-                                            Get.to(() => ServiceRequestDetails(
-                                                  offersModel: offersModel,
-                                                  chatId: chatModel.id,
-                                                  offersReceivedModel:
-                                                      offersReceivedModel,
-                                                ));
+                                            if (offersModel
+                                                .offersReceived.isNotEmpty) {
+                                              Get.to(() =>
+                                                  ServiceRequestDetails(
+                                                    offersModel: offersModel,
+                                                    chatId: chatModel.id,
+                                                    offersReceivedModel:
+                                                        offersReceivedModel,
+                                                  ));
+                                            } else {
+                                              if (offersReceivedModel == null) {
+                                                Get.to(() =>
+                                                    ServiceRequestDetails(
+                                                      offersModel: offersModel,
+                                                      chatId: chatModel.id,
+                                                      offersReceivedModel:
+                                                          offersReceivedModel,
+                                                    ));
+                                              } else {
+                                                toastification.show(
+                                                  context: context,
+                                                  title: Text(
+                                                      'This request was deleted.'),
+                                                  autoCloseDuration:
+                                                      const Duration(
+                                                          seconds: 3),
+                                                );
+                                              }
+                                            }
                                           }
                                         },
                                         child: Card(
@@ -718,17 +760,17 @@ class _MessagePageState extends State<MessagePage> {
                                                               .isEmpty) {
                                                             if (s.isNotEmpty) {
                                                               // chatController.cleanController();
-                                                              chatController
-                                                                  .sendMessage(
-                                                                      userModel,
-                                                                      widget
-                                                                          .chatModel,
-                                                                      s.trim(),
-                                                                      widget
-                                                                          .secondUser,
-                                                                      '',
-                                                                      '',
-                                                                      false);
+                                                              chatController.sendMessage(
+                                                                  userModel,
+                                                                  widget
+                                                                      .chatModel,
+                                                                  s.trim(),
+                                                                  widget
+                                                                      .secondUser,
+                                                                  '',
+                                                                  '',
+                                                                  false,
+                                                                  offersModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -756,7 +798,8 @@ class _MessagePageState extends State<MessagePage> {
                                                                   element
                                                                       .thumbnailUrl,
                                                                   element
-                                                                      .isVideo);
+                                                                      .isVideo,
+                                                                  offersModel);
                                                               messageScrollController
                                                                   .jumpTo(0);
                                                               chatController
@@ -785,18 +828,20 @@ class _MessagePageState extends State<MessagePage> {
                                                                 .isDark
                                                             ? Colors.white
                                                             : primaryColor,
+                                                        fontWeight:
+                                                            FontWeight.w400,
                                                       ),
                                                       controller:
                                                           textMessageController,
                                                       decoration: BoxDecoration(
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(46),
+                                                                  .circular(6),
                                                           border: Border.all(
                                                             color: changeColor(
                                                                 color:
                                                                     'A9A9A9'),
-                                                            width: 2,
+                                                            width: 0.5,
                                                           )),
                                                     ),
                                                   ),
@@ -837,8 +882,7 @@ class _MessagePageState extends State<MessagePage> {
                                                             BoxDecoration(
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(
-                                                                      200),
+                                                                  .circular(6),
                                                           color: userController
                                                                   .isDark
                                                               ? Colors.white
@@ -854,29 +898,8 @@ class _MessagePageState extends State<MessagePage> {
                                                       ),
                                                     )
                                                   else
-                                                    IconButton(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(0),
-                                                        onPressed: () {
-                                                          if (checkBadWords(
-                                                                  textMessageController
-                                                                      .text)
-                                                              .isNotEmpty) {
-                                                            Get.showSnackbar(
-                                                                GetSnackBar(
-                                                              message:
-                                                                  'Vulgar language detected in your input. Please refrain from using inappropriate language.',
-                                                              duration:
-                                                                  const Duration(
-                                                                      seconds:
-                                                                          3),
-                                                              snackPosition:
-                                                                  SnackPosition
-                                                                      .TOP,
-                                                            ));
-                                                            return;
-                                                          }
+                                                    InkWell(
+                                                        onTap: () {
                                                           if (chatController
                                                               .pickedMedia
                                                               .isEmpty) {
@@ -894,7 +917,8 @@ class _MessagePageState extends State<MessagePage> {
                                                                       .secondUser,
                                                                   '',
                                                                   '',
-                                                                  false);
+                                                                  false,
+                                                                  offersModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -930,7 +954,8 @@ class _MessagePageState extends State<MessagePage> {
                                                                   element
                                                                       .thumbnailUrl,
                                                                   element
-                                                                      .isVideo);
+                                                                      .isVideo,
+                                                                  offersModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -947,12 +972,30 @@ class _MessagePageState extends State<MessagePage> {
                                                             }
                                                           }
                                                         },
-                                                        icon: Image.asset(
-                                                          'assets/send.png',
-                                                          color: userController
-                                                                  .isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          6),
+                                                              color: userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                  : primaryColor),
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(5),
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .all(5),
+                                                          child:
+                                                              SvgPicture.asset(
+                                                            'assets/send.svg',
+                                                            color: userController
+                                                                    .isDark
+                                                                ? primaryColor
+                                                                : Colors.white,
+                                                          ),
                                                         ))
                                                 ],
                                               ),

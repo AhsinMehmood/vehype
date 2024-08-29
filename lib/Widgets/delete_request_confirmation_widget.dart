@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vehype/Controllers/chat_controller.dart';
+import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
@@ -52,12 +54,36 @@ class DeleteRequestConfirmationWidget extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () async {
                       Get.close(1);
+                      QuerySnapshot<Map<String, dynamic>> chatsSnap =
+                          await FirebaseFirestore.instance
+                              .collection('chats')
+                              .where('offerId', isEqualTo: offersModel.offerId)
+                              .get();
+
+                      for (var element in chatsSnap.docs) {
+                        await ChatController().updateChatToClose(
+                            element.id, 'The request has been deleted.');
+                      }
+                      QuerySnapshot<Map<String, dynamic>> offersReceivedSnap =
+                          await FirebaseFirestore.instance
+                              .collection('offersReceived')
+                              .where('offerId', isEqualTo: offersModel.offerId)
+                              .get();
+                      for (var element in offersReceivedSnap.docs) {
+                        await FirebaseFirestore.instance
+                            .collection('offersReceived')
+                            .doc(element.id)
+                            .update({
+                          'checkByList': [],
+                        });
+                      }
                       await FirebaseFirestore.instance
                           .collection('offers')
                           .doc(offersModel.offerId)
                           .update({
                         'status': 'inactive',
                         'offersReceived': [],
+                        'checkByList': [],
                       });
                     },
                     style: ElevatedButton.styleFrom(
