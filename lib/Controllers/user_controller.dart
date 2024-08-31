@@ -548,7 +548,7 @@ class UserController with ChangeNotifier {
     }
   }
 
-  String currentVersion = '3.0.3.12';
+  String currentVersion = '3.0.3.67';
 
   Future<bool> checkVersion() async {
     DocumentSnapshot<Map<String, dynamic>> snap =

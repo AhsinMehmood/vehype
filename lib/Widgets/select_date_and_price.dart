@@ -20,6 +20,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Pages/repair_page.dart';
@@ -37,10 +38,12 @@ class SelectDateAndPrice extends StatefulWidget {
   final OffersModel offersModel;
   final String? chatId;
   final UserModel ownerModel;
+  final GarageModel garageModel;
   final OffersReceivedModel? offersReceivedModel;
   const SelectDateAndPrice(
       {super.key,
       required this.offersModel,
+      required this.garageModel,
       this.chatId,
       required this.ownerModel,
       required this.offersReceivedModel});
@@ -107,9 +110,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
             widget.offersReceivedModel != null ? 'Update Offer' : 'Send Offer',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
-              fontFamily: 'Avenir',
             ),
           ),
           centerTitle: true,
@@ -131,16 +133,15 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if (widget.offersModel.imageOne != '')
-                          ExtendedImage.network(
-                            widget.offersModel.imageOne,
-                            height: 50,
-                            width: 50,
-                            fit: BoxFit.cover,
-                            cache: true,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                        ExtendedImage.network(
+                          widget.garageModel.imageUrl,
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          cache: true,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         const SizedBox(
                           width: 8,
                         ),
@@ -149,12 +150,12 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'widget.offersModel.title',
+                                widget.garageModel.title,
                                 maxLines: 2,
                                 style: TextStyle(
                                   // color: Colors.black,
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w800,
+
+                                  fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -183,7 +184,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                     ' ',
                                     style: TextStyle(
                                       // color: Colors.black,
-                                      fontFamily: 'Avenir',
+
                                       fontWeight: FontWeight.w500,
                                       fontSize: 14,
                                     ),
@@ -192,8 +193,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                     widget.offersModel.issue,
                                     style: TextStyle(
                                       // color: Colors.black,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w800,
+
+                                      fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -832,7 +833,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       });
 
       NotificationController().sendNotification(
-         userIds: [widget.offersReceivedModel!.offerBy],
+          userIds: [widget.offersReceivedModel!.offerBy],
           offerId: widget.offersModel.offerId,
           requestId: widget.offersReceivedModel!.id,
           title: 'Service Offer Updated',

@@ -87,7 +87,6 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                           checkByList: offersModel.checkByList,
                           isAdd: false,
                           senderId: userController.userModel!.userId,
-
                           notificationTitle: '',
                           notificationSubtitle: '');
                       showDialog(
@@ -149,7 +148,6 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                           offersReceived: null,
                           isAdd: false,
                           senderId: userController.userModel!.userId,
-
                           checkByList: offersModel.checkByList,
                           notificationTitle: '',
                           notificationSubtitle: '');
@@ -244,14 +242,14 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                         offersReceived: null,
                         isAdd: false,
                         checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                        senderId: userController.userModel!.userId,
                         notificationTitle: '',
                         notificationSubtitle: '');
                     Get.close(1);
                     Get.to(() => SelectDateAndPrice(
                           offersModel: offersModel,
                           offersReceivedModel: null,
+                          garageModel: garageModel,
                           ownerModel: UserModel.fromJson(ownerSnap),
                         ));
                   },
@@ -347,8 +345,7 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                     offerId: offersModel.offerId,
                     userId: userController.userModel!.userId,
                     offersReceived: null,
-                          senderId: userController.userModel!.userId,
-
+                    senderId: userController.userModel!.userId,
                     checkByList: offersModel.checkByList,
                     isAdd: false,
                     notificationTitle: '',
@@ -408,8 +405,7 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                 OffersController().updateNotificationForOffers(
                     offerId: offersModel.offerId,
                     userId: userController.userModel!.userId,
-                          senderId: userController.userModel!.userId,
-
+                    senderId: userController.userModel!.userId,
                     isAdd: false,
                     notificationTitle: '',
                     checkByList: offersModel.checkByList,
@@ -495,8 +491,7 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: null,
                   checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(

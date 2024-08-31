@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:manage_calendar_events/manage_calendar_events.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/service_request_details.dart';
+import 'package:vehype/Widgets/calenders_list.dart';
 import 'package:vehype/Widgets/service_cancel_request_confirmation_sheet.dart';
 import 'package:vehype/Widgets/service_ignore_confirm.dart';
 
@@ -187,20 +189,43 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
             ),
           InkWell(
             onTap: () async {
-              _myPlugin.hasPermissions().then((value) async {
-                if (!value!) {
-                  _myPlugin.requestPermissions();
-                } else {
-                  List<Calendar>? calendar = await _myPlugin.getCalendars();
-                  print(calendar!.length);
-                  for (var element in calendar) {
-                    // print(element.accountName);
-                    // print(element.id);
-                    print(element.name);
-                    // print(element.ownerName);
+              if (offersReceivedModel.seekerEventId == '') {
+                _myPlugin.hasPermissions().then((value) async {
+                  if (!value!) {
+                    _myPlugin.requestPermissions();
+                  } else {
+                    List<Calendar> calendar =
+                        await _myPlugin.getCalendars() ?? [];
+                    if (calendar.isEmpty) {
+                      toastification.show(
+                          context: context,
+                          autoCloseDuration: Duration(seconds: 3),
+                          title: Text('No calendar found, please try again.'));
+                    } else {
+                      Get.bottomSheet(CalendersList(
+                        calenders: calendar,
+                        offersModel: offersModel,
+                        offersReceivedModel: offersReceivedModel,
+                      ));
+                    }
                   }
-                }
-              });
+                });
+              } else {
+                _myPlugin
+                    .deleteEvent(
+                        calendarId: offersReceivedModel.seekerCalendarId,
+                        eventId: offersReceivedModel.seekerEventId)
+                    .then((isDeleted) async {
+                  await FirebaseFirestore.instance
+                      .collection('offersReceived')
+                      .doc(offersReceivedModel.id)
+                      .update({
+                    'seekerEventId': '',
+                    'seekerCalendarId': '',
+                  });
+                  debugPrint('Is Event deleted: $isDeleted');
+                });
+              }
             },
             child: Container(
               height: 50,
@@ -214,7 +239,9 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  'Add to Calendar',
+                  offersReceivedModel.seekerEventId == ''
+                      ? 'Add to Calendar'
+                      : 'Remove Event',
                   style: TextStyle(
                     color: userController.isDark ? primaryColor : Colors.white,
                     fontSize: 14,
@@ -269,8 +296,7 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                   userId: userController.userModel!.userId,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   isAdd: false,
                   notificationTitle: '',
                   notificationSubtitle: '');
@@ -349,8 +375,7 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       ownerDetails.userId,
                       offersModel.offerId);
                   OffersController().updateNotificationForOffers(
-                          senderId: userController.userModel!.userId,
-
+                      senderId: userController.userModel!.userId,
                       offerId: offersModel.offerId,
                       userId: userController.userModel!.userId,
                       offersReceived: offersReceivedModel.id,
@@ -372,8 +397,7 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       userId: userController.userModel!.userId,
                       isAdd: false,
                       offersReceived: offersReceivedModel.id,
-                          senderId: userController.userModel!.userId,
-
+                      senderId: userController.userModel!.userId,
                       checkByList: offersModel.checkByList,
                       notificationTitle: '',
                       notificationSubtitle: '');
@@ -432,8 +456,7 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(

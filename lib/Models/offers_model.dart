@@ -132,27 +132,36 @@ class OffersReceivedModel {
   final String ratingOneImage;
   final String ratingTwoImage;
   final bool isDone;
-  OffersReceivedModel(
-      {required this.offerBy,
-      required this.cancelReason,
-      required this.commentOne,
-      required this.commentTwo,
-      required this.ratingOne,
-      required this.ratingTwo,
-      required this.checkByList,
-      required this.offerAt,
-      required this.comment,
-      required this.ownerId,
-      required this.cancelBy,
-      required this.id,
-      required this.offerId,
-      required this.price,
-      required this.startDate,
-      required this.endDate,
-      required this.isDone,
-      required this.ratingOneImage,
-      required this.ratingTwoImage,
-      required this.status});
+  final ownerEventId;
+  final ownerCalendarId;
+  final String seekerEventId;
+  final String seekerCalendarId;
+  OffersReceivedModel({
+    required this.offerBy,
+    required this.cancelReason,
+    required this.commentOne,
+    required this.commentTwo,
+    required this.ratingOne,
+    required this.ratingTwo,
+    required this.checkByList,
+    required this.offerAt,
+    required this.comment,
+    required this.ownerId,
+    required this.cancelBy,
+    required this.id,
+    required this.offerId,
+    required this.price,
+    required this.startDate,
+    required this.endDate,
+    required this.isDone,
+    required this.ratingOneImage,
+    required this.ratingTwoImage,
+    required this.status,
+    required this.ownerEventId,
+    this.ownerCalendarId,
+    required this.seekerEventId,
+    required this.seekerCalendarId,
+  });
 
   factory OffersReceivedModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snap) {
@@ -183,6 +192,10 @@ class OffersReceivedModel {
         ownerId: data['ownerId'] ?? '',
         commentOne: data['commentOne'] ?? '',
         isDone: data['isDone'] ?? false,
+        ownerEventId: data['ownerEventId'] ?? '',
+        ownerCalendarId: data['ownerCalendarId'] ?? '',
+        seekerCalendarId: data['seekerCalendarId'] ?? '',
+        seekerEventId: data['seekerEventId'] ?? '',
         commentTwo: data['commentTwo'] ?? '',
         offerId: data['offerId']);
   }

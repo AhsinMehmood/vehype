@@ -3,12 +3,15 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:manage_calendar_events/manage_calendar_events.dart';
 import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
+import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Widgets/calenders_list.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/Widgets/owner_complete_offer_confirmation_sheet.dart';
 import 'package:vehype/Widgets/owner_to_service_rating_sheet.dart';
@@ -221,6 +224,8 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                         height: 15,
                       ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +249,81 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          )
+                          ),
+                          if (offersReceivedModel.status == 'Upcoming')
+                            InkWell(
+                              onTap: () {
+                                final CalendarPlugin _myPlugin =
+                                    CalendarPlugin();
+
+                                if (offersReceivedModel.ownerCalendarId == '') {
+                                  _myPlugin
+                                      .hasPermissions()
+                                      .then((value) async {
+                                    if (!value!) {
+                                      _myPlugin.requestPermissions();
+                                    } else {
+                                      List<Calendar> calendar =
+                                          await _myPlugin.getCalendars() ?? [];
+                                      if (calendar.isEmpty) {
+                                        toastification.show(
+                                            context: context,
+                                            autoCloseDuration:
+                                                Duration(seconds: 3),
+                                            title: Text(
+                                                'No calendar found, please try again.'));
+                                      } else {
+                                        Get.bottomSheet(CalendersList(
+                                          calenders: calendar,
+                                          offersModel: offersModel,
+                                          offersReceivedModel:
+                                              offersReceivedModel,
+                                        ));
+                                      }
+                                    }
+                                  });
+                                } else {
+                                  CalendarPlugin()
+                                      .deleteEvent(
+                                          calendarId: offersReceivedModel
+                                              .ownerCalendarId,
+                                          eventId:
+                                              offersReceivedModel.ownerEventId)
+                                      .then((isDeleted) async {
+                                    await FirebaseFirestore.instance
+                                        .collection('offersReceived')
+                                        .doc(offersReceivedModel.id)
+                                        .update({
+                                      'ownerEventId': '',
+                                      'ownerCalendarId': '',
+                                    });
+                                    debugPrint('Is Event deleted: $isDeleted');
+                                  });
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(6),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    border: Border.all(
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                    )),
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  offersReceivedModel.ownerEventId == ''
+                                      ? 'Add to Calendar'
+                                      : 'Remove Event',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            )
                         ],
                       ),
                       const SizedBox(

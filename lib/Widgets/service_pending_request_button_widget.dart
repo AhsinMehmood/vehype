@@ -306,6 +306,7 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
               Get.to(() => SelectDateAndPrice(
                     offersModel: offersModel,
                     offersReceivedModel: offersReceivedModel,
+                    garageModel: garageModel,
                     ownerModel: UserModel.fromJson(ownerSnap),
                   ));
             },
@@ -379,8 +380,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                   notificationTitle: '',
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   notificationSubtitle: '');
               showModalBottomSheet(
                   shape: RoundedRectangleBorder(
@@ -562,8 +562,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                     isAdd: false,
                     offersReceived: offersReceivedModel.id,
                     checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                    senderId: userController.userModel!.userId,
                     notificationTitle: '',
                     notificationSubtitle: '');
                 UserModel ownerDetails = UserModel.fromJson(snap);
@@ -646,8 +645,7 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(

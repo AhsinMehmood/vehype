@@ -513,11 +513,10 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'App Version: 3.0.3.66',
+                        'App Version: 3.0.3.67',
                         style: TextStyle(
-                          fontSize: 17,
+                          fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          fontFamily: 'Avenir',
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor,
@@ -557,8 +556,8 @@ class LogoutConfirmation extends StatelessWidget {
               'Are you sure you want to logout?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontSize: 17,
               ),
             ),
             const SizedBox(
@@ -583,7 +582,7 @@ class LogoutConfirmation extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   )),
               child: Text(
-                'Logout',
+                'Log Out',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
