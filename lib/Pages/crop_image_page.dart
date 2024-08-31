@@ -32,28 +32,26 @@ class _CropImagePageState extends State<CropImagePage> {
 
   @override
   Widget build(BuildContext context) {
-    // final UserModel userModel = Provider.of<UserModel>(context);
+    final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
         leading: IconButton(
             onPressed: () {
               Get.back();
             },
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: Colors.black,
             )),
         title: Text(
           'Crop Profile Image',
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 17,
-            fontFamily: 'Avenir',
-            fontWeight: FontWeight.w600,
+            color: userController.isDark ? Colors.white : primaryColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,
@@ -101,19 +99,19 @@ class _CropImagePageState extends State<CropImagePage> {
               _controller.crop();
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                maximumSize: Size(Get.width * 0.8, 55),
-                minimumSize: Size(Get.width * 0.8, 55),
+                backgroundColor:
+                    userController.isDark ? Colors.white : primaryColor,
+                maximumSize: Size(Get.width * 0.8, 50),
+                minimumSize: Size(Get.width * 0.8, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(6),
                 )),
-            child: const Text(
+            child: Text(
               'Save',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontFamily: 'Avenir',
-                fontWeight: FontWeight.w800,
+                color: userController.isDark ? primaryColor : Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

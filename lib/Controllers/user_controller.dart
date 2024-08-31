@@ -25,6 +25,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
+import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
@@ -32,7 +33,9 @@ import 'package:vehype/Pages/crop_image_page.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:vehype/bad_words.dart';
+import '../Models/chat_model.dart';
 import '../Widgets/loading_dialog.dart';
+import 'offers_controller.dart';
 
 enum AccountType {
   seeker,
@@ -68,11 +71,32 @@ class UserController with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateStatusBarColor(bool isDark) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Makes status bar transparent
+      statusBarIconBrightness: isDark
+          ? Brightness.light
+          : Brightness.dark, // Sets the icon brightness
+    ));
+  }
+
   bool isDark = false;
+
   initTheme() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool theme = sharedPreferences.getBool('isDark') ?? false;
-    isDark = theme;
+
+    bool? theme = sharedPreferences.getBool('isDark');
+    // If the theme preference is not set, default to system theme
+    if (theme == null) {
+      // Check the system theme mode and set `isDark` accordingly
+      isDark =
+          WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    } else {
+      // Use the saved preference
+      isDark = theme;
+    }
+    updateStatusBarColor(isDark); // Update status bar color
+
     notifyListeners();
   }
 
@@ -80,6 +104,8 @@ class UserController with ChangeNotifier {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setBool('isDark', value);
     isDark = value;
+    updateStatusBarColor(isDark); // Update status bar color
+
     notifyListeners();
   }
 
@@ -93,13 +119,18 @@ class UserController with ChangeNotifier {
 
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
       streamSubscription;
-  void getUserStream(String userId) {
+  void getUserStream(String userId, {Function(UserModel)? onDataReceived}) {
     Stream<DocumentSnapshot<Map<String, dynamic>>> stream =
         FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
+
     streamSubscription = stream.listen((event) {
       UserModel newUserModel = UserModel.fromJson(event);
       _userModel = newUserModel;
       notifyListeners();
+
+      if (onDataReceived != null) {
+        onDataReceived(newUserModel);
+      }
     });
     notifyListeners();
   }
@@ -147,6 +178,7 @@ class UserController with ChangeNotifier {
 
     await OneSignal.logout();
     await GoogleSignIn().disconnect();
+    changeTabIndex(0);
 
     Get.close(1);
 
@@ -335,52 +367,171 @@ class UserController with ChangeNotifier {
   }
 
   deleteUserAccount(String userId) async {
-    try {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
-
-      Get.dialog(LoadingDialog(), barrierDismissible: false);
-      if (streamSubscription != null) {
-        streamSubscription!.cancel();
-      }
-      http.Response response = await http.get(
-          Uri.parse(
-              'https://us-central1-vehype-386313.cloudfunctions.net/deleteUserAccount?uid=$userId'),
-          headers: {
-            'Content-Type': 'application/json',
-          });
-      if (response.statusCode == 200) {
-        // MixpanelProvider().deletedAccountEvent(user: userModel, reason: reason);
-
-        sharedPreferences.clear();
-
-        // await FirebaseAuth.instance.currentUser!.delete();
-
-        GoogleSignIn().disconnect();
-        FirebaseAuth.instance.signOut();
-        Get.back();
-        // AwesomeNotifications().cancelAll();
-        OneSignal.logout();
-
-        Get.offAll(() => const SplashPage());
-        return;
-      } else {
-        Get.back();
-      }
-
-      // await FirebaseAuth.instance.currentUser!.reauthenticateWithPopup(provider)
-    } catch (exception, stackTrace) {
-      Get.back();
-      print(exception.toString());
-      // await Sentry.captureException(
-      //   exception,
-      //   stackTrace: stackTrace,
-      // );
-      // return {};
-    }
+    http.Response response = await http.get(
+        Uri.parse(
+            'https://us-central1-vehype-386313.cloudfunctions.net/deleteUserAccount?uid=$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+        });
   }
 
   bool isAdmin = false;
+
+  Future<void> handleUserAccountActions(UserModel userModel) async {
+    // Determine if the user is a 'seeker' or 'provider'
+    bool isSeeker = userModel.accountType == 'seeker';
+
+    // Fetch the relevant offers
+    QuerySnapshot<Map<String, dynamic>> offersSnap = await FirebaseFirestore
+        .instance
+        .collection(isSeeker ? 'offers' : 'offersReceived')
+        .where(isSeeker ? 'ownerId' : 'offerBy', isEqualTo: userModel.userId)
+        .get();
+
+    for (var element in offersSnap.docs) {
+      if (isSeeker) {
+        await _handleSeekerOffers(userModel, OffersModel.fromJson(element));
+      } else {
+        await _handleProviderOffers(
+            userModel, OffersReceivedModel.fromJson(element));
+      }
+    }
+  }
+
+  Future<void> _handleSeekerOffers(
+      UserModel userModel, OffersModel offersModel) async {
+    if (offersModel.status == 'active') {
+      await _rejectAllOffers(offersModel);
+      await FirebaseFirestore.instance
+          .collection('offers')
+          .doc(offersModel.offerId)
+          .update({
+        'status': 'inactive',
+        'offersReceived': [],
+        'checkByList': [],
+      });
+    } else {
+      await _cancelSeekerOffer(userModel, offersModel);
+    }
+  }
+
+  Future<void> _handleProviderOffers(
+      UserModel userModel, OffersReceivedModel offersReceivedModel) async {
+    DocumentSnapshot<Map<String, dynamic>> requestSnap = await FirebaseFirestore
+        .instance
+        .collection('offers')
+        .doc(offersReceivedModel.offerId)
+        .get();
+    OffersModel offersModel = OffersModel.fromJson(requestSnap);
+
+    OffersController().cancelOfferByService(
+        offersReceivedModel,
+        offersModel,
+        userModel.userId,
+        offersReceivedModel.offerBy,
+        'The request was automatically canceled.');
+
+    DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(offersReceivedModel.ownerId)
+        .get();
+
+    NotificationController().sendNotification(
+        userIds: [offersReceivedModel.ownerId],
+        offerId: offersModel.offerId,
+        requestId: offersReceivedModel.id,
+        title: 'Offer Cancellation Alert',
+        subtitle:
+            '${userModel.name} has canceled their offer. Rate and review their service.');
+
+    ChatModel? chatModel = await ChatController()
+        .getChat(userModel.userId, offersModel.ownerId, offersModel.offerId);
+    if (chatModel != null) {
+      ChatController().updateChatToClose(
+          chatModel.id, '${userModel.name} has canceled their offer.');
+    }
+
+    OffersController().updateNotificationForOffers(
+        offerId: offersModel.offerId,
+        senderId: userModel.userId,
+        userId: offersModel.ownerId,
+        isAdd: true,
+        offersReceived: offersReceivedModel.id,
+        checkByList: offersModel.checkByList,
+        notificationTitle: '${userModel.name} has canceled their offer.',
+        notificationSubtitle:
+            '${userModel.name} has canceled their offer. Rate and review their service.');
+  }
+
+  Future<void> _rejectAllOffers(OffersModel offersModel) async {
+    QuerySnapshot<Map<String, dynamic>> offersReceivedSnap =
+        await FirebaseFirestore.instance
+            .collection('offersReceived')
+            .where('offerId', isEqualTo: offersModel.offerId)
+            .get();
+
+    for (var element in offersReceivedSnap.docs) {
+      await FirebaseFirestore.instance
+          .collection('offersReceived')
+          .doc(element.id)
+          .update({
+        'checkByList': [],
+        'status': 'Rejected',
+      });
+    }
+  }
+
+  Future<void> _cancelSeekerOffer(
+      UserModel userModel, OffersModel offersModel) async {
+    QuerySnapshot<Map<String, dynamic>> offersReceivedSnap =
+        await FirebaseFirestore.instance
+            .collection('offersReceived')
+            .where('offerId', isEqualTo: offersModel.offerId)
+            .get();
+
+    for (var element in offersReceivedSnap.docs) {
+      OffersReceivedModel offersReceivedModel =
+          OffersReceivedModel.fromJson(element);
+
+      OffersController().cancelOfferByOwner(
+          offersReceivedModel,
+          offersModel,
+          userModel.userId,
+          offersReceivedModel.offerBy,
+          'The request was automatically canceled.');
+
+      NotificationController().sendNotification(
+          userIds: [offersReceivedModel.offerBy],
+          offerId: offersModel.offerId,
+          requestId: offersReceivedModel.id,
+          title: 'Offer Cancelled',
+          subtitle:
+              '${userModel.name} has cancelled the request. Click here to review.');
+
+      QuerySnapshot<Map<String, dynamic>> chatsSnap = await FirebaseFirestore
+          .instance
+          .collection('chats')
+          .where('offerId', isEqualTo: offersModel.offerId)
+          .get();
+
+      for (var chat in chatsSnap.docs) {
+        await ChatController()
+            .updateChatToClose(chat.id, 'The request has been deleted.');
+      }
+
+      OffersController().updateNotificationForOffers(
+          offerId: offersModel.offerId,
+          userId: offersReceivedModel.offerBy,
+          senderId: userModel.userId,
+          isAdd: true,
+          offersReceived: offersReceivedModel.id,
+          checkByList: offersModel.checkByList,
+          notificationTitle: '${userModel.name} has cancelled the request.',
+          notificationSubtitle:
+              '${userModel.name} has cancelled the request. Tap to review.');
+    }
+  }
 
   checkIsAdmin(String email) async {
     DocumentSnapshot<Map<String, dynamic>> snap =

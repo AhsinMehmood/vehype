@@ -15,6 +15,7 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/add_vehicle.dart';
 import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/Pages/vehicle_request_page.dart';
+import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -42,7 +43,7 @@ class MyGarage extends StatelessWidget {
           'My Garage',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -151,7 +152,7 @@ class MyGarage extends StatelessWidget {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(6),
                                   color: userController.isDark
                                       ? primaryColor
                                       : Colors.white,
@@ -174,8 +175,8 @@ class MyGarage extends StatelessWidget {
                                       },
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12),
+                                          topLeft: Radius.circular(6),
+                                          topRight: Radius.circular(6),
                                         ),
                                         child: CachedNetworkImage(
                                           imageUrl: garageModel.imageUrl,
@@ -188,7 +189,7 @@ class MyGarage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(
-                                    height: 10,
+                                    height: 0,
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -202,7 +203,6 @@ class MyGarage extends StatelessWidget {
                                               child: Text(
                                                 garageModel.title,
                                                 style: TextStyle(
-                                                  fontFamily: 'Avenir',
                                                   fontWeight: FontWeight.w700,
                                                   color: userController.isDark
                                                       ? Colors.white
@@ -216,6 +216,27 @@ class MyGarage extends StatelessWidget {
                                         const SizedBox(
                                           height: 10,
                                         ),
+                                        if (garageModel.submodel != '')
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  garageModel.submodel,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w400,
+                                                    color: userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        if (garageModel.submodel != '')
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
                                         Row(
                                           children: [
                                             SvgPicture.asset(
@@ -234,12 +255,11 @@ class MyGarage extends StatelessWidget {
                                             Text(
                                               garageModel.bodyStyle,
                                               style: TextStyle(
-                                                fontFamily: 'Avenir',
                                                 fontWeight: FontWeight.w400,
                                                 color: userController.isDark
                                                     ? Colors.white
                                                     : primaryColor,
-                                                fontSize: 14,
+                                                fontSize: 16,
                                               ),
                                             ),
                                           ],
@@ -248,31 +268,82 @@ class MyGarage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(
-                                    height: 20,
+                                    height: 10,
                                   ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      fixedSize: Size(Get.width * 0.8, 45),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(1),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          fixedSize: Size(Get.width * 0.44, 45),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          elevation: 0.0,
+                                          backgroundColor: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                        onPressed: () {
+                                          Get.to(() => VehicleRequestsPage(
+                                              garageModel: garageModel));
+                                        },
+                                        child: Text(
+                                          'Requests',
+                                          style: TextStyle(
+                                              color: userController.isDark
+                                                  ? primaryColor
+                                                  : Colors.white,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 16),
+                                        ),
                                       ),
-                                      elevation: 0.0,
-                                      backgroundColor: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                    ),
-                                    onPressed: () {
-                                      Get.to(() => VehicleRequestsPage(
-                                          garageModel: garageModel));
-                                    },
-                                    child: Text(
-                                      'Manage Requests',
-                                      style: TextStyle(
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
+                                      InkWell(
+                                        onTap: () async {
+                                          final GarageController
+                                              garageController =
+                                              Provider.of<GarageController>(
+                                                  context,
+                                                  listen: false);
+                                          Get.dialog(LoadingDialog(),
+                                              barrierDismissible: false);
+                                          await garageController
+                                              .initVehicle(garageModel);
+                                          Get.close(1);
+                                          Get.to(() => AddVehicle(
+                                              garageModel: garageModel));
+                                        },
+                                        child: Container(
+                                          height: 45,
+                                          width: Get.width * 0.44,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              color: userController.isDark
+                                                  ? primaryColor
+                                                  : Colors.white,
+                                              border: Border.all(
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                              )),
+                                          child: Center(
+                                            child: Text(
+                                              'Manage Vehicle',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 16,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                   // const SizedBox(
                                   //   height: 10,

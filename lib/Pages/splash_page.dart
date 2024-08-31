@@ -81,18 +81,23 @@ class _SplashPageState extends State<SplashPage> {
               //   'geo': geoFirePoint.data,
               //   'long': position.longitude,
               // });
-              userController.getUserStream(userId + userModel.accountType);
-              if (userModel.accountType == 'provider') {
-                offersProvider.startListening(userModel);
-                offersProvider
-                    .startListeningOffers(userId + userModel.accountType);
-              } else {
-                offersProvider
-                    .startListeningOwnerOffers(userId + userModel.accountType);
-              }
+              
+              userController.getUserStream(
+                userId + userModel.accountType,
+                onDataReceived: (userModel) {
+                  if (userModel.accountType == 'provider') {
+                    offersProvider.startListening(userModel);
+                    offersProvider
+                        .startListeningOffers(userModel.userId);
+                  } else {
+                    offersProvider.startListeningOwnerOffers(
+                      userModel.userId);
+                  }
+                  // await OneSignal.Notifications.requestPermission(true);
 
-              await Future.delayed(const Duration(seconds: 1));
-              Get.offAll(() => const TabsPage());
+                  Get.offAll(() => const TabsPage());
+                },
+              );
             } else {
               await FirebaseFirestore.instance
                   .collection('users')
@@ -121,18 +126,22 @@ class _SplashPageState extends State<SplashPage> {
               //   'geo': geoFirePoint.data,
               //   'long': position.longitude,
               // });
-              userController.getUserStream(userId + userModel.accountType);
-              if (userModel.accountType == 'provider') {
-                offersProvider.startListening(userModel);
-                offersProvider
-                    .startListeningOffers(userId + userModel.accountType);
-              } else {
-                offersProvider
-                    .startListeningOwnerOffers(userId + userModel.accountType);
-              }
+              userController.getUserStream(
+                userId + userModel.accountType,
+                onDataReceived: (userModel) {
+                  if (userModel.accountType == 'provider') {
+                    offersProvider.startListening(userModel);
+                    offersProvider
+                        .startListeningOffers(userModel.userId);
+                  } else {
+                    offersProvider.startListeningOwnerOffers(
+                        userModel.userId);
+                  }
+                  // await OneSignal.Notifications.requestPermission(true);
 
-              await Future.delayed(const Duration(seconds: 1));
-              Get.offAll(() => const TabsPage());
+                  Get.offAll(() => const TabsPage());
+                },
+              );
             }
           }
         }

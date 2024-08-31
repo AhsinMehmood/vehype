@@ -62,6 +62,7 @@ class OwnerInprogressButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: offersReceivedModel!.id,
                   checkByList: offersModel.checkByList,
+                  senderId: userController.userModel!.userId,
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => OwnerRequestDetailsInprogressInactivePage(

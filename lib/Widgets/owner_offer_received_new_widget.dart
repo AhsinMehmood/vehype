@@ -10,6 +10,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:vehype/Widgets/owner_accept_offer_confirmation.dart';
 import 'package:vehype/Widgets/owner_ignore_offer_confirmation_widget.dart';
 
 import '../Controllers/offers_controller.dart';
@@ -345,55 +346,40 @@ class OwnerOfferReceivedNewWidget extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Center(
-                    child: Text(
-                      'Chat',
-                      style: TextStyle(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/messenger.png',
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                        height: 24,
+                        width: 24,
+                      ),
+                      const SizedBox(
+                        width: 6,
+                      ),
+                      Text(
+                        'Chat',
+                        style: TextStyle(
+                          // color: userController.isDark ? Colors.white : Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.w700),
-                    ),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
               InkWell(
                 onTap: () async {
-                  Get.dialog(LoadingDialog(), barrierDismissible: false);
-
-                  DocumentSnapshot<Map<String, dynamic>> offerByQuery =
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(offersReceivedModel.offerBy)
-                          .get();
-                  OffersController().acceptOffer(
-                      offersReceivedModel,
-                      offersModel,
-                      userModel,
-                      UserModel.fromJson(offerByQuery),
-                      chatId,
-                      garageModel);
-
-                  NotificationController().sendNotification(
-                      senderUser: userController.userModel!,
-                      receiverUser: UserModel.fromJson(offerByQuery),
-                      offerId: offersModel.offerId,
-                      requestId: offersReceivedModel.id,
-                      title: 'Good News: Offer Accepted',
-                      subtitle:
-                          '${userController.userModel!.name} has accepted your offer. Tap here to review.');
-
-                  OffersController().updateNotificationForOffers(
-                      offerId: offersModel.offerId,
-                      userId: UserModel.fromJson(offerByQuery).userId,
-                      isAdd: true,
-                      offersReceived: offersReceivedModel.id,
-                      checkByList: offersModel.checkByList,
-                      notificationTitle:
-                          '${userController.userModel!.name} has accepted your offer',
-                      notificationSubtitle:
-                          '${userController.userModel!.name} has accepted your offer. Tap here to review.');
+                  Get.bottomSheet(OwnerAcceptOfferConfirmation(
+                      offersReceivedModel: offersReceivedModel,
+                      offersModel: offersModel,
+                      userModel: userModel,
+                      chatId: chatId,
+                      garageModel: garageModel,
+                      userController: userController));
                 },
                 child: Container(
                   height: 50,

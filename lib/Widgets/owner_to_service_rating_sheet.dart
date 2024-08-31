@@ -457,14 +457,9 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
                               ])
                             });
                           }
-                          DocumentSnapshot<Map<String, dynamic>> ownerSnap =
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(widget.offersReceivedModel.offerBy)
-                                  .get();
+
                           NotificationController().sendNotification(
-                              senderUser: userController.userModel!,
-                              receiverUser: UserModel.fromJson(ownerSnap),
+                              userIds: [widget.offersReceivedModel.offerBy],
                               offerId: widget.offersModel.offerId,
                               requestId: widget.offersReceivedModel.id,
                               title:
@@ -476,6 +471,7 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
                               offerId: widget.offersModel.offerId,
                               userId: widget.offersReceivedModel.offerBy,
                               isAdd: true,
+                              senderId: userController.userModel!.userId,
                               offersReceived: widget.offersReceivedModel.id,
                               checkByList: widget.offersModel.checkByList,
                               notificationTitle:

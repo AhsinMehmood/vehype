@@ -15,6 +15,7 @@ import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Widgets/delete_vehicle_confirmation.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
@@ -39,10 +40,7 @@ class _AddVehicleState extends State<AddVehicle> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 0)).then((value) {
-      final GarageController garageController =
-          Provider.of<GarageController>(context, listen: false);
       if (widget.garageModel != null) {
-        garageController.initVehicle(widget.garageModel!);
         _vinController.text = widget.garageModel!.vin;
 
         setState(() {});
@@ -79,13 +77,24 @@ class _AddVehicleState extends State<AddVehicle> {
                 color: userController.isDark ? Colors.white : primaryColor,
               )),
           title: Text(
-            'Add Vehicle',
+            widget.garageModel == null ? 'Add Vehicle' : 'Update Vehicle',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
+          actions: [
+            if (widget.garageModel != null)
+              IconButton(
+                onPressed: () {
+                  Get.bottomSheet(DeleteVehicleConfirmation(
+                      chatId: widget.garageModel!.garageId));
+                },
+                icon: Icon(Icons.delete_forever_outlined),
+                iconSize: 28,
+              )
+          ],
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -134,7 +143,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                   Container(
                                     width: 150,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
+                                      borderRadius: BorderRadius.circular(6),
                                       border: Border.all(
                                         color: userController.isDark
                                             ? Colors.white.withOpacity(0.4)
@@ -150,7 +159,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                               ? Colors.white
                                               : primaryColor,
                                           fontSize: 16,
-                                          fontWeight: FontWeight.w800,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
@@ -158,7 +167,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                 ],
                               )
                             : ClipRRect(
-                                borderRadius: BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(6),
                                 child: ExtendedImage.network(
                                   garageController.imageOneUrl,
                                   handleLoadingProgress: true,
@@ -198,8 +207,8 @@ class _AddVehicleState extends State<AddVehicle> {
                       Text(
                         'Vehicle Type *',
                         style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w800,
+                          // fontFamily: 'Avenir',
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: userController.isDark
                               ? Colors.white
@@ -226,8 +235,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                   ? 'Choose'
                                   : garageController.selectedVehicleType!.title,
                               style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 // color: changeColor(color: '7B7B7B'),
                                 fontSize: 16,
                               ),
@@ -285,8 +293,7 @@ class _AddVehicleState extends State<AddVehicle> {
                       Text(
                         'Make *',
                         style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: userController.isDark
                               ? Colors.white
@@ -315,8 +322,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                     : garageController
                                         .selectedVehicleMake!.title,
                                 style: TextStyle(
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w600,
                                   // color: changeColor(color: '7B7B7B'),
                                   fontSize: 16,
                                 ),
@@ -374,8 +380,7 @@ class _AddVehicleState extends State<AddVehicle> {
                       Text(
                         'Year *',
                         style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: userController.isDark
                               ? Colors.white
@@ -402,8 +407,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                   ? 'Choose'
                                   : garageController.selectedYear,
                               style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 // color: changeColor(color: '7B7B7B'),
                                 fontSize: 16,
                               ),
@@ -469,8 +473,7 @@ class _AddVehicleState extends State<AddVehicle> {
                       Text(
                         'Model *',
                         style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: userController.isDark
                               ? Colors.white
@@ -498,8 +501,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                   : garageController
                                       .selectedVehicleModel!.title,
                               style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 // color: changeColor(color: '7B7B7B'),
                                 fontSize: 16,
                               ),
@@ -565,8 +567,7 @@ class _AddVehicleState extends State<AddVehicle> {
                         Text(
                           'Sub-Model *',
                           style: TextStyle(
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: userController.isDark
                                 ? Colors.white
@@ -595,8 +596,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                       : garageController
                                           .selectedSubModel!.title,
                                   style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w600,
                                     // color: changeColor(color: '7B7B7B'),
                                     fontSize: 16,
                                   ),
@@ -624,8 +624,7 @@ class _AddVehicleState extends State<AddVehicle> {
                     Text(
                       'VIN',
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 16,
                         color:
                             userController.isDark ? Colors.white : primaryColor,
@@ -660,15 +659,19 @@ class _AddVehicleState extends State<AddVehicle> {
                                 ? Colors.white
                                 : primaryColor,
                           )),
-                          hintText: 'Enter VIN'
+                          hintText: 'Enter VIN',
+                          hintStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            // color: changeColor(color: '7B7B7B'),
+                            fontSize: 16,
+                          )
                           // counter: const SizedBox.shrink(),
                           ),
                       // initialValue: '',
 
                       textCapitalization: TextCapitalization.words,
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w700,
                         // color: changeColor(color: '7B7B7B'),
                         fontSize: 16,
                       ),
@@ -681,54 +684,40 @@ class _AddVehicleState extends State<AddVehicle> {
                 const SizedBox(
                   height: 20,
                 ),
-                Container(
-                  color: userController.isDark ? primaryColor : Colors.white,
-                  height: 80,
-                  width: Get.width,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                          onPressed: () async {
-                            if (garageController.saveButtonValidation()) {
-                              garageController.saveVehicle(userModel,
-                                  _vinController.text, widget.addService);
-                            } else {
-                              toastification.show(
-                                context: context,
-                                title: Text(
-                                    'The fields that are marked with * are required!'),
-                                autoCloseDuration: Duration(seconds: 3),
-                                type: ToastificationType.error,
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              maximumSize: Size(Get.width * 0.9, 55),
-                              minimumSize: Size(Get.width * 0.9, 55),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              )),
-                          child: Text(
-                            'Save',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                              fontSize: 17,
-                              fontFamily: 'Avenir',
-                              fontWeight: FontWeight.w700,
-                            ),
-                          )),
-                      const SizedBox(
-                        height: 15,
+                ElevatedButton(
+                    onPressed: () async {
+                      if (garageController.saveButtonValidation()) {
+                        garageController.saveVehicle(
+                            userModel, _vinController.text, widget.addService);
+                      } else {
+                        toastification.show(
+                          context: context,
+                          title: Text(
+                              'The fields that are marked with * are required!'),
+                          autoCloseDuration: Duration(seconds: 3),
+                          type: ToastificationType.error,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            userController.isDark ? Colors.white : primaryColor,
+                        maximumSize: Size(Get.width * 0.9, 50),
+                        minimumSize: Size(Get.width * 0.9, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        )),
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color:
+                            userController.isDark ? primaryColor : Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                       ),
-                    ],
-                  ),
+                    )),
+                const SizedBox(
+                  height: 15,
                 ),
               ],
             ),
@@ -833,8 +822,7 @@ class _MakePickerState extends State<MakePicker> {
                                                 bodyStyle.title,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontFamily: 'Avenir',
-                                                  fontWeight: FontWeight.w400,
+                                                  fontWeight: FontWeight.w600,
                                                   color: userController.isDark
                                                       ? Colors.white
                                                       : primaryColor,
@@ -849,8 +837,8 @@ class _MakePickerState extends State<MakePicker> {
                                                   .selectedVehicleMake !=
                                               null &&
                                           garageController
-                                                  .selectedVehicleMake!.id ==
-                                              bodyStyle.id)
+                                                  .selectedVehicleMake!.title ==
+                                              bodyStyle.title)
                                         Container(
                                           padding: const EdgeInsets.all(2),
                                           decoration: BoxDecoration(
@@ -915,8 +903,7 @@ class _MakePickerState extends State<MakePicker> {
                                                 bodyStyle.title,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontFamily: 'Avenir',
-                                                  fontWeight: FontWeight.w400,
+                                                  fontWeight: FontWeight.w600,
                                                   color: userController.isDark
                                                       ? Colors.white
                                                       : primaryColor,
@@ -931,8 +918,8 @@ class _MakePickerState extends State<MakePicker> {
                                                   .selectedVehicleMake !=
                                               null &&
                                           garageController
-                                                  .selectedVehicleMake!.id ==
-                                              bodyStyle.id)
+                                                  .selectedVehicleMake!.title ==
+                                              bodyStyle.title)
                                         Container(
                                           padding: const EdgeInsets.all(2),
                                           decoration: BoxDecoration(
@@ -1019,8 +1006,7 @@ class YearPicker extends StatelessWidget {
                                 Text(
                                   year.toString(),
                                   style: TextStyle(
-                                    fontFamily: 'Avenir',
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w600,
                                     color: userController.isDark
                                         ? Colors.white
                                         : primaryColor,
@@ -1112,8 +1098,7 @@ class BodyStylePicker extends StatelessWidget {
                                       bodyStyle.title,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.w600,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -1256,8 +1241,7 @@ class _ModelPickerState extends State<ModelPicker> {
                                       child: Text(
                                         bodyStyle.title,
                                         style: TextStyle(
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w400,
+                                          fontWeight: FontWeight.w600,
                                           color: userController.isDark
                                               ? Colors.white
                                               : primaryColor,
@@ -1326,8 +1310,7 @@ class _ModelPickerState extends State<ModelPicker> {
                                       child: Text(
                                         bodyStyle.title,
                                         style: TextStyle(
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w400,
+                                          fontWeight: FontWeight.w600,
                                           color: userController.isDark
                                               ? Colors.white
                                               : primaryColor,
@@ -1469,8 +1452,7 @@ class _SubModelPickerState extends State<SubModelPicker> {
                                       child: Text(
                                         bodyStyle.title,
                                         style: TextStyle(
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w400,
+                                          fontWeight: FontWeight.w600,
                                           color: userController.isDark
                                               ? Colors.white
                                               : primaryColor,
@@ -1539,8 +1521,7 @@ class _SubModelPickerState extends State<SubModelPicker> {
                                       child: Text(
                                         bodyStyle.title,
                                         style: TextStyle(
-                                          fontFamily: 'Avenir',
-                                          fontWeight: FontWeight.w400,
+                                          fontWeight: FontWeight.w600,
                                           color: userController.isDark
                                               ? Colors.white
                                               : primaryColor,
@@ -1632,8 +1613,7 @@ class _FuelPickerState extends State<FuelPicker> {
                       child: Text(
                         fuelType,
                         style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor,

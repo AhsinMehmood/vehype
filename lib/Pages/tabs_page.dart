@@ -632,10 +632,11 @@ class LocationPermissionSheet extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
+                Get.close(1);
                 bool serviceEnabled;
                 LocationPermission permission =
                     await Geolocator.requestPermission();
-                ;
+
                 serviceEnabled = await Geolocator.isLocationServiceEnabled();
                 if (!serviceEnabled) {
                   Geolocator.openLocationSettings();
@@ -661,7 +662,7 @@ class LocationPermissionSheet extends StatelessWidget {
                       'long': position.longitude,
                       'geo': geoFirePoint.data,
                     });
-                    Get.close(2);
+                    Get.close(1);
                   }
                 }
               },

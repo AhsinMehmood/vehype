@@ -832,8 +832,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       });
 
       NotificationController().sendNotification(
-          senderUser: userModel,
-          receiverUser: widget.ownerModel,
+         userIds: [widget.offersReceivedModel!.offerBy],
           offerId: widget.offersModel.offerId,
           requestId: widget.offersReceivedModel!.id,
           title: 'Service Offer Updated',
@@ -843,6 +842,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       OffersController().updateNotificationForOffers(
           offerId: widget.offersModel.offerId,
           userId: widget.ownerModel.userId,
+          senderId: userController.userModel!.userId,
           isAdd: true,
           offersReceived: widget.offersReceivedModel!.id,
           checkByList: widget.offersModel.checkByList,
@@ -881,8 +881,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       });
 
       await NotificationController().sendNotification(
-          senderUser: userModel,
-          receiverUser: widget.ownerModel,
+          userIds: [widget.ownerModel.userId],
           offerId: widget.offersModel.offerId,
           requestId: reference.id,
           title: 'New Offer for Your Request',
@@ -891,11 +890,13 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       OffersController().updateNotificationForOffers(
           offerId: widget.offersModel.offerId,
           userId: widget.ownerModel.userId,
+          senderId: userController.userModel!.userId,
           isAdd: true,
           offersReceived: reference.id,
           checkByList: widget.offersModel.checkByList,
           notificationTitle: '${userModel.name} has submitted an offer.',
-          notificationSubtitle: 'Tap here to review and respond.');
+          notificationSubtitle:
+              '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
       ChatModel? chatModel = await ChatController().getChat(userModel.userId,
           widget.ownerModel.userId, widget.offersModel.offerId);
       if (chatModel != null) {

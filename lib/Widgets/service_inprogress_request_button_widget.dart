@@ -269,6 +269,8 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                   userId: userController.userModel!.userId,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                   isAdd: false,
                   notificationTitle: '',
                   notificationSubtitle: '');
@@ -347,6 +349,8 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       ownerDetails.userId,
                       offersModel.offerId);
                   OffersController().updateNotificationForOffers(
+                          senderId: userController.userModel!.userId,
+
                       offerId: offersModel.offerId,
                       userId: userController.userModel!.userId,
                       offersReceived: offersReceivedModel.id,
@@ -368,6 +372,8 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       userId: userController.userModel!.userId,
                       isAdd: false,
                       offersReceived: offersReceivedModel.id,
+                          senderId: userController.userModel!.userId,
+
                       checkByList: offersModel.checkByList,
                       notificationTitle: '',
                       notificationSubtitle: '');
@@ -426,6 +432,8 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(

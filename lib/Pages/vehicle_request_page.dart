@@ -1,13 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Widgets/owner_active_offers.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/garage_controller.dart';
 import '../Controllers/user_controller.dart';
+import '../Widgets/owner_request_widget.dart';
 import 'choose_account_type.dart';
 import 'create_request_page.dart';
 import 'repair_page.dart';
@@ -29,7 +32,7 @@ class VehicleRequestsPage extends StatelessWidget {
           height: 55,
           width: 55,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(200),
+            borderRadius: BorderRadius.circular(12),
             color: userController.isDark ? Colors.white : primaryColor,
           ),
           child: InkWell(
@@ -91,7 +94,7 @@ class VehicleRequestsPage extends StatelessWidget {
             'Vehicle Requests',
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -148,7 +151,17 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return Container();
+
+                  return ListView.builder(
+                      itemCount: offersPosted.length,
+                      padding: const EdgeInsets.only(
+                          left: 0, right: 0, bottom: 80, top: 15),
+                      itemBuilder: (context, index) {
+                        return OwnerRequestWidget(
+                          offersModel: offersPosted[index],
+                          garageModel: garageModel,
+                        );
+                      });
                 }),
           ),
           SafeArea(
@@ -187,7 +200,29 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return Container();
+                  return ListView.builder(
+                      itemCount: offersPosted.length,
+                      padding: const EdgeInsets.only(
+                          left: 0, right: 0, bottom: 80, top: 15),
+                      itemBuilder: (context, index) {
+                        return StreamBuilder<OffersReceivedModel>(
+                            stream: FirebaseFirestore.instance
+                                .collection('offersReceived')
+                                .doc(offersPosted[index].offerReceivedIdJob)
+                                .snapshots()
+                                .map((convert) =>
+                                    OffersReceivedModel.fromJson(convert)),
+                            builder: (context,
+                                AsyncSnapshot<OffersReceivedModel> snapshot) {
+                              OffersReceivedModel? offersReceivedModel =
+                                  snapshot.data;
+                              return OwnerRequestWidget(
+                                offersModel: offersPosted[index],
+                                offersReceivedModel: offersReceivedModel,
+                                garageModel: garageModel,
+                              );
+                            });
+                      });
                 }),
           ),
           SafeArea(
@@ -226,7 +261,29 @@ class VehicleRequestsPage extends StatelessWidget {
                       ),
                     );
                   }
-                  return Container();
+                  return ListView.builder(
+                      itemCount: offersPosted.length,
+                      padding: const EdgeInsets.only(
+                          left: 0, right: 0, bottom: 80, top: 15),
+                      itemBuilder: (context, index) {
+                        return StreamBuilder<OffersReceivedModel>(
+                            stream: FirebaseFirestore.instance
+                                .collection('offersReceived')
+                                .doc(offersPosted[index].offerReceivedIdJob)
+                                .snapshots()
+                                .map((convert) =>
+                                    OffersReceivedModel.fromJson(convert)),
+                            builder: (context,
+                                AsyncSnapshot<OffersReceivedModel> snapshot) {
+                              OffersReceivedModel? offersReceivedModel =
+                                  snapshot.data;
+                              return OwnerRequestWidget(
+                                offersModel: offersPosted[index],
+                                offersReceivedModel: offersReceivedModel,
+                                garageModel: garageModel,
+                              );
+                            });
+                      });
                 }),
           ),
         ]),

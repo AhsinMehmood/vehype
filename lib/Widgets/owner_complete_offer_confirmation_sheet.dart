@@ -1,19 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
+import '../Controllers/chat_controller.dart';
 import '../Controllers/user_controller.dart';
+import '../Models/chat_model.dart';
 import '../Models/garage_model.dart';
 import '../Models/offers_model.dart';
 import 'loading_dialog.dart';
 
-class OwnerAcceptOfferConfirmation extends StatelessWidget {
-  const OwnerAcceptOfferConfirmation({
+class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
+  const OwnerCompleteOfferConfirmationSheet({
     super.key,
     required this.offersReceivedModel,
     required this.offersModel,
@@ -52,7 +53,7 @@ class OwnerAcceptOfferConfirmation extends StatelessWidget {
                     height: 10,
                   ),
                   Text(
-                    'Are You Sure You Want to Accept This Offer?',
+                    'Are You Sure You Want to Complete This Request?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
@@ -64,50 +65,39 @@ class OwnerAcceptOfferConfirmation extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      DocumentSnapshot<Map<String, dynamic>> offerByQuery =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(offersReceivedModel.offerBy)
-                              .get();
-                      if (DateTime.parse(offersReceivedModel.startDate)
-                          .isBefore(DateTime.now().toUtc())) {
-                        toastification.show(
-                            context: context,
-                            title: Text(
-                                'Offer Time Expired: You can ask ${UserModel.fromJson(offerByQuery).name} to update the offer.'));
-                        return;
-                      }
                       Get.close(1);
 
-                      Get.dialog(LoadingDialog(), barrierDismissible: false);
+                      // Get.dialog(LoadingDialog(), barrierDismissible: false);
 
-                      OffersController().acceptOffer(
-                          offersReceivedModel,
-                          offersModel,
-                          userModel,
-                          UserModel.fromJson(offerByQuery),
-                          chatId,
-                          garageModel);
+                      OffersController().completeOffer(
+                        offersReceivedModel,
+                      );
 
                       NotificationController().sendNotification(
-                          userIds: [offerByQuery.id],
+                          userIds: [offersReceivedModel.offerBy],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
-                          title: 'Good News: Offer Accepted',
+                          title: 'Request Completed Successfully',
                           subtitle:
-                              '${userController.userModel!.name} has accepted your offer. Tap here to review.');
-
+                              '${userController.userModel!.name} has marked the request as complete. Tap to review.');
                       OffersController().updateNotificationForOffers(
                           offerId: offersModel.offerId,
-                          userId: UserModel.fromJson(offerByQuery).userId,
+                          userId: offersReceivedModel.offerBy,
                           senderId: userController.userModel!.userId,
                           isAdd: true,
                           offersReceived: offersReceivedModel.id,
                           checkByList: offersModel.checkByList,
-                          notificationTitle:
-                              '${userController.userModel!.name} has accepted your offer',
+                          notificationTitle: 'Request Completed Successfully',
                           notificationSubtitle:
-                              '${userController.userModel!.name} has accepted your offer. Tap here to review.');
+                              '${userController.userModel!.name} has marked the request as complete. Tap to review.');
+                      ChatModel? chatModel = await ChatController().getChat(
+                          userController.userModel!.userId,
+                          offersModel.ownerId,
+                          offersModel.offerId);
+                      if (chatModel != null) {
+                        ChatController().updateChatToClose(chatModel.id,
+                            '${userController.userModel!.name} has marked the request as complete.');
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:

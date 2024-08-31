@@ -238,14 +238,9 @@ class _OwnerCancelOfferConfirmationSheetState
                           widget.userController.userModel!.userId,
                           widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
-                      DocumentSnapshot<Map<String, dynamic>> offerByQuery =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(widget.offersReceivedModel.offerBy)
-                              .get();
+
                       NotificationController().sendNotification(
-                          senderUser: widget.userController.userModel!,
-                          receiverUser: UserModel.fromJson(offerByQuery),
+                          userIds: [widget.offersReceivedModel.offerBy],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancelled',
@@ -255,12 +250,14 @@ class _OwnerCancelOfferConfirmationSheetState
                       OffersController().updateNotificationForOffers(
                           offerId: widget.offersModel.offerId,
                           userId: widget.offersReceivedModel.offerBy,
+                          senderId: widget.userController.userModel!.userId,
                           isAdd: true,
                           offersReceived: widget.offersReceivedModel.id,
                           checkByList: widget.offersModel.checkByList,
                           notificationTitle:
                               '${widget.userController.userModel!.name} has cancelled the request.',
-                          notificationSubtitle: 'Tap to review.');
+                          notificationSubtitle:
+                              '${widget.userController.userModel!.name} has cancelled the request. Click here to review.');
 
                       ChatModel? chatModel = await ChatController().getChat(
                           widget.userController.userModel!.userId,

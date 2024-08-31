@@ -7,12 +7,11 @@ import '../Models/user_model.dart';
 
 class NotificationController {
   Future<void> sendNotification({
-    required UserModel senderUser,
-    required UserModel receiverUser,
     required String offerId,
     required String? requestId,
     required String title,
     required String subtitle,
+    required List userIds,
   }) async {
     const appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
     const restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
@@ -21,7 +20,7 @@ class NotificationController {
       'app_id': appId,
       'headings': {'en': title},
       'contents': {'en': subtitle},
-      'include_external_user_ids': [receiverUser.userId],
+      'include_external_user_ids': userIds,
       'data': {
         'offerId': offerId,
         'type': 'request',

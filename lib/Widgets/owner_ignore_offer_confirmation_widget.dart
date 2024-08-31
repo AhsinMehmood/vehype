@@ -53,6 +53,8 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                       OffersController().updateNotificationForOffers(
                           offerId: offersModel.offerId,
                           userId: userController.userModel!.userId,
+                          senderId: userController.userModel!.userId,
+
                           checkByList: offersModel.checkByList,
                           isAdd: false,
                           offersReceived: offersReceivedModel.id,
@@ -64,7 +66,7 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                           offersModel.offerId);
                       if (chatModel != null) {
                         ChatController().updateChatToClose(chatModel.id,
-                            'The offer was marked as ignore by ${userController.userModel!.name}.');
+                            'The offer was declined by ${userController.userModel!.name}.');
                       }
                       Get.close(2);
                     },

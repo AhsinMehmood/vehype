@@ -909,31 +909,26 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     List<UserModel> filterProviders = userController.filterProviders(
         filterIgnore, userModel.lat, userModel.long, 100);
     List addNotifications = [];
-
+    List userIds = [];
+    for (var element in filterProviders) {
+      userIds.add(element.userId);
+    }
+    NotificationController().sendNotification(
+        userIds: userIds,
+        offerId: requestId,
+        requestId: null,
+        title: 'Request Changes Notification',
+        subtitle:
+            '${userModel.name} has updated his request. Click to see the latest changes.');
     for (UserModel provider in filterProviders) {
-      NotificationController().sendNotification(
-          senderUser: userModel,
-          receiverUser: provider,
-          offerId: requestId,
-          requestId: null,
-          title: 'Request Changes Notification',
-          subtitle:
-              '${userModel.name} has updated his request. Click to see the latest changes.');
-
-      OffersController().updateNotificationForOffers(
-          offerId: widget.offersModel!.offerId,
-          userId: provider.userId,
-          checkByList: widget.offersModel!.checkByList,
-          offersReceived: null,
-          isAdd: true,
-          notificationTitle: '${userModel.name} has updated his request.',
-          notificationSubtitle:
-              '${userModel.name} has updated his request. Click to see the latest changes.');
       addNotifications.add({
         'checkById': provider.userId,
         'isRead': false,
         'title': '${userModel.name} has updated his request.',
-        'subtitle': 'Click to see the latest changes.'
+        'subtitle':
+            '${userModel.name} has updated his request. Click to see the latest changes.',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+        'senderId': userModel.userId,
       });
     }
     await FirebaseFirestore.instance
@@ -942,7 +937,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .update({
       'checkByList': addNotifications,
     });
-    print(filterProviders.length);
   }
 
   Future getUserProviders(
@@ -969,31 +963,28 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .toList();
     List<UserModel> filterProviders = userController.filterProviders(
         blockedUsers, userModel.lat, userModel.long, 100);
+    List userIds = [];
+    for (var element in filterProviders) {
+      userIds.add(element.userId);
+    }
     List addNotifications = [];
+    NotificationController().sendNotification(
+        offerId: requestId,
+        userIds: userIds,
+        requestId: null,
+        title: 'Opportunity Alert: New Request',
+        subtitle:
+            'A nearby vehicle owner has submitted a new request. Click here to see more and respond quickly.');
     for (UserModel provider in filterProviders) {
-      NotificationController().sendNotification(
-          senderUser: userModel,
-          receiverUser: provider,
-          offerId: requestId,
-          requestId: null,
-          title: 'Opportunity Alert: New Request',
-          subtitle:
-              'A nearby vehicle owner has submitted a new request. Click here to see more and respond quickly.');
       addNotifications.add({
         'checkById': provider.userId,
         'isRead': false,
         'title': 'Opportunity Alert: New Request',
-        'subtitle': 'Tap to see more and respond quickly.'
+        'subtitle':
+            'Opportunity Alert: New Request. Tap to see more and respond quickly.',
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+        'senderId': userModel.userId,
       });
-      // OffersController().updateNotificationForOffers(
-      //     offerId: requestId,
-      //     userId: provider.userId,
-      //     checkByList: [],
-      //     isAdd: true,
-      //     offersReceived: null,
-      //     notificationTitle: 'Opportunity Alert: New Request',
-      //     notificationSubtitle:
-      //         '${userModel.name} has submitted a new request. Tap to see more and respond quickly.');
     }
     await FirebaseFirestore.instance
         .collection('offers')

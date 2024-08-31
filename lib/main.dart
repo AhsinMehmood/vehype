@@ -36,7 +36,7 @@ void main() async {
 
   // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
   // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
-  OneSignal.Debug.setLogLevel(OSLogLevel.debug);
+  OneSignal.Debug.setLogLevel(OSLogLevel.error);
 
   OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
   // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
@@ -84,8 +84,9 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool needToUpdate = false;
+
   checkUpdate() async {
     UserController().checkVersion().then((value) {
       setState(() {
@@ -97,13 +98,22 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 0)).then((value) {
+    WidgetsBinding.instance.addObserver(this);
+    Future.delayed(const Duration(seconds: 0)).then((value) async {
       final UserController userController =
           Provider.of<UserController>(context, listen: false);
-      userController.initTheme();
+      await userController.initTheme();
       checkUpdate();
     });
     listenOneSignalNotification();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    userController.initTheme();
   }
 
   listenOneSignalNotification() {

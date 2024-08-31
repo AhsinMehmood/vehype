@@ -66,6 +66,7 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
                           isAdd: false,
                           offersReceived: null,
                           checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
                           notificationTitle: '',
                           notificationSubtitle: '');
                       showModalBottomSheet(
@@ -113,6 +114,8 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
                           isAdd: false,
                           offersReceived: null,
                           checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                           notificationTitle: '',
                           notificationSubtitle: '');
 
@@ -152,6 +155,8 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
                         offerId: offersModel.offerId,
                         userId: userController.userModel!.userId,
                         isAdd: false,
+                          senderId: userController.userModel!.userId,
+
                         checkByList: offersModel.checkByList,
                         offersReceived: null,
                         notificationTitle: '',

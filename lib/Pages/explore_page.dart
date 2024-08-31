@@ -163,9 +163,7 @@ class _ExplorePageState extends State<ExplorePage> {
     // Custom query condition.
     Query<Map<String, dynamic>> queryBuilder(
             Query<Map<String, dynamic>> query) =>
-        query
-            .where('accountType', isEqualTo: 'provider')
-            .where('status', isEqualTo: 'active');
+        query.where('accountType', isEqualTo: 'provider');
 // Streamed document snapshots of geo query under given conditions.
     final Stream<List<DocumentSnapshot<Map<String, dynamic>>>> stream =
         GeoCollectionReference<Map<String, dynamic>>(collectionReference)
@@ -186,20 +184,8 @@ class _ExplorePageState extends State<ExplorePage> {
                   snapshot) {
             if (!snapshot.hasData) {
               return Center(
-                child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                ),
-              );
-            } else if (snapshot.data == null) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                ),
-              );
-            } else if (snapshot.data!.isEmpty) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
+                child: Text(
+                  snapshot.error.toString(),
                 ),
               );
             }
@@ -207,7 +193,13 @@ class _ExplorePageState extends State<ExplorePage> {
 
             for (DocumentSnapshot<Map<String, dynamic>> element
                 in snapshot.data ?? []) {
-              nearbyProvidersStream.add(UserModel.fromJson(element));
+              bool isDelete = element.data()?['isDelete'] ?? false;
+              if (element.data()?['name'] != 'Guest User') {
+                if (!isDelete) {
+                  // Checks both false and missing (defaulting to false)
+                  nearbyProvidersStream.add(UserModel.fromJson(element));
+                }
+              }
             }
             Fuzzy<String> f = Fuzzy(
                 nearbyProvidersStream.map((e) => e.searchKey).toList(),
@@ -237,30 +229,30 @@ class _ExplorePageState extends State<ExplorePage> {
             );
             return Stack(
               children: [
-                // GoogleMap(
-                //   markers: markers.toSet(),
-                //   liteModeEnabled: false,
-                //   compassEnabled: false,
-                //   myLocationEnabled: false,
-                //   mapType: isSatLite ? MapType.satellite : MapType.normal,
-                //   zoomControlsEnabled: false,
-                //   zoomGesturesEnabled: true,
-                //   initialCameraPosition: CameraPosition(
-                //     target: LatLng(lat, long),
-                //     zoom: 14.0,
-                //   ),
-                //   onTap: (s) {
-                //     if (selectedMarker != null) {
-                //       selectedMarker = null;
-                //       setState(() {});
-                //     }
-                //   },
-                //   onMapCreated: (controller) {
-                //     if (!_controller.isCompleted) {
-                //       _controller.complete(controller);
-                //     }
-                //   },
-                // ),
+                GoogleMap(
+                  markers: markers.toSet(),
+                  liteModeEnabled: false,
+                  compassEnabled: false,
+                  myLocationEnabled: false,
+                  mapType: isSatLite ? MapType.satellite : MapType.normal,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(lat, long),
+                    zoom: 14.0,
+                  ),
+                  onTap: (s) {
+                    if (selectedMarker != null) {
+                      selectedMarker = null;
+                      setState(() {});
+                    }
+                  },
+                  onMapCreated: (controller) {
+                    if (!_controller.isCompleted) {
+                      _controller.complete(controller);
+                    }
+                  },
+                ),
                 Align(
                     alignment: Alignment.topCenter,
                     child: SafeArea(

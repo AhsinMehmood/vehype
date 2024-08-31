@@ -19,6 +19,7 @@ class OffersController {
       // required bool isNew,
       required String? offersReceived,
       required String notificationTitle,
+      required String senderId,
       required String notificationSubtitle}) async {
     List<OffersNotification> notifications = checkByList;
     List mapData = [];
@@ -30,6 +31,9 @@ class OffersController {
         'isRead': false,
         'title': notificationTitle,
         'subtitle': notificationSubtitle,
+        'createdAt': DateTime.now().toUtc().toIso8601String(),
+        'senderId': senderId,
+        'offersReceivedId': offersReceived ?? '',
       }));
       for (var element in notifications) {
         mapData.add({
@@ -37,6 +41,9 @@ class OffersController {
           'isRead': element.isRead,
           'title': element.title,
           'subtitle': element.subtitle,
+          'senderId': senderId,
+          'createdAt': DateTime.now().toUtc().toIso8601String(),
+          'offersReceivedId': offersReceived ?? '',
         });
       }
       await FirebaseFirestore.instance
@@ -62,6 +69,9 @@ class OffersController {
           'isRead': element.isRead,
           'title': element.title,
           'subtitle': element.subtitle,
+          'senderId': senderId,
+          'createdAt': DateTime.now().toUtc().toIso8601String(),
+          'offersReceivedId': offersReceived ?? '',
         });
       }
       print('Notification Length After ${notifications.length}');

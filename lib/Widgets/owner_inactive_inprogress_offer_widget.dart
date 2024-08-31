@@ -10,6 +10,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:vehype/Widgets/owner_complete_offer_confirmation_sheet.dart';
 import 'package:vehype/Widgets/owner_to_service_rating_sheet.dart';
 
 import '../Controllers/chat_controller.dart';
@@ -652,16 +653,29 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      'Chat',
-                                      style: TextStyle(
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/messenger.png',
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                        height: 24,
+                                        width: 24,
+                                      ),
+                                      const SizedBox(
+                                        width: 6,
+                                      ),
+                                      Text(
+                                        'Chat',
+                                        style: TextStyle(
+                                          // color: userController.isDark ? Colors.white : Colors.white,
                                           fontSize: 16,
-                                          fontWeight: FontWeight.w700),
-                                    ),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -685,9 +699,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     garageModel);
 
                                 NotificationController().sendNotification(
-                                    senderUser: userController.userModel!,
-                                    receiverUser:
-                                        UserModel.fromJson(offerByQuery),
+                                    userIds: [offerByQuery.id],
                                     offerId: offersModel.offerId,
                                     requestId: offersReceivedModel.id,
                                     title: 'Good News: Offer Accepted',
@@ -700,6 +712,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                         UserModel.fromJson(offerByQuery).userId,
                                     isAdd: true,
                                     offersReceived: offersReceivedModel.id,
+                                    senderId: userController.userModel!.userId,
                                     checkByList: offersModel.checkByList,
                                     notificationTitle:
                                         '${userController.userModel!.name} has accepted your offer',
@@ -795,16 +808,29 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      'Chat',
-                                      style: TextStyle(
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/messenger.png',
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                        height: 24,
+                                        width: 24,
+                                      ),
+                                      const SizedBox(
+                                        width: 6,
+                                      ),
+                                      Text(
+                                        'Chat',
+                                        style: TextStyle(
+                                          // color: userController.isDark ? Colors.white : Colors.white,
                                           fontSize: 16,
-                                          fontWeight: FontWeight.w700),
-                                    ),
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -818,44 +844,15 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                 //         .collection('users')
                                 //         .doc(offersReceivedModel.offerBy)
                                 //         .get();
-                                OffersController().completeOffer(
-                                  offersReceivedModel,
-                                );
-                                DocumentSnapshot<Map<String, dynamic>>
-                                    offerByQuery = await FirebaseFirestore
-                                        .instance
-                                        .collection('users')
-                                        .doc(offersReceivedModel.offerBy)
-                                        .get();
-                                NotificationController().sendNotification(
-                                    senderUser: userController.userModel!,
-                                    receiverUser:
-                                        UserModel.fromJson(offerByQuery),
-                                    offerId: offersModel.offerId,
-                                    requestId: offersReceivedModel.id,
-                                    title: 'Request Completed Successfully',
-                                    subtitle:
-                                        '${userController.userModel!.name} has marked the request as complete. Tap to review.');
-                                OffersController().updateNotificationForOffers(
-                                    offerId: offersModel.offerId,
-                                    userId: offersReceivedModel.offerBy,
-                                    isAdd: true,
-                                    offersReceived: offersReceivedModel.id,
-                                    checkByList: offersModel.checkByList,
-                                    notificationTitle:
-                                        'Request Completed Successfully',
-                                    notificationSubtitle:
-                                        '${userController.userModel!.name} has marked the request as complete. Tap to review.');
-                                ChatModel? chatModel = await ChatController()
-                                    .getChat(
-                                        userController.userModel!.userId,
-                                        offersModel.ownerId,
-                                        offersModel.offerId);
-                                if (chatModel != null) {
-                                  ChatController().updateChatToClose(
-                                      chatModel.id,
-                                      '${userController.userModel!.name} has marked the request as complete.');
-                                }
+                                Get.bottomSheet(
+                                    OwnerCompleteOfferConfirmationSheet(
+                                        offersReceivedModel:
+                                            offersReceivedModel,
+                                        offersModel: offersModel,
+                                        userModel: userModel,
+                                        chatId: chatId,
+                                        garageModel: garageModel,
+                                        userController: userController));
                               },
                               child: Container(
                                 height: 50,

@@ -77,8 +77,7 @@ class OrdersHistoryProvider extends StatelessWidget {
         .where((element) => element.checkByList
             .any((check) => check.checkById == userModel.userId))
         .toList();
-   
-    
+
     List<OffersReceivedModel> upcomingOffersNotifications = upcomingOffers
         .where((element) => element.checkByList
             .any((check) => check.checkById == userModel.userId))
@@ -116,7 +115,8 @@ class OrdersHistoryProvider extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     Get.to(() => NotificationsPage(
-                          notifications: [],
+                          offers: notificationToCheckOffersNewOffers,
+                          offersReceivedModelList: notificationsOffersReceived,
                         ));
                   },
                   child: Stack(
@@ -125,9 +125,21 @@ class OrdersHistoryProvider extends StatelessWidget {
                         Icons.notifications_outlined,
                         color:
                             userController.isDark ? Colors.white : primaryColor,
-                        size: 26,
+                        size: 28,
                       ),
-                      if (notificationsOffersReceived.isNotEmpty)
+                      if ((offersProvider.offers
+                                  .where((offer) => offer.checkByList.any(
+                                      (check) =>
+                                          check.checkById == userModel.userId))
+                                  .toList()
+                                  .length +
+                              offersProvider.offersReceived
+                                  .where((offer) => offer.checkByList.any(
+                                      (check) =>
+                                          check.checkById == userModel.userId))
+                                  .toList()
+                                  .length) !=
+                          0)
                         Container(
                           height: 16,
                           width: 16,
@@ -138,7 +150,21 @@ class OrdersHistoryProvider extends StatelessWidget {
                           padding: const EdgeInsets.all(1),
                           child: Center(
                             child: Text(
-                              notificationsOffersReceived.length.toString(),
+                              (offersProvider.offers
+                                          .where((offer) => offer.checkByList
+                                              .any((check) =>
+                                                  check.checkById ==
+                                                  userModel.userId))
+                                          .toList()
+                                          .length +
+                                      offersProvider.offersReceived
+                                          .where((offer) => offer.checkByList
+                                              .any((check) =>
+                                                  check.checkById ==
+                                                  userModel.userId))
+                                          .toList()
+                                          .length)
+                                  .toString(),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

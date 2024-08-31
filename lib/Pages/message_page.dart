@@ -162,15 +162,23 @@ class _MessagePageState extends State<MessagePage> {
                                               offersModel.ownerId) {
                                             if (offersModel.status ==
                                                 'active') {
-                                              Get.to(() =>
-                                                  OwnerRequestDetailsInprogressInactivePage(
-                                                    offersModel: offersModel,
-                                                    chatId: widget.chatModel.id,
-                                                    garageModel:
-                                                        widget.garageModel,
-                                                    offersReceivedModel:
-                                                        offersReceivedModel!,
-                                                  ));
+                                              if (offersReceivedModel == null) {
+                                                Get.to(() =>
+                                                    OwnerActiveRequestDetails(
+                                                        offersModel:
+                                                            offersModel));
+                                              } else {
+                                                Get.to(() =>
+                                                    OwnerRequestDetailsInprogressInactivePage(
+                                                      offersModel: offersModel,
+                                                      chatId:
+                                                          widget.chatModel.id,
+                                                      garageModel:
+                                                          widget.garageModel,
+                                                      offersReceivedModel:
+                                                          offersReceivedModel,
+                                                    ));
+                                              }
                                             } else if (offersModel.status ==
                                                     'inProgress' ||
                                                 offersModel.status ==
@@ -362,7 +370,114 @@ class _MessagePageState extends State<MessagePage> {
                                                       ),
                                                     ),
                                                     IconButton(
-                                                        onPressed: () {},
+                                                        onPressed: () async {
+                                                          if (userModel
+                                                                  .userId ==
+                                                              offersModel
+                                                                  .ownerId) {
+                                                            if (offersModel
+                                                                    .status ==
+                                                                'active') {
+                                                              if (offersReceivedModel ==
+                                                                  null) {
+                                                                Get.to(() =>
+                                                                    OwnerActiveRequestDetails(
+                                                                        offersModel:
+                                                                            offersModel));
+                                                              } else {
+                                                                Get.to(() =>
+                                                                    OwnerRequestDetailsInprogressInactivePage(
+                                                                      offersModel:
+                                                                          offersModel,
+                                                                      chatId: widget
+                                                                          .chatModel
+                                                                          .id,
+                                                                      garageModel:
+                                                                          widget
+                                                                              .garageModel,
+                                                                      offersReceivedModel:
+                                                                          offersReceivedModel,
+                                                                    ));
+                                                              }
+                                                            } else if (offersModel
+                                                                        .status ==
+                                                                    'inProgress' ||
+                                                                offersModel
+                                                                        .status ==
+                                                                    'inactive') {
+                                                              if (offersModel
+                                                                  .offersReceived
+                                                                  .isNotEmpty) {
+                                                                Get.to(() =>
+                                                                    OwnerRequestDetailsInprogressInactivePage(
+                                                                      offersModel:
+                                                                          offersModel,
+                                                                      chatId: widget
+                                                                          .chatModel
+                                                                          .id,
+                                                                      garageModel:
+                                                                          widget
+                                                                              .garageModel,
+                                                                      offersReceivedModel:
+                                                                          offersReceivedModel!,
+                                                                    ));
+                                                              } else {
+                                                                toastification
+                                                                    .show(
+                                                                  context:
+                                                                      context,
+                                                                  title: Text(
+                                                                      'This request was deleted.'),
+                                                                  autoCloseDuration:
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              3),
+                                                                );
+                                                              }
+                                                            }
+                                                          } else {
+                                                            if (offersModel
+                                                                .offersReceived
+                                                                .isNotEmpty) {
+                                                              Get.to(() =>
+                                                                  ServiceRequestDetails(
+                                                                    offersModel:
+                                                                        offersModel,
+                                                                    chatId:
+                                                                        chatModel
+                                                                            .id,
+                                                                    offersReceivedModel:
+                                                                        offersReceivedModel,
+                                                                  ));
+                                                            } else {
+                                                              if (offersReceivedModel ==
+                                                                  null) {
+                                                                Get.to(() =>
+                                                                    ServiceRequestDetails(
+                                                                      offersModel:
+                                                                          offersModel,
+                                                                      chatId:
+                                                                          chatModel
+                                                                              .id,
+                                                                      offersReceivedModel:
+                                                                          offersReceivedModel,
+                                                                    ));
+                                                              } else {
+                                                                toastification
+                                                                    .show(
+                                                                  context:
+                                                                      context,
+                                                                  title: Text(
+                                                                      'This request was deleted.'),
+                                                                  autoCloseDuration:
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              3),
+                                                                );
+                                                              }
+                                                            }
+                                                          }
+                                                        },
                                                         icon: Icon(
                                                           Icons
                                                               .arrow_forward_ios_rounded,
@@ -437,7 +552,6 @@ class _MessagePageState extends State<MessagePage> {
                                                       style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.w300,
-                                                        fontFamily: 'Avenir',
                                                         fontSize: 15,
                                                         fontStyle:
                                                             FontStyle.italic,
@@ -1229,7 +1343,6 @@ class _MessagePageState extends State<MessagePage> {
           Text(
             'Avoid suspicious activity',
             style: const TextStyle(
-              fontFamily: 'Avenir',
               color: Colors.black,
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -1246,7 +1359,6 @@ class _MessagePageState extends State<MessagePage> {
                   'If you see any links or messages that look unsual, don\'t click or respond to them. You can report them by contacting our Customer Service',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontFamily: 'Avenir',
                     color: Colors.black,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -1264,7 +1376,7 @@ class _MessagePageState extends State<MessagePage> {
             onPressed: () async {
               final Uri params = Uri(
                 scheme: 'mailto',
-                path: 'recipient@example.com',
+                path: 'mailto:support@vehype.com',
                 query: 'subject=VEHYPE Support - ${userModel.name}',
               );
               String url = params.toString();
@@ -1273,10 +1385,9 @@ class _MessagePageState extends State<MessagePage> {
             child: Text(
               'Report an issue',
               style: const TextStyle(
-                fontFamily: 'Avenir',
                 color: Colors.blue,
                 fontSize: 14,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w700,
                 // overflow: TextO,
                 fontStyle: FontStyle.normal,
               ),
@@ -1285,126 +1396,6 @@ class _MessagePageState extends State<MessagePage> {
         ],
       ),
     );
-  }
-}
-
-class RequestDetailsButtonOwner extends StatelessWidget {
-  const RequestDetailsButtonOwner({
-    super.key,
-    required this.widget,
-    required this.offersModel,
-    required this.userModel,
-    required this.offersReceivedModel,
-  });
-
-  final MessagePage widget;
-  final OffersModel offersModel;
-
-  final UserModel userModel;
-  final OffersReceivedModel offersReceivedModel;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () async {
-        // Get.dialog(LoadingDialog(), barrierDismissible: false);
-        // await FirebaseFirestore.instance
-        //     .collection('offersReceived')
-        //     .doc(offersReceivedModel.id)
-        //     .update({
-        //   'status': 'Upcoming',
-        // });
-        // await FirebaseFirestore.instance
-        //     .collection('offers')
-        //     .doc(offersModel.offerId)
-        //     .update({
-        //   'status': 'inProgress',
-        // });
-        // sendNotification(
-        //     offersReceivedModel.offerBy,
-        //     userModel.name,
-        //     'Offer Update',
-        //     '${userModel.name}, Accepted the offer',
-        //     offersReceivedModel.id,
-        //     'Offer',
-        //     '');
-        // Get.close(1);
-      },
-      style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.withOpacity(0.2),
-          elevation: 0.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
-          )),
-      child: Text(
-        'Accept Offer',
-        style: TextStyle(
-          color: Colors.green,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-}
-
-class RequestDetailsButtonProvider extends StatelessWidget {
-  const RequestDetailsButtonProvider({
-    super.key,
-    required this.widget,
-    required this.offersModel,
-    required this.userModel,
-    required this.offersReceivedModel,
-  });
-
-  final MessagePage widget;
-  final OffersModel offersModel;
-
-  final UserModel userModel;
-  final OffersReceivedModel offersReceivedModel;
-
-  @override
-  Widget build(BuildContext context) {
-    return offersModel.ownerId != userModel.userId
-        ? TextButton(
-            onPressed: () {
-              Get.to(
-                () => SelectDateAndPrice(
-                  offersModel: offersModel,
-                  ownerModel: userModel,
-                  offersReceivedModel: offersReceivedModel,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.withOpacity(0.2),
-                elevation: 0.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                )),
-            child: Text(
-              'Update Offer',
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 14,
-              ),
-            ),
-          )
-        : TextButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.withOpacity(0.2),
-                elevation: 0.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                )),
-            child: Text(
-              'Request Details',
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 14,
-              ),
-            ),
-          );
   }
 }
 
@@ -2015,6 +2006,7 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
     return Column(
       children: [
         message.mediaUrl == ''
@@ -2024,7 +2016,9 @@ class MessageWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: primaryColor,
+                  color: userController.isDark
+                      ? changeColor(color: '#444655')
+                      : primaryColor,
                 ),
                 child: RichText(
                   text: TextSpan(
@@ -2125,7 +2119,9 @@ class MessageWidget extends StatelessWidget {
                           bottomLeft: Radius.circular(6),
                           bottomRight: Radius.circular(6),
                         ),
-                        color: primaryColor,
+                        color: userController.isDark
+                            ? changeColor(color: '#444655')
+                            : primaryColor,
                       ),
                       child: RichText(
                         text: TextSpan(

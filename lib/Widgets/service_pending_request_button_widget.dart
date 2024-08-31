@@ -379,6 +379,8 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                   notificationTitle: '',
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                   notificationSubtitle: '');
               showModalBottomSheet(
                   shape: RoundedRectangleBorder(
@@ -560,6 +562,8 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                     isAdd: false,
                     offersReceived: offersReceivedModel.id,
                     checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                     notificationTitle: '',
                     notificationSubtitle: '');
                 UserModel ownerDetails = UserModel.fromJson(snap);
@@ -642,6 +646,8 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                   isAdd: false,
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
+                          senderId: userController.userModel!.userId,
+
                   notificationTitle: '',
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(

@@ -14,6 +14,7 @@ class DeleteChatConfirmationSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     return Container(
+      width: Get.width,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),

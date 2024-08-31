@@ -3,21 +3,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:vehype/Pages/offers_received_details.dart';/s
 class OffersNotification {
   final String checkById;
-  final bool isRead;
+  bool isRead;
   final String title;
   final String subtitle;
+  final String createdAt;
+  final String senderId;
+  final String offersReceivedId;
 
   OffersNotification(
       {required this.checkById,
       required this.isRead,
       required this.title,
-      required this.subtitle});
+      required this.offersReceivedId,
+      required this.subtitle,
+      required this.senderId,
+      required this.createdAt});
 
   factory OffersNotification.fromDb(data) {
     return OffersNotification(
         checkById: data['checkById'],
         isRead: data['isRead'],
         title: data['title'],
+        offersReceivedId: data['offersReceivedId'] ?? '',
+        createdAt:
+            data['createdAt'] ?? DateTime.now().toUtc().toIso8601String(),
+        senderId: data['senderId'] ?? data['checkById'],
         subtitle: data['subtitle']);
   }
 }

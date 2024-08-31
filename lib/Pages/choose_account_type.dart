@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -293,9 +294,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             ? Colors.white.withOpacity(0.8)
                                             : primaryColor.withOpacity(0.8),
                                         () {
-                                      // Handle tap on 'world'
-
-                                      // launchUrl('');
+                                      launchUrl(Uri.parse(
+                                          'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                                     }),
                                     TextSpan(
                                       text: '.',
@@ -324,8 +324,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             ? Colors.white.withOpacity(0.8)
                                             : primaryColor.withOpacity(0.8),
                                         () {
-                                      // launchUrl(
-                                      //    );
+                                      launchUrl(Uri.parse(
+                                          'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                                     }),
                                     TextSpan(
                                       text: ' and ',
@@ -344,8 +344,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                             ? Colors.white.withOpacity(0.8)
                                             : primaryColor.withOpacity(0.8),
                                         () {
-                                      // launchUrl(
-                                      //     );
+                                      launchUrl(Uri.parse(
+                                          'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                                     }),
                                     TextSpan(
                                       text: '.',

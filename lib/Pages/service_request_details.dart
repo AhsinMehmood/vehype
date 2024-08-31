@@ -810,56 +810,76 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                                                         0.2),
                                                           ),
                                                           const SizedBox(
-                                                            height: 30,
+                                                            height: 20,
                                                           ),
-                                                          Align(
-                                                            alignment: Alignment
-                                                                .centerLeft,
-                                                            child: Text(
-                                                              'Submodel',
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w800,
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            Align(
+                                                              alignment: Alignment
+                                                                  .centerLeft,
+                                                              child: Text(
+                                                                'Submodel',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          Align(
-                                                            alignment: Alignment
-                                                                .centerLeft,
-                                                            child: Text(
-                                                              garageModel
-                                                                  .submodel,
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            const SizedBox(
+                                                              height: 20,
+                                                            ),
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            Align(
+                                                              alignment: Alignment
+                                                                  .centerLeft,
+                                                              child: Text(
+                                                                garageModel
+                                                                    .submodel,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          Container(
-                                                            height: 0.5,
-                                                            width: Get.width,
-                                                            color: userController
-                                                                    .isDark
-                                                                ? Colors.white
-                                                                    .withOpacity(
-                                                                        0.2)
-                                                                : primaryColor
-                                                                    .withOpacity(
-                                                                        0.2),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            const SizedBox(
+                                                              height: 20,
+                                                            ),
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            Container(
+                                                              height: 0.5,
+                                                              width: Get.width,
+                                                              color: userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                      .withOpacity(
+                                                                          0.2)
+                                                                  : primaryColor
+                                                                      .withOpacity(
+                                                                          0.2),
+                                                            ),
+                                                          if (garageModel
+                                                                  .submodel !=
+                                                              '')
+                                                            const SizedBox(
+                                                              height: 20,
+                                                            ),
                                                           Align(
                                                             alignment: Alignment
                                                                 .centerLeft,

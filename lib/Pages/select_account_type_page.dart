@@ -10,6 +10,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
 
+import '../Controllers/offers_provider.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import 'location_permission.dart';
@@ -63,32 +64,56 @@ class SelectAccountType extends StatelessWidget {
 
                       final GeoFirePoint geoFirePoint = GeoFirePoint(
                           GeoPoint(latLng.latitude, latLng.longitude));
+                      DocumentSnapshot<Map<String, dynamic>> userSNap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc('${userModelAccount.userId}provider')
+                              .get();
+                      if (userSNap.exists) {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userSNap.id)
+                            .update({
+                          'isDelete': false,
+                          'accountType': 'provider',
+                          'name': userModelAccount.name,
+                        });
+                      } else {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc('${userModelAccount.userId}provider')
+                            .set({
+                          'accountType': 'provider',
+                          'name': userModelAccount.name,
+                          // 'accountType': 'owner',
+                          'profileUrl': userModelAccount.profileUrl,
+                          'id': '${userModelAccount.userId}provider',
+                          'email': userModelAccount.email,
+                          'status': 'active',
+                          'lat': latLng.latitude,
+                          'long': latLng.longitude,
+                          'geo': geoFirePoint.data,
+                        });
+                      }
 
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc('${userModelAccount.userId}provider')
-                          .set({
-                        'accountType': 'provider',
-                        'name': userModelAccount.name,
-                        // 'accountType': 'owner',
-                        'profileUrl': userModelAccount.profileUrl,
-                        'id': '${userModelAccount.userId}provider',
-                        'email': userModelAccount.email,
-                        'status': 'active',
-                        'lat': latLng.latitude,
-                        'long': latLng.longitude,
-                        'geo': geoFirePoint.data,
-                      });
                       OneSignal.login('${userModelAccount.userId}provider');
 
-                      userController
-                          .getUserStream('${userModelAccount.userId}provider');
-                      await Future.delayed(const Duration(seconds: 2));
-                      // await OneSignal.Notifications.requestPermission(true);
+                      userController.getUserStream(
+                        '${userModelAccount.userId}provider',
+                        onDataReceived: (userModel) {
+                          OffersProvider offersProvider =
+                              Provider.of<OffersProvider>(context,
+                                  listen: false);
+                          offersProvider.startListening(userModel);
+                          offersProvider.startListeningOffers(userModel.userId);
 
-                      Get.close(1);
+                          // await OneSignal.Notifications.requestPermission(true);
 
-                      Get.offAll(() => const TabsPage());
+                          Get.close(1);
+
+                          Get.offAll(() => const TabsPage());
+                        },
+                      );
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -146,28 +171,55 @@ class SelectAccountType extends StatelessWidget {
 
                       final GeoFirePoint geoFirePoint = GeoFirePoint(
                           GeoPoint(latLng.latitude, latLng.longitude));
+                      DocumentSnapshot<Map<String, dynamic>> userSNap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc('${userModelAccount.userId}seeker')
+                              .get();
+                      if (userSNap.exists) {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userSNap.id)
+                            .update({
+                          'isDelete': false,
+                          'accountType': 'seeker',
+                          'name': userModelAccount.name,
+                        });
+                      } else {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc('${userModelAccount.userId}seeker')
+                            .set({
+                          'accountType': 'seeker',
+                          'name': userModelAccount.name,
+                          // 'accountType': 'owner',
+                          'profileUrl': userModelAccount.profileUrl,
+                          'id': '${userModelAccount.userId}seeker',
+                          'email': userModelAccount.email,
+                          'status': 'active',
+                          'lat': latLng.latitude,
+                          'long': latLng.longitude,
+                          'geo': geoFirePoint.data,
+                        });
+                      }
 
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc('${userModelAccount.userId}seeker')
-                          .set({
-                        'accountType': 'seeker',
-                        'name': userModelAccount.name,
-                        // 'accountType': 'owner',
-                        'profileUrl': userModelAccount.profileUrl,
-                        'id': '${userModelAccount.userId}seeker',
-                        'email': userModelAccount.email,
-                        'lat': latLng.latitude,
-                        'long': latLng.longitude,
-                        'geo': geoFirePoint.data,
-                      });
-                      userController
-                          .getUserStream('${userModelAccount.userId}seeker');
-                      await Future.delayed(const Duration(seconds: 2));
+                      userController.getUserStream(
+                        '${userModelAccount.userId}seeker',
+                        onDataReceived: (userModel) {
+                          OffersProvider offersProvider =
+                              Provider.of<OffersProvider>(context,
+                                  listen: false);
+                          offersProvider
+                              .startListeningOwnerOffers(userModel.userId);
+
+                          // await OneSignal.Notifications.requestPermission(true);
+
+                          Get.close(1);
+
+                          Get.offAll(() => const TabsPage());
+                        },
+                      );
                       // await OneSignal.Notifications.requestPermission(true);
-
-                      Get.close(1);
-                      Get.offAll(() => const NotificationDialog());
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(

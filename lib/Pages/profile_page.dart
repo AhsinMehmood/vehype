@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -401,6 +402,8 @@ class ProfilePage extends StatelessWidget {
                       InkWell(
                         onTap: () async {
                           // Get.offAll(() => SplashPage());
+                          launchUrl(Uri.parse(
+                              'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                         },
                         child: Text(
                           'Privacy Policy',
@@ -418,6 +421,8 @@ class ProfilePage extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: () async {
+                          launchUrl(Uri.parse(
+                              'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                           // Get.offAll(() => SplashPage());
                         },
                         child: Text(
@@ -481,15 +486,7 @@ class ProfilePage extends StatelessWidget {
                       InkWell(
                         // 89
                         onTap: () async {
-                          OffersProvider offersProvider =
-                              Provider.of<OffersProvider>(context,
-                                  listen: false);
-                          userController.closeStream();
-                          offersProvider.stopListening();
-                          UserController().logout(userModel);
-
-                          userController.changeTabIndex(0);
-                          Get.offAll(SplashPage());
+                          Get.bottomSheet(LogoutConfirmation());
                         },
                         child: Text(
                           'Log Out',
@@ -535,6 +532,98 @@ class ProfilePage extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LogoutConfirmation extends StatelessWidget {
+  const LogoutConfirmation({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
+    return Container(
+      width: Get.width,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: userController.isDark ? primaryColor : Colors.white),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Text(
+              'Are you sure you want to logout?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Get.close(1);
+                OffersProvider offersProvider =
+                    Provider.of<OffersProvider>(context, listen: false);
+                userController.closeStream();
+                offersProvider.stopListening();
+
+                UserController().logout(userController.userModel!);
+              },
+              style: ElevatedButton.styleFrom(
+                  elevation: 0.0,
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                  minimumSize: Size(Get.width * 0.6, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  )),
+              child: Text(
+                'Logout',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: userController.isDark ? primaryColor : Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+              },
+              child: Container(
+                height: 50,
+                width: Get.width * 0.6,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                    )),
+                child: Center(
+                  child: Text(
+                    'Stay Login',
+                    style: TextStyle(
+                      color:
+                          userController.isDark ? Colors.white : primaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
         ),
       ),
     );

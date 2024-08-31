@@ -175,7 +175,7 @@ class SeekerProfileWidget extends StatelessWidget {
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -207,7 +207,7 @@ class SeekerProfileWidget extends StatelessWidget {
                                   color: userController.isDark
                                       ? Colors.white
                                       : primaryColor,
-                                  fontSize: 13,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -236,7 +236,7 @@ class SeekerProfileWidget extends StatelessWidget {
                     style: TextStyle(
                       color:
                           userController.isDark ? Colors.white : primaryColor,
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -318,6 +318,7 @@ class ProviderProfileWidget extends StatelessWidget {
                       )),
                   bottom: TabBar(
                     isScrollable: true,
+                    tabAlignment: TabAlignment.start,
                     indicatorColor: userController.isDark
                         ? Colors.white.withOpacity(0.5)
                         : primaryColor.withOpacity(0.5),
@@ -522,7 +523,7 @@ class _OverviewTabState extends State<OverviewTab> {
                       style: TextStyle(
                         color:
                             userController.isDark ? Colors.white : primaryColor,
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -696,7 +697,7 @@ class ServicesTab extends StatelessWidget {
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor,
-                          fontSize: 17,
+                          fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -755,7 +756,7 @@ class ServicesTab extends StatelessWidget {
                       style: TextStyle(
                         color:
                             userController.isDark ? Colors.white : primaryColor,
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -836,7 +837,7 @@ class ReviewsTab extends StatelessWidget {
                               ? Colors.white
                               : primaryColor,
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       subtitle: Column(
@@ -922,10 +923,10 @@ class ReviewsTab extends StatelessWidget {
                         },
                         child: Card(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(6),
                             child: ExtendedImage.network(
                               userData.ratings[inde]['images'],
 

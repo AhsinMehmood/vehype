@@ -6,6 +6,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:toastification/toastification.dart';
+import 'package:vehype/Controllers/offers_controller.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
@@ -18,12 +20,13 @@ import 'package:timeago/timeago.dart' as timeago;
 // import 'inactive_offers_seeker.dart';
 // import 'offers_received_details.dart';
 // import 'received_offers_seeker.dart';
+import 'owner_request_details_inprogress_inactive_page.dart';
 import 'repair_page.dart';
 // import 'requests_received_provider_details.dart';
 
 class OwnerNotificationsPage extends StatefulWidget {
-  final List<NotificationsModel> notifications;
-  const OwnerNotificationsPage({super.key, required this.notifications});
+  final List<OffersModel> offers;
+  const OwnerNotificationsPage({super.key, required this.offers});
 
   @override
   State<OwnerNotificationsPage> createState() => _OwnerNotificationsPageState();
@@ -31,10 +34,34 @@ class OwnerNotificationsPage extends StatefulWidget {
 
 class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
   bool isAll = true;
+  List<OffersNotification> offersNotifications = [];
+  Map<String, List<OffersNotification>> map = {};
+  @override
+  void initState() {
+    super.initState();
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    UserModel userModel = userController.userModel!;
+    for (OffersModel offer in widget.offers) {
+      List<OffersNotification> offersNotifications = offer.checkByList
+          .where((noti) => noti.checkById == userModel.userId)
+          .toList();
+
+      if (map[offer.offerId] != null) {
+        map[offer.offerId]!.addAll(offersNotifications);
+      } else {
+        map[offer.offerId] = offersNotifications;
+      }
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = userController.userModel!;
+
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(
@@ -45,7 +72,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
           'Notifications',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 17,
+            fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -60,550 +87,270 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
       ),
       body: Column(
         children: [
-          // const SizedB
-          StreamBuilder<List<NotificationsModel>>(
-              initialData: widget.notifications,
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userModel.userId)
-                  .collection('notifications')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots()
-                  .map((m) => m.docs
-                      .map((s) => NotificationsModel.fromJson(s))
-                      .toList()),
-              builder:
-                  (context, AsyncSnapshot<List<NotificationsModel>> snapshot) {
-                if (!snapshot.hasData) {
-                  return Expanded(
-                    child: Center(
-                      child: Text('Nothing Here!'),
-                    ),
-                  );
-                }
-                List<NotificationsModel> notificationsStream =
-                    snapshot.data ?? [];
-                List<NotificationsModel> filterNotifications = isAll
-                    ? notificationsStream
-                    : notificationsStream
-                        .where((dd) => dd.isRead == false)
-                        .toList();
-                notificationsStream = filterNotifications;
-                if (notificationsStream.isEmpty) {
-                  return Expanded(
-                    child: Center(
-                      child: Text('Nothing Here!'),
-                    ),
-                  );
-                }
+          Expanded(
+            child: map.isEmpty
+                ? Center(
+                    child: Text('Nothing here!'),
+                  )
+                : ListView.builder(
+                    itemCount: map.length,
+                    itemBuilder: (context, mapIndex) {
+                      OffersModel offersModel = widget.offers.firstWhere(
+                          (offer) =>
+                              offer.offerId == map.keys.elementAt(mapIndex));
+                      List<OffersNotification> notifications =
+                          map[offersModel.offerId]!.toList();
+                      return ListView.builder(
+                          itemCount: notifications.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            OffersNotification notificationsModel =
+                                notifications[index];
 
-                return Expanded(
-                  child: Column(
-                    children: [
-                      // const SizedBox(
-                      //   height: 15,
-                      // ),
-                      // const SizedBox(
-                      //   height: 10,
-                      // ),
-                      Expanded(
-                        child: ListView.builder(
-                            itemCount: notificationsStream.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              NotificationsModel notificationsModel =
-                                  notificationsStream[index];
-                              return StreamBuilder<UserModel>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection('users')
-                                      .doc(notificationsModel.senderId)
-                                      .snapshots()
-                                      .map((ss) => UserModel.fromJson(ss)),
-                                  builder: (context,
-                                      AsyncSnapshot<UserModel> senderSnap) {
-                                    if (!senderSnap.hasData) {
-                                      return Center();
-                                    }
-                                    UserModel senderModel = senderSnap.data!;
-                                    final createdAt = DateTime.parse(
-                                        notificationsModel.createdAt);
+                            return StreamBuilder<UserModel>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(notificationsModel.senderId)
+                                    .snapshots()
+                                    .map((ss) => UserModel.fromJson(ss)),
+                                builder: (context,
+                                    AsyncSnapshot<UserModel> senderSnap) {
+                                  if (!senderSnap.hasData) {
+                                    return Center();
+                                  }
+                                  UserModel senderModel = senderSnap.data!;
+                                  final createdAt = DateTime.parse(
+                                      notificationsModel.createdAt);
 
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 6,
-                                        right: 6,
-                                        top: 10,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          SwipeableTile(
-                                            color: notificationsModel.isRead ==
-                                                    false
-                                                ? Colors.redAccent
-                                                : userController.isDark
-                                                    ? Colors.blueGrey.shade400
-                                                    : Colors.white60,
-                                            swipeThreshold: 0.2,
-                                            direction:
-                                                SwipeDirection.horizontal,
-                                            onSwiped: (direction) {
-                                              // Here call setState to update state
-                                              FirebaseFirestore.instance
-                                                  .collection('users')
-                                                  .doc(userModel.userId)
-                                                  .collection('notifications')
-                                                  .doc(notificationsModel.id)
-                                                  .delete();
-                                            },
-                                            backgroundBuilder:
-                                                (context, direction, progress) {
-                                              if (direction ==
-                                                  SwipeDirection.endToStart) {
-                                                return Container(
-                                                  color: userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                                  padding:
-                                                      const EdgeInsets.all(10),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.delete,
-                                                        color: userController
-                                                                .isDark
-                                                            ? primaryColor
-                                                            : Colors.white,
-                                                        size: 22,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                                // return your widget
-                                              } else if (direction ==
-                                                  SwipeDirection.startToEnd) {
-                                                return Container(
-                                                  color: userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                                  padding:
-                                                      const EdgeInsets.all(10),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.delete,
-                                                        color: userController
-                                                                .isDark
-                                                            ? primaryColor
-                                                            : Colors.white,
-                                                        size: 22,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                                // return your widget
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                      // left: 3,
+                                      // right: 3,
+                                      top: 10,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          color: notificationsModel.isRead
+                                              ? userController.isDark
+                                                  ? primaryColor
+                                                  : Colors.white
+                                              : changeColor(color: '#658cf6')
+                                                  .withOpacity(0.2),
+                                          child: InkWell(
+                                            onTap: () async {
+                                              notificationsModel.isRead = true;
+                                              setState(() {});
+
+                                              Get.dialog(LoadingDialog(),
+                                                  barrierDismissible: false);
+                                              DocumentSnapshot<
+                                                      Map<String, dynamic>>
+                                                  garageSnap =
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('garages')
+                                                      .doc(offersModel.garageId)
+                                                      .get();
+                                              OffersReceivedModel?
+                                                  offersReceivedModel;
+
+                                              if (notificationsModel
+                                                      .offersReceivedId !=
+                                                  '') {
+                                                DocumentSnapshot<
+                                                        Map<String, dynamic>>
+                                                    offerSnap =
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection(
+                                                            'offersReceived')
+                                                        .doc(notificationsModel
+                                                            .offersReceivedId)
+                                                        .get();
+
+                                                offersReceivedModel =
+                                                    OffersReceivedModel
+                                                        .fromJson(offerSnap);
                                               }
-                                              return Container();
+                                              Get.close(1);
+                                              OffersController()
+                                                  .updateNotificationForOffers(
+                                                      offerId:
+                                                          offersModel.offerId,
+                                                      userId: userModel.userId,
+                                                      checkByList: offersModel
+                                                          .checkByList,
+                                                      isAdd: false,
+                                                      offersReceived:
+                                                          offersReceivedModel
+                                                              ?.id,
+                                                      notificationTitle: '',
+                                                      senderId:
+                                                          userModel.userId,
+                                                      notificationSubtitle: '');
+
+                                              if (offersModel.status ==
+                                                  'active') {
+                                                Get.to(() =>
+                                                    OwnerRequestDetailsInprogressInactivePage(
+                                                      offersModel: offersModel,
+                                                      garageModel:
+                                                          GarageModel.fromJson(
+                                                              garageSnap),
+                                                      offersReceivedModel:
+                                                          offersReceivedModel!,
+                                                    ));
+                                              } else if (offersModel.status ==
+                                                      'inProgress' ||
+                                                  offersModel.status ==
+                                                      'inactive') {
+                                                if (offersModel.offersReceived
+                                                    .isNotEmpty) {
+                                                  Get.to(() =>
+                                                      OwnerRequestDetailsInprogressInactivePage(
+                                                        offersModel:
+                                                            offersModel,
+                                                        garageModel: GarageModel
+                                                            .fromJson(
+                                                                garageSnap),
+                                                        offersReceivedModel:
+                                                            offersReceivedModel!,
+                                                      ));
+                                                } else {
+                                                  toastification.show(
+                                                    context: context,
+                                                    title: Text(
+                                                        'This request was deleted.'),
+                                                    autoCloseDuration:
+                                                        const Duration(
+                                                            seconds: 3),
+                                                  );
+                                                }
+                                              }
                                             },
-                                            key: UniqueKey(),
-                                            child: ListTile(
-                                              onTap: () async {
-                                                if (!notificationsModel
-                                                    .isRead) {
-                                                  FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(userModel.userId)
-                                                      .collection(
-                                                          'notifications')
-                                                      .doc(
-                                                          notificationsModel.id)
-                                                      .update({
-                                                    'isRead': true,
-                                                  });
-                                                }
-                                                // // await OneSignal.logout();
-                                                // // await OneSignal.login(
-                                                // //     userModel.userId);
-                                                // await OneSignal.Notifications
-                                                //     .requestPermission(true);
-                                                // await sendNotification(
-                                                //     'LWLuSyFmLANl73qEljxzOCayKvg2seeker',
-                                                //     userModel.name,
-                                                //     'Offer Update',
-                                                //     '${userModel.name} Sent you an offer.',
-                                                //     'wO92XODLc3piC7sdEAmX',
-                                                //     'offer',
-                                                //     'messageId');
-                                                print(userModel.userId);
-                                                print(notificationsModel.type);
-
-                                                if (notificationsModel.type ==
-                                                    'request') {
-                                                  Get.dialog(LoadingDialog(),
-                                                      barrierDismissible:
-                                                          false);
-                                                  DocumentSnapshot<
-                                                          Map<String, dynamic>>
-                                                      requestSnap =
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection('offers')
-                                                          .doc(
-                                                              notificationsModel
-                                                                  .objectId)
-                                                          .get();
-                                                  OffersModel offersModel =
-                                                      OffersModel.fromJson(
-                                                          requestSnap);
-                                                  Get.close(1);
-
-                                                  if (offersModel.status ==
-                                                      'active') {
-                                                    // Get.to(() =>
-                                                    //     ReceivedOffersSeeker(
-                                                    //       offersModel:
-                                                    //           offersModel,
-                                                    //     ));
-                                                  } else {
-                                                    toastification.show(
-                                                      closeButtonShowType:
-                                                          CloseButtonShowType
-                                                              .none,
-                                                      title: Text(
-                                                          'Request was covered.'),
-                                                      style: ToastificationStyle
-                                                          .minimal,
-                                                      showProgressBar: false,
-                                                      autoCloseDuration:
-                                                          Duration(
-                                                        seconds: 3,
-                                                      ),
-                                                      description: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          ElevatedButton(
-                                                              onPressed: () {
-                                                                FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                        'users')
-                                                                    .doc(userModel
-                                                                        .userId)
-                                                                    .collection(
-                                                                        'notifications')
-                                                                    .doc(
-                                                                        notificationsModel
-                                                                            .id)
-                                                                    .delete();
-                                                              },
-                                                              style: ElevatedButton
-                                                                  .styleFrom(),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(
-                                                                        4.0),
-                                                                child: Icon(Icons
-                                                                    .delete),
-                                                              )),
-                                                        ],
-                                                      ),
-
-                                                      // icon: Icon(Icons.delete),
-                                                      context: context,
-                                                    );
-                                                  }
-                                                } else if (notificationsModel
-                                                        .type ==
-                                                    'offer') {
-                                                  Get.dialog(LoadingDialog(),
-                                                      barrierDismissible:
-                                                          false);
-                                                  DocumentSnapshot<
-                                                          Map<String, dynamic>>
-                                                      offersReceivedSnap =
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection(
-                                                              'offersReceived')
-                                                          .doc(
-                                                              notificationsModel
-                                                                  .objectId)
-                                                          .get();
-                                                  OffersReceivedModel
-                                                      offersReceivedModel =
-                                                      OffersReceivedModel
-                                                          .fromJson(
-                                                              offersReceivedSnap);
-
-                                                  DocumentSnapshot<
-                                                          Map<String, dynamic>>
-                                                      requestSnap =
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection('offers')
-                                                          .doc(
-                                                              offersReceivedModel
-                                                                  .offerId)
-                                                          .get();
-                                                  OffersModel offersModel =
-                                                      OffersModel.fromJson(
-                                                          requestSnap);
-
-                                                  Get.close(1);
-                                                  if (offersReceivedModel
-                                                          .status ==
-                                                      'Pending') {
-                                                    // Get.to(() =>
-                                                    // ReceivedOffersSeeker(
-                                                    //   offersModel:
-                                                    //       offersModel,
-                                                    //   offersReceivedModel:
-                                                    //       offersReceivedModel,
-                                                    // ));
-                                                  } else {
-                                                    // Get.to(() =>
-                                                    //     InActiveOffersSeeker(
-                                                    //       offersModel:
-                                                    //           offersModel,
-                                                    //       isFromNoti: true,
-                                                    //       offersReceivedModel:
-                                                    //           offersReceivedModel,
-                                                    //       tittle: offersReceivedModel
-                                                    //                   .status ==
-                                                    //               'ignore'
-                                                    //           ? 'Ignored'
-                                                    //           : offersReceivedModel
-                                                    //               .status,
-                                                    //     ));
-                                                  }
-                                                }
-                                              },
-                                              // selected: notificationsModel.isRead,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
+                                            child: Container(
+                                              padding: const EdgeInsets.only(
+                                                left: 12,
+                                                right: 12,
+                                                top: 12,
+                                                bottom: 12,
                                               ),
-                                              tileColor: notificationsModel
-                                                          .isRead ==
-                                                      false
-                                                  ? Colors.red
-                                                  : userController.isDark
-                                                      ? Colors.blueGrey.shade400
-                                                      : Colors.white60,
-                                              leading: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(200),
-                                                child: ExtendedImage.network(
-                                                  senderModel.profileUrl,
-                                                  height: 45,
-                                                  width: 45,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              title: Text(
-                                                notificationsModel.title,
-                                                style: TextStyle(
-                                                  color: notificationsModel
-                                                              .isRead ==
-                                                          false
-                                                      ? Colors.white
-                                                      : userController.isDark
-                                                          ? Colors.white
-                                                          : primaryColor,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              subtitle: Text(
-                                                notificationsModel.subTitle,
-                                                style: TextStyle(
-                                                    color: notificationsModel
-                                                                .isRead ==
-                                                            false
-                                                        ? Colors.white
-                                                        : userController.isDark
-                                                            ? Colors.white
-                                                            : primaryColor,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w400,
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
-                                              ),
-                                              trailing: Text(
-                                                timeago.format(createdAt),
-                                                style: TextStyle(
-                                                  color: notificationsModel
-                                                              .isRead ==
-                                                          false
-                                                      ? Colors.white
-                                                      : userController.isDark
-                                                          ? Colors.white
-                                                          : primaryColor,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            200),
+                                                    child:
+                                                        ExtendedImage.network(
+                                                      senderModel.profileUrl,
+                                                      height: 65,
+                                                      width: 65,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 6,
+                                                  ),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          notificationsModel
+                                                              .subtitle,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          maxLines: 2,
+                                                          style: TextStyle(
+                                                            color: userController
+                                                                    .isDark
+                                                                ? Colors.white
+                                                                : primaryColor,
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 5,
+                                                        ),
+                                                        Text(
+                                                          timeago.format(
+                                                              createdAt),
+                                                          style: TextStyle(
+                                                            color: userController
+                                                                    .isDark
+                                                                ? Colors.white
+                                                                : primaryColor,
+                                                            fontSize: 12,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  // Column(
+                                                  //   mainAxisAlignment:
+                                                  //       MainAxisAlignment.start,
+                                                  //   children: [
+                                                  //     Icon(Icons
+                                                  //         .more_horiz_outlined),
+                                                  //   ],
+                                                  // )
+                                                ],
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(
-                                            height: 8,
-                                          ),
-                                          Container(
-                                            height: 1,
-                                            width: Get.width,
-                                            color: changeColor(color: 'D9D9D9'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  });
-                            }),
-                      ),
-                      if (notificationsStream.isNotEmpty)
-                        Container(
-                          color: userController.isDark
-                              ? primaryColor
-                              : Colors.white,
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                            top: 15,
-                            bottom: 30,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  for (var element in notificationsStream) {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(userModel.userId)
-                                        .collection('notifications')
-                                        .doc(element.id)
-                                        .delete();
-                                  }
-                                },
-                                child: Text(
-                                  'Clear All',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              }),
-        ],
-      ),
-    );
-  }
-}
-
-class NotificationWidget extends StatelessWidget {
-  const NotificationWidget({
-    super.key,
-    required this.notificationsModel,
-    required this.senderModel,
-    required this.userController,
-  });
-
-  final NotificationsModel notificationsModel;
-  final UserModel senderModel;
-  final UserController userController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      color: notificationsModel.isRead == false
-          ? Colors.green.withOpacity(0.4)
-          : null,
-      child: Container(
-        padding: const EdgeInsets.all(12.0),
-        margin: const EdgeInsets.only(
-          bottom: 10,
-        ),
-        // color: Colors.red,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(200),
-                  child: ExtendedImage.network(
-                    senderModel.profileUrl,
-                    height: 45,
-                    width: 45,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          notificationsModel.title,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '1 hour ago',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 7,
-                    ),
-                    Text(
-                      notificationsModel.subTitle,
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                });
+                          });
+                    }),
+          ),
+          if (map.isNotEmpty)
+            Container(
+              color: userController.isDark ? primaryColor : Colors.white,
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 15,
+                bottom: 30,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      // for (var element in offers) {
+                      //   FirebaseFirestore.instance
+                      //       .collection('users')
+                      //       .doc(userModel.userId)
+                      //       .collection('notifications')
+                      //       .doc(element.id)
+                      //       .delete();
+                      // }
+                    },
+                    child: Text(
+                      'Clear All',
                       style: TextStyle(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          overflow: TextOverflow.ellipsis),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

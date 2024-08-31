@@ -40,7 +40,8 @@ Color changeColor({required String color}) {
 }
 
 int currentVersion = 3;
-
+String defaultImage =
+    'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757';
 Color primaryColor = const Color(0xff2A2E43);
 Color primaryColor2 = changeColor(color: 'FF2F53');
 String carApiToken = 'ba831f89-cd77-4efc-9b3b-2a4ef151f959';

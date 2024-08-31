@@ -144,6 +144,8 @@ class ServiceCompletedRequestButtonWidget extends StatelessWidget {
                     offerId: offersModel.offerId,
                     userId: userController.userModel!.userId,
                     isAdd: false,
+                          senderId: userController.userModel!.userId,
+
                     offersReceived: offersReceivedModel.id,
                     checkByList: offersModel.checkByList,
                     notificationTitle: '',
@@ -199,6 +201,8 @@ class ServiceCompletedRequestButtonWidget extends StatelessWidget {
               OffersController().updateNotificationForOffers(
                   offerId: offersModel.offerId,
                   userId: userController.userModel!.userId,
+                          senderId: userController.userModel!.userId,
+
                   isAdd: false,
                   notificationTitle: '',
                   checkByList: offersModel.checkByList,

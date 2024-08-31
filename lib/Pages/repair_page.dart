@@ -42,7 +42,7 @@ class RepairPage extends StatelessWidget {
           height: 55,
           width: 55,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(12),
             color: userController.isDark ? Colors.white : primaryColor,
           ),
           child: InkWell(
@@ -105,7 +105,7 @@ class RepairPage extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     Get.to(() => OwnerNotificationsPage(
-                          notifications: [],
+                          offers: ownerOffersNeedsToCheck,
                         ));
                   },
                   child: Stack(
@@ -114,7 +114,7 @@ class RepairPage extends StatelessWidget {
                         Icons.notifications_outlined,
                         color:
                             userController.isDark ? Colors.white : primaryColor,
-                        size: 24,
+                        size: 28,
                       ),
                       if (ownerOffersNeedsToCheck.isNotEmpty)
                         Container(

@@ -49,6 +49,8 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
               onTap: () {
                 OffersController().updateNotificationForOffers(
                     offerId: offersModel.offerId,
+                          senderId: userController.userModel!.userId,
+
                     userId: userController.userModel!.userId,
                     isAdd: false,
                     offersReceived: offersReceivedModel.id,
@@ -111,6 +113,8 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
                   offersReceived: offersReceivedModel.id,
                   checkByList: offersModel.checkByList,
                   notificationTitle: '',
+                          senderId: userController.userModel!.userId,
+
                   notificationSubtitle: '');
               Get.to(() => ServiceRequestDetails(
                   offersModel: offersModel,

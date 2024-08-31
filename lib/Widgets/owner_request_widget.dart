@@ -10,11 +10,7 @@ import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
-import 'package:vehype/Widgets/service_cancelled_request_button_widget.dart';
-import 'package:vehype/Widgets/service_completed_request_button_widget.dart';
-import 'package:vehype/Widgets/service_inprogress_request_button_widget.dart';
-import 'package:vehype/Widgets/service_new_request_button_widget.dart';
-import 'package:vehype/Widgets/service_pending_request_button_widget.dart';
+
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
 

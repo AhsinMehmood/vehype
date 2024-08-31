@@ -15,6 +15,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/select_account_type_page.dart';
@@ -106,15 +107,22 @@ class LoginController {
             if (userModel.adminStatus == 'blocked') {
               Get.offAll(() => const DisabledWidget());
             } else {
-              userController.getUserStream(userId + userModel.accountType);
-              DocumentSnapshot<Map<String, dynamic>> accountType =
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userId)
-                      .get();
-              OneSignal.login(userId + userModel.accountType);
-              // Get.offAll(() => const TabsPage());
-              Get.offAll(() => const TabsPage());
+              OffersProvider offersProvider =
+                  Provider.of<OffersProvider>(context, listen: false);
+              userController.getUserStream(
+                userId + userModel.accountType,
+                onDataReceived: (userModel) {
+                  if (userModel.accountType == 'provider') {
+                    offersProvider.startListening(userModel);
+                    offersProvider.startListeningOffers(userModel.userId);
+                  } else {
+                    offersProvider.startListeningOwnerOffers(userModel.userId);
+                  }
+                  // await OneSignal.Notifications.requestPermission(true);
+                  OneSignal.login(userModel.accountType);
+                  Get.offAll(() => const TabsPage());
+                },
+              );
             }
           }
         }
@@ -136,11 +144,15 @@ class LoginController {
 
   loginWithApple(BuildContext context) async {
     try {
+      // Show the loading dialog
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
+
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
       final rawNonce = generateNonce();
       final nonce = sha256ofString(rawNonce);
+
+      // Attempt to get Apple ID credentials
       final AuthorizationCredentialAppleID credential =
           await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -150,11 +162,13 @@ class LoginController {
         nonce: nonce,
       );
 
+      // Create an OAuth credential from the Apple ID credential
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
         rawNonce: rawNonce,
       );
 
+      // Sign in with the OAuth credential
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(oauthCredential);
 
@@ -162,64 +176,95 @@ class LoginController {
       String? email = userCredential.user!.email;
       String? name = userCredential.user!.displayName;
 
+      // Save the user ID to shared preferences
       sharedPreferences.setString('userId', userId);
+
+      // Check if the user is new and save their details in Firestore
       if (userCredential.additionalUserInfo!.isNewUser) {
         String? urlAvatar = userCredential.user!.photoURL;
         await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'name': name,
-          // 'accountType': 'owner',
           'profileUrl': urlAvatar,
           'id': userId,
           'email': email,
         });
+
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(userId)
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
-        Get.close(1);
 
-        Get.offAll(() => SelectAccountType(
-              userModelAccount: userModel,
-            ));
+        // Close the loading dialog and navigate to the account type selection page
+        Get.close(1);
+        Get.offAll(() => SelectAccountType(userModelAccount: userModel));
       } else {
+        // Existing user logic
         UserController userController =
             Provider.of<UserController>(context, listen: false);
-
-        // if(){}
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(userId)
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
+
+        // Close the loading dialog
         Get.close(1);
+
         if (userModel.accountType == '') {
-          Get.offAll(() => SelectAccountType(
-                userModelAccount: userModel,
-              ));
+          Get.offAll(() => SelectAccountType(userModelAccount: userModel));
         } else {
           if (userModel.adminStatus == 'blocked') {
             Get.offAll(() => const DisabledWidget());
           } else {
-            userController.getUserStream(userId + userModel.accountType);
-            DocumentSnapshot<Map<String, dynamic>> accountType =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userId)
-                    .get();
-            OneSignal.login(userId + userModel.accountType);
-
-            Get.offAll(() => const TabsPage());
+            OffersProvider offersProvider =
+                Provider.of<OffersProvider>(context, listen: false);
+            userController.getUserStream(
+              userId + userModel.accountType,
+              onDataReceived: (userModel) {
+                if (userModel.accountType == 'provider') {
+                  offersProvider.startListening(userModel);
+                  offersProvider.startListeningOffers(userModel.userId);
+                } else {
+                  offersProvider.startListeningOwnerOffers(userModel.userId);
+                }
+                // await OneSignal.Notifications.requestPermission(true);
+                OneSignal.login(userModel.accountType);
+                Get.offAll(() => const TabsPage());
+              },
+            );
           }
         }
       }
     } on FirebaseAuthException catch (e) {
+      // Close the loading dialog if an error occurs
       Get.close(1);
 
+      // Show an error message
       Get.showSnackbar(GetSnackBar(
         message: e.message,
+        duration: const Duration(seconds: 3),
+      ));
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // Close the loading dialog if the sign-in is canceled by the user
+      Get.close(1);
+
+      // Optionally, show a message to the user if needed
+      if (e.code == AuthorizationErrorCode.canceled) {
+        Get.showSnackbar(GetSnackBar(
+          message: "Sign-in was canceled.",
+          duration: const Duration(seconds: 3),
+        ));
+      }
+    } catch (e) {
+      // Handle any other exceptions
+      Get.close(1);
+
+      // Show a generic error message
+      Get.showSnackbar(GetSnackBar(
+        message: "An error occurred during sign-in. Please try again.",
         duration: const Duration(seconds: 3),
       ));
     }

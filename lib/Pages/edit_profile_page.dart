@@ -30,6 +30,7 @@ import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/garage_controller.dart';
+import '../Controllers/offers_provider.dart';
 import '../Controllers/vehicle_data.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -612,8 +613,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                   Text(
                     'Full Name',
                     style: TextStyle(
-                      fontFamily: 'Avenir',
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                       // color: Colors.black,
                       fontSize: 16,
                     ),
@@ -637,8 +637,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         userController.userModel!, 'name', value),
                     textCapitalization: TextCapitalization.words,
                     style: TextStyle(
-                      fontFamily: 'Avenir',
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       // color: changeColor(color: '7B7B7B'),
                       fontSize: 16,
                     ),
@@ -666,8 +665,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     Text(
                       'Business Info',
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                         // color: Colors.black,
                         fontSize: 16,
                       ),
@@ -691,8 +689,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                           userController.userModel!, 'businessInfo', value),
                       // textCapitalization: TextCapitalization.words,
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w600,
                         // color: changeColor(color: '7B7B7B'),
                         fontSize: 16,
                       ),
@@ -723,8 +720,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     Text(
                       'Contact Info',
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                         // color: Colors.black,
                         fontSize: 16,
                       ),
@@ -749,8 +745,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       textCapitalization: TextCapitalization.none,
                       keyboardType: TextInputType.phone,
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w600,
                         // color: changeColor(color: '7B7B7B'),
                         fontSize: 16,
                       ),
@@ -781,8 +776,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     Text(
                       'Business Website',
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                         // color: Colors.black,
                         fontSize: 16,
                       ),
@@ -806,8 +800,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                           userController.userModel!, 'website', value),
                       textCapitalization: TextCapitalization.words,
                       style: TextStyle(
-                        fontFamily: 'Avenir',
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w600,
                         // color: changeColor(color: '7B7B7B'),
                         fontSize: 16,
                       ),
@@ -828,14 +821,14 @@ class _EditProfileTabState extends State<EditProfileTab> {
                   color: changeColor(color: 'D9D9D9'),
                 ),
               const SizedBox(
-                height: 50,
+                height: 20,
               ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   'Account Type',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -859,6 +852,9 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             await SharedPreferences.getInstance();
                         String realUserId =
                             sharedPreferences.getString('userId') ?? '';
+                        OffersProvider offersProvider =
+                            Provider.of<OffersProvider>(context, listen: false);
+                        offersProvider.stopListening();
                         await OneSignal.logout();
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
@@ -874,25 +870,23 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Container(
                           height: 50,
                           padding: const EdgeInsets.only(
                             top: 5,
                             bottom: 5,
-                            left: 8,
-                            right: 8,
                           ),
-                          width: Get.width * 0.7,
+                          width: Get.width * 0.9,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(6),
                               color: Colors.white,
                               border: Border.all(
                                 color: Colors.black,
                               )),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Container(
                                 height: 22,
@@ -938,7 +932,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       ),
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     InkWell(
                       borderRadius: BorderRadius.circular(200),
@@ -954,6 +948,9 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         UserModel userModel = userController.userModel!;
                         print(userModel.userId);
                         await OneSignal.logout();
+                        OffersProvider offersProvider =
+                            Provider.of<OffersProvider>(context, listen: false);
+                        offersProvider.stopListening();
 
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
@@ -969,25 +966,25 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Container(
                           height: 50,
                           padding: const EdgeInsets.only(
                             top: 5,
                             bottom: 5,
-                            left: 8,
-                            right: 8,
+                            left: 0,
+                            right: 0,
                           ),
-                          width: Get.width * 0.7,
+                          width: Get.width,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(6),
                               color: Color.fromARGB(255, 3, 0, 10),
                               border: Border.all(
                                 color: Color.fromARGB(255, 3, 0, 10),
                               )),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Container(
                                 height: 22,
@@ -1047,9 +1044,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             Text(
                               'Location',
                               style: TextStyle(
-                                fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w700,
-                                fontSize: 18,
+                                fontSize: 16,
                               ),
                             ),
                             const SizedBox(
@@ -1061,7 +1057,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                               child: userController.userModel!.lat == 0.0
                                   ? CupertinoActivityIndicator()
                                   : ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(6),
                                       child: GoogleMap(
                                         onMapCreated: (contr) {
                                           _controller.complete(contr);
@@ -1199,16 +1195,20 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    minimumSize: Size(Get.width * 0.7, 50),
+                                    minimumSize: Size(Get.width * 0.9, 50),
                                   ),
                                   child: Text(
                                     'Change Location',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                     ),

@@ -235,14 +235,9 @@ class _ServiceCancelRequestConfirmationSheetState
                           widget.userController.userModel!.userId,
                           widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
-                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(widget.offersReceivedModel.ownerId)
-                              .get();
+
                       NotificationController().sendNotification(
-                          senderUser: widget.userController.userModel!,
-                          receiverUser: UserModel.fromJson(ownerSnap),
+                          userIds: [widget.offersReceivedModel.offerBy],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancellation Alert',
@@ -258,6 +253,7 @@ class _ServiceCancelRequestConfirmationSheetState
                       }
                       OffersController().updateNotificationForOffers(
                           offerId: widget.offersModel.offerId,
+                          senderId: widget.userController.userModel!.userId,
                           userId: widget.offersModel.ownerId,
                           isAdd: true,
                           offersReceived: widget.offersReceivedModel.id,
@@ -265,7 +261,7 @@ class _ServiceCancelRequestConfirmationSheetState
                           notificationTitle:
                               '${widget.userController.userModel!.name} has canceled their offer.',
                           notificationSubtitle:
-                              'Rate and review their service.');
+                              '${widget.userController.userModel!.name} has canceled their offer. Rate and review their service.');
                       Get.close(1);
                     },
                     style: ElevatedButton.styleFrom(

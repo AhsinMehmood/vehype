@@ -160,7 +160,7 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  selectMake(VehicleMake newBodyStyle) async {
+  Future selectMake(VehicleMake newBodyStyle) async {
     selectedVehicleMake = newBodyStyle;
     selectedYear = '';
     selectedVehicleModel = null;
@@ -377,6 +377,7 @@ class GarageController with ChangeNotifier {
     if (selectedVehicleType != null &&
         selectedVehicleMake != null &&
         selectedVehicleModel != null &&
+        selectedSubModel != null &&
         imageOneLoading == false) {
       return true;
     } else {
@@ -437,26 +438,30 @@ class GarageController with ChangeNotifier {
   }
 
   initVehicle(GarageModel garageModel) async {
-    selectedVehicleType = getVehicleType()
-        .where((element) => element.title == garageModel.bodyStyle)
-        .first;
-    selectedVehicleMake = VehicleMake(
-        id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0);
-    selectedVehicleModel = VehicleModel(
+    await selectVehicleType(
+        VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
+    // await sele(VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
+
+    await selectMake(VehicleMake(
+        id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0));
+    await selectYear(garageModel.year);
+
+    await selectModel(VehicleModel(
         id: 1,
         title: garageModel.model,
         icon: 'icon',
         vehicleMakeId: 0,
-        vehicleTypeId: 0);
-    selectedSubModel = VehicleModel(
+        vehicleTypeId: 0));
+
+    await selectSubModel(VehicleModel(
         id: 1,
         title: garageModel.submodel,
         icon: 'icon',
         vehicleMakeId: 0,
-        vehicleTypeId: 0);
-    imageOneUrl = garageModel.imageUrl;
+        vehicleTypeId: 0));
 
-    selectedYear = garageModel.year;
+    imageOneUrl = garageModel.imageUrl;
+    // selectedYear = ;
     editGarage = garageModel;
     notifyListeners();
   }
