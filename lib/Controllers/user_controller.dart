@@ -18,7 +18,7 @@ import 'package:get/get.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:image_cropper/image_cropper.dart';
+// import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
@@ -548,7 +548,7 @@ class UserController with ChangeNotifier {
     }
   }
 
-  String currentVersion = '3.0.3.67';
+  String currentVersion = '3.0.3.12';
 
   Future<bool> checkVersion() async {
     DocumentSnapshot<Map<String, dynamic>> snap =
@@ -615,6 +615,6 @@ class AppModel {
 
   AppModel({required this.versionNumber});
   factory AppModel.fromJson(Map<String, dynamic> json) {
-    return AppModel(versionNumber: json['version'] ?? '3.0.3.12');
+    return AppModel(versionNumber: json['version'] ?? '3.0.3.67');
   }
 }

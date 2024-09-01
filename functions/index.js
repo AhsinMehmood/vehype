@@ -16,6 +16,67 @@ const firestore = admin.firestore();
 
 
 
+
+exports.notifyInactiveVehicleOwners = functions.pubsub.schedule('0 0 * * 1-5').onRun(async (context) => {
+    const now = admin.firestore.Timestamp.now();
+    const fourHoursAgo = new Date(now.toDate().getTime() - 4 * 60 * 60 * 1000);
+
+    // Query vehicle owners who were last active more than 4 hours ago
+    const usersSnapshot = await db.collection('users')
+        .where('accountType', '==', 'vehicleOwner')
+        .where('lastActive', '<=', admin.firestore.Timestamp.fromDate(fourHoursAgo))
+        .get();
+
+    // Process each user
+    for (const userDoc of usersSnapshot.docs) {
+        const userData = userDoc.data();
+        const userId = userDoc.id;
+
+        // Query offers collection for this user
+        const offersSnapshot = await db.collection('offers')
+            .where('ownerId', '==', userId)
+            .where('status', '==', 'active')  // Assuming offers are related to the user by userId
+            .get();
+
+        // Filter offers based on checkByList condition
+        const matchingOffers = offersSnapshot.docs.filter(offerDoc => {
+            const offerData = offerDoc.data();
+            const checkByList = offerData.checkByList || [];
+
+            // Check if any map in checkByList meets the conditions
+            return checkByList.some(check => 
+                check.checkById === userId && 
+                check.createdAt.toMillis() <= fourHoursAgo.getTime()
+            );
+        });
+
+        // If there are matching offers, send a notification via OneSignal
+        if (matchingOffers.length > 0) {
+            const notificationPayload = {
+                app_id: ONE_SIGNAL_APP_ID,
+                include_external_user_ids: [userId], // Assuming userId is mapped to OneSignal external user ID
+                headings: { "en": "You have new offers to check" },
+                contents: { "en": "Please check the new offers in your account." },
+            };
+
+            try {
+                await axios.post('https://onesignal.com/api/v1/notifications', notificationPayload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${ONE_SIGNAL_API_KEY}`,
+                    },
+                });
+                console.log(`Notification sent to user ${userId} via OneSignal`);
+            } catch (error) {
+                console.error(`Failed to send notification to user ${userId} via OneSignal: `, error);
+            }
+        }
+    }
+
+    return null;
+});
+
+
 // exports.getAndSaveData = functions.https.onRequest(async (req, res) => {
 //     try
 //     {
@@ -361,11 +422,7 @@ exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
 
     try
     {
-        const firestoreDeleteBatch = admin.firestore().batch();
-        // const userFirestorePurchasesRef = admin.firestore().collection('users').doc(uid).collection('purchases');
-        const connectionsRed = admin.firestore().collection('garages').where('ownerId', '==', uid);
-        const userFirestorePurchasesRef = admin.firestore().collection('offers').where('ownerId', '==', uid);
-
+   
         // const offersReceived = admin.firestore().collection('offers').doc().collection('offersReceived').where('ownerId', '==', uid);
         /// 35116023
         //////
@@ -377,74 +434,19 @@ exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
         // Vehype@pp01
         /////
         // offersReceived
-        const querySnapshot = await userFirestorePurchasesRef.get();
-        const connections = await connectionsRed.get();
-
-
-        const batch = admin.firestore().batch();
-        querySnapshot.forEach((doc) => {
-
-            batch.delete(doc.ref);
-        });
-        const connectionsBatch = admin.firestore().batch();
-        connections.forEach((doc) => {
-            connectionsBatch.delete(doc.ref);
-        });
-        await connectionsBatch.commit();
-
-        await batch.commit();
-        const userFirestoreRef = admin.firestore().collection('users').doc(uid);
-        // 
-
-
+     
 
 
 
         // firestoreDeleteBatch.delete(connectionsRed);
 
         // firestoreDeleteBatch.delete(purchasesRed);
-        firestoreDeleteBatch.delete(userFirestoreRef);
-
-        const chatsRef = admin.database().ref('chats');
-        const chatsSnapshot = await chatsRef.child(currentUserID).once('value');
-        chatsSnapshot.forEach((chatSnapshot) => {
-            const secondUserID = chatSnapshot.key;
-            chatsRef.child(currentUserID).child(secondUserID).remove();
-            chatsRef.child(secondUserID).child(currentUserID).remove();
-        });
-
-        // Delete messages
-        const messagesRef = admin.database().ref('messages');
-        const messagesSnapshot = await messagesRef.once('value');
-        messagesSnapshot.forEach((messageSnapshot) => {
-            const chatID = messageSnapshot.key;
-            if (chatID.includes(currentUserID))
-            {
-                messagesRef.child(chatID).remove();
-            }
-        });
-
-
-        // Delete user's Firebase Storage images
-        const storageDeletePromises = [];
-        const storageRef = admin.storage().bucket();
-
-        // List all files in the user's folder
-        const [files] = await storageRef.getFiles({ prefix: `users/${uid}/` });
-
-        files.forEach((file) => {
-            const fileRef = storageRef.file(file.name);
-            storageDeletePromises.push(fileRef.delete());
-        });
-
-        // Wait for all storage deletions to complete
-        await Promise.all(storageDeletePromises);
-
+       
         // Delete the user from Firebase Authentication
         await admin.auth().deleteUser(uid);
 
         // Commit the Firestore batch delete
-        await firestoreDeleteBatch.commit();
+ 
 
         // res.status(200).send('User account deleted successfully.');
         res.status(200).send('User account deleted successfully.');

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "832920203889-5e5jgnoecueoahn8qkg29d5bplg2m578.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "8c23cdca36af198f806a684acc8dd7143da42fb3"
+          }
+        },
+        {
           "client_id": "832920203889-a3l0oj4m2pnc1210ogbstqg9gb1dtugq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -44,6 +52,22 @@
           "android_info": {
             "package_name": "com.nomadllc.vehype",
             "certificate_hash": "4795237618203dfd825721f35ca50598aea9cc37"
+          }
+        },
+        {
+          "client_id": "832920203889-ps5ff2nn1kghc95jq803arjen0di5t0f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "2c01b866831ea8709b3dd651d92c7b925abe913e"
+          }
+        },
+        {
+          "client_id": "832920203889-sm39712doeq3b4ska11m1iu902dts183.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomadllc.vehype",
+            "certificate_hash": "f20801d410a2252f9aa0ba78d31b9756c79861f5"
           }
         },
         {

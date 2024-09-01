@@ -133,6 +133,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       Image.asset(
                                         'assets/google.png',
                                         height: 30,
+                                        width: 30,
                                       ),
                                       const SizedBox(
                                         width: 6,

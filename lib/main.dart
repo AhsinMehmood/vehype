@@ -85,16 +85,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  bool needToUpdate = false;
-
-  checkUpdate() async {
-    UserController().checkVersion().then((value) {
-      setState(() {
-        needToUpdate = value;
-      });
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -103,7 +93,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final UserController userController =
           Provider.of<UserController>(context, listen: false);
       await userController.initTheme();
-      checkUpdate();
     });
     listenOneSignalNotification();
   }
@@ -190,7 +179,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData().copyWith(
         textTheme: textTheme,
       ),
-      home: needToUpdate ? const AppUpdate() : const SplashPage(),
+      home: const SplashPage(),
     );
   }
 }

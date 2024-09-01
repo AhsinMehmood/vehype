@@ -60,4 +60,5 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://vehype-386313-default-rtdb.firebaseio.com',
     storageBucket: 'vehype-386313.appspot.com',
   );
+
 }

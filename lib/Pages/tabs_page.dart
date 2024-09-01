@@ -56,6 +56,8 @@ class _TabsPageState extends State<TabsPage> {
   }
 
   getNotificationSetting() async {
+    await Future.delayed(const Duration(seconds: 1));
+
     bool isNotAllowed = OneSignal.Notifications.permission;
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
@@ -68,7 +70,6 @@ class _TabsPageState extends State<TabsPage> {
         .get();
     if (updateSnap.exists) {
       if (updateSnap.data()!['newVersion'] != currentVersion) {
-        await Future.delayed(const Duration(seconds: 1));
         showModalBottomSheet(
             context: context,
             backgroundColor:
@@ -76,11 +77,12 @@ class _TabsPageState extends State<TabsPage> {
             // enableDrag: false,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
               ),
             ),
             isDismissible: false,
+            enableDrag: false,
             builder: (context) {
               return UpdateSheet(
                 userController: userController,
@@ -98,8 +100,8 @@ class _TabsPageState extends State<TabsPage> {
                   userController.isDark ? primaryColor : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(6),
+                  topRight: Radius.circular(6),
                 ),
               ),
             );
@@ -114,8 +116,8 @@ class _TabsPageState extends State<TabsPage> {
                   userController.isDark ? primaryColor : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(6),
+                  topRight: Radius.circular(6),
                 ),
               ),
               isDismissible: false,
@@ -582,110 +584,104 @@ class LocationPermissionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
-      child: Container(
-        width: Get.width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+    return Container(
+      width: Get.width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(6),
+          topRight: Radius.circular(6),
+        ),
+        color: userController.isDark ? primaryColor : Colors.white,
+      ),
+      height: 280,
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 20,
           ),
-          color: userController.isDark ? primaryColor : Colors.white,
-        ),
-        height: 280,
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 20,
+          Text(
+            userController.userModel!.accountType == 'Provider'
+                ? 'Enable Location for Service\nAvailability'
+                : 'Enable Location for Nearby\nService Providers',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: userController.isDark ? Colors.white : primaryColor,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
             ),
-            Text(
-              userController.userModel!.accountType == 'Provider'
-                  ? 'Enable Location for Service\nAvailability'
-                  : 'Enable Location for Nearby\nService Providers',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            // Text(
-            //   userController.userModel!.accountType == 'Provider'
-            //       ? 'Grant access to connect with nearby customers.'
-            //       : 'Grant access to find service providers near you.',
-            //   textAlign: TextAlign.center,
-            //   style: TextStyle(
-            //     color: userController.isDark ? Colors.white : primaryColor,
-            //     fontSize: 16,
-            //     fontWeight: FontWeight.w500,
-            //   ),
-            // ),
-            const SizedBox(
-              height: 40,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Get.close(1);
-                bool serviceEnabled;
-                LocationPermission permission =
-                    await Geolocator.requestPermission();
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          // Text(
+          //   userController.userModel!.accountType == 'Provider'
+          //       ? 'Grant access to connect with nearby customers.'
+          //       : 'Grant access to find service providers near you.',
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     color: userController.isDark ? Colors.white : primaryColor,
+          //     fontSize: 16,
+          //     fontWeight: FontWeight.w500,
+          //   ),
+          // ),
+          const SizedBox(
+            height: 40,
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.close(1);
+              bool serviceEnabled;
+              LocationPermission permission =
+                  await Geolocator.requestPermission();
 
-                serviceEnabled = await Geolocator.isLocationServiceEnabled();
-                if (!serviceEnabled) {
-                  Geolocator.openLocationSettings();
+              serviceEnabled = await Geolocator.isLocationServiceEnabled();
+              if (!serviceEnabled) {
+                Geolocator.openLocationSettings();
+              } else {
+                // permission = await Geolocator.checkPermission();
+                // permission = await Geolocator.checkPermission();
+                if (permission == LocationPermission.denied ||
+                    permission == LocationPermission.deniedForever ||
+                    permission == LocationPermission.unableToDetermine) {
+                  Geolocator.openAppSettings();
                 } else {
-                  // permission = await Geolocator.checkPermission();
-                  // permission = await Geolocator.checkPermission();
-                  if (permission == LocationPermission.denied ||
-                      permission == LocationPermission.deniedForever ||
-                      permission == LocationPermission.unableToDetermine) {
-                    Geolocator.openAppSettings();
-                  } else {
-                    Get.dialog(const LoadingDialog(),
-                        barrierDismissible: false);
-                    Position position = await Geolocator.getCurrentPosition();
-                    final GeoFirePoint geoFirePoint = GeoFirePoint(
-                        GeoPoint(position.latitude, position.longitude));
+                  Position position = await Geolocator.getCurrentPosition();
+                  final GeoFirePoint geoFirePoint = GeoFirePoint(
+                      GeoPoint(position.latitude, position.longitude));
 
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userController.userModel!.userId)
-                        .update({
-                      'lat': position.latitude,
-                      'long': position.longitude,
-                      'geo': geoFirePoint.data,
-                    });
-                    Get.close(1);
-                  }
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userController.userModel!.userId)
+                      .update({
+                    'lat': position.latitude,
+                    'long': position.longitude,
+                    'geo': geoFirePoint.data,
+                  });
+                  // Get.close(1);
                 }
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: Size(Get.width * 0.8, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  )),
-              child: Text(
-                'Allow Access',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
+              }
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    userController.isDark ? Colors.white : primaryColor,
+                minimumSize: Size(Get.width * 0.8, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                )),
+            child: Text(
+              'Allow Access',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
       ),
     );
   }
@@ -709,8 +705,8 @@ class UpdateSheet extends StatelessWidget {
         width: Get.width,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+            topLeft: Radius.circular(6),
+            topRight: Radius.circular(6),
           ),
           color: userController.isDark ? primaryColor : Colors.white,
         ),
@@ -761,15 +757,16 @@ class UpdateSheet extends StatelessWidget {
                 }
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
                   minimumSize: Size(Get.width * 0.8, 45),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
+                    borderRadius: BorderRadius.circular(6),
                   )),
               child: Text(
                 'Update Now',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: userController.isDark ? primaryColor : Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                 ),
@@ -801,8 +798,8 @@ class NotificationSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+          topLeft: Radius.circular(6),
+          topRight: Radius.circular(6),
         ),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
@@ -839,15 +836,17 @@ class NotificationSheet extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
+              Get.close(1);
+
               await OneSignal.Notifications.requestPermission(true);
               OneSignal.login(userController.userModel!.userId);
-              Get.close(1);
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor:
+                    userController.isDark ? Colors.white : primaryColor,
                 minimumSize: Size(Get.width * 0.8, 45),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: BorderRadius.circular(6),
                 )),
             child: Text(
               'Yes, notify me',

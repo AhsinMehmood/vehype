@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:swipeable_tile/swipeable_tile.dart';
+// import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
