@@ -100,20 +100,25 @@ class SelectAccountType extends StatelessWidget {
 
                       userController.getUserStream(
                         '${userModelAccount.userId}provider',
-                        onDataReceived: (userModel) {
-                          OffersProvider offersProvider =
-                              Provider.of<OffersProvider>(context,
-                                  listen: false);
-                          offersProvider.startListening(userModel);
-                          offersProvider.startListeningOffers(userModel.userId);
-
-                          // await OneSignal.Notifications.requestPermission(true);
-
-                          Get.close(1);
-
-                          Get.offAll(() => const TabsPage());
-                        },
+                        onDataReceived: (userModel) {},
                       );
+                      DocumentSnapshot<Map<String, dynamic>> usersnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc('${userModelAccount.userId}provider')
+                              .get();
+                      OffersProvider offersProvider =
+                          Provider.of<OffersProvider>(context, listen: false);
+                      offersProvider
+                          .startListening(UserModel.fromJson(usersnap));
+                      offersProvider.startListeningOffers(
+                          UserModel.fromJson(usersnap).userId);
+
+                      // await OneSignal.Notifications.requestPermission(true);
+
+                      Get.close(1);
+
+                      Get.offAll(() => const TabsPage());
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -219,6 +224,26 @@ class SelectAccountType extends StatelessWidget {
                           Get.offAll(() => const TabsPage());
                         },
                       );
+                      userController.getUserStream(
+                        '${userModelAccount.userId}provider',
+                        onDataReceived: (userModel) {},
+                      );
+                      DocumentSnapshot<Map<String, dynamic>> usersnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc('${userModelAccount.userId}seeker')
+                              .get();
+                      OffersProvider offersProvider =
+                          Provider.of<OffersProvider>(context, listen: false);
+                      // offersProvider.startListening(UserModel.fromJson(usersnap));/s
+                      offersProvider.startListeningOwnerOffers(
+                          UserModel.fromJson(usersnap).userId);
+
+                      // await OneSignal.Notifications.requestPermission(true);
+
+                      Get.close(1);
+
+                      Get.offAll(() => const TabsPage());
                       // await OneSignal.Notifications.requestPermission(true);
                     },
                     child: Card(

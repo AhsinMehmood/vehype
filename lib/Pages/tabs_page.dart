@@ -52,12 +52,12 @@ class _TabsPageState extends State<TabsPage> {
   @override
   void initState() {
     super.initState();
-    getNotificationSetting();
+    Future.delayed(const Duration(seconds: 1)).then((s) {
+      getNotificationSetting();
+    });
   }
 
   getNotificationSetting() async {
-    await Future.delayed(const Duration(seconds: 1));
-
     bool isNotAllowed = OneSignal.Notifications.permission;
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
@@ -672,7 +672,7 @@ class LocationPermissionSheet extends StatelessWidget {
             child: Text(
               'Allow Access',
               style: TextStyle(
-                color: Colors.white,
+                color: userController.isDark ? primaryColor : Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
               ),
@@ -843,7 +843,7 @@ class NotificationSheet extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    userController.isDark ? Colors.white : primaryColor,
+                    userController.isDark ? primaryColor : Colors.white,
                 minimumSize: Size(Get.width * 0.8, 45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

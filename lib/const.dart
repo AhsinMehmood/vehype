@@ -39,7 +39,7 @@ Color changeColor({required String color}) {
   return myColor;
 }
 
-int currentVersion = 67;
+int currentVersion = 71;
 String defaultImage =
     'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757';
 Color primaryColor = const Color(0xff2A2E43);

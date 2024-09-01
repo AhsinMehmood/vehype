@@ -97,32 +97,42 @@ class LoginController {
                   .get();
           UserModel userModel = UserModel.fromJson(snapshot);
 
-          Get.close(1);
-
           if (userModel.accountType == '') {
+            Get.close(1);
+
             Get.offAll(() => SelectAccountType(
                   userModelAccount: userModel,
                 ));
           } else {
             if (userModel.adminStatus == 'blocked') {
+              Get.close(1);
+
               Get.offAll(() => const DisabledWidget());
             } else {
               OffersProvider offersProvider =
                   Provider.of<OffersProvider>(context, listen: false);
               userController.getUserStream(
                 userId + userModel.accountType,
-                onDataReceived: (userModel) {
-                  if (userModel.accountType == 'provider') {
-                    offersProvider.startListening(userModel);
-                    offersProvider.startListeningOffers(userModel.userId);
-                  } else {
-                    offersProvider.startListeningOwnerOffers(userModel.userId);
-                  }
-                  // await OneSignal.Notifications.requestPermission(true);
-                  OneSignal.login(userModel.accountType);
-                  Get.offAll(() => const TabsPage());
-                },
+                onDataReceived: (userModel) {},
               );
+              DocumentSnapshot<Map<String, dynamic>> usersnap =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId + userModel.accountType)
+                      .get();
+              if (userModel.accountType == 'provider') {
+                offersProvider.startListening(UserModel.fromJson(usersnap));
+                offersProvider
+                    .startListeningOffers(UserModel.fromJson(usersnap).userId);
+              } else {
+                offersProvider.startListeningOwnerOffers(
+                    UserModel.fromJson(usersnap).userId);
+              }
+              Get.close(1);
+
+              // await OneSignal.Notifications.requestPermission(true);
+              OneSignal.login(userModel.accountType);
+              Get.offAll(() => const TabsPage());
             }
           }
         }
@@ -211,30 +221,43 @@ class LoginController {
         UserModel userModel = UserModel.fromJson(snapshot);
 
         // Close the loading dialog
-        Get.close(1);
 
         if (userModel.accountType == '') {
+          Get.close(1);
+
           Get.offAll(() => SelectAccountType(userModelAccount: userModel));
         } else {
           if (userModel.adminStatus == 'blocked') {
+            Get.close(1);
+
             Get.offAll(() => const DisabledWidget());
           } else {
             OffersProvider offersProvider =
                 Provider.of<OffersProvider>(context, listen: false);
             userController.getUserStream(
               userId + userModel.accountType,
-              onDataReceived: (userModel) {
-                if (userModel.accountType == 'provider') {
-                  offersProvider.startListening(userModel);
-                  offersProvider.startListeningOffers(userModel.userId);
-                } else {
-                  offersProvider.startListeningOwnerOffers(userModel.userId);
-                }
-                // await OneSignal.Notifications.requestPermission(true);
-                OneSignal.login(userModel.accountType);
-                Get.offAll(() => const TabsPage());
-              },
+              onDataReceived: (userModel) {},
             );
+
+            DocumentSnapshot<Map<String, dynamic>> usersnap =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId + userModel.accountType)
+                    .get();
+            if (userModel.accountType == 'provider') {
+              offersProvider.startListening(UserModel.fromJson(usersnap));
+              offersProvider
+                  .startListeningOffers(UserModel.fromJson(usersnap).userId);
+            } else {
+              offersProvider.startListeningOwnerOffers(
+                  UserModel.fromJson(usersnap).userId);
+            }
+            Get.close(1);
+
+            // await OneSignal.Notifications.requestPermission(true);
+            OneSignal.login(userModel.accountType);
+            Get.offAll(() => const TabsPage());
+            // offersProvider.startListening(UserModel.fromJson(usersnap));/s
           }
         }
       }
