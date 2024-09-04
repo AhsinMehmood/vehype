@@ -21,7 +21,6 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Models/vehicle_model.dart';
-import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:vehype/const.dart';

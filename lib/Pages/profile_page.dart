@@ -1,13 +1,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -15,13 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
-import 'package:vehype/Pages/explore_page.dart';
-import 'package:vehype/Pages/my_gallery_page.dart';
-import 'package:vehype/Pages/my_garage.dart';
-import 'package:vehype/Pages/orders_history_provider.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
@@ -30,7 +23,6 @@ import 'comments_page.dart';
 import 'delete_account_page.dart';
 import 'my_fav_page.dart';
 // import 'orders_history_seeker.dart';
-import 'splash_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -512,14 +504,84 @@ class ProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      Text(
-                        'App Version: 3.0.3.$currentVersion',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
+                      InkWell(
+                        onTap: () async {
+                          // List ooo = [
+                          //   'x7PQVwdWnc14dS1cij4O',
+                          //   'yf5y8dWdzhAYLVDxgbHV',
+                          //   'tKIK5bnXNNkgomMJf0DW',
+                          //   'sv3yUlk7PFvwpbslA6WU',
+                          //   'sskm4ngC1Dt25bZPM4Rl',
+                          //   'f7EF2OpJ3SVIOYn1C6Yc',
+                          //   'c3b96p3ABZaOf1hslKPP',
+                          //   'ax0QMCvkzHsZcV6LeVOS',
+                          //   'Ulqy4uEtJ5wiOL6Prego',
+                          //   'U93H8n7mWPh0WrvsdwlY',
+                          //   'QUAXU4wZQmKJibZp5ZP9',
+                          //   'LWfswqfZHdRhFRHz063I',
+                          //   'KpPGfnynSrpoqBQwglgV',
+                          //   'Ay5LEbBJqHPwdJ2m5AJt',
+                          //   'A75ctiAnB29MEQjvt16y',
+                          //   '9MZu0LegYFOUkr0p1TQ8',
+                          //   '7L63wFpOJXJI266lHIgQ',
+                          //   '73ESk7pJehHxOSOWvGCM',
+                          //   '1t1PDUS2U43OkfHnaRmY',
+                          // ];
+                          // for (var id in ooo) {
+                          //   DocumentSnapshot<Map<String, dynamic>> offeee =
+                          //       await FirebaseFirestore.instance
+                          //           .collection('offers')
+                          //           .doc(id)
+                          //           .get();
+                          //   print(offeee.data()!['status']);
+                          //   print(offeee.data()!['garageId'] ?? 'GARAAfwe id');
+                          // }
+                          QuerySnapshot<Map<String, dynamic>> offersSnap =
+                              await FirebaseFirestore.instance
+                                  .collection('chats')
+                                  .get();
+                          List<ChatModel> offers = [];
+                          for (var offer in offersSnap.docs) {
+                            offers.add(ChatModel.fromJson(offer));
+                          }
+                          for (var element in offers) {
+                            DocumentSnapshot<Map<String, dynamic>> garageSnp =
+                                await FirebaseFirestore.instance
+                                    .collection('offers')
+                                    .doc(element.offerId)
+                                    .get();
+                            print('${garageSnp.exists}  sjhfsahjshkjfhks');
+                            if (!garageSnp.exists) {
+                              await FirebaseFirestore.instance
+                                  .collection('chats')
+                                  .doc(element.id)
+                                  .delete();
+                              print('DELTed');
+                            }
+
+                            // if (element.offerRequestId == '') {
+
+                            //   await FirebaseFirestore.instance
+                            //       .collection('offers')
+                            //       .doc(element.offerId)
+                            //       .update({
+                            //     'garageId': garageSnp.docs.first.id,
+                            //   });
+                            //   print(element.offerId +
+                            //       ' goingggg' +
+                            //       garageSnp.docs.first.id);
+                            // }
+                          }
+                        },
+                        child: Text(
+                          'App Version: 3.0.3.$currentVersion',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                          ),
                         ),
                       ),
                       const SizedBox(

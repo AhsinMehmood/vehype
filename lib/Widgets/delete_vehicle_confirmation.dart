@@ -13,8 +13,6 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
 import '../Controllers/notification_controller.dart';
-import '../Models/chat_model.dart';
-import '../Models/user_model.dart';
 
 class DeleteVehicleConfirmation extends StatefulWidget {
   final String chatId;

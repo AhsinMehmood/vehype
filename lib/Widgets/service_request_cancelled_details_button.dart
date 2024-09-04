@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Pages/service_request_details.dart';
 
 import '../Models/offers_model.dart';
 

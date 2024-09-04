@@ -11,17 +11,13 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 import 'package:vehype/Widgets/calenders_list.dart';
 import 'package:vehype/Widgets/service_cancel_request_confirmation_sheet.dart';
-import 'package:vehype/Widgets/service_ignore_confirm.dart';
 
 import '../Models/chat_model.dart';
 import '../Models/offers_model.dart';
 import '../Models/user_model.dart';
-import '../Pages/choose_account_type.dart';
 import '../Pages/message_page.dart';
-import '../Pages/repair_page.dart';
 import '../const.dart';
 import 'loading_dialog.dart';
-import 'select_date_and_price.dart';
 
 class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
@@ -39,7 +35,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-    final CalendarPlugin _myPlugin = CalendarPlugin();
+    final CalendarPlugin myPlugin = CalendarPlugin();
 
     return Container(
       height: 80,
@@ -190,12 +186,12 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
           InkWell(
             onTap: () async {
               if (offersReceivedModel.seekerEventId == '') {
-                _myPlugin.hasPermissions().then((value) async {
+                myPlugin.hasPermissions().then((value) async {
                   if (!value!) {
-                    _myPlugin.requestPermissions();
+                    myPlugin.requestPermissions();
                   } else {
                     List<Calendar> calendar =
-                        await _myPlugin.getCalendars() ?? [];
+                        await myPlugin.getCalendars() ?? [];
                     if (calendar.isEmpty) {
                       toastification.show(
                           context: context,
@@ -211,7 +207,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
                   }
                 });
               } else {
-                _myPlugin
+                myPlugin
                     .deleteEvent(
                         calendarId: offersReceivedModel.seekerCalendarId,
                         eventId: offersReceivedModel.seekerEventId)

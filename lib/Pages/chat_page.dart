@@ -1,8 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -21,19 +19,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   // bool isShow = false;
-  @override
-  void initState() {
-    super.initState();
-    getNotificationSetting();
-  }
 
-  getNotificationSetting() async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-
-    // bool isNotAllowed = await OneSignal.Notifications.canRequest();
-    // userController.changeIsShow(isNotAllowed);
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 // import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -22,17 +23,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/crop_image_page.dart';
+import 'package:vehype/Pages/location_permission.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:http/http.dart' as http;
-import 'package:vehype/bad_words.dart';
+import 'package:vehype/Pages/tabs_page.dart';
 import '../Models/chat_model.dart';
 import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
@@ -43,8 +44,38 @@ enum AccountType {
 }
 
 class UserController with ChangeNotifier {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  pushTokenUpdate(String userId) async {
+    NotificationSettings settings = await messaging.getNotificationSettings();
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      String? pushToken = await FirebaseMessaging.instance.getToken();
+      await updateToken(userId, pushToken ?? '');
+    } else {
+      Future.delayed(const Duration(seconds: 3)).then((s) {
+        Get.bottomSheet(
+          NotificationSheet(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
+          ),
+        );
+      });
+    }
+  }
+
+  updateToken(String userId, String pushToken) async {
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'pushToken': pushToken,
+    });
+  }
+
   UserModel? _userModel;
   List selectedServicesFilter = [];
+
   clearServie() {
     selectedServicesFilter = [];
     notifyListeners();
@@ -165,7 +196,7 @@ class UserController with ChangeNotifier {
 
   logout(UserModel userModel) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
-
+    await updateToken(userModel.userId, '');
     streamSubscription?.cancel();
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -176,7 +207,6 @@ class UserController with ChangeNotifier {
     // mixpanel.reset();
     await FirebaseAuth.instance.signOut();
 
-    await OneSignal.logout();
     await GoogleSignIn().disconnect();
     changeTabIndex(0);
 

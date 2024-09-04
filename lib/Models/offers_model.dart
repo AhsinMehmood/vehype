@@ -176,17 +176,18 @@ class OffersReceivedModel {
     return OffersReceivedModel(
         ratingOne: data['ratingOne'] ?? 0.0,
         ratingTwo: data['ratingTwo'] ?? 0.0,
-        offerBy: data['offerBy'],
+        offerBy: data['offerBy'] ?? 'null',
         comment: data['comment'] ?? '',
         cancelReason: data['cancelReason'] ?? '',
-        offerAt: data['offerAt'],
-        price: data['price'],
+        offerAt: data['offerAt'] ?? DateTime.now().toLocal().toIso8601String(),
+        price: data['price'] ?? 0.0,
         id: snap.id,
         cancelBy: data['cancelBy'] ?? '',
-        startDate: data['startDate'],
-        endDate: data['endDate'],
+        startDate:
+            data['startDate'] ?? DateTime.now().toLocal().toIso8601String(),
+        endDate: data['endDate'] ?? DateTime.now().toLocal().toIso8601String(),
         checkByList: offersNotifications,
-        status: data['status'],
+        status: data['status'] ?? '',
         ratingOneImage: data['ratingOneImage'] ?? '',
         ratingTwoImage: data['ratingTwoImage'] ?? '',
         ownerId: data['ownerId'] ?? '',
@@ -197,6 +198,6 @@ class OffersReceivedModel {
         seekerCalendarId: data['seekerCalendarId'] ?? '',
         seekerEventId: data['seekerEventId'] ?? '',
         commentTwo: data['commentTwo'] ?? '',
-        offerId: data['offerId']);
+        offerId: data['offerId'] ?? 'null');
   }
 }

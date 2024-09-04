@@ -112,7 +112,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                       controller: scrollController,
                       child: Column(
                         children: [
-                          Container(
+                          SizedBox(
                             // color: Colors.red,
                             width: Get.width,
                             height: 300,
@@ -131,7 +131,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                         return InkWell(
                                           onTap: () {
                                             List images = <dynamic>[
-                                                  offersModel.imageOne
+                                                  garageModel.imageUrl
                                                 ] +
                                                 offersModel.images;
                                             Get.to(() => FullImagePageView(
@@ -140,7 +140,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                                 ));
                                           },
                                           child: ExtendedImage.network(
-                                            offersModel.imageOne,
+                                            garageModel.imageUrl,
                                             fit: BoxFit.cover,
                                             height: 300,
                                             width: Get.width,
@@ -152,7 +152,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                         return InkWell(
                                           onTap: () {
                                             List images = <dynamic>[
-                                                  offersModel.imageOne
+                                                  garageModel.imageUrl,
                                                 ] +
                                                 offersModel.images;
                                             Get.to(() => FullImagePageView(
@@ -935,8 +935,8 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                   children: [
                                     Text(
                                       garageModel.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.visible,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w800,

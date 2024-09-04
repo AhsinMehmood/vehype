@@ -33,10 +33,9 @@ target 'Runner' do
   pod 'FirebaseFirestore', :git => 'https://github.com/invertase/firestore-ios-sdk-frameworks.git', :tag => '11.0.0'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
 end
+
+
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
@@ -44,8 +43,5 @@ post_install do |installer|
   end
 end
 
-target 'OneSignalNotificationServiceExtension' do
-  use_frameworks!
-  pod 'OneSignalXCFramework', '>= 5.0.0', '< 6.0'
-end
+
 

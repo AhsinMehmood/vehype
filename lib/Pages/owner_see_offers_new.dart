@@ -74,24 +74,23 @@ class OwnerSeeOffersNew extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              if (offersModel.imageOne != '')
-                                InkWell(
-                                  onTap: () {
-                                    Get.to(() => FullImagePageView(
-                                          urls: [offersModel.imageOne],
-                                          currentIndex: 0,
-                                        ));
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: CachedNetworkImage(
-                                      imageUrl: offersModel.imageOne,
-                                      height: 50,
-                                      width: 50,
-                                      fit: BoxFit.cover,
-                                    ),
+                              InkWell(
+                                onTap: () {
+                                  Get.to(() => FullImagePageView(
+                                        urls: [garageModel.imageUrl],
+                                        currentIndex: 0,
+                                      ));
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: CachedNetworkImage(
+                                    imageUrl: garageModel.imageUrl,
+                                    height: 50,
+                                    width: 50,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
+                              ),
                               const SizedBox(
                                 width: 8,
                               ),
@@ -104,9 +103,9 @@ class OwnerSeeOffersNew extends StatelessWidget {
                                       maxLines: 2,
                                       style: TextStyle(
                                         // color: Colors.black,
-                                        fontFamily: 'Avenir',
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 15,
+                                        // fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -135,7 +134,7 @@ class OwnerSeeOffersNew extends StatelessWidget {
                                           ' ',
                                           style: TextStyle(
                                             // color: Colors.black,
-                                            fontFamily: 'Avenir',
+                                            // fontFamily: 'Avenir',/
                                             fontWeight: FontWeight.w500,
                                             fontSize: 14,
                                           ),
@@ -144,9 +143,9 @@ class OwnerSeeOffersNew extends StatelessWidget {
                                           offersModel.issue,
                                           style: TextStyle(
                                             // color: Colors.black,
-                                            fontFamily: 'Avenir',
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14,
+                                            // fontFamily: 'Avenir',
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 15,
                                           ),
                                         ),
                                       ],

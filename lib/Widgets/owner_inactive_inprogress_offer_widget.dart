@@ -16,10 +16,8 @@ import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/Widgets/owner_complete_offer_confirmation_sheet.dart';
 import 'package:vehype/Widgets/owner_to_service_rating_sheet.dart';
 
-import '../Controllers/chat_controller.dart';
 import '../Controllers/notification_controller.dart';
 import '../Controllers/offers_controller.dart';
-import '../Models/chat_model.dart';
 import '../Models/user_model.dart';
 import '../Pages/full_image_view_page.dart';
 import '../Pages/second_user_profile.dart';
@@ -253,18 +251,18 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                           if (offersReceivedModel.status == 'Upcoming')
                             InkWell(
                               onTap: () {
-                                final CalendarPlugin _myPlugin =
+                                final CalendarPlugin myPlugin =
                                     CalendarPlugin();
 
                                 if (offersReceivedModel.ownerCalendarId == '') {
-                                  _myPlugin
+                                  myPlugin
                                       .hasPermissions()
                                       .then((value) async {
                                     if (!value!) {
-                                      _myPlugin.requestPermissions();
+                                      myPlugin.requestPermissions();
                                     } else {
                                       List<Calendar> calendar =
-                                          await _myPlugin.getCalendars() ?? [];
+                                          await myPlugin.getCalendars() ?? [];
                                       if (calendar.isEmpty) {
                                         toastification.show(
                                             context: context,

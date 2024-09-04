@@ -1,6 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -16,11 +14,10 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'owner_active_request_button_widget.dart';
 import 'owner_inprogress_button_widget.dart';
-import 'undo_ignore_provider.dart';
 
 class OwnerRequestWidget extends StatelessWidget {
   final OffersModel offersModel;
-  final GarageModel? garageModel;
+  final GarageModel garageModel;
   final OffersReceivedModel? offersReceivedModel;
   const OwnerRequestWidget(
       {super.key,
@@ -32,18 +29,7 @@ class OwnerRequestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     DateTime createdAt = DateTime.parse(offersModel.createdAt);
-    GarageModel garageModels = garageModel ??
-        GarageModel(
-            ownerId: 'ownerId',
-            submodel: '',
-            title: offersModel.vehicleId,
-            imageUrl: offersModel.imageOne,
-            bodyStyle: 'Passenger vehicle',
-            make: '',
-            year: '',
-            model: '',
-            vin: '',
-            garageId: offersModel.garageId);
+
     return Stack(
       children: [
         if (offersModel.checkByList
@@ -108,10 +94,21 @@ class OwnerRequestWidget extends StatelessWidget {
                         topRight: Radius.circular(6),
                       ),
                       child: CachedNetworkImage(
-                        imageUrl: garageModels.imageUrl,
+                        imageUrl: garageModel.imageUrl,
                         fit: BoxFit.cover,
                         height: 230,
                         width: Get.width,
+                        placeholder: (context, url) => Center(
+                            child: SizedBox(
+                                height: 230,
+                                width: 230,
+                                child: Center(
+                                    child: SizedBox(
+                                        height: 30,
+                                        width: 30,
+                                        child: CircularProgressIndicator())))),
+                        errorWidget: (context, url, error) =>
+                            Image.asset("assets/icon.png"),
                       ),
                     ),
                     Positioned(
@@ -155,7 +152,7 @@ class OwnerRequestWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        garageModels.title,
+                        garageModel.title,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w900,
@@ -170,7 +167,7 @@ class OwnerRequestWidget extends StatelessWidget {
                             getVehicleType()
                                 .firstWhere((test) =>
                                     test.title ==
-                                    garageModels.bodyStyle
+                                    garageModel.bodyStyle
                                         .split(',')
                                         .first
                                         .trim())
@@ -185,7 +182,7 @@ class OwnerRequestWidget extends StatelessWidget {
                             width: 8,
                           ),
                           Text(
-                            garageModels.bodyStyle,
+                            garageModel.bodyStyle,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
@@ -280,7 +277,7 @@ class OwnerRequestWidget extends StatelessWidget {
                                   formatDateTime(
                                     DateTime.parse(
                                       offersReceivedModel!.startDate,
-                                    ),
+                                    ).toLocal(),
                                   ),
                                   style: TextStyle(
                                     fontSize: 16,
@@ -312,19 +309,19 @@ class OwnerRequestWidget extends StatelessWidget {
               if (offersModel.status == 'active')
                 OwnerActiveRequestButtonWidget(
                   offersModel: offersModel,
-                  garageModel: garageModels,
+                  garageModel: garageModel,
                 )
               else if (offersModel.status == 'inProgress')
                 OwnerInprogressButtonWidget(
                   offersModel: offersModel,
                   offersReceivedModel: offersReceivedModel,
-                  garageModel: garageModels,
+                  garageModel: garageModel,
                 )
               else if (offersModel.status == 'inactive')
                 if (offersModel.offersReceived.isNotEmpty)
                   OwnerInprogressButtonWidget(
                     offersModel: offersModel,
-                    garageModel: garageModels,
+                    garageModel: garageModel,
                     offersReceivedModel: offersReceivedModel,
                   )
                 else

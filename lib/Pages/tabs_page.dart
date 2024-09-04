@@ -8,7 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,7 +26,6 @@ import 'package:vehype/Pages/repair_page.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/offers_model.dart';
-import '../Widgets/loading_dialog.dart';
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -36,14 +35,14 @@ class TabsPage extends StatefulWidget {
 }
 
 class _TabsPageState extends State<TabsPage> {
-  List<Widget> _body = [
+  final List<Widget> _body = [
     RepairPage(),
     MyGarage(),
     ExplorePage(),
     ChatPage(),
     ProfilePage(),
   ];
-  List<Widget> _body2 = [
+  final List<Widget> _body2 = [
     OrdersHistoryProvider(),
     ChatPage(),
     ProfilePage(),
@@ -58,7 +57,6 @@ class _TabsPageState extends State<TabsPage> {
   }
 
   getNotificationSetting() async {
-    bool isNotAllowed = OneSignal.Notifications.permission;
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
     bool serviceEnabled;
@@ -92,21 +90,7 @@ class _TabsPageState extends State<TabsPage> {
       } else {
         serviceEnabled = await Geolocator.isLocationServiceEnabled();
         permission = await Geolocator.checkPermission();
-        if (isNotAllowed == false) {
-          Future.delayed(const Duration(seconds: 3)).then((s) {
-            Get.bottomSheet(
-              NotificationSheet(userController: userController),
-              backgroundColor:
-                  userController.isDark ? primaryColor : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(6),
-                  topRight: Radius.circular(6),
-                ),
-              ),
-            );
-          });
-        } else if (serviceEnabled == false ||
+        if (serviceEnabled == false ||
             permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
           Future.delayed(const Duration(seconds: 1)).then((s) {
@@ -133,7 +117,7 @@ class _TabsPageState extends State<TabsPage> {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     final UserModel userModel = userController.userModel!;
-
+    // print(userModel.pushToken);
     // AppController controller = Get.put(AppController());
     return Scaffold(
         body: IndexedStack(
@@ -211,7 +195,7 @@ class _TabsPageState extends State<TabsPage> {
 
   BottomNavigationBar bottomNavigationBarSeeker() {
     final UserController userController = Provider.of<UserController>(context);
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
+    // final UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -236,7 +220,7 @@ class _TabsPageState extends State<TabsPage> {
   }
 
   List<BottomNavigationBarItem> providerTabs() {
-    final UserController userController = Provider.of<UserController>(context);
+    // final UserController userController = Provider.of<UserController>(context);/
     final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
 
     final UserModel userModel = Provider.of<UserController>(context).userModel!;
@@ -788,13 +772,11 @@ class UpdateSheet extends StatelessWidget {
 class NotificationSheet extends StatelessWidget {
   const NotificationSheet({
     super.key,
-    required this.userController,
   });
-
-  final UserController userController;
 
   @override
   Widget build(BuildContext context) {
+    final UserController userController = Provider.of<UserController>(context);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -837,13 +819,11 @@ class NotificationSheet extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Get.close(1);
-
-              await OneSignal.Notifications.requestPermission(true);
-              OneSignal.login(userController.userModel!.userId);
+              userController.pushTokenUpdate(userController.userModel!.userId);
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    userController.isDark ? primaryColor : Colors.white,
+                    userController.isDark ? Colors.white : primaryColor,
                 minimumSize: Size(Get.width * 0.8, 45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -851,7 +831,7 @@ class NotificationSheet extends StatelessWidget {
             child: Text(
               'Yes, notify me',
               style: TextStyle(
-                color: Colors.white,
+                color: userController.isDark ? primaryColor : Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
               ),

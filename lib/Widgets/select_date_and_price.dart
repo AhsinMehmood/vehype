@@ -3,11 +3,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -22,10 +20,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
-import 'package:vehype/Pages/full_image_view_page.dart';
-import 'package:vehype/Pages/repair_page.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
-import 'package:vehype/bad_words.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/notification_controller.dart';
@@ -924,7 +919,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
 String formatDateTime(DateTime dateTime) {
   DateFormat format = DateFormat.yMMMMd('en_US').add_jm();
 //  -> July 10, 2024 5:08 PM
-  String dateString = format.format(dateTime);
+  String dateString = format.format(dateTime.toLocal());
 
   return dateString;
 }
@@ -932,7 +927,7 @@ String formatDateTime(DateTime dateTime) {
 String formatDate(DateTime dateTime) {
   DateFormat format = DateFormat.yMMMMd('en_US');
 //  -> July 10, 2024 5:08 PM
-  String dateString = format.format(dateTime);
+  String dateString = format.format(dateTime.toLocal());
 
   return dateString;
 }

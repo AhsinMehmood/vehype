@@ -51,7 +51,7 @@ class NewOffers extends StatelessWidget {
 
     return ListView.builder(
         itemCount: newOffers.length,
-        shrinkWrap: true,
+        // shrinkWrap: true,
         padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
         itemBuilder: (context, index) {
           OffersModel offersModel = newOffers[index];

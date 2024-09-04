@@ -159,7 +159,7 @@ class _VideoPlayerNetworkState extends State<VideoPlayerNetwork> {
           }
         }
       });
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       // await Sentry.captureException(
       //   exception,
       //   stackTrace: stackTrace,

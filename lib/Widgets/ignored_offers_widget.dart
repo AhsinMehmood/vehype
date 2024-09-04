@@ -38,7 +38,7 @@ class IgnoredOffers extends StatelessWidget {
 
     return ListView.builder(
         itemCount: ignoredOffers.length,
-        shrinkWrap: true,
+        // shrinkWrap: true,s
         padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
         itemBuilder: (context, index) {
           OffersModel offersModel = ignoredOffers[index];

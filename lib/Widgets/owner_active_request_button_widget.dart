@@ -11,7 +11,6 @@ import 'package:vehype/const.dart';
 import '../Controllers/offers_controller.dart';
 import '../Controllers/user_controller.dart';
 import '../Models/offers_model.dart';
-import '../Pages/choose_account_type.dart';
 
 class OwnerActiveRequestButtonWidget extends StatelessWidget {
   final OffersModel offersModel;
@@ -44,7 +43,9 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
             height: 80,
             width: Get.width,
             decoration: BoxDecoration(
-              color: userController.isDark ? primaryColor : Colors.white,
+              color: userController.isDark
+                  ? changeColor(color: '#343042')
+                  : Colors.white,
               border: Border(
                   top: BorderSide(
                 color: userController.isDark
@@ -115,7 +116,6 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
                           offersReceived: null,
                           checkByList: offersModel.checkByList,
                           senderId: userController.userModel!.userId,
-
                           notificationTitle: '',
                           notificationSubtitle: '');
 
@@ -155,8 +155,7 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
                         offerId: offersModel.offerId,
                         userId: userController.userModel!.userId,
                         isAdd: false,
-                          senderId: userController.userModel!.userId,
-
+                        senderId: userController.userModel!.userId,
                         checkByList: offersModel.checkByList,
                         offersReceived: null,
                         notificationTitle: '',

@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,6 @@ import 'package:video_compress/video_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 
-import '../Pages/repair_page.dart';
 import 'user_controller.dart';
 
 class ChatController with ChangeNotifier {
@@ -138,14 +136,14 @@ class ChatController with ChangeNotifier {
     String chatId,
     int limit,
   ) {
-    StreamController<List<MessageModel>> _streamController =
+    StreamController<List<MessageModel>> streamController =
         StreamController<List<MessageModel>>();
 
     var query = _messagesRef.child(chatId).orderByChild('sentAt');
 
     query.onValue.listen((event) {
       if (event.snapshot.value == null) {
-        _streamController.add(<MessageModel>[]);
+        streamController.add(<MessageModel>[]);
         return;
       }
 
@@ -169,12 +167,12 @@ class ChatController with ChangeNotifier {
       });
       messages.sort((a, b) => b.sentAt.compareTo(a.sentAt));
 
-      _streamController.add(messages);
+      streamController.add(messages);
     }, onError: (error) {
       print(error);
     });
 
-    return _streamController.stream;
+    return streamController.stream;
   }
 
   getUnread(String sentAt, String lastOpen, BuildContext context) {

@@ -28,11 +28,11 @@ class GarageModel {
       model: data['model'] ?? '',
       vin: data['vin'] ?? '',
       garageId: id,
-      imageUrl: imageOne.isEmpty
+      imageUrl: imageOne == ''
           ? 'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/WhatsApp%20Image%202024-07-25%20at%2022.08.41.jpeg?alt=media&token=3e2daa79-95e1-45a2-ab01-52a484423618'
           : imageOne,
       submodel: data['subModel'] ?? '',
-      title: '${data['make']}, ${data['year']}, ${data['model']}',
+      title: '${data['year']}, ${data['model']}',
     );
   }
 

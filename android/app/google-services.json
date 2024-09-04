@@ -96,10 +96,10 @@
               "client_type": 3
             },
             {
-              "client_id": "832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com",
+              "client_id": "832920203889-onjgrk8glqgo5m2gj932vgj86ltffs9d.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.nomadllc.vehype"
+                "bundle_id": "com.nomadllc.vehype.OneSignalNotificationServiceExtension"
               }
             }
           ]

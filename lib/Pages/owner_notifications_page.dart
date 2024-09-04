@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 // import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:toastification/toastification.dart';
@@ -13,7 +12,6 @@ import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
-import '../Models/notifications_model.dart';
 import '../Models/user_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -21,7 +19,6 @@ import 'package:timeago/timeago.dart' as timeago;
 // import 'offers_received_details.dart';
 // import 'received_offers_seeker.dart';
 import 'owner_request_details_inprogress_inactive_page.dart';
-import 'repair_page.dart';
 // import 'requests_received_provider_details.dart';
 
 class OwnerNotificationsPage extends StatefulWidget {

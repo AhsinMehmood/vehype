@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,6 +56,18 @@ class DefaultFirebaseOptions {
     projectId: 'vehype-386313',
     databaseURL: 'https://vehype-386313-default-rtdb.firebaseio.com',
     storageBucket: 'vehype-386313.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAK6KvCmEG7qqs-uE8XnIc8UgltGT-bmuM',
+    appId: '1:832920203889:ios:7f1cf1482827a5d2cce1d0',
+    messagingSenderId: '832920203889',
+    projectId: 'vehype-386313',
+    databaseURL: 'https://vehype-386313-default-rtdb.firebaseio.com',
+    storageBucket: 'vehype-386313.appspot.com',
+    androidClientId: '832920203889-5e5jgnoecueoahn8qkg29d5bplg2m578.apps.googleusercontent.com',
+    iosClientId: '832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com',
+    iosBundleId: 'com.nomadllc.vehype',
   );
 
 }

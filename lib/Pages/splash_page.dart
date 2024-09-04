@@ -4,10 +4,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
@@ -71,7 +69,7 @@ class _SplashPageState extends State<SplashPage> {
                     .doc(userId + userModel.accountType)
                     .get();
             if (accountTypeUserSnap.exists) {
-              OneSignal.login(userId + userModel.accountType);
+              userController.pushTokenUpdate(userId + userModel.accountType);
 
               // await FirebaseFirestore.instance
               //     .collection('users')
@@ -86,12 +84,18 @@ class _SplashPageState extends State<SplashPage> {
                 userId + userModel.accountType,
                 onDataReceived: (userModel) {},
               );
-
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId + userModel.accountType)
+                  .get();
               if (userModel.accountType == 'provider') {
-                offersProvider.startListening(UserModel.fromJson(accountTypeUserSnap));
-                offersProvider.startListeningOffers(UserModel.fromJson(accountTypeUserSnap).userId);
+                offersProvider
+                    .startListening(UserModel.fromJson(accountTypeUserSnap));
+                offersProvider.startListeningOffers(
+                    UserModel.fromJson(accountTypeUserSnap).userId);
               } else {
-                offersProvider.startListeningOwnerOffers(UserModel.fromJson(accountTypeUserSnap).userId);
+                offersProvider.startListeningOwnerOffers(
+                    UserModel.fromJson(accountTypeUserSnap).userId);
               }
               // await OneSignal.Notifications.requestPermission(true);
 
@@ -110,7 +114,9 @@ class _SplashPageState extends State<SplashPage> {
                 'status': 'active',
               });
               // await Future.delayed(const Duration(seconds: 1));
-              OneSignal.login(userId + userModel.accountType);
+              // OneSignal.login(userId + userModel.accountType);
+              userController.pushTokenUpdate(userId + userModel.accountType);
+
               // Position position = await Geolocator.getCurrentPosition();
 
               // final GeoFirePoint geoFirePoint =
@@ -124,6 +130,10 @@ class _SplashPageState extends State<SplashPage> {
               //   'geo': geoFirePoint.data,
               //   'long': position.longitude,
               // });
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userId + userModel.accountType)
+                  .get();
               userController.getUserStream(
                 userId + userModel.accountType,
                 onDataReceived: (userModel) {},

@@ -4,18 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:vehype/Controllers/notification_controller.dart';
-import 'package:vehype/Controllers/owner_offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
-import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/Widgets/owner_accept_offer_confirmation.dart';
 import 'package:vehype/Widgets/owner_ignore_offer_confirmation_widget.dart';
 
 import '../Controllers/offers_controller.dart';
 import '../Models/user_model.dart';
-import '../Pages/message_page.dart';
 import '../Pages/second_user_profile.dart';
 import '../const.dart';
 import 'select_date_and_price.dart';

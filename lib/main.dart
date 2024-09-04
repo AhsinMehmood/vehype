@@ -2,14 +2,16 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
@@ -18,6 +20,7 @@ import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:vehype/const.dart';
+import 'package:vehype/firebase_options.dart';
 // import 'package:json_theme/json_theme.dart';
 
 void main() async {
@@ -25,7 +28,9 @@ void main() async {
   // if (Platform.isAndroid) {
   //   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
   // }
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // final themeStr = await rootBundle.loadString('assets/theme.json');
   // final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');
   FirebaseFirestore.instance.settings = const Settings(
@@ -36,43 +41,40 @@ void main() async {
 
   // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
   // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
-  OneSignal.Debug.setLogLevel(OSLogLevel.error);
+  // OneSignal.Debug.setLogLevel(OSLogLevel.error);
 
-  OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
+  // OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
   // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
   //     trackAutomaticEvents: true);
-  // await SentryFlutter.init(
-  //   (options) {
+  await SentryFlutter.init((options) {
+    options.dsn =
+        'https://db34bb55769b55480e81f75aca7cf9d8@o4507883907186688.ingest.us.sentry.io/4507883909677056';
+    // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+    // We recommend adjusting this value in production.
+    options.tracesSampleRate = 1.0;
 
-  //     options.dsn =
-  //         'https://c6ac471a08028bb3ecd01426b474eaf5@o4507069896523776.ingest.us.sentry.io/4507069897965568';
-  //     // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-  //     // We recommend adjusting this value in production.
-  //     options.tracesSampleRate = 1.0;
-  //     // The sampling rate for profiling is relative to tracesSampleRate
-  //     // Setting to 1.0 will profile 100% of sampled transactions:
-  //     options.profilesSampleRate = 1.0;
-  //   },
-  //   appRunner: () =>
-  // );
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<UserController>(
-            create: (context) => UserController()),
-        ChangeNotifierProvider<OffersProvider>(
-            create: (context) => OffersProvider()),
-        ChangeNotifierProvider<GarageController>(
-            create: (context) => GarageController()),
-        ChangeNotifierProvider<ChatController>(
-            create: (context) => ChatController()),
-      ],
-      child: MyApp(
-          // theme: theme,
-          // themeStrDark: darkTheme,
-          ),
-    ),
-  );
+    // The sampling rate for profiling is relative to tracesSampleRate
+    // Setting to 1.0 will profile 100% of sampled transactions:
+    options.profilesSampleRate = 1.0;
+  },
+      appRunner: () => runApp(
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider<UserController>(
+                    create: (context) => UserController()),
+                ChangeNotifierProvider<OffersProvider>(
+                    create: (context) => OffersProvider()),
+                ChangeNotifierProvider<GarageController>(
+                    create: (context) => GarageController()),
+                ChangeNotifierProvider<ChatController>(
+                    create: (context) => ChatController()),
+              ],
+              child: MyApp(
+                  // theme: theme,
+                  // themeStrDark: darkTheme,
+                  ),
+            ),
+          ));
 }
 
 class MyApp extends StatefulWidget {
@@ -106,14 +108,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   listenOneSignalNotification() {
-    OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-      if (event.notification.additionalData!['type'] == 'chat') {
-        // FlutterAppBadger.updateBadgeCount(1);
-        // print(event.notification.additionalData);
-        ChatController().updateMessage(
-            event.notification.additionalData!['chatId'],
-            event.notification.additionalData!['messageId'],
-            1);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        if (message.data['type'] == 'chat') {
+          // FlutterAppBadger.updateBadgeCount(1);
+          // print(event.notification.additionalData);
+          ChatController().updateMessage(
+              message.data['chatId'], message.data['messageId'], 1);
+        }
       }
     });
   }

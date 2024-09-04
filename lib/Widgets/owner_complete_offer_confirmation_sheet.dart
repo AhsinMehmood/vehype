@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
@@ -11,7 +10,6 @@ import '../Controllers/user_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/garage_model.dart';
 import '../Models/offers_model.dart';
-import 'loading_dialog.dart';
 
 class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
   const OwnerCompleteOfferConfirmationSheet({

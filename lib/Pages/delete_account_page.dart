@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -361,6 +361,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           OffersProvider offersProvider =
                               Provider.of<OffersProvider>(context,
                                   listen: false);
+                          await userController.updateToken(
+                              userModel.userId, '');
+                          userController.closeStream();
+
                           offersProvider.stopListening();
                           sharedPreferences.clear();
                           userController.changeTabIndex(0);
@@ -368,7 +372,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           await FirebaseAuth.instance.signOut();
                           await GoogleSignIn().disconnect();
 
-                          await OneSignal.logout();
                           Get.close(1); // Close the loading dialog
                           Get.offAll(() => SplashPage());
                         },

@@ -1,9 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_interpolation_to_compose_strings, prefer_const_literals_to_create_immutables
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 // import 'package:flutter_app_badger/flutter_app_badger.dart';
@@ -89,255 +88,244 @@ class _ChatWidgetState extends State<ChatWidget> {
                             .map((convert) => GarageModel.fromJson(convert)),
                         builder:
                             (context, AsyncSnapshot<GarageModel> garageSnap) {
-                          final GarageModel garageModel = garageSnap.data ??
-                              GarageModel(
-                                  ownerId: offersModel.ownerId,
-                                  submodel: 'submodel',
-                                  title: 'Fetching',
-                                  imageUrl: offersModel.imageOne,
-                                  bodyStyle: '',
-                                  make: 'make',
-                                  year: 'year',
-                                  model: 'model',
-                                  vin: 'vin',
-                                  garageId: offersModel.garageId);
-                          return InkWell(
-                            onTap: () {
-                              if (getUnread(
-                                  widget.chat.lastMessageAt,
-                                  widget.chat.lastOpen[widget.user.userId],
-                                  context)) {
-                                // FlutterAppBadger.removeBadge();
-                                // FlutterAppIconBadge.removeBadge();
-                              }
-                              Get.to(() => MessagePage(
-                                    chatModel: widget.chat,
-                                    garageModel: garageModel,
-                                    secondUser: secondUserData,
-                                    offersModel: offersModel,
-                                  ));
-                            },
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Get.to(() => SecondUserProfile(
-                                              userId: secondUserData.userId));
-                                        },
-                                        child: Container(
-                                          height: 55,
-                                          width: 55,
-                                          child: Stack(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                child: ExtendedImage.network(
-                                                  garageModel.imageUrl,
-                                                  fit: BoxFit.cover,
-                                                  height: 50,
-                                                  width: 50,
-                                                ),
-                                              ),
-                                              Positioned(
-                                                bottom: 0,
-                                                right: 0,
-                                                child: ClipRRect(
+                          if (garageSnap.hasData && garageSnap.data != null) {
+                            final GarageModel garageModel = garageSnap.data!;
+                            return InkWell(
+                              onTap: () {
+                                if (getUnread(
+                                    widget.chat.lastMessageAt,
+                                    widget.chat.lastOpen[widget.user.userId],
+                                    context)) {
+                                  // FlutterAppBadger.removeBadge();
+                                  // FlutterAppIconBadge.removeBadge();
+                                }
+                                Get.to(() => MessagePage(
+                                      chatModel: widget.chat,
+                                      garageModel: garageModel,
+                                      secondUser: secondUserData,
+                                      offersModel: offersModel,
+                                    ));
+                              },
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Get.to(() => SecondUserProfile(
+                                                userId: secondUserData.userId));
+                                          },
+                                          child: SizedBox(
+                                            height: 55,
+                                            width: 55,
+                                            child: Stack(
+                                              children: [
+                                                ClipRRect(
                                                   borderRadius:
-                                                      BorderRadius.circular(
-                                                          200),
-                                                  child: ExtendedImage.network(
-                                                    secondUserData.profileUrl,
+                                                      BorderRadius.circular(6),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl:
+                                                        garageModel.imageUrl,
                                                     fit: BoxFit.cover,
-                                                    height: 25,
-                                                    width: 25,
+                                                    height: 50,
+                                                    width: 50,
                                                   ),
                                                 ),
+                                                Positioned(
+                                                  bottom: 0,
+                                                  right: 0,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            200),
+                                                    child: CachedNetworkImage(
+                                                      imageUrl: secondUserData
+                                                          .profileUrl,
+                                                      fit: BoxFit.cover,
+                                                      height: 25,
+                                                      width: 25,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                secondUserData.name,
+                                                style: TextStyle(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      garageModel.title,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      textAlign:
+                                                          TextAlign.start,
+                                                      style: TextStyle(
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      widget.chat.text.contains(
+                                                              'Start the chat with')
+                                                          ? '${widget.chat.text} ' +
+                                                              secondUserData
+                                                                  .name
+                                                          : getText(
+                                                              widget.chat.text,
+                                                              widget.chat
+                                                                      .lastMessageMe ==
+                                                                  widget.user
+                                                                      .userId),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                        fontSize: 14,
+                                                        fontWeight: getUnread(
+                                                                widget.chat
+                                                                    .lastMessageAt,
+                                                                widget.chat
+                                                                        .lastOpen[
+                                                                    widget.user
+                                                                        .userId],
+                                                                context)
+                                                            ? FontWeight.bold
+                                                            : FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        Row(
                                           children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  secondUserData.name,
-                                                  style: TextStyle(
-                                                    color: userController.isDark
-                                                        ? Colors.white
-                                                        : primaryColor,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    garageModel.title,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1,
-                                                    textAlign: TextAlign.start,
+                                            SizedBox(
+                                              height: 70,
+                                              // margin: const Ed,
+                                              width: 90,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  if (getUnread(
+                                                      widget.chat.lastMessageAt,
+                                                      widget.chat.lastOpen[
+                                                          widget.user.userId],
+                                                      context))
+                                                    Container(
+                                                      height: 10,
+                                                      width: 10,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(200),
+                                                      ),
+                                                    ),
+                                                  Text(
+                                                    formatDateTime(
+                                                      DateTime.parse(widget.chat
+                                                              .lastMessageAt)
+                                                          .toLocal(),
+                                                    ),
                                                     style: TextStyle(
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
-                                                      fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    widget.chat.text.contains(
-                                                            'Start the chat with')
-                                                        ? '${widget.chat.text} ' +
-                                                            secondUserData.name
-                                                        : getText(
-                                                            widget.chat.text,
-                                                            widget.chat
-                                                                    .lastMessageMe ==
-                                                                widget.user
-                                                                    .userId),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1,
-                                                    style: TextStyle(
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
-                                                      fontSize: 14,
-                                                      fontWeight: getUnread(
-                                                              widget.chat
-                                                                  .lastMessageAt,
-                                                              widget.chat
-                                                                      .lastOpen[
-                                                                  widget.user
-                                                                      .userId],
-                                                              context)
-                                                          ? FontWeight.bold
-                                                          : FontWeight.w700,
-                                                    ),
+                                                  SvgPicture.asset(
+                                                    getServices()
+                                                        .firstWhere((dd) =>
+                                                            dd.name ==
+                                                            offersModel.issue)
+                                                        .image,
+                                                    color: userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                                    height: 30,
+                                                    width: 30,
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            height: 70,
-                                            // margin: const Ed,
-                                            width: 90,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                if (getUnread(
-                                                    widget.chat.lastMessageAt,
-                                                    widget.chat.lastOpen[
-                                                        widget.user.userId],
-                                                    context))
-                                                  Container(
-                                                    height: 10,
-                                                    width: 10,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              200),
-                                                    ),
-                                                  ),
-                                                Text(
-                                                  formatDateTime(
-                                                    DateTime.parse(widget
-                                                            .chat.lastMessageAt)
-                                                        .toLocal(),
-                                                  ),
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                SvgPicture.asset(
-                                                  getServices()
-                                                      .firstWhere((dd) =>
-                                                          dd.name ==
-                                                          offersModel.issue)
-                                                      .image,
-                                                  color: userController.isDark
-                                                      ? Colors.white
-                                                      : primaryColor,
-                                                  height: 30,
-                                                  width: 30,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 0,
-                                ),
-                                Container(
-                                    height: 0.6,
-                                    margin: const EdgeInsets.all(0),
-                                    width: Get.width,
-                                    color: userController.isDark
-                                        ? Colors.white.withOpacity(0.1)
-                                        : primaryColor.withOpacity(0.1)),
-                              ],
-                            ),
-                          );
+                                  const SizedBox(
+                                    height: 0,
+                                  ),
+                                  Container(
+                                      height: 0.6,
+                                      margin: const EdgeInsets.all(0),
+                                      width: Get.width,
+                                      color: userController.isDark
+                                          ? Colors.white.withOpacity(0.1)
+                                          : primaryColor.withOpacity(0.1)),
+                                ],
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
                         });
                   } else {
                     return SizedBox();
                   }
                 });
           } else {
-            return Container(
-              child: CupertinoActivityIndicator(),
-            );
+            return Container();
           }
         });
   }

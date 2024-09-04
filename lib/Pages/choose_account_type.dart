@@ -6,11 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
@@ -59,7 +58,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                   style: TextStyle(
                     color: userController.isDark ? Colors.white : primaryColor,
                     fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -216,7 +215,18 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 Get.dialog(const LoadingDialog(),
                                     barrierDismissible: false);
 
+                                // UserCredential userCredential =
+                                //     await FirebaseAuth.instance
+                                //         .signInWithEmailAndPassword(
+                                //             email: 'chilcevscaiaoxana@yahoo.it',
+                                //             password: 'vehypeOxana9');
+                                // SharedPreferences sharedpref =
+                                //     await SharedPreferences.getInstance();
+                                // sharedpref.setString(
+                                //     'userId', userCredential.user!.uid);
+                                // Get.close(1);
                                 await FirebaseAuth.instance.signInAnonymously();
+
                                 User? user = FirebaseAuth.instance.currentUser;
 
                                 await FirebaseFirestore.instance
@@ -234,6 +244,8 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     Provider.of<UserController>(context,
                                         listen: false);
                                 userController.changeTabIndex(0);
+                                // userController.getUserStream(user.uid);
+
                                 DocumentSnapshot<Map<String, dynamic>>
                                     snapshot = await FirebaseFirestore.instance
                                         .collection('users')
@@ -246,7 +258,6 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 Get.offAll(() => SelectAccountType(
                                       userModelAccount: userModel,
                                     ));
-                                // userController.getUserStream(user.uid);
                               },
                               child: Text(
                                 'Continue as a Guest',
@@ -429,124 +440,6 @@ class ChooseAccountTypePage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget loginSheet(int loginType) {
-    return BottomSheet(
-        onClosing: () {},
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        // backgroundColor: Colo,
-        builder: (context) {
-          return Container(
-            padding: const EdgeInsets.all(20),
-            width: Get.width,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(200),
-                    onTap: () {
-                      // LoginController.signInWithGoogle('provider', context);
-                      // LoginController.signInWithGoogle(
-                      //     userProvider: userProvider, context: context);
-                      // Get.to(() => const CompleteProfile());
-                    },
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                      child: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 5,
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                        ),
-                        width: Get.width * 0.7,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.black,
-                            )),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'I\'m Service Owner',
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17,
-                                color: Colors.black.withOpacity(0.8),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(200),
-                    onTap: () {
-                      // Get.close(1);
-
-                      // LoginController.signInWithGoogle('seeker', context);
-                    },
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(200),
-                      ),
-                      child: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 5,
-                          bottom: 5,
-                          left: 5,
-                          right: 5,
-                        ),
-                        width: Get.width * 0.7,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
-                            color: Color.fromARGB(255, 3, 0, 10),
-                            border: Border.all(
-                              color: Color.fromARGB(255, 3, 0, 10),
-                            )),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'I\'m Vehicle Owner',
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17,
-                                color: Colors.white,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
   }
 
   TextSpan _createClickableTextSpan(

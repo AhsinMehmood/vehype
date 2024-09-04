@@ -6,7 +6,7 @@ PODS:
   - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
   - BSImagePicker (3.3.3)
-  - cloud_firestore (5.3.0):
+  - cloud_firestore (5.4.0):
     - Firebase/Firestore (= 11.0.0)
     - firebase_core
     - Flutter
@@ -35,6 +35,9 @@ PODS:
   - Firebase/Functions (11.0.0):
     - Firebase/CoreOnly
     - FirebaseFunctions (~> 11.0.0)
+  - Firebase/Messaging (11.0.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 11.0.0)
   - Firebase/Storage (11.0.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 11.0.0)
@@ -47,6 +50,10 @@ PODS:
     - Flutter
   - firebase_database (11.1.0):
     - Firebase/Database (= 11.0.0)
+    - firebase_core
+    - Flutter
+  - firebase_messaging (15.1.0):
+    - Firebase/Messaging (= 11.0.0)
     - firebase_core
     - Flutter
   - firebase_storage (12.2.0):
@@ -98,7 +105,7 @@ PODS:
     - FirebaseFirestoreAbseilBinary (= 1.2024011602.0)
     - FirebaseFirestoreGRPCCPPBinary (= 1.65.1)
     - leveldb-library (~> 1.22)
-    - nanopb (< 2.30911.0, >= 2.30908.0)
+    - nanopb (~> 3.30910.0)
   - FirebaseFunctions (11.0.0):
     - FirebaseAppCheckInterop (~> 11.0)
     - FirebaseAuthInterop (~> 11.0)
@@ -107,6 +114,20 @@ PODS:
     - FirebaseMessagingInterop (~> 11.0)
     - FirebaseSharedSwift (~> 11.0)
     - GTMSessionFetcher/Core (~> 3.4)
+  - FirebaseInstallations (11.1.0):
+    - FirebaseCore (~> 11.0)
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (11.0.0):
+    - FirebaseCore (~> 11.0)
+    - FirebaseInstallations (~> 11.0)
+    - GoogleDataTransport (~> 10.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/Reachability (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - nanopb (~> 3.30910.0)
   - FirebaseMessagingInterop (11.1.0)
   - FirebaseSharedSwift (11.0.0)
   - FirebaseStorage (11.0.0):
@@ -133,6 +154,9 @@ PODS:
     - FlutterMacOS
     - GoogleSignIn (~> 7.1)
     - GTMSessionFetcher (>= 3.4.0)
+  - GoogleDataTransport (10.1.0):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - GoogleMaps (8.4.0):
     - GoogleMaps/Maps (= 8.4.0)
   - GoogleMaps/Base (8.4.0)
@@ -184,66 +208,23 @@ PODS:
   - multi_image_picker_plus (0.0.1):
     - BSImagePicker (~> 3.1)
     - Flutter
-  - nanopb (2.30910.0):
-    - nanopb/decode (= 2.30910.0)
-    - nanopb/encode (= 2.30910.0)
-  - nanopb/decode (2.30910.0)
-  - nanopb/encode (2.30910.0)
-  - onesignal_flutter (5.2.4):
-    - Flutter
-    - OneSignalXCFramework (= 5.2.3)
-  - OneSignalXCFramework (5.2.3):
-    - OneSignalXCFramework/OneSignalComplete (= 5.2.3)
-  - OneSignalXCFramework/OneSignal (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalExtension
-    - OneSignalXCFramework/OneSignalLiveActivities
-    - OneSignalXCFramework/OneSignalNotifications
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalOutcomes
-    - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalComplete (5.2.3):
-    - OneSignalXCFramework/OneSignal
-    - OneSignalXCFramework/OneSignalInAppMessages
-    - OneSignalXCFramework/OneSignalLocation
-  - OneSignalXCFramework/OneSignalCore (5.2.3)
-  - OneSignalXCFramework/OneSignalExtension (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalInAppMessages (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalNotifications
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalOutcomes
-    - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLiveActivities (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLocation (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalNotifications
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalNotifications (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalExtension
-    - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalOSCore (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalOutcomes (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalUser (5.2.3):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalNotifications
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalOutcomes
+  - nanopb (3.30910.0):
+    - nanopb/decode (= 3.30910.0)
+    - nanopb/encode (= 3.30910.0)
+  - nanopb/decode (3.30910.0)
+  - nanopb/encode (3.30910.0)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - PromisesObjC (2.4.0)
   - RecaptchaInterop (100.0.0)
+  - Sentry/HybridSDK (8.35.1)
+  - sentry_flutter (8.8.0):
+    - Flutter
+    - FlutterMacOS
+    - Sentry/HybridSDK (= 8.35.1)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -269,6 +250,7 @@ DEPENDENCIES:
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_database (from `.symlinks/plugins/firebase_database/ios`)
+  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `11.0.0`)
   - Flutter (from `Flutter`)
@@ -280,10 +262,9 @@ DEPENDENCIES:
   - manage_calendar_events (from `.symlinks/plugins/manage_calendar_events/ios`)
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - multi_image_picker_plus (from `.symlinks/plugins/multi_image_picker_plus/ios`)
-  - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
-  - OneSignalXCFramework (< 6.0, >= 5.0.0)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
@@ -312,10 +293,13 @@ SPEC REPOS:
     - FirebaseFirestoreGRPCCPPBinary
     - FirebaseFirestoreInternalBinary
     - FirebaseFunctions
+    - FirebaseInstallations
+    - FirebaseMessaging
     - FirebaseMessagingInterop
     - FirebaseSharedSwift
     - FirebaseStorage
     - Google-Maps-iOS-Utils
+    - GoogleDataTransport
     - GoogleMaps
     - GoogleSignIn
     - GoogleUtilities
@@ -323,8 +307,9 @@ SPEC REPOS:
     - GTMSessionFetcher
     - leveldb-library
     - nanopb
-    - OneSignalXCFramework
+    - PromisesObjC
     - RecaptchaInterop
+    - Sentry
 
 EXTERNAL SOURCES:
   cloud_firestore:
@@ -339,6 +324,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_database:
     :path: ".symlinks/plugins/firebase_database/ios"
+  firebase_messaging:
+    :path: ".symlinks/plugins/firebase_messaging/ios"
   firebase_storage:
     :path: ".symlinks/plugins/firebase_storage/ios"
   FirebaseFirestore:
@@ -362,12 +349,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/maps_launcher/ios"
   multi_image_picker_plus:
     :path: ".symlinks/plugins/multi_image_picker_plus/ios"
-  onesignal_flutter:
-    :path: ".symlinks/plugins/onesignal_flutter/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  sentry_flutter:
+    :path: ".symlinks/plugins/sentry_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
@@ -391,7 +378,7 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BSImagePicker: 57900b323f951711608acaf97d52e9183530cb6d
-  cloud_firestore: 15d5767445fbd525df58295240753e87393c854f
+  cloud_firestore: c44f5943a6f7fc1775cfa4a1e980a0024ed565ee
   cloud_functions: 7918c97e2f146266f5591dbb2e9bca3f7fbb2c18
   ffmpeg-kit-ios-https: f9c838aa5400a6c5ba12324c6b798f52197ba354
   ffmpeg_kit_flutter: b4ca70cac3fc1d8ac14cdc660754b60870358732
@@ -399,6 +386,7 @@ SPEC CHECKSUMS:
   firebase_auth: 16ac5db3d064db837ecd845080d7e18e4be7c66d
   firebase_core: ceec591a66629daaee82d3321551692c4a871493
   firebase_database: d50936f67fe294f3b395814d2355819f9a651366
+  firebase_messaging: 15d8b557010f3bb7b98d0302e1c7c8fbcd244425
   firebase_storage: 3b166e39a19e95b6a2d1c33b4ebff41e12a7615b
   FirebaseAppCheckInterop: e59b52f2c0e188e6ba77b9e3f6acead2117f2abf
   FirebaseAuth: d5cf28be74d7e82257f6a3f717509eff70d3cf4a
@@ -413,8 +401,10 @@ SPEC CHECKSUMS:
   FirebaseFirestoreGRPCBoringSSLBinary: d86ebbe2adc8d15d7ebf305fff7d6358385327f8
   FirebaseFirestoreGRPCCoreBinary: 472bd808e1886a5efb2fd03dd09b98d34641a335
   FirebaseFirestoreGRPCCPPBinary: db76d83d2b7517623f8426ed7f7a17bad2478084
-  FirebaseFirestoreInternalBinary: bcc46da0228b53cfaab4a5f65ee391bbcaf60db2
+  FirebaseFirestoreInternalBinary: 9b233680572ca2bc2c3654c3c3b22b2699cb14eb
   FirebaseFunctions: 49653511d8c966ad16c5c02acc2bfd642ef1cec1
+  FirebaseInstallations: d0a8fea5a6fa91abc661591cf57c0f0d70863e57
+  FirebaseMessaging: d2d1d9c62c46dd2db49a952f7deb5b16ad2c9742
   FirebaseMessagingInterop: 02e4dc0c64fa21c97b7c8d514cd2aa6672c252b6
   FirebaseSharedSwift: 9d0e7130af2f0cf162ecd136971f9661f2a3f769
   FirebaseStorage: f9e2bf027d549db18b6195a37b31c85f56e40200
@@ -424,6 +414,7 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
   google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
   google_sign_in_ios: 07375bfbf2620bc93a602c0e27160d6afc6ead38
+  GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
@@ -434,12 +425,13 @@ SPEC CHECKSUMS:
   manage_calendar_events: 9b2889799340398027b3e3f5c4891d41599ec257
   maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
   multi_image_picker_plus: b95d83279b5019ce4637ef17ca3aa14a557ffea6
-  nanopb: 438bc412db1928dac798aa6fd75726007be04262
-  onesignal_flutter: 3d348a51e0c42e112e559a5c9871e2aada3deb7a
-  OneSignalXCFramework: 356e59953e157f6e45a7fdfc863073b3168b2d01
+  nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  Sentry: 1fe34e9c2cbba1e347623610d26db121dcb569f1
+  sentry_flutter: a39c2a2d67d5e5b9cb0b94a4985c76dd5b3fc737
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
@@ -448,6 +440,6 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   wakelock_plus: 78ec7c5b202cab7761af8e2b2b3d0671be6c4ae1
 
-PODFILE CHECKSUM: 2193ccaa2cf25a42abbbf94964a136ebe1ba7d9b
+PODFILE CHECKSUM: 57ad8cdcd808f2c4f26593905b5d2d34effec4a3
 
 COCOAPODS: 1.15.2

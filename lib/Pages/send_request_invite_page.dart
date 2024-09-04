@@ -13,15 +13,12 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
 import '../Controllers/garage_controller.dart';
-import '../Controllers/offers_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/chat_model.dart';
 import '../Widgets/loading_dialog.dart';
-import '../Widgets/select_date_and_price.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'message_page.dart';
-import 'repair_page.dart';
 // import 'select_service_crv.dart';
 
 class SendRequestInvitePage extends StatelessWidget {

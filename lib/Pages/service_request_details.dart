@@ -25,13 +25,11 @@ import '../Models/garage_model.dart';
 import '../Widgets/select_date_and_price.dart';
 import 'package:http/http.dart' as http;
 
-import '../Widgets/service_cancelled_request_button_widget.dart';
 import '../Widgets/service_completed_request_button_widget.dart';
 import '../Widgets/service_inprogress_request_button_widget.dart';
 import '../Widgets/service_new_request_button_widget.dart';
 import '../Widgets/service_pending_request_button_widget.dart';
 import '../Widgets/service_request_cancelled_details_button.dart';
-import '../Widgets/undo_ignore_provider.dart';
 
 class ServiceRequestDetails extends StatefulWidget {
   final OffersModel offersModel;
@@ -275,7 +273,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                           controller: scrollController,
                                           child: Column(
                                             children: [
-                                              Container(
+                                              SizedBox(
                                                 // color: Colors.red,
                                                 width: Get.width,
                                                 height: 300,

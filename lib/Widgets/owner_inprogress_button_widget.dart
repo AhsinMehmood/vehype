@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/garage_model.dart';
-import 'package:vehype/Widgets/delete_request_confirmation_widget.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/offers_controller.dart';
 import '../Controllers/user_controller.dart';
 import '../Models/offers_model.dart';
-import '../Pages/choose_account_type.dart';
 import '../Pages/owner_request_details_inprogress_inactive_page.dart';
 
 class OwnerInprogressButtonWidget extends StatelessWidget {

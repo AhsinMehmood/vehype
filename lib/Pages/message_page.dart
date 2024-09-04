@@ -38,7 +38,6 @@ import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/Widgets/delete_chat_confirmation_sheet.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
 
-import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/video_player.dart';
 
 import 'package:vehype/const.dart';
@@ -1457,7 +1456,7 @@ class SecondUserMessageWidget extends StatelessWidget {
                     onTap: () {
                       Get.to(() => VideoPlayerNetwork(url: message.mediaUrl));
                     },
-                    child: Container(
+                    child: SizedBox(
                       height: 200,
                       width: Get.width * 0.75,
                       child: Stack(
@@ -2041,7 +2040,7 @@ class MessageWidget extends StatelessWidget {
                       onTap: () {
                         Get.to(() => VideoPlayerNetwork(url: message.mediaUrl));
                       },
-                      child: Container(
+                      child: SizedBox(
                         height: 200,
                         width: Get.width * 0.75,
                         child: Stack(

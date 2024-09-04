@@ -90,7 +90,7 @@ class _CalendersListState extends State<CalendersList> {
         .get();
 
     UserModel secondUser = UserModel.fromJson(nameSnap);
-    CalendarEvent _newEvent = CalendarEvent(
+    CalendarEvent newEvent = CalendarEvent(
       title: '${secondUser.name}: ${widget.offersModel.vehicleId}',
       description: widget.offersModel.issue,
       startDate: DateTime.parse(widget.offersReceivedModel.startDate).toLocal(),
@@ -103,7 +103,7 @@ class _CalendersListState extends State<CalendersList> {
       ),
     );
     _myPlugin
-        .createEvent(calendarId: calendarId, event: _newEvent)
+        .createEvent(calendarId: calendarId, event: newEvent)
         .then((evenId) async {
       print(evenId);
       if (userModel.accountType == 'provider') {

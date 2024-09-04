@@ -6,7 +6,7 @@ import 'package:vehype/const.dart';
 import '../Controllers/user_controller.dart';
 
 class LoadingDialog extends StatelessWidget {
-  const LoadingDialog({Key? key}) : super(key: key);
+  const LoadingDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,24 +3,16 @@
 import 'dart:async';
 // import 'package:fuse/fuse.dart'; // Import the fuse package
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
@@ -30,7 +22,6 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Models/user_model.dart';
-import 'second_user_profile.dart';
 
 final _collectionReference = FirebaseFirestore.instance.collection('locations');
 
@@ -389,7 +380,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                         isScrollControlled: true,
                                       );
                                     },
-                                    child: Container(
+                                    child: SizedBox(
                                       height: 45,
                                       width: 45,
                                       child: Card(
@@ -636,7 +627,7 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   Future<BitmapDescriptor> getCustomIcon(UserModel userData) async {
-    return Container(
+    return SizedBox(
       height: 55,
       width: 55,
       child: Stack(

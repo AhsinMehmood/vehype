@@ -6,7 +6,6 @@ import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 
-import '../Controllers/notification_controller.dart';
 import '../Controllers/offers_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/garage_model.dart';
@@ -14,7 +13,6 @@ import '../Models/offers_model.dart';
 import '../Models/user_model.dart';
 
 import '../Pages/message_page.dart';
-import '../Pages/repair_page.dart';
 import '../const.dart';
 import 'loading_dialog.dart';
 import 'select_date_and_price.dart';

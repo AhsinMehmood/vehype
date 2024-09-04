@@ -2,11 +2,9 @@
 
 // import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 // import 'package:package_rename/package_rename.dart';
@@ -21,7 +19,6 @@ import 'package:vehype/const.dart';
 import '../Controllers/user_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/vehicle_model.dart';
-import '../Widgets/loading_dialog.dart';
 
 class AddVehicle extends StatefulWidget {
   final GarageModel? garageModel;

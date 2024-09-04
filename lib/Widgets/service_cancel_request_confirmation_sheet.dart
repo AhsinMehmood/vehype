@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
-import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';

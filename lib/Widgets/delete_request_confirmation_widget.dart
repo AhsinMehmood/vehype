@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
-import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';

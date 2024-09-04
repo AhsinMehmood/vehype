@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 // import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -781,169 +780,172 @@ class ReviewsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
 
-    return ListView.builder(
-        itemCount: userData.ratings.length,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(
-          top: 20,
-        ),
-        itemBuilder: (context, inde) {
-          print(userData.ratings[inde]['id']);
-          return StreamBuilder<UserModel>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userData.ratings[inde]['id'])
-                  .snapshots()
-                  .map((event) => UserModel.fromJson(event)),
-              builder: (context, AsyncSnapshot<UserModel> snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox(
-                    height: 100,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
-                      ),
-                    ),
-                  );
-                }
-                UserModel commenterData = snapshot.data!;
-
-                return Column(
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ListTile(
-                      leading: InkWell(
-                        onTap: () {
-                          Get.to(() => FullImagePageView(
-                                urls: [commenterData.profileUrl],
-                              ));
-                        },
-                        child: ExtendedImage.network(
-                          commenterData.profileUrl,
-                          // height: 45,
-                          shape: BoxShape.circle,
-                          // borderRadius: Border,
-                          // width: 45,
-                        ),
-                      ),
-                      title: Text(
-                        commenterData.name,
-                        style: TextStyle(
+    return Expanded(
+      child: ListView.builder(
+          itemCount: userData.ratings.length,
+          // shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(
+            top: 20,
+          ),
+          itemBuilder: (context, inde) {
+            // print(userData.ratings[inde]['id']);
+            return StreamBuilder<UserModel>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userData.ratings[inde]['id'])
+                    .snapshots()
+                    .map((event) => UserModel.fromJson(event)),
+                builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                  if (!snapshot.hasData) {
+                    return SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: CircularProgressIndicator(
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              RatingBarIndicator(
-                                rating: userData.ratings[inde]['rating'],
-                                itemBuilder: (context, _) => Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 25,
-                                ),
-                                itemSize: 25,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                timeago.format(DateTime.parse(
-                                    userData.ratings[inde]['at'].toString())),
-                                style: TextStyle(
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    );
+                  }
+                  UserModel commenterData = snapshot.data!;
+
+                  return Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
                       ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ReadMoreText(
-                          userData.ratings[inde]['comment'],
-                          trimMode: TrimMode.Line,
-                          trimLines: 2,
-                          textAlign: TextAlign.start,
-                          colorClickableText: Colors.pink,
-                          trimCollapsedText: ' Show more',
-                          trimExpandedText: ' Show less',
+                      ListTile(
+                        leading: InkWell(
+                          onTap: () {
+                            Get.to(() => FullImagePageView(
+                                  urls: [commenterData.profileUrl],
+                                ));
+                          },
+                          child: ExtendedImage.network(
+                            commenterData.profileUrl,
+                            // height: 45,
+                            shape: BoxShape.circle,
+                            // borderRadius: Border,
+                            // width: 45,
+                          ),
+                        ),
+                        title: Text(
+                          commenterData.name,
                           style: TextStyle(
                             color: userController.isDark
                                 ? Colors.white
                                 : primaryColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.normal,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
                           ),
-                          moreStyle: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                RatingBarIndicator(
+                                  rating: userData.ratings[inde]['rating'],
+                                  itemBuilder: (context, _) => Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 25,
+                                  ),
+                                  itemSize: 25,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  timeago.format(DateTime.parse(
+                                      userData.ratings[inde]['at'].toString())),
+                                  style: TextStyle(
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    if (userData.ratings[inde]['images'] != null)
                       const SizedBox(
-                        height: 8,
+                        height: 5,
                       ),
-                    if (userData.ratings[inde]['images'] != null)
-                      InkWell(
-                        onTap: () {
-                          List imageUrls = [];
-                          for (var element in userData.ratings) {
-                            if (element['images'] != null) {
-                              imageUrls.add(element['images']);
-                            }
-                          }
-                          Get.to(() => FullImagePageView(
-                                urls: imageUrls,
-                                currentIndex: inde,
-                              ));
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ReadMoreText(
+                            userData.ratings[inde]['comment'],
+                            trimMode: TrimMode.Line,
+                            trimLines: 2,
+                            textAlign: TextAlign.start,
+                            colorClickableText: Colors.pink,
+                            trimCollapsedText: ' Show more',
+                            trimExpandedText: ' Show less',
+                            style: TextStyle(
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
+                              fontSize: 15,
+                              fontWeight: FontWeight.normal,
+                            ),
+                            moreStyle: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: ExtendedImage.network(
-                              userData.ratings[inde]['images'],
+                        ),
+                      ),
+                      if (userData.ratings[inde]['images'] != null)
+                        const SizedBox(
+                          height: 8,
+                        ),
+                      if (userData.ratings[inde]['images'] != null)
+                        InkWell(
+                          onTap: () {
+                            List imageUrls = [];
+                            for (var element in userData.ratings) {
+                              if (element['images'] != null) {
+                                imageUrls.add(element['images']);
+                              }
+                            }
+                            Get.to(() => FullImagePageView(
+                                  urls: imageUrls,
+                                  currentIndex: inde,
+                                ));
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: ExtendedImage.network(
+                                userData.ratings[inde]['images'],
 
-                              height: 180,
-                              // shape: BoxShape.rectangle,
-                              fit: BoxFit.cover,
-                              borderRadius: BorderRadius.circular(12),
+                                height: 180,
+                                // shape: BoxShape.rectangle,
+                                fit: BoxFit.cover,
+                                borderRadius: BorderRadius.circular(12),
 
-                              width: Get.width * 0.95,
+                                width: Get.width * 0.95,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                );
-              });
-        });
+                    ],
+                  );
+                });
+          }),
+    );
   }
 }
 

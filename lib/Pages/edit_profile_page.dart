@@ -6,21 +6,18 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
@@ -627,11 +624,15 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     },
                     // controller: _vinController,
                     decoration: InputDecoration(
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText: 'John Doe',
-                      // counter: const SizedBox.shrink(),
-                    ),
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        hintText: 'John Doe',
+                        hintStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                        )
+                        // counter: const SizedBox.shrink(),
+                        ),
                     initialValue: userController.userModel!.name,
                     onChanged: (String value) => userController.updateTexts(
                         userController.userModel!, 'name', value),
@@ -679,11 +680,15 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       // controller: _vinController,
                       decoration: InputDecoration(
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        hintText: 'Add your business details',
-                        // counter: const SizedBox.shrink(),
-                      ),
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: 'Add your business details',
+                          hintStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                          )
+                          // counter: const SizedBox.shrink(),
+                          ),
                       initialValue: userController.userModel!.businessInfo,
                       onChanged: (String value) => userController.updateTexts(
                           userController.userModel!, 'businessInfo', value),
@@ -735,6 +740,10 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       // controller: _vinController,
                       decoration: InputDecoration(
                         border: InputBorder.none,
+                        hintStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                        ),
                         focusedBorder: InputBorder.none,
                         hintText: 'Enter your contact info',
                         // counter: const SizedBox.shrink(),
@@ -790,11 +799,15 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       // controller: _vinController,
                       decoration: InputDecoration(
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        hintText: 'https://yourbusiness.com/',
-                        // counter: const SizedBox.shrink(),
-                      ),
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          hintText: 'https://yourbusiness.com/',
+                          hintStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                          )
+                          // counter: const SizedBox.shrink(),
+                          ),
                       initialValue: userController.userModel!.website,
                       onChanged: (String value) => userController.updateTexts(
                           userController.userModel!, 'website', value),
@@ -855,7 +868,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         OffersProvider offersProvider =
                             Provider.of<OffersProvider>(context, listen: false);
                         offersProvider.stopListening();
-                        await OneSignal.logout();
+                        await userController.updateToken(userModel.userId, '');
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
                             .collection('users')
@@ -947,10 +960,12 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         print(realUserId);
                         UserModel userModel = userController.userModel!;
                         print(userModel.userId);
-                        await OneSignal.logout();
+                        await userController.updateToken(userModel.userId, '');
                         OffersProvider offersProvider =
                             Provider.of<OffersProvider>(context, listen: false);
                         offersProvider.stopListening();
+                        // offersProvider.stopListening();
+                        // offersProvider.stopListening();
 
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
@@ -1051,7 +1066,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Container(
+                            SizedBox(
                               height: 200,
                               width: Get.width,
                               child: userController.userModel!.lat == 0.0

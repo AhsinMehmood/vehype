@@ -373,20 +373,23 @@ class Offers extends StatelessWidget {
               //         element.offerId == offersReceivedModel.offerId);
               // print(offersReceivedModel.id);
 
-              return StreamBuilder(
+              return StreamBuilder<OffersModel>(
                   stream: FirebaseFirestore.instance
                       .collection('offers')
                       .doc(offersReceivedModel.offerId)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot offerSnap) {
-                    if (!offerSnap.hasData) {
-                      return SizedBox.shrink();
+                      .snapshots()
+                      .map((convert) => OffersModel.fromJson(convert)),
+                  builder: (context, AsyncSnapshot<OffersModel> offerSnap) {
+                    if (!offerSnap.hasData && offerSnap.data == null) {
+                      return SizedBox(
+                        height: 350,
+                        width: Get.width,
+                      );
                     }
                     if (offerSnap.hasError) {
                       return Text(offerSnap.stackTrace.toString());
                     }
-                    OffersModel offersModel =
-                        OffersModel.fromJson(offerSnap.data);
+                    OffersModel offersModel = offerSnap.data!;
 
                     return ServiceRequestWidget(
                       offersModel: offersModel,

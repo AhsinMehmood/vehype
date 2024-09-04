@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Widgets/owner_active_offers.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/garage_controller.dart';
@@ -13,7 +12,6 @@ import '../Controllers/user_controller.dart';
 import '../Widgets/owner_request_widget.dart';
 import 'choose_account_type.dart';
 import 'create_request_page.dart';
-import 'repair_page.dart';
 
 class VehicleRequestsPage extends StatelessWidget {
   final GarageModel garageModel;

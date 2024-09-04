@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
+// import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/tabs_page.dart';
@@ -13,7 +13,6 @@ import 'package:vehype/const.dart';
 import '../Controllers/offers_provider.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
-import 'location_permission.dart';
 
 class SelectAccountType extends StatelessWidget {
   final UserModel userModelAccount;
@@ -48,7 +47,7 @@ class SelectAccountType extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   InkWell(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(6),
                     onTap: () async {
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
@@ -96,7 +95,9 @@ class SelectAccountType extends StatelessWidget {
                         });
                       }
 
-                      OneSignal.login('${userModelAccount.userId}provider');
+                      // OneSignal.login('${userModelAccount.userId}provider');
+                      userController.pushTokenUpdate(
+                          '${userModelAccount.userId}provider');
 
                       userController.getUserStream(
                         '${userModelAccount.userId}provider',
@@ -122,7 +123,7 @@ class SelectAccountType extends StatelessWidget {
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Container(
                         height: 50,
@@ -134,7 +135,7 @@ class SelectAccountType extends StatelessWidget {
                         ),
                         width: Get.width * 0.7,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(6),
                             color: Colors.white,
                             border: Border.all(
                               color: Colors.black,
@@ -171,7 +172,9 @@ class SelectAccountType extends StatelessWidget {
                           .update({
                         'accountType': 'seeker',
                       });
-                      OneSignal.login('${userModelAccount.userId}seeker');
+                      userController
+                          .pushTokenUpdate('${userModelAccount.userId}seeker');
+
                       LatLng latLng = await UserController().getLocations();
 
                       final GeoFirePoint geoFirePoint = GeoFirePoint(

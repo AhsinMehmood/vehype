@@ -5,11 +5,8 @@ import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Widgets/service_request_widget.dart';
 
-import '../Controllers/garage_controller.dart';
 import '../Models/offers_model.dart';
-import '../Pages/repair_page.dart';
 import '../const.dart';
 import 'owner_request_widget.dart';
 
@@ -52,12 +49,31 @@ class OwnerActiveOffers extends StatelessWidget {
                   .doc(offersPosted[index].garageId)
                   .snapshots()
                   .map((cc) => GarageModel.fromJson(cc)),
-              builder: (context, snapshot) {
-                GarageModel? garageModel = snapshot.data;
-                return OwnerRequestWidget(
-                  offersModel: offersPosted[index],
-                  garageModel: garageModel,
-                );
+              builder: (context, garasnap) {
+                if (garasnap.hasData && garasnap.data != null) {
+                  GarageModel garageModel = garasnap.data!;
+                  return OwnerRequestWidget(
+                    offersModel: offersPosted[index],
+                    garageModel: garageModel,
+                    // offersReceivedModel: null,
+                  );
+                } else {
+                  return OwnerRequestWidget(
+                    offersModel: offersPosted[index],
+                    garageModel: GarageModel(
+                        ownerId: 'ownerId',
+                        submodel: 'submodel',
+                        title: 'title',
+                        imageUrl: defaultImage,
+                        bodyStyle: 'Truck',
+                        make: 'make',
+                        year: 'year',
+                        model: 'model',
+                        vin: 'vin',
+                        garageId: 'garageId'),
+                    // offersReceivedModel: offersReceivedModel,
+                  );
+                }
               });
         });
   }

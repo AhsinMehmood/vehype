@@ -1,32 +1,23 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
-import 'package:vehype/Controllers/offers_controller.dart';
-import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
-import 'package:vehype/Pages/repair_page.dart';
-import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 
 import '../Controllers/vehicle_data.dart';
@@ -571,7 +562,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
+                              SizedBox(
                                 height: 140,
                                 width: Get.width,
                                 child: lat == 0.0

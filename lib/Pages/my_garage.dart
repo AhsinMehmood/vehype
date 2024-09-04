@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,7 +12,6 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/add_vehicle.dart';
-import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/Pages/vehicle_request_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
@@ -21,7 +19,6 @@ import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
 import 'choose_account_type.dart';
-import 'full_image_view_page.dart';
 // import 'select_service_crv.dart';
 
 class MyGarage extends StatelessWidget {
@@ -144,7 +141,7 @@ class MyGarage extends StatelessWidget {
                             PageController();
 
                         return Padding(
-                          padding: const EdgeInsets.all(15.0),
+                          padding: const EdgeInsets.all(5.0),
                           child: InkWell(
                             onTap: () {
                               Get.to(
@@ -168,10 +165,19 @@ class MyGarage extends StatelessWidget {
                                     width: Get.width,
                                     height: 220,
                                     child: InkWell(
-                                      onTap: () {
-                                        Get.to(() => FullImagePageView(
-                                              urls: [garageModel.imageUrl],
-                                            ));
+                                      onTap: () async {
+                                        final GarageController
+                                            garageController =
+                                            Provider.of<GarageController>(
+                                                context,
+                                                listen: false);
+                                        Get.dialog(LoadingDialog(),
+                                            barrierDismissible: false);
+                                        await garageController
+                                            .initVehicle(garageModel);
+                                        Get.close(1);
+                                        Get.to(() => AddVehicle(
+                                            garageModel: garageModel));
                                       },
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.only(
