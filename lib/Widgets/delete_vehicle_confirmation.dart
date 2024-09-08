@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
@@ -207,7 +208,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                               .doc(offersReceivedModel.offerBy)
                               .get();
                       NotificationController().sendNotification(
-                          userIds: [offerByQuery.id],
+                          userTokens: [UserModel.fromJson(offerByQuery).pushToken],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Offer Cancelled',

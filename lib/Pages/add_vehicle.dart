@@ -7,12 +7,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 // import 'package:package_rename/package_rename.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/delete_vehicle_confirmation.dart';
 import 'package:vehype/const.dart';
 
@@ -104,7 +106,15 @@ class _AddVehicleState extends State<AddVehicle> {
                 InkWell(
                   onTap: () {
                     // completeProfileProvider.selectImages(0, context);
-                    garageController.selectImage(context, userModel, 0);
+                    Get.bottomSheet(ChooseGalleryCamera(onTapCamera: () {
+                      garageController.selectImage(
+                          context, userModel, 0, ImageSource.camera);
+                      Get.close(1);
+                    }, onTapGallery: () {
+                      garageController.selectImage(
+                          context, userModel, 0, ImageSource.gallery);
+                      Get.close(1);
+                    }));
                   },
                   child: Container(
                     height: 220,
@@ -519,7 +529,9 @@ class _AddVehicleState extends State<AddVehicle> {
                 const SizedBox(
                   height: 20,
                 ),
-                if (garageController.vehicleSubModels.isNotEmpty)
+                if (garageController.selectedVehicleType != null &&
+                    garageController.selectedVehicleType!.title ==
+                        'Passenger vehicle')
                   InkWell(
                     onTap: () async {
                       if (garageController.selectedVehicleModel != null) {
@@ -684,6 +696,12 @@ class _AddVehicleState extends State<AddVehicle> {
                 ElevatedButton(
                     onPressed: () async {
                       if (garageController.saveButtonValidation()) {
+                        // toastification.show(
+                        //   context: context,
+                        //   title: Text('Everything is fine'),
+                        //   autoCloseDuration: Duration(seconds: 3),
+                        //   type: ToastificationType.error,
+                        // );
                         garageController.saveVehicle(
                             userModel, _vinController.text, widget.addService);
                       } else {

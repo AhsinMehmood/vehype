@@ -143,7 +143,14 @@ class MyGarage extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: InkWell(
-                            onTap: () {
+                            onTap: () async {
+                              final GarageController garageController =
+                                  Provider.of<GarageController>(context,
+                                      listen: false);
+                              Get.dialog(LoadingDialog(),
+                                  barrierDismissible: false);
+                              await garageController.initVehicle(garageModel);
+                              Get.close(1);
                               Get.to(
                                   () => AddVehicle(garageModel: garageModel));
                             },
@@ -164,33 +171,17 @@ class MyGarage extends StatelessWidget {
                                   SizedBox(
                                     width: Get.width,
                                     height: 220,
-                                    child: InkWell(
-                                      onTap: () async {
-                                        final GarageController
-                                            garageController =
-                                            Provider.of<GarageController>(
-                                                context,
-                                                listen: false);
-                                        Get.dialog(LoadingDialog(),
-                                            barrierDismissible: false);
-                                        await garageController
-                                            .initVehicle(garageModel);
-                                        Get.close(1);
-                                        Get.to(() => AddVehicle(
-                                            garageModel: garageModel));
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(6),
-                                          topRight: Radius.circular(6),
-                                        ),
-                                        child: CachedNetworkImage(
-                                          imageUrl: garageModel.imageUrl,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
+                                      ),
+                                      child: CachedNetworkImage(
+                                        imageUrl: garageModel.imageUrl,
 
-                                          fit: BoxFit.cover,
+                                        fit: BoxFit.cover,
 
-                                          //cancelToken: cancellationToken,
-                                        ),
+                                        //cancelToken: cancellationToken,
                                       ),
                                     ),
                                   ),

@@ -566,7 +566,7 @@ class ProfilePage extends StatelessWidget {
                             //       .doc(element.offerId)
                             //       .update({
                             //     'garageId': garageSnp.docs.first.id,
-                            //   });
+                            //   }); p
                             //   print(element.offerId +
                             //       ' goingggg' +
                             //       garageSnp.docs.first.id);

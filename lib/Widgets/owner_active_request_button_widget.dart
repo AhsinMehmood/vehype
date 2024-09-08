@@ -43,9 +43,7 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
             height: 80,
             width: Get.width,
             decoration: BoxDecoration(
-              color: userController.isDark
-                  ? changeColor(color: '#343042')
-                  : Colors.white,
+              color: userController.isDark ? primaryColor : Colors.white,
               border: Border(
                   top: BorderSide(
                 color: userController.isDark

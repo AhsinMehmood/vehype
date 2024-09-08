@@ -90,7 +90,9 @@ class OwnerAcceptOfferConfirmation extends StatelessWidget {
                           garageModel);
 
                       NotificationController().sendNotification(
-                          userIds: [offerByQuery.id],
+                          userTokens: [
+                            UserModel.fromJson(offerByQuery).pushToken
+                          ],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Good News: Offer Accepted',

@@ -63,6 +63,8 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To enhance your experience, this app requires access to your microphone.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>To enhance your experience, this app requires access to your photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

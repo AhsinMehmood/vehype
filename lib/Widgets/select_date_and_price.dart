@@ -403,7 +403,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                     await showOmniDateTimePicker(
                                   context: context,
                                   initialDate: garageController.startDate,
-                                  firstDate: DateTime.now(),
+                                  firstDate: garageController.startDate,
                                   lastDate: DateTime.now().add(
                                     const Duration(days: 30),
                                   ),
@@ -814,104 +814,122 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
   applyToJob(
       UserModel userModel, GarageController garageController, comment) async {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
-    UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    if (widget.offersReceivedModel != null) {
-      await FirebaseFirestore.instance
-          .collection('offersReceived')
-          .doc(widget.offersReceivedModel!.id)
-          .update({
-        'price': double.parse(priceController.text.toString()),
-        'startDate': garageController.startDate!.toUtc().toIso8601String(),
-        'endDate': garageController.endDate!.toUtc().toIso8601String(),
-        'comment': comment.text,
-      });
+    try {
+      UserController userController =
+          Provider.of<UserController>(context, listen: false);
+      // Use a default valid ID if needed
+      final documentId = widget.offersReceivedModel?.id ?? 'defaultId';
+      print(documentId);
+      if (documentId != 'defaultId') {
+        await FirebaseFirestore.instance
+            .collection('offersReceived')
+            .doc(documentId)
+            .update({
+          'price': double.parse(priceController.text.toString()),
+          'startDate': garageController.startDate!.toUtc().toIso8601String(),
+          'endDate': garageController.endDate!.toUtc().toIso8601String(),
+          'comment': comment.text,
+        });
+        DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.offersReceivedModel!.ownerId)
+                .get();
 
-      NotificationController().sendNotification(
-          userIds: [widget.offersReceivedModel!.offerBy],
-          offerId: widget.offersModel.offerId,
-          requestId: widget.offersReceivedModel!.id,
-          title: 'Service Offer Updated',
-          subtitle:
-              '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
+        NotificationController().sendNotification(
+            userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+            offerId: widget.offersModel.offerId,
+            requestId: widget.offersReceivedModel!.id,
+            title: 'Service Offer Updated',
+            subtitle:
+                '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
 
-      OffersController().updateNotificationForOffers(
-          offerId: widget.offersModel.offerId,
-          userId: widget.ownerModel.userId,
-          senderId: userController.userModel!.userId,
-          isAdd: true,
-          offersReceived: widget.offersReceivedModel!.id,
-          checkByList: widget.offersModel.checkByList,
-          notificationTitle: '${userModel.name} updated his offer.',
-          notificationSubtitle:
-              '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
-      // ChatController().updateChatRequestId(widget.chatId!, widget.offersModel.offerId);
-      ChatModel? chatModel = await ChatController().getChat(userModel.userId,
-          widget.ownerModel.userId, widget.offersModel.offerId);
-      if (chatModel != null) {
-        ChatController()
-            .updateChatRequestId(chatModel.id, widget.offersReceivedModel!.id);
+        OffersController().updateNotificationForOffers(
+            offerId: widget.offersModel.offerId,
+            userId: widget.ownerModel.userId,
+            senderId: userController.userModel!.userId,
+            isAdd: true,
+            offersReceived: widget.offersReceivedModel!.id,
+            checkByList: widget.offersModel.checkByList,
+            notificationTitle: '${userModel.name} updated his offer.',
+            notificationSubtitle:
+                '${userModel.name} has updated their offer for your request. Review the new details to see the changes made just for you.');
+        // ChatController().updateChatRequestId(widget.chatId!, widget.offersModel.offerId);
+        ChatModel? chatModel = await ChatController().getChat(userModel.userId,
+            widget.ownerModel.userId, widget.offersModel.offerId);
+        if (chatModel != null) {
+          ChatController().updateChatRequestId(
+              chatModel.id, widget.offersReceivedModel!.id);
+        }
+        Get.close(2);
+
+        garageController.closeOfferSubmit();
+      } else {
+        await FirebaseFirestore.instance
+            .collection('offers')
+            .doc(widget.offersModel.offerId)
+            .update({
+          'offersReceived': FieldValue.arrayUnion([userModel.userId]),
+        });
+
+        DocumentReference<Map<String, dynamic>> reference =
+            await FirebaseFirestore.instance.collection('offersReceived').add({
+          'offerBy': userModel.userId,
+          'offerId': widget.offersModel.offerId,
+          'ownerId': widget.ownerModel.userId,
+          'offerAt': DateTime.now().toUtc().toIso8601String(),
+          'status': 'Pending',
+          'price': double.parse(priceController.text.toString()),
+          'startDate': garageController.startDate!.toUtc().toIso8601String(),
+          'endDate': garageController.endDate!.toUtc().toIso8601String(),
+          'comment': comment.text,
+        });
+        DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.offersModel.ownerId)
+                .get();
+
+        NotificationController().sendNotification(
+            userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+            offerId: widget.offersModel.offerId,
+            requestId: reference.id,
+            title: 'New Offer for Your Request',
+            subtitle:
+                '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
+        OffersController().updateNotificationForOffers(
+            offerId: widget.offersModel.offerId,
+            userId: widget.ownerModel.userId,
+            senderId: userController.userModel!.userId,
+            isAdd: true,
+            offersReceived: reference.id,
+            checkByList: widget.offersModel.checkByList,
+            notificationTitle: '${userModel.name} has submitted an offer.',
+            notificationSubtitle:
+                '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
+        ChatModel? chatModel = await ChatController().getChat(userModel.userId,
+            widget.ownerModel.userId, widget.offersModel.offerId);
+        String chatId = chatModel?.id ?? 'defaultId';
+        if (chatId != 'defaultId') {
+          ChatController().updateChatRequestId(chatId, reference.id);
+        }
+        garageController.closeOfferSubmit();
+
+        // if (widget.chatId != null) {
+        Get.close(3);
+        // } else {
+
+        // }
+
+        // Get.showSnackbar(
+        //   GetSnackBar(
+        //     message: 'Submitted successfully. Check Orders history for status',
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
       }
-      Get.close(2);
-
-      garageController.closeOfferSubmit();
-    } else {
-      await FirebaseFirestore.instance
-          .collection('offers')
-          .doc(widget.offersModel.offerId)
-          .update({
-        'offersReceived': FieldValue.arrayUnion([userModel.userId]),
-      });
-
-      DocumentReference<Map<String, dynamic>> reference =
-          await FirebaseFirestore.instance.collection('offersReceived').add({
-        'offerBy': userModel.userId,
-        'offerId': widget.offersModel.offerId,
-        'ownerId': widget.ownerModel.userId,
-        'offerAt': DateTime.now().toUtc().toIso8601String(),
-        'status': 'Pending',
-        'price': double.parse(priceController.text.toString()),
-        'startDate': garageController.startDate!.toUtc().toIso8601String(),
-        'endDate': garageController.endDate!.toUtc().toIso8601String(),
-        'comment': comment.text,
-      });
-
-      await NotificationController().sendNotification(
-          userIds: [widget.ownerModel.userId],
-          offerId: widget.offersModel.offerId,
-          requestId: reference.id,
-          title: 'New Offer for Your Request',
-          subtitle:
-              '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
-      OffersController().updateNotificationForOffers(
-          offerId: widget.offersModel.offerId,
-          userId: widget.ownerModel.userId,
-          senderId: userController.userModel!.userId,
-          isAdd: true,
-          offersReceived: reference.id,
-          checkByList: widget.offersModel.checkByList,
-          notificationTitle: '${userModel.name} has submitted an offer.',
-          notificationSubtitle:
-              '${userModel.name} has submitted an offer in response to your request. Click here to review and respond.');
-      ChatModel? chatModel = await ChatController().getChat(userModel.userId,
-          widget.ownerModel.userId, widget.offersModel.offerId);
-      if (chatModel != null) {
-        ChatController().updateChatRequestId(chatModel.id, reference.id);
-      }
-      garageController.closeOfferSubmit();
-
-      // if (widget.chatId != null) {
-      Get.close(3);
-      // } else {
-
-      // }
-
-      // Get.showSnackbar(
-      //   GetSnackBar(
-      //     message: 'Submitted successfully. Check Orders history for status',
-      //     duration: Duration(seconds: 3),
-      //   ),
-      // );
+    } catch (e) {
+      print(e);
     }
   }
 }

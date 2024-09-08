@@ -15,13 +15,26 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
+import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:vehype/const.dart';
 import 'package:vehype/firebase_options.dart';
+
 // import 'package:json_theme/json_theme.dart';
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Handle background message
+  print('Handling a background message: ${message.messageId}');
+  if (message.data['type'] == 'chat') {
+    // FlutterAppBadger.updateBadgeCount(1);
+    // print(event.notification.additionalData);
+    ChatController()
+        .updateMessage(message.data['chatId'], message.data['messageId'], 1);
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +49,9 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // NotificationController().listenOneSignalNotification();
   // final themeJson = jsonDecode(themeStr);
   // final darkThemeJson = jsonDecode(themeStrDark);
 
@@ -90,13 +106,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+
     WidgetsBinding.instance.addObserver(this);
+
     Future.delayed(const Duration(seconds: 0)).then((value) async {
-      final UserController userController =
-          Provider.of<UserController>(context, listen: false);
       await userController.initTheme();
     });
-    listenOneSignalNotification();
+
+    // listenOneSignalNotification();
   }
 
   @override
@@ -105,22 +124,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
     userController.initTheme();
-  }
-
-  listenOneSignalNotification() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        if (message.data['type'] == 'chat') {
-          // FlutterAppBadger.updateBadgeCount(1);
-          // print(event.notification.additionalData);
-          ChatController().updateMessage(
-              message.data['chatId'], message.data['messageId'], 1);
-        }
-      }
-    });
   }
 
   @override
@@ -179,6 +182,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VEHYPE',
+      navigatorKey: navigatorKey,
       themeMode: userController.isDark ? ThemeMode.dark : ThemeMode.light,
       darkTheme: ThemeData.dark().copyWith(textTheme: textTheme),
       theme: ThemeData().copyWith(

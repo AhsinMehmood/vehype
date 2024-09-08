@@ -4,7 +4,7 @@ description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
-version: 3.0.3+75
+version: 3.0.3+79
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -17,6 +17,9 @@ dependencies:
   omni_datetime_picker:
     git:
       url: https://github.com/AhsinMehmood/OmniDateTimePicker.git
+
+
+
       # ref: main  # Optional: specify the branch, tag, or commit hash
   cupertino_icons: ^1.0.6
   firebase_core: ^3.4.0
@@ -36,9 +39,11 @@ dependencies:
   shared_preferences: ^2.3.2
   flutter_svg: 
   # image_select: ^0.0.3
+  # advanced_media_picker: ^0.0.16
   # flutter_image_compress: ^2.3.0
   extended_image: ^8.2.1
   map_location_picker: 
+  # media_picker_widget: ^1.0.7
   # mixpanel_flutter: ^2.3.1
   flutter_rating_bar: ^4.0.1
   firebase_database: ^11.1.0
@@ -75,6 +80,7 @@ dependencies:
 
   sentry_flutter: ^8.8.0
   crypto: ^3.0.5
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

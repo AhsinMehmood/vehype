@@ -12,7 +12,7 @@ import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
+// import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
@@ -225,80 +225,80 @@ class GarageController with ChangeNotifier {
         buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 
-  selectRequestImage(ImageSource imageSource, String userId) async {
-    if (imageSource == ImageSource.camera) {
-      final XFile? image = await picker.pickImage(source: imageSource);
-      if (image != null) {
-        requestImages.add(RequestImageModel(
-            imageUrl: '',
-            isLoading: true,
-            progress: 0.4,
-            imageFile: File(image.path)));
-        isRequestImageLoading = true;
+  // selectRequestImage(ImageSource imageSource, String userId) async {
+  //   if (imageSource == ImageSource.camera) {
+  //     final XFile? image = await picker.pickImage(source: imageSource);
+  //     if (image != null) {
+  //       requestImages.add(RequestImageModel(
+  //           imageUrl: '',
+  //           isLoading: true,
+  //           progress: 0.4,
+  //           imageFile: File(image.path)));
+  //       isRequestImageLoading = true;
 
-        notifyListeners();
-        for (var element in requestImages) {
-          if (element.imageUrl == '') {
-            uploadRequestImage(element, userId);
-          }
-        }
-      }
-    } else {
-      List<Asset> pickImages = await MultiImagePicker.pickImages(
-          androidOptions: AndroidOptions(
-            maxImages: 3 - requestImages.length,
-          ),
-          iosOptions: IOSOptions(
-              settings: CupertinoSettings(
-                  selection: SelectionSetting(
-            max: 3 - requestImages.length,
-          ))));
+  //       notifyListeners();
+  //       for (var element in requestImages) {
+  //         if (element.imageUrl == '') {
+  //           uploadRequestImage(element, userId);
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     // List<Asset> pickImages = await MultiImagePicker.pickImages(
+  //     //     androidOptions: AndroidOptions(
+  //     //       maxImages: 3 - requestImages.length,
+  //     //     ),
+  //     //     iosOptions: IOSOptions(
+  //     //         settings: CupertinoSettings(
+  //     //             selection: SelectionSetting(
+  //     //       max: 3 - requestImages.length,
+  //     //     ))));
 
-      // images.first.getByteData();
-      // final List<XFile> images = await picker.pickMultiImage();
-      List<File> images = [];
-      Get.dialog(LoadingDialog(),
-          useSafeArea: false, barrierDismissible: false);
-      for (Asset asset in pickImages) {
-        ByteData getFile = await asset.getByteData();
-        File file = await writeToFile(getFile, asset.name);
+  //     // images.first.getByteData();
+  //     // final List<XFile> images = await picker.pickMultiImage();
+  //     List<File> images = [];
+  //     Get.dialog(LoadingDialog(),
+  //         useSafeArea: false, barrierDismissible: false);
+  //     for (Asset asset in pickImages) {
+  //       ByteData getFile = await asset.getByteData();
+  //       File file = await writeToFile(getFile, asset.name);
 
-        images.add(file);
-      }
+  //       images.add(file);
+  //     }
 
-      List<RequestImageModel> selectedImage = [];
+  //     List<RequestImageModel> selectedImage = [];
 
-      for (var i = 0; i < images.length; i++) {
-        selectedImage.add(RequestImageModel(
-            imageUrl: '',
-            isLoading: true,
-            progress: 0.5,
-            imageFile: File(images[i].path)));
-      }
-      Get.close(1);
+  //     for (var i = 0; i < images.length; i++) {
+  //       selectedImage.add(RequestImageModel(
+  //           imageUrl: '',
+  //           isLoading: true,
+  //           progress: 0.5,
+  //           imageFile: File(images[i].path)));
+  //     }
+  //     Get.close(1);
 
-      requestImages.addAll(selectedImage);
-      if (selectedImage.isNotEmpty) {
-        isRequestImageLoading = true;
-      }
+  //     requestImages.addAll(selectedImage);
+  //     if (selectedImage.isNotEmpty) {
+  //       isRequestImageLoading = true;
+  //     }
 
-      // if (selectedImage.length + requestImages.length >= 3) {
-      //   if (selectedImage.length + requestImages.length == 3) {
-      //     requestImages.addAll(selectedImage);
-      //   } else {}
-      // } else {
-      //   requestImages.addAll(selectedImage);
-      // }
-      notifyListeners();
-      print(requestImages.length);
+  //     // if (selectedImage.length + requestImages.length >= 3) {
+  //     //   if (selectedImage.length + requestImages.length == 3) {
+  //     //     requestImages.addAll(selectedImage);
+  //     //   } else {}
+  //     // } else {
+  //     //   requestImages.addAll(selectedImage);
+  //     // }
+  //     notifyListeners();
+  //     print(requestImages.length);
 
-      for (RequestImageModel requestImageModel in requestImages) {
-        if (requestImageModel.imageUrl == '') {
-          uploadRequestImage(requestImageModel, userId);
-        }
-      }
-    }
-  }
+  //     for (RequestImageModel requestImageModel in requestImages) {
+  //       if (requestImageModel.imageUrl == '') {
+  //         uploadRequestImage(requestImageModel, userId);
+  //       }
+  //     }
+  //   }
+  // }
 
   uploadRequestImage(RequestImageModel requestImageModel, String userId) async {
     // File compressed
@@ -327,8 +327,9 @@ class GarageController with ChangeNotifier {
     }
   }
 
-  selectImage(BuildContext context, UserModel userModel, int index) async {
-    XFile? xFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  selectImage(BuildContext context, UserModel userModel, int index,
+      ImageSource imageSource) async {
+    XFile? xFile = await ImagePicker().pickImage(source: imageSource);
 
     if (xFile != null) {
       File selectedFile = File(xFile.path);
@@ -373,53 +374,61 @@ class GarageController with ChangeNotifier {
   }
 
   bool saveButtonValidation() {
-    if (selectedVehicleType != null &&
-        selectedVehicleMake != null &&
-        selectedVehicleModel != null &&
-        selectedSubModel != null &&
-        imageOneLoading == false) {
-      return true;
-    } else {
+    if (selectedVehicleType == null ||
+        selectedVehicleMake == null ||
+        selectedVehicleModel == null ||
+        imageOneLoading) {
       return false;
     }
+
+    if (selectedVehicleType!.title == 'Passenger vehicle') {
+      return selectedSubModel != null;
+    }
+
+    return true;
   }
 
   GarageModel? editGarage;
 
   saveVehicle(UserModel userModel, String vin, bool isCreateRequest) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
-    if (editGarage != null) {
-      String id = editGarage!.garageId;
-      await FirebaseFirestore.instance.collection('garages').doc(id).update({
-        'ownerId': userModel.userId,
-        'bodyStyle': selectedVehicleType!.title,
-        'make': selectedVehicleMake!.title,
-        'year': selectedYear,
-        'model': selectedVehicleModel!.title,
-        'subModel': selectedSubModel!.title,
-        'vin': vin,
-        'imageOne': imageOneUrl,
-        'imageTwo': imageTwoUrl,
-        'updatedAt': DateTime.now().toUtc().toIso8601String(),
-      });
-    } else {
-      await FirebaseFirestore.instance.collection('garages').add({
-        'ownerId': userModel.userId,
-        'bodyStyle': selectedVehicleType!.title,
-        'make': selectedVehicleMake!.title,
-        'year': selectedYear,
-        'model': selectedVehicleModel!.title,
-        'subModel': selectedSubModel!.title,
-        'vin': vin,
-        'imageOne': imageOneUrl,
-        'imageTwo': imageTwoUrl,
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-      });
+
+    try {
+      if (editGarage != null) {
+        String id = editGarage!.garageId;
+        await FirebaseFirestore.instance.collection('garages').doc(id).update({
+          'ownerId': userModel.userId,
+          'bodyStyle': selectedVehicleType!.title,
+          'make': selectedVehicleMake!.title,
+          'year': selectedYear,
+          'model': selectedVehicleModel!.title,
+          'subModel': selectedSubModel == null ? '' : selectedSubModel!.title,
+          'vin': vin,
+          'imageOne': imageOneUrl,
+          'imageTwo': imageTwoUrl,
+          'updatedAt': DateTime.now().toUtc().toIso8601String(),
+        });
+      } else {
+        await FirebaseFirestore.instance.collection('garages').add({
+          'ownerId': userModel.userId,
+          'bodyStyle': selectedVehicleType!.title,
+          'make': selectedVehicleMake!.title,
+          'year': selectedYear,
+          'model': selectedVehicleModel!.title,
+          'subModel': selectedSubModel == null ? '' : selectedSubModel!.title,
+          'vin': vin,
+          'imageOne': imageOneUrl,
+          'imageTwo': imageTwoUrl,
+          'createdAt': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
+
+      Get.close(2);
+      disposeController();
+    } catch (e) {
+      print(e.toString());
+      Get.close(1);
     }
-
-    Get.close(2);
-
-    disposeController();
   }
 
   // TaskSnapshot? uploadTaskOne;

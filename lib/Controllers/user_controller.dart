@@ -468,7 +468,7 @@ class UserController with ChangeNotifier {
         .get();
 
     NotificationController().sendNotification(
-        userIds: [offersReceivedModel.ownerId],
+        userTokens: [UserModel.fromJson(ownerSnap).pushToken],
         offerId: offersModel.offerId,
         requestId: offersReceivedModel.id,
         title: 'Offer Cancellation Alert',
@@ -530,9 +530,14 @@ class UserController with ChangeNotifier {
           userModel.userId,
           offersReceivedModel.offerBy,
           'The request was automatically canceled.');
+      DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(offersReceivedModel.ownerId)
+          .get();
 
       NotificationController().sendNotification(
-          userIds: [offersReceivedModel.offerBy],
+          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
           offerId: offersModel.offerId,
           requestId: offersReceivedModel.id,
           title: 'Offer Cancelled',

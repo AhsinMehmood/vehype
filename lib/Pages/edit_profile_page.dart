@@ -799,15 +799,16 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       },
                       // controller: _vinController,
                       decoration: InputDecoration(
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          hintText: 'https://yourbusiness.com/',
-                          hintStyle: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                          )
-                          // counter: const SizedBox.shrink(),
-                          ),
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        hintText: 'https://yourbusiness.com/',
+                        hintStyle: TextStyle(
+                          // color: userController.isDark? Colors.white
+                          fontWeight: FontWeight.w300,
+                          fontSize: 15,
+                        ),
+                        // counter: const SizedBox.shrink(),
+                      ),
                       initialValue: userController.userModel!.website,
                       onChanged: (String value) => userController.updateTexts(
                           userController.userModel!, 'website', value),

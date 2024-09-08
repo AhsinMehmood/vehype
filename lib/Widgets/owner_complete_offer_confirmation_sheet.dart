@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
@@ -70,9 +71,14 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                       OffersController().completeOffer(
                         offersReceivedModel,
                       );
+                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(offersReceivedModel.offerBy)
+                              .get();
 
                       NotificationController().sendNotification(
-                          userIds: [offersReceivedModel.offerBy],
+                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Request Completed Successfully',

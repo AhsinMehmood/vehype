@@ -255,9 +255,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     CalendarPlugin();
 
                                 if (offersReceivedModel.ownerCalendarId == '') {
-                                  myPlugin
-                                      .hasPermissions()
-                                      .then((value) async {
+                                  myPlugin.hasPermissions().then((value) async {
                                     if (!value!) {
                                       myPlugin.requestPermissions();
                                     } else {
@@ -776,7 +774,9 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     garageModel);
 
                                 NotificationController().sendNotification(
-                                    userIds: [offerByQuery.id],
+                                    userTokens: [
+                                      UserModel.fromJson(offerByQuery).pushToken
+                                    ],
                                     offerId: offersModel.offerId,
                                     requestId: offersReceivedModel.id,
                                     title: 'Good News: Offer Accepted',

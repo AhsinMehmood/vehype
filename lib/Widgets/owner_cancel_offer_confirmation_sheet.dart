@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ import '../Controllers/notification_controller.dart';
 import '../Controllers/user_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/offers_model.dart';
+import '../Models/user_model.dart';
 
 class OwnerCancelOfferConfirmationSheet extends StatefulWidget {
   const OwnerCancelOfferConfirmationSheet({
@@ -236,9 +238,14 @@ class _OwnerCancelOfferConfirmationSheetState
                           widget.userController.userModel!.userId,
                           widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
+                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(widget.offersReceivedModel.offerBy)
+                              .get();
 
                       NotificationController().sendNotification(
-                          userIds: [widget.offersReceivedModel.offerBy],
+                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancelled',

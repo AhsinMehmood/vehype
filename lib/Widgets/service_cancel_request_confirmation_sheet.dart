@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
+import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
@@ -233,9 +235,14 @@ class _ServiceCancelRequestConfirmationSheetState
                           widget.userController.userModel!.userId,
                           widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
+  DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(widget.offersReceivedModel.ownerId)
+                              .get();
 
                       NotificationController().sendNotification(
-                          userIds: [widget.offersReceivedModel.offerBy],
+                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancellation Alert',

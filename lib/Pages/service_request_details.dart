@@ -114,6 +114,8 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+    final documentId = widget.offersReceivedModel?.id ??
+        'defaultId'; // Use a default valid ID if needed
 
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -133,16 +135,21 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
             builder: (context, snapshot) {
               OffersModel offersModel = snapshot.data ?? widget.offersModel;
               return StreamBuilder<OffersReceivedModel>(
-                  initialData: widget.offersReceivedModel,
+                  // initialData: widget.offersReceivedModel,
                   stream: FirebaseFirestore.instance
                       .collection('offersReceived')
-                      .doc(widget.offersReceivedModel == null
-                          ? 'null'
-                          : widget.offersReceivedModel!.id)
+                      .doc(documentId)
                       .snapshots()
                       .map((convert) => OffersReceivedModel.fromJson(convert)),
-                  builder: (context, snapshot) {
-                    OffersReceivedModel? offersReceivedModel = snapshot.data;
+                  builder: (context,
+                      AsyncSnapshot<OffersReceivedModel> offersReceivedSnap) {
+                    OffersReceivedModel? offersReceivedModel;
+                    if (offersReceivedSnap.hasData &&
+                        documentId != 'defaultId') {
+                      offersReceivedModel = offersReceivedSnap.data;
+                      print(offersReceivedModel);
+                    }
+
                     return StreamBuilder<GarageModel>(
                         stream: FirebaseFirestore.instance
                             .collection('garages')

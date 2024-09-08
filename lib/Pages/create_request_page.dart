@@ -900,14 +900,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     List<UserModel> filterProviders = userController.filterProviders(
         filterIgnore, userModel.lat, userModel.long, 100);
     List addNotifications = [];
-    List userIds = [];
+    List<String> userIds = [];
     for (var element in filterProviders) {
-      userIds.add(element.userId);
+      userIds.add(element.pushToken);
     }
     NotificationController().sendNotification(
-        userIds: userIds,
+        userTokens: userIds,
         offerId: requestId,
-        requestId: null,
+        requestId: '',
         title: 'Request Changes Notification',
         subtitle:
             '${userModel.name} has updated his request. Click to see the latest changes.');
@@ -954,15 +954,15 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .toList();
     List<UserModel> filterProviders = userController.filterProviders(
         blockedUsers, userModel.lat, userModel.long, 100);
-    List userIds = [];
+    List<String> userIds = [];
     for (var element in filterProviders) {
-      userIds.add(element.userId);
+      userIds.add(element.pushToken);
     }
     List addNotifications = [];
     NotificationController().sendNotification(
         offerId: requestId,
-        userIds: userIds,
-        requestId: null,
+        userTokens: userIds,
+        requestId: '',
         title: 'Opportunity Alert: New Request',
         subtitle:
             'A nearby vehicle owner has submitted a new request. Click here to see more and respond quickly.');

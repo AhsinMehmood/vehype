@@ -15,6 +15,67 @@ const firestore = admin.firestore();
 
 
 
+exports.sendMessageNotification = functions.https.onCall(async (data, context) => {
+    const { chatId, messageId, title, subtitle, userIds } = data;
+
+    const message = {
+        notification: {
+            title: title,
+            body: subtitle,
+        },
+        data: {
+            chatId: chatId,
+            type: 'chat',
+            messageId: messageId,
+        },
+        tokens: userIds, // FCM registration tokens
+    };
+
+    try {
+        const response = await admin.messaging().sendMulticast(message);
+        console.log('Successfully sent message:', response);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending message:', error);
+        return { success: false, error: error.message };
+    }
+});
+
+
+
+
+exports.sendNotification = functions.https.onCall(async (data, context) => {
+    const { offerId, requestId, title, subtitle, userIds } = data;
+
+    const message = {
+        notification: {
+            title: title,
+            body: subtitle,
+        },
+        data: {
+            offerId: offerId,
+            type: 'request',
+            requestId: requestId || '',
+        },
+        tokens: userIds, // FCM registration tokens
+    };
+
+    try {
+        const response = await admin.messaging().sendMulticast(message);
+        console.log('Successfully sent message:', response);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending message:', error);
+        return { success: false, error: error.message };
+    }
+});
+
+
+
+
+
+
+
 
 
 exports.notifyInactiveVehicleOwners = functions.pubsub.schedule('0 0 * * 1-5').onRun(async (context) => {

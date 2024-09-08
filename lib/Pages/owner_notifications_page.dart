@@ -145,6 +145,9 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                       Map<String, dynamic>>
                                                   garageSnap =
                                                   await FirebaseFirestore
+                                        
+                                        
+                                        
                                                       .instance
                                                       .collection('garages')
                                                       .doc(offersModel.garageId)

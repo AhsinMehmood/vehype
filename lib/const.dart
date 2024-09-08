@@ -3,6 +3,26 @@ import 'package:vehype/bad_words.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:math';
+// import 'package';
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
+
+int currentVersion = 79;
+
+getImageFileFromAssets(String path) async {
+  final byteData = await rootBundle.load('assets/$path');
+
+  final file = File('${(await getTemporaryDirectory()).path}/$path');
+  await file.create(recursive: true);
+  await file.writeAsBytes(byteData.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+  return file;
+}
 
 double haversine(double lat1, double lon1, double lat2, double lon2) {
   const double R = 6371; // Radius of Earth in kilometers
@@ -39,7 +59,6 @@ Color changeColor({required String color}) {
   return myColor;
 }
 
-int currentVersion = 75;
 String defaultImage =
     'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757';
 Color primaryColor = const Color(0xff2A2E43);

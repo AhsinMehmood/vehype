@@ -121,9 +121,16 @@ class VehicleRequestsPage extends StatelessWidget {
                 builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
                   if (!snap.hasData) {
                     return Center(
-                      child: CircularProgressIndicator(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
+                      child: Text(
+                        'Create a Request to Hire a Proffesional',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     );
                   }
@@ -170,9 +177,16 @@ class VehicleRequestsPage extends StatelessWidget {
                 builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
                   if (!snap.hasData) {
                     return Center(
-                      child: CircularProgressIndicator(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
+                      child: Text(
+                        'No In Progress Offers Yet!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     );
                   }
@@ -186,7 +200,7 @@ class VehicleRequestsPage extends StatelessWidget {
                   if (offersPosted.isEmpty) {
                     return Center(
                       child: Text(
-                        'Nothing Yet!',
+                        'No In Progress Offers Yet!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: userController.isDark
@@ -231,9 +245,16 @@ class VehicleRequestsPage extends StatelessWidget {
                 builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
                   if (!snap.hasData) {
                     return Center(
-                      child: CircularProgressIndicator(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
+                      child: Text(
+                        'No History Yet!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     );
                   }
