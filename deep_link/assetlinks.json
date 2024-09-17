@@ -1,0 +1,12 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.nomadllc.vehype",
+        "sha256_cert_fingerprints": [
+          "9f:7d:5d:9f:64:d4:53:08:a3:9c:88:1d:b1:35:86:93:56:a5:e7:9e:b9:e3:07:14:9f:9b:64:e0:10:eb:58:30"
+        ]
+      }
+    }
+  ]

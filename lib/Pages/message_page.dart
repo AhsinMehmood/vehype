@@ -206,17 +206,17 @@ class _MessagePageState extends State<MessagePage> {
                                               }
                                             }
                                           } else {
-                                            if (offersModel
-                                                .offersReceived.isNotEmpty) {
+                                            // if(){}
+                                            if (offersModel.status ==
+                                                    'active' &&
+                                                offersReceivedModel == null) {
                                               Get.to(() =>
                                                   ServiceRequestDetails(
                                                     offersModel: offersModel,
                                                     chatId: chatModel.id,
-                                                    offersReceivedModel:
-                                                        offersReceivedModel,
                                                   ));
                                             } else {
-                                              if (offersReceivedModel == null) {
+                                              if (offersReceivedModel != null) {
                                                 Get.to(() =>
                                                     ServiceRequestDetails(
                                                       offersModel: offersModel,
@@ -1375,7 +1375,7 @@ class _MessagePageState extends State<MessagePage> {
             onPressed: () async {
               final Uri params = Uri(
                 scheme: 'mailto',
-                path: 'mailto:support@vehype.com',
+                path: 'support@vehype.com',
                 query: 'subject=VEHYPE Support - ${userModel.name}',
               );
               String url = params.toString();

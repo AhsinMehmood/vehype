@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/const.dart';
@@ -21,8 +19,11 @@ import '../Pages/service_request_details.dart';
 import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
 import 'user_controller.dart';
+import 'package:http/http.dart' as http;
 
 class NotificationController {
+  String appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
+  String restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
   navigateChat(Map<String, dynamic> data) async {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
     ChatModel? chatModel = await ChatController().getSingleChat(data['chatId']);
@@ -250,30 +251,40 @@ class NotificationController {
     ));
   }
 
-  listenOneSignalNotification(RemoteMessage message) {}
+  // listenOneSignalNotification(RemoteMessage message) {}
 
   Future<void> sendNotification({
     required String offerId,
     required String requestId,
     required String title,
     required String subtitle,
-    required List<String> userTokens,
+    required List<String> userIds,
   }) async {
     try {
-      HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable('sendNotification');
-      final response = await callable.call({
-        'offerId': offerId,
-        'requestId': requestId,
-        'title': title,
-        'subtitle': subtitle,
-        'userIds': userTokens, // FCM registration tokens
-      });
+      final message = {
+        'app_id': appId,
+        'headings': {'en': title},
+        'contents': {'en': subtitle},
+        'include_external_user_ids': userIds,
+        'data': {
+          'offerId': offerId,
+          'type': 'request',
+          'requestId': requestId,
+        },
+      };
 
-      if (response.data['success']) {
-        print('Notification sent successfully');
-      } else {
-        print('Failed to send notification: ${response.data['error']}');
+      try {
+        final response = await http.post(
+          Uri.parse('https://onesignal.com/api/v1/notifications'),
+          body: jsonEncode(message),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic $restApiKey',
+          },
+        );
+        print('Notification sent: ${response.body}');
+      } catch (error) {
+        print('Error sending notification: $error');
       }
     } catch (error) {
       print('Error sending notification: $error');
@@ -287,17 +298,26 @@ class NotificationController {
     required String chatId,
     required String messageId,
   }) async {
-      HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable('sendMessageNotification');
-      final response = await callable.call({
-        'chatId': chatId,
-        'messageId': messageId,
-        'title': 'New Message: ${offersModel.issue}',
-        'subtitle': '${receiverUser.name} sent you a message',
-        'userIds': [senderUser.pushToken], // FCM registration tokens
-      });
- 
+    final message = {
+      'app_id': appId,
+      'headings': {'en': 'New Message: ${offersModel.issue}'},
+      'contents': {'en': '${receiverUser.name} sent you a message'},
+      'include_external_user_ids': [senderUser.userId],
+      'data': {'chatId': chatId, 'messageId': messageId, 'type': 'chat'},
+    };
 
-   
+    try {
+      final response = await http.post(
+        Uri.parse('https://onesignal.com/api/v1/notifications'),
+        body: jsonEncode(message),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic $restApiKey',
+        },
+      );
+      print('Notification sent: ${response.body}');
+    } catch (error) {
+      print('Error sending notification: $error');
+    }
   }
 }

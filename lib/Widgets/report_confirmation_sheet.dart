@@ -82,13 +82,11 @@ class ReportConfirmationSheet extends StatelessWidget {
               onTap: () {
                 Get.close(1);
               },
-              child: Container(
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

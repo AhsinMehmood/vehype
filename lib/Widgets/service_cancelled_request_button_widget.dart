@@ -57,25 +57,10 @@ class ServiceCancelledRequestButtonWidget extends StatelessWidget {
                     checkByList: offersModel.checkByList,
                     notificationTitle: '',
                     notificationSubtitle: '');
-                showModalBottomSheet(
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    // constraints: BoxConstraints(
-                    //   maxHeight: Get.height * 0.95,
-                    //   minHeight: Get.height * 0.95,
-                    //   minWidth: Get.width,
-                    // ),
-                    isScrollControlled: true,
-                    // showDragHandle: true,
-                    enableDrag: true,
-                    builder: (contex) {
-                      return ServiceToOwnerRatingSheet(
+              Get.to(()=>ServiceToOwnerRatingSheet(
                           offersReceivedModel: offersReceivedModel,
                           offersModel: offersModel,
-                          isDark: userController.isDark);
-                    });
+                          isDark: userController.isDark));
               },
               child: Container(
                 height: 50,

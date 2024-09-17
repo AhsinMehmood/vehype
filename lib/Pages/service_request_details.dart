@@ -113,9 +113,9 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
-    final documentId = widget.offersReceivedModel?.id ??
-        'defaultId'; // Use a default valid ID if needed
+    // final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
+    String? documentId =
+        widget.offersReceivedModel?.id; // Use a default valid ID if needed
 
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -134,20 +134,26 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                 .map((convert) => OffersModel.fromJson(convert)),
             builder: (context, snapshot) {
               OffersModel offersModel = snapshot.data ?? widget.offersModel;
-              return StreamBuilder<OffersReceivedModel>(
+              return StreamBuilder(
                   // initialData: widget.offersReceivedModel,
                   stream: FirebaseFirestore.instance
                       .collection('offersReceived')
-                      .doc(documentId)
-                      .snapshots()
-                      .map((convert) => OffersReceivedModel.fromJson(convert)),
+                      .doc(documentId.toString())
+                      .snapshots(),
                   builder: (context,
-                      AsyncSnapshot<OffersReceivedModel> offersReceivedSnap) {
+                      AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                          offersReceivedSnap) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
                     OffersReceivedModel? offersReceivedModel;
-                    if (offersReceivedSnap.hasData &&
-                        documentId != 'defaultId') {
-                      offersReceivedModel = offersReceivedSnap.data;
-                      print(offersReceivedModel);
+
+                    if (offersReceivedSnap.data!.exists) {
+                      // print('object');
+                      offersReceivedModel = OffersReceivedModel.fromJson(
+                          offersReceivedSnap.data!);
                     }
 
                     return StreamBuilder<GarageModel>(
@@ -191,6 +197,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                   floatingActionButton: Stack(
                                     children: [
                                       if (offersReceivedModel != null)
+                                        // Text('data'),
                                         Positioned(
                                             bottom:
                                                 offersReceivedModel.cancelBy !=
@@ -221,6 +228,8 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
+                                          // Text(documentId + ' skldjls'),
+
                                           if (offersReceivedModel == null)
                                             ServiceNewRequestPageButtonWidget(
                                               offersModel: offersModel,

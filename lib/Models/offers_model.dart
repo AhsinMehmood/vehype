@@ -132,8 +132,8 @@ class OffersReceivedModel {
   final String ratingOneImage;
   final String ratingTwoImage;
   final bool isDone;
-  final ownerEventId;
-  final ownerCalendarId;
+  final String ownerEventId;
+  final String ownerCalendarId;
   final String seekerEventId;
   final String seekerCalendarId;
   OffersReceivedModel({
@@ -158,14 +158,14 @@ class OffersReceivedModel {
     required this.ratingTwoImage,
     required this.status,
     required this.ownerEventId,
-    this.ownerCalendarId,
+    required this.ownerCalendarId,
     required this.seekerEventId,
     required this.seekerCalendarId,
   });
 
   factory OffersReceivedModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snap) {
-    Map<String, dynamic> data = snap.data() ?? {};
+    Map<String, dynamic> data = snap.data()!;
     List<OffersNotification> offersNotifications = [];
     List checkByMap = data['checkByList'] ?? [];
     for (var element in checkByMap) {

@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
@@ -372,6 +372,27 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
+
+                      InkWell(
+                        onTap: () async {
+                          // Get.offAll(() => SplashPage());
+                          Share.share(
+                              'Spread the Word: VEHYPE Connects Vehicle Owners with Top Service Owners! https://vehype.com/');
+                        },
+                        child: Text(
+                          'Share VEHYPE',
+                          style: TextStyle(
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       InkWell(
                         onTap: () async {
                           // Get.offAll(() => SplashPage());
@@ -536,42 +557,40 @@ class ProfilePage extends StatelessWidget {
                           //   print(offeee.data()!['status']);
                           //   print(offeee.data()!['garageId'] ?? 'GARAAfwe id');
                           // }
-                          QuerySnapshot<Map<String, dynamic>> offersSnap =
-                              await FirebaseFirestore.instance
-                                  .collection('chats')
-                                  .get();
-                          List<ChatModel> offers = [];
-                          for (var offer in offersSnap.docs) {
-                            offers.add(ChatModel.fromJson(offer));
-                          }
-                          for (var element in offers) {
-                            DocumentSnapshot<Map<String, dynamic>> garageSnp =
-                                await FirebaseFirestore.instance
-                                    .collection('offers')
-                                    .doc(element.offerId)
-                                    .get();
-                            print('${garageSnp.exists}  sjhfsahjshkjfhks');
-                            if (!garageSnp.exists) {
-                              await FirebaseFirestore.instance
-                                  .collection('chats')
-                                  .doc(element.id)
-                                  .delete();
-                              print('DELTed');
-                            }
+                          // QuerySnapshot<Map<String, dynamic>> offersSnap =
+                          //     await FirebaseFirestore.instance
+                          //         .collection('chats')
+                          //         .get();
+                          // List<ChatModel> offers = [];
+                          // for (var offer in offersSnap.docs) {
+                          //   offers.add(ChatModel.fromJson(offer));
+                          // }
+                          // for (var element in offers) {
+                          //   DocumentSnapshot<Map<String, dynamic>> garageSnp =
+                          //       await FirebaseFirestore.instance
+                          //           .collection('offers')
+                          //           .doc(element.offerId)
+                          //           .get();
+                          //   if (!garageSnp.exists) {
+                          //     await FirebaseFirestore.instance
+                          //         .collection('chats')
+                          //         .doc(element.id)
+                          //         .delete();
+                          //   }
 
-                            // if (element.offerRequestId == '') {
+                          // if (element.offerRequestId == '') {
 
-                            //   await FirebaseFirestore.instance
-                            //       .collection('offers')
-                            //       .doc(element.offerId)
-                            //       .update({
-                            //     'garageId': garageSnp.docs.first.id,
-                            //   }); p
-                            //   print(element.offerId +
-                            //       ' goingggg' +
-                            //       garageSnp.docs.first.id);
-                            // }
-                          }
+                          //   await FirebaseFirestore.instance
+                          //       .collection('offers')
+                          //       .doc(element.offerId)
+                          //       .update({
+                          //     'garageId': garageSnp.docs.first.id,
+                          //   }); p
+                          //   print(element.offerId +
+                          //       ' goingggg' +
+                          //       garageSnp.docs.first.id);
+                          // }
+                          // }
                         },
                         child: Text(
                           'App Version: 3.0.3.$currentVersion',

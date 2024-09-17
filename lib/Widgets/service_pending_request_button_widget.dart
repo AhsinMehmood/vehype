@@ -84,9 +84,9 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                     'Cancel Offer Confirmation',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 20,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 17,
+                                      // fontFamily: 'Avenir',
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(
@@ -133,15 +133,15 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                         minimumSize: Size(Get.width * 0.6, 50),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(6),
                                         )),
                                     child: Text(
                                       'Confirm',
                                       style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
+                                        fontSize: 16,
+                                        // fontFamily: 'Avenir',
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -156,22 +156,22 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                         backgroundColor: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
-                                        elevation: 1.0,
+                                        elevation: 0.0,
                                         maximumSize: Size(Get.width * 0.6, 50),
                                         minimumSize: Size(Get.width * 0.6, 50),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(6),
                                         )),
                                     child: Text(
                                       'Cancel',
                                       style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
+                                        fontSize: 16,
+                                        // fontFamily: 'Avenir',
                                         color: userController.isDark
                                             ? primaryColor
                                             : Colors.white,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -410,12 +410,12 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                     height: 10,
                                   ),
                                   Text(
-                                    'Cancel Offer Confirmations',
+                                    'Cancel Offer Confirmation',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 20,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      // fontFamily: 'Avenir',
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                   const SizedBox(
@@ -463,20 +463,20 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                     },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.red,
-                                        elevation: 1.0,
+                                        elevation: 0.0,
                                         maximumSize: Size(Get.width * 0.6, 50),
                                         minimumSize: Size(Get.width * 0.6, 50),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(6),
                                         )),
                                     child: Text(
                                       'Confirm',
                                       style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
+                                        fontSize: 16,
+                                        // fontFamily: 'Avenir',
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
@@ -491,22 +491,22 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                         backgroundColor: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
-                                        elevation: 1.0,
+                                        elevation: 0.0,
                                         maximumSize: Size(Get.width * 0.6, 50),
                                         minimumSize: Size(Get.width * 0.6, 50),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(6),
                                         )),
                                     child: Text(
                                       'Cancel',
                                       style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Avenir',
+                                        fontSize: 16,
+                                        // fontFamily: 'Avenir',
                                         color: userController.isDark
                                             ? primaryColor
                                             : Colors.white,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),

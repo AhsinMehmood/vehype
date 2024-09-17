@@ -6,7 +6,7 @@ class NotificationsModel {
   //   'createdAt': DateTime.now().toLocal().toIso8601String(),
   //   'senderId': notificationSender.userId,
   //   'senderName': notificationSender.name,
-  //   'type': type,
+  //   'type': type, 
   //   'isRead': false,
   //   'objectId': objectId,
   final String title;

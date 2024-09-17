@@ -40,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
             fontWeight: FontWeight.w800,
           ),
         ),
-      ),
+      ), 
       body: SafeArea(
         child: StreamBuilder<List<ChatModel>>(
             // initialData: [],

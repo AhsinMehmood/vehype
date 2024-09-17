@@ -2,12 +2,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +16,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
-import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 
 import 'package:vehype/Controllers/user_controller.dart';
@@ -25,16 +25,16 @@ import 'package:vehype/firebase_options.dart';
 
 // import 'package:json_theme/json_theme.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Handle background message
-  print('Handling a background message: ${message.messageId}');
-  if (message.data['type'] == 'chat') {
-    // FlutterAppBadger.updateBadgeCount(1);
-    // print(event.notification.additionalData);
-    ChatController()
-        .updateMessage(message.data['chatId'], message.data['messageId'], 1);
-  }
-}
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   // Handle background message
+//   print('Handling a background message: ${message.messageId}');
+//   if (message.data['type'] == 'chat') {
+//     // FlutterAppBadger.updateBadgeCount(1);
+//     // print(event.notification.additionalData);
+//     ChatController()
+//         .updateMessage(message.data['chatId'], message.data['messageId'], 1);
+//   }
+// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +49,7 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // NotificationController().listenOneSignalNotification();
   // final themeJson = jsonDecode(themeStr);
@@ -57,9 +57,9 @@ void main() async {
 
   // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
   // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
-  // OneSignal.Debug.setLogLevel(OSLogLevel.error);
+  OneSignal.Debug.setLogLevel(OSLogLevel.debug);
 
-  // OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
+  OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
   // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
   //     trackAutomaticEvents: true);
   await SentryFlutter.init((options) {

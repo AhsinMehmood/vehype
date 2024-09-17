@@ -8,7 +8,7 @@ class MessageModel {
   final bool isVideo;
   final String thumbnailUrl;
   final int state;
-
+ 
   MessageModel(
       {required this.id,
       required this.isSystemMessage,

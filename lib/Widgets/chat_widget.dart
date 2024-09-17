@@ -59,7 +59,6 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     FontWeight fontWeight =
         lastMessageAt != lastOpen ? FontWeight.w800 : FontWeight.w400;
-    print(widget.chat.id);
     return StreamBuilder<UserModel>(
         stream: FirebaseFirestore.instance
             .collection('users')

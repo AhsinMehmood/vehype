@@ -9,7 +9,7 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
+ 
 import '../Controllers/user_controller.dart';
 
 class CommentsPage extends StatelessWidget {
@@ -48,7 +48,6 @@ class CommentsPage extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           shrinkWrap: true,
           itemBuilder: (context, inde) {
-            print(data.ratings[inde]['id']);
             return StreamBuilder<UserModel>(
                 stream: FirebaseFirestore.instance
                     .collection('users')

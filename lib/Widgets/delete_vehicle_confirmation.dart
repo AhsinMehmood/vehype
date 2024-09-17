@@ -208,7 +208,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                               .doc(offersReceivedModel.offerBy)
                               .get();
                       NotificationController().sendNotification(
-                          userTokens: [UserModel.fromJson(offerByQuery).pushToken],
+                          userIds: [UserModel.fromJson(offerByQuery).userId],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Offer Cancelled',

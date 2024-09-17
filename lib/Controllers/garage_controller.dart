@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, empty_catches
 
 import 'dart:convert';
 import 'dart:io';
@@ -39,7 +39,6 @@ Future<LatLng> getPlaceLatLng(String placeId) async {
     // Parse the JSON response
     var json = jsonDecode(response.body);
     var location = json['results'][0]['geometry']['location'];
-    print(location.toString());
     double lat = location['lat'];
     double lng = location['lng'];
     return LatLng(lat, lng);
@@ -128,16 +127,11 @@ class GarageController with ChangeNotifier {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-          print('Data successfully saved to Firestore');
         } else {
-          print('Failed to save data: ${responseData['error']}');
         }
       } else {
-        print(
-            'Failed to call function: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
-      print('Error calling Cloud Function: $e');
     }
   }
 
@@ -310,7 +304,6 @@ class GarageController with ChangeNotifier {
 
     uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
       double progress = snapshot.bytesTransferred / snapshot.totalBytes;
-      print('Upload progress: $progress');
       requestImageModel.progress = progress; // Update progress in your model
       notifyListeners(); // Notify listeners to update UI
     });
@@ -321,11 +314,9 @@ class GarageController with ChangeNotifier {
         requestImageModel.isLoading = false;
         notifyListeners(); // Notify listeners to update UI
       });
-      print('Upload complete');
     } catch (e) {
-      print('Upload failed: $e');
     }
-  }
+  } 
 
   selectImage(BuildContext context, UserModel userModel, int index,
       ImageSource imageSource) async {
@@ -426,7 +417,6 @@ class GarageController with ChangeNotifier {
       Get.close(2);
       disposeController();
     } catch (e) {
-      print(e.toString());
       Get.close(1);
     }
   }
@@ -622,7 +612,6 @@ class GarageController with ChangeNotifier {
       String requestId = '';
       String address =
           await getAddressFromLatLng(latLng.latitude, latLng.longitude);
-      print(userId);
       List images = [];
       for (var element in requestImages) {
         images.add(element.imageUrl);
@@ -675,7 +664,6 @@ class GarageController with ChangeNotifier {
       disposeController();
       return requestId;
     } catch (e) {
-      print(e);
       // Get.close(1);
       return '';
     }

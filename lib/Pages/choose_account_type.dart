@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -226,7 +225,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 //     'userId', userCredential.user!.uid);
                                 // Get.close(1);
                                 await FirebaseAuth.instance.signInAnonymously();
-
+ 
                                 User? user = FirebaseAuth.instance.currentUser;
 
                                 await FirebaseFirestore.instance

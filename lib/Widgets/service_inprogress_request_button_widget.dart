@@ -186,26 +186,44 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
           InkWell(
             onTap: () async {
               if (offersReceivedModel.seekerEventId == '') {
-                myPlugin.hasPermissions().then((value) async {
-                  if (!value!) {
-                    myPlugin.requestPermissions();
-                  } else {
-                    List<Calendar> calendar =
-                        await myPlugin.getCalendars() ?? [];
-                    if (calendar.isEmpty) {
-                      toastification.show(
-                          context: context,
-                          autoCloseDuration: Duration(seconds: 3),
-                          title: Text('No calendar found, please try again.'));
-                    } else {
-                      Get.bottomSheet(CalendersList(
-                        calenders: calendar,
-                        offersModel: offersModel,
-                        offersReceivedModel: offersReceivedModel,
-                      ));
-                    }
+                bool? hasPermissions = await myPlugin.hasPermissions();
+
+                if (!hasPermissions!) {
+                  // Request permissions
+                  await myPlugin.requestPermissions();
+
+                  // Recheck permissions after request
+                  hasPermissions = await myPlugin.hasPermissions();
+
+                  if (!hasPermissions!) {
+                    toastification.show(
+                      context: context,
+                      autoCloseDuration: Duration(seconds: 3),
+                      title:
+                          Text('Permissions are required to access calendars.'),
+                    );
+                    return; // Exit early if permissions are not granted
                   }
-                });
+                }
+
+                // Fetch calendars after ensuring permissions are granted
+                List<Calendar> calendar = await myPlugin.getCalendars() ?? [];
+
+                if (calendar.isEmpty) {
+                  toastification.show(
+                    context: context,
+                    autoCloseDuration: Duration(seconds: 3),
+                    title: Text('No calendar found.'),
+                  );
+                } else {
+                  Get.bottomSheet(
+                    CalendersList(
+                      calenders: calendar,
+                      offersModel: offersModel,
+                      offersReceivedModel: offersReceivedModel,
+                    ),
+                  );
+                }
               } else {
                 myPlugin
                     .deleteEvent(

@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -361,8 +362,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           OffersProvider offersProvider =
                               Provider.of<OffersProvider>(context,
                                   listen: false);
-                          await userController.updateToken(
-                              userModel.userId, '');
+                          await OneSignal.logout();
+
                           userController.closeStream();
 
                           offersProvider.stopListening();
@@ -417,6 +418,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     // Reference to the Firebase Auth user document
     DocumentReference authUserRef =
         FirebaseFirestore.instance.collection('users').doc(userId);
+    await OneSignal.logout();
+
     // Update primary account
     batch.update(primaryAccountRef, {
       'name': 'Private User',
@@ -490,9 +493,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     try {
       // Commit the batch
       await batch.commit();
-      print("Both accounts updated and the user account deleted successfully");
-    } catch (e) {
-      print("Failed to update accounts or delete the user account: $e");
-    }
+    } catch (e) {}
   }
 }

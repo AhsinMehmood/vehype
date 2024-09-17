@@ -4,7 +4,7 @@ description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
-version: 3.0.3+79
+version: 3.0.3+85
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -27,6 +27,7 @@ dependencies:
   cloud_functions:
   firebase_auth: ^5.2.0
   google_sign_in: ^6.2.1
+  share_plus: ^10.0.2
 
   provider: ^6.1.2
   firebase_storage: ^12.2.0
@@ -47,7 +48,7 @@ dependencies:
   # mixpanel_flutter: ^2.3.1
   flutter_rating_bar: ^4.0.1
   firebase_database: ^11.1.0
-  firebase_messaging: ^15.1.0
+  # firebase_messaging: ^15.1.0
   
   image_picker: ^1.1.2
   multi_image_picker_plus: ^0.0.5
@@ -76,12 +77,17 @@ dependencies:
   # omni_datetime_picker: ^2.0.4
   manage_calendar_events: ^2.0.3
   # google_fonts:
-  # onesignal_flutter: ^5.2.4
+  onesignal_flutter: ^5.2.5
 
   sentry_flutter: ^8.8.0
   crypto: ^3.0.5
   http: ^1.2.2
 
+  intl: any
+  path: any
+  searchfield: ^1.1.0
+  # firebase_dynamic_links: ^6.0.5
+  # uni_links: ^0.5.1
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 

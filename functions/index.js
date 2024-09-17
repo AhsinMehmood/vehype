@@ -15,6 +15,41 @@ const firestore = admin.firestore();
 
 
 
+
+
+
+
+
+exports.handleOneSignalWebhook = functions.https.onRequest(async (req, res) => {
+  try {
+    const event = req.body;
+
+    // Check if it's a delivery event
+    if (event.event === 'notification.delivered') {
+      const { notification_id, data } = event;
+
+      // Extract relevant information from the payload
+      const chatId = data.chatId; // Example: assuming your data contains chatId
+      const messageId = data.messageId; // Example: assuming your data contains messageId
+      const type = data.type;
+      if(type == 'chat'){
+            // Update the message state in Firebase Realtime Database
+      await admin.database().ref(`messages/${chatId}/${messageId}`).update({
+        state: 1, // Update state as delivered
+      });
+      }
+
+      console.log(`Message state updated: ${chatId}/${messageId}`);
+    }
+
+    res.status(200).send('Webhook processed successfully');
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).send('Error processing webhook');
+  }
+});
+
+
 exports.sendMessageNotification = functions.https.onCall(async (data, context) => {
     const { chatId, messageId, title, subtitle, userIds } = data;
 

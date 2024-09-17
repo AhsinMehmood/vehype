@@ -235,14 +235,14 @@ class _ServiceCancelRequestConfirmationSheetState
                           widget.userController.userModel!.userId,
                           widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
-  DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
                           await FirebaseFirestore.instance
                               .collection('users')
                               .doc(widget.offersReceivedModel.ownerId)
                               .get();
 
                       NotificationController().sendNotification(
-                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+                          userIds: [UserModel.fromJson(ownerSnap).userId],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancellation Alert',

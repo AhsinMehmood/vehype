@@ -743,6 +743,21 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                 ),
                               );
                             } else {
+                              if (garageController.startDate!
+                                  .toLocal()
+                                  .isBefore(DateTime.now().toLocal())) {
+                                toastification.show(
+                                  title: Text('Selected Time is in the Past'),
+                                  style: ToastificationStyle.minimal,
+                                  context: context,
+                                  type: ToastificationType.error,
+                                  showProgressBar: true,
+                                  autoCloseDuration: Duration(
+                                    seconds: 3,
+                                  ),
+                                );
+                                return;
+                              }
                               if (garageController.agreement) {
                                 if (priceController.text == '.' ||
                                     priceController.text == '.0') {
@@ -819,7 +834,6 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           Provider.of<UserController>(context, listen: false);
       // Use a default valid ID if needed
       final documentId = widget.offersReceivedModel?.id ?? 'defaultId';
-      print(documentId);
       if (documentId != 'defaultId') {
         await FirebaseFirestore.instance
             .collection('offersReceived')
@@ -837,7 +851,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                 .get();
 
         NotificationController().sendNotification(
-            userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+            userIds: [UserModel.fromJson(ownerSnap).userId],
             offerId: widget.offersModel.offerId,
             requestId: widget.offersReceivedModel!.id,
             title: 'Service Offer Updated',
@@ -891,7 +905,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                 .get();
 
         NotificationController().sendNotification(
-            userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+            userIds: [UserModel.fromJson(ownerSnap).userId],
             offerId: widget.offersModel.offerId,
             requestId: reference.id,
             title: 'New Offer for Your Request',
@@ -929,7 +943,9 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
         // );
       }
     } catch (e) {
-      print(e);
+      Get.close(1);
+
+      print(e.toString());
     }
   }
 }

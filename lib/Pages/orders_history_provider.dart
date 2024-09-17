@@ -56,6 +56,9 @@ class OrdersHistoryProvider extends StatelessWidget {
     // List<OffersReceivedModel> ignoredOffers = offersReceivedList
     //     .where((element) => element.status == 'ignore')
     //     .toList();
+    List<OffersReceivedModel> rejectedOffers = offersReceivedList
+        .where((element) => element.status == 'ignore')
+        .toList();
     List<OffersReceivedModel> offersPending = offersReceivedList
         .where((element) => element.status == 'Pending')
         .toList();
@@ -86,15 +89,20 @@ class OrdersHistoryProvider extends StatelessWidget {
         .where((element) => element.checkByList
             .any((check) => check.checkById == userModel.userId))
         .toList();
+    List<OffersReceivedModel> rejectedOffersNotifications = rejectedOffers
+        .where((element) => element.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
     List<OffersReceivedModel> notificationsOffersReceived =
         pendingOffersNotifications +
             completedOffersNotifications +
             upcomingOffersNotifications +
-            cencelledOffersNotifications;
+            cencelledOffersNotifications +
+            rejectedOffersNotifications;
 
     return DefaultTabController(
       length: 6,
-      initialIndex: 1,
+      initialIndex: 0,
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         appBar: AppBar(
@@ -183,13 +191,6 @@ class OrdersHistoryProvider extends StatelessWidget {
             labelColor: userController.isDark ? Colors.white : primaryColor,
             tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(
-                child: Row(
-                  children: [
-                    Text('Ignored'),
-                  ],
-                ),
-              ),
               Tab(
                 child: Row(
                   children: [
@@ -290,16 +291,38 @@ class OrdersHistoryProvider extends StatelessWidget {
                   ],
                 ),
               ),
+              Tab(
+                child: Row(
+                  children: [
+                    Text('Ignored'),
+                  ],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  children: [
+                    Text('Rejected'),
+                    if (rejectedOffersNotifications.isNotEmpty)
+                      const SizedBox(
+                        width: 2,
+                      ),
+                    if (rejectedOffersNotifications.isNotEmpty)
+                      Container(
+                        height: 12,
+                        width: 12,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(200),
+                          color: Colors.red,
+                        ),
+                      )
+                  ],
+                ),
+              ),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            IgnoredOffers(
-              userController: userController,
-              userModel: userModel,
-              ignoredOffers: ignoredOffers,
-            ),
             NewOffers(
               userController: userController,
               userModel: userModel,
@@ -324,6 +347,16 @@ class OrdersHistoryProvider extends StatelessWidget {
                 userController: userController,
                 id: 4,
                 emptyText: 'No Cancelled Offers Yet!',
+                offersPending: offersCencelled),
+            IgnoredOffers(
+              userController: userController,
+              userModel: userModel,
+              ignoredOffers: ignoredOffers,
+            ),
+            Offers(
+                userController: userController,
+                id: 5,
+                emptyText: 'No Rejected Offers Yet!',
                 offersPending: offersCencelled),
           ],
         ),

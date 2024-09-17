@@ -45,16 +45,30 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     UserModel userModel = userController.userModel!;
-    return SafeArea(
-      child: Container(
-        height: Get.height,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: widget.isDark ? primaryColor : Colors.white,
+    return Scaffold(
+      backgroundColor: userController.isDark ? primaryColor : Colors.white,
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
+        leading: IconButton(
+            onPressed: () {
+              Get.close(1);
+            },
+            icon: Icon(
+              Icons.close,
+              color: userController.isDark ? Colors.white : primaryColor,
+            )),
+        title: Text(
+          'Rate Your Experience',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: userController.isDark ? Colors.white : primaryColor,
+            fontSize: 17,
+          ),
         ),
-        margin: const EdgeInsets.only(
-          top: 20,
-        ),
+      ),
+      body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -62,43 +76,6 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
               children: [
                 Column(
                   children: [
-                    SizedBox(
-                      height: 25,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              Get.close(1);
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            )),
-                        Text(
-                          'Rate Your Experience',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 17,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.close,
-                            color: Colors.transparent,
-                          ),
-                          color: Colors.transparent,
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
@@ -326,60 +303,60 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: TextFormField(
-                        maxLines: 5,
-                        maxLength: 256,
-                        controller: commentController,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.sentences,
-                        textInputAction: TextInputAction.done,
-                        onTapOutside: (s) {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                        },
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                        ),
-                        onChanged: (u) {
-                          // setState(() {});
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Share your experience and any feedback...',
-                          hintStyle: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 15,
-                            // color: Colors.grey[400],
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                  color: userController.isDark
-                                      ? Colors.white.withOpacity(0.2)
-                                      : primaryColor.withOpacity(0.2))),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                  color: userController.isDark
-                                      ? Colors.white.withOpacity(0.2)
-                                      : primaryColor.withOpacity(0.2))),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                              borderSide: BorderSide(
-                                  color: userController.isDark
-                                      ? Colors.white.withOpacity(0.2)
-                                      : primaryColor.withOpacity(0.2))),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
                   ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: TextFormField(
+                    maxLines: 5,
+                    maxLength: 256,
+                    controller: commentController,
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.done,
+                    onTapOutside: (s) {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    },
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                    onChanged: (u) {
+                      // setState(() {});
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Share your experience and any feedback...',
+                      hintStyle: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15,
+                        // color: Colors.grey[400],
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.2)
+                                  : primaryColor.withOpacity(0.2))),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.2)
+                                  : primaryColor.withOpacity(0.2))),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          borderSide: BorderSide(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.2)
+                                  : primaryColor.withOpacity(0.2))),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
                 ),
                 const SizedBox(
                   height: 20,
@@ -457,14 +434,14 @@ class _OwnerToServiceRatingSheetState extends State<OwnerToServiceRatingSheet> {
                               ])
                             });
                           }
-  DocumentSnapshot<Map<String, dynamic>> ownerSnap =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(widget.offersReceivedModel.offerBy)
-                              .get();
+                          DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(widget.offersReceivedModel.offerBy)
+                                  .get();
 
-                      NotificationController().sendNotification(
-                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+                          NotificationController().sendNotification(
+                              userIds: [UserModel.fromJson(ownerSnap).userId],
                               offerId: widget.offersModel.offerId,
                               requestId: widget.offersReceivedModel.id,
                               title:

@@ -81,7 +81,7 @@ class UserModel {
 
     double totalRating = ratings.isEmpty
         ? 0.0
-        : ratings.fold<double>(
+        : ratings.fold<double>( 
             0.0, (prev, element) => prev + (element['rating']));
     return UserModel(
       userId,

@@ -7,3 +7,4 @@ class AppController extends GetxController {
     selectedTab = index.obs;
   }
 }
+ 

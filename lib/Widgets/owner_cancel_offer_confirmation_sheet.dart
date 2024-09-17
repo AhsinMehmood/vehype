@@ -245,7 +245,7 @@ class _OwnerCancelOfferConfirmationSheetState
                               .get();
 
                       NotificationController().sendNotification(
-                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+                          userIds: [UserModel.fromJson(ownerSnap).userId],
                           offerId: widget.offersModel.offerId,
                           requestId: widget.offersReceivedModel.id,
                           title: 'Offer Cancelled',

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'dart:async';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 
@@ -47,9 +45,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     Future.delayed(const Duration(seconds: 0)).then((value) {
       final GarageController garageController =
           Provider.of<GarageController>(context, listen: false);
-      final UserController userController =
-          Provider.of<UserController>(context, listen: false);
-      UserModel userModel = userController.userModel!;
 
       if (widget.offersModel != null) {
         garageController.selectedVehicle = widget.offersModel!.vehicleId;
@@ -93,7 +88,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     });
   }
 
-  final Completer<GoogleMapController> _controller =
+  final Completer<GoogleMapController> mapController =
       Completer<GoogleMapController>();
 
   getLocations() async {
@@ -532,7 +527,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                           long = latLng.longitude;
                           setState(() {});
                           final GoogleMapController controller =
-                              await _controller.future;
+                              await mapController.future;
                           await controller.animateCamera(
                               CameraUpdate.newCameraPosition(CameraPosition(
                             target: LatLng(lat, long),
@@ -573,65 +568,60 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                       )
                                     : ClipRRect(
                                         borderRadius: BorderRadius.circular(6),
-                                        child: GoogleMap(
-                                          onMapCreated: (contr) {
-                                            _controller.complete(contr);
-                                          },
-                                          onTap: (l) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PlacePicker(
-                                                  apiKey:
-                                                      'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                                  selectText: 'Pick This Place',
-                                                  onPlacePicked:
-                                                      (result) async {
-                                                    Get.dialog(LoadingDialog(),
-                                                        barrierDismissible:
-                                                            false);
-                                                    LatLng latLng =
-                                                        await getPlaceLatLng(
-                                                            result.placeId ??
-                                                                '');
-                                                    lat = latLng.latitude;
-                                                    long = latLng.longitude;
-                                                    setState(() {});
-                                                    final GoogleMapController
-                                                        controller =
-                                                        await _controller
-                                                            .future;
-                                                    await controller.animateCamera(
-                                                        CameraUpdate
-                                                            .newCameraPosition(
-                                                                CameraPosition(
-                                                      target: LatLng(lat, long),
-                                                      zoom: 16.0,
-                                                    )));
-                                                    Get.close(2);
-                                                  },
-                                                  initialPosition:
-                                                      LatLng(lat, long),
-                                                  useCurrentLocation: true,
-                                                  selectInitialPosition: true,
-                                                  resizeToAvoidBottomInset:
-                                                      false, // only works in page mode, less flickery, remove if wrong offsets
+                                        child: MapForRequestCreate(
+                                            mapController: mapController,
+                                            onMpCreated: (c) {
+                                              mapController.complete(c);
+                                            },
+                                            function: (l) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PlacePicker(
+                                                    apiKey:
+                                                        'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                                    selectText:
+                                                        'Pick This Place',
+                                                    onPlacePicked:
+                                                        (result) async {
+                                                      Get.dialog(
+                                                          LoadingDialog(),
+                                                          barrierDismissible:
+                                                              false);
+                                                      LatLng latLng =
+                                                          await getPlaceLatLng(
+                                                              result.placeId ??
+                                                                  '');
+                                                      lat = latLng.latitude;
+                                                      long = latLng.longitude;
+                                                      setState(() {});
+                                                      final GoogleMapController
+                                                          controller =
+                                                          await mapController
+                                                              .future;
+                                                      await controller.animateCamera(
+                                                          CameraUpdate
+                                                              .newCameraPosition(
+                                                                  CameraPosition(
+                                                        target:
+                                                            LatLng(lat, long),
+                                                        zoom: 16.0,
+                                                      )));
+                                                      Get.close(2);
+                                                    },
+                                                    initialPosition:
+                                                        LatLng(lat, long),
+                                                    useCurrentLocation: true,
+                                                    selectInitialPosition: true,
+                                                    resizeToAvoidBottomInset:
+                                                        false, // only works in page mode, less flickery, remove if wrong offsets
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                          markers: {
-                                            Marker(
-                                              markerId: MarkerId('current'),
-                                              position: LatLng(lat, long),
-                                            ),
-                                          },
-                                          initialCameraPosition: CameraPosition(
-                                            target: LatLng(lat, long),
-                                            zoom: 16.0,
-                                          ),
-                                        ),
+                                              );
+                                            },
+                                            lat: lat,
+                                            long: long),
                                       ),
                               ),
                               const SizedBox(
@@ -659,7 +649,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                               setState(() {});
                                               final GoogleMapController
                                                   controller =
-                                                  await _controller.future;
+                                                  await mapController.future;
                                               await controller.animateCamera(
                                                   CameraUpdate
                                                       .newCameraPosition(
@@ -902,10 +892,10 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     List addNotifications = [];
     List<String> userIds = [];
     for (var element in filterProviders) {
-      userIds.add(element.pushToken);
+      userIds.add(element.userId);
     }
     NotificationController().sendNotification(
-        userTokens: userIds,
+        userIds: userIds,
         offerId: requestId,
         requestId: '',
         title: 'Request Changes Notification',
@@ -956,12 +946,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         blockedUsers, userModel.lat, userModel.long, 100);
     List<String> userIds = [];
     for (var element in filterProviders) {
-      userIds.add(element.pushToken);
+      userIds.add(element.userId);
     }
     List addNotifications = [];
     NotificationController().sendNotification(
         offerId: requestId,
-        userTokens: userIds,
+        userIds: userIds,
         requestId: '',
         title: 'Opportunity Alert: New Request',
         subtitle:
@@ -983,7 +973,41 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .update({
       'checkByList': addNotifications,
     });
-    print(filterProviders.length);
+  }
+}
+
+class MapForRequestCreate extends StatelessWidget {
+  const MapForRequestCreate({
+    super.key,
+    required this.lat,
+    required this.long,
+    required this.function,
+    required this.mapController,
+    required this.onMpCreated,
+  });
+
+  final double lat;
+  final Completer<GoogleMapController> mapController;
+  final double long;
+  final void Function(GoogleMapController) onMpCreated;
+  final void Function(LatLng) function;
+
+  @override
+  Widget build(BuildContext context) {
+    return GoogleMap(
+      onMapCreated: onMpCreated,
+      onTap: function,
+      markers: {
+        Marker(
+          markerId: MarkerId('current'),
+          position: LatLng(lat, long),
+        ),
+      },
+      initialCameraPosition: CameraPosition(
+        target: LatLng(lat, long),
+        zoom: 16.0,
+      ),
+    );
   }
 }
 

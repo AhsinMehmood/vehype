@@ -51,24 +51,10 @@ class ServiceRequestCancelledDetailsButton extends StatelessWidget {
                     offersReceivedModel.cancelBy != 'provider')
                   InkWell(
                     onTap: () {
-                      showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          // constraints: BoxConstraints(
-                          //   maxHeight: Get.height * 0.95,
-                          //   minHeight: Get.height * 0.95,
-                          //   minWidth: Get.width,
-                          // ),
-                          isScrollControlled: true,
-                          showDragHandle: true,
-                          builder: (contex) {
-                            return ServiceToOwnerRatingSheet(
-                                offersReceivedModel: offersReceivedModel,
-                                offersModel: offersModel,
-                                isDark: userController.isDark);
-                          });
+                      Get.to(() => ServiceToOwnerRatingSheet(
+                          offersReceivedModel: offersReceivedModel,
+                          offersModel: offersModel,
+                          isDark: userController.isDark));
                     },
                     child: Container(
                       height: 50,

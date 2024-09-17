@@ -15,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -869,7 +870,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         OffersProvider offersProvider =
                             Provider.of<OffersProvider>(context, listen: false);
                         offersProvider.stopListening();
-                        await userController.updateToken(userModel.userId, '');
+                        OneSignal.logout();
                         userController.changeTabIndex(0);
                         await FirebaseFirestore.instance
                             .collection('users')
@@ -958,10 +959,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                             await SharedPreferences.getInstance();
                         String realUserId =
                             sharedPreferences.getString('userId') ?? '';
-                        print(realUserId);
                         UserModel userModel = userController.userModel!;
-                        print(userModel.userId);
-                        await userController.updateToken(userModel.userId, '');
+                        OneSignal.logout();
                         OffersProvider offersProvider =
                             Provider.of<OffersProvider>(context, listen: false);
                         offersProvider.stopListening();

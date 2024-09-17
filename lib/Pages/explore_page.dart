@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'dart:async';
 // import 'package:fuse/fuse.dart'; // Import the fuse package
@@ -13,6 +13,7 @@ import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:searchfield/searchfield.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
@@ -50,11 +51,13 @@ class _ExplorePageState extends State<ExplorePage> {
     getLocations();
   }
 
+  FocusNode searchnode = FocusNode();
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
   double lat = 0.0;
   double long = 0.0;
+  bool focus = false;
 
   final double radiusInKm = 50;
 
@@ -82,7 +85,6 @@ class _ExplorePageState extends State<ExplorePage> {
     final UserModel userModel = userController.userModel!;
     List<Marker> markers = [];
     for (UserModel element in nearbyProviders) {
-      print(element.userId);
       if (element.email == 'No email set') {
       } else {
         if (element.userId != userController.userModel!.userId) {
@@ -168,189 +170,325 @@ class _ExplorePageState extends State<ExplorePage> {
 
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      body: StreamBuilder<List<DocumentSnapshot<Map<String, dynamic>>>>(
-          stream: stream,
-          builder: (context,
-              AsyncSnapshot<List<DocumentSnapshot<Map<String, dynamic>>>>
-                  snapshot) {
-            if (!snapshot.hasData) {
-              return Center(
-                child: Text(
-                  snapshot.error.toString(),
-                ),
-              );
-            }
-            List<UserModel> nearbyProvidersStream = [];
+      body: SafeArea(
+        child: StreamBuilder<List<DocumentSnapshot<Map<String, dynamic>>>>(
+            stream: stream,
+            builder: (context,
+                AsyncSnapshot<List<DocumentSnapshot<Map<String, dynamic>>>>
+                    snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: Text(
+                    snapshot.error.toString(),
+                  ),
+                );
+              }
+              List<UserModel> nearbyProvidersStream = [];
 
-            for (DocumentSnapshot<Map<String, dynamic>> element
-                in snapshot.data ?? []) {
-              bool isDelete = element.data()?['isDelete'] ?? false;
-              if (element.data()?['name'] != 'Guest User') {
-                if (!isDelete) {
-                  // Checks both false and missing (defaulting to false)
-                  nearbyProvidersStream.add(UserModel.fromJson(element));
+              for (DocumentSnapshot<Map<String, dynamic>> element
+                  in snapshot.data ?? []) {
+                bool isDelete = element.data()?['isDelete'] ?? false;
+                if (element.data()?['name'] != 'Guest User') {
+                  if (!isDelete) {
+                    // Checks both false and missing (defaulting to false)
+                    nearbyProvidersStream.add(UserModel.fromJson(element));
+                  }
                 }
               }
-            }
-            Fuzzy<String> f = Fuzzy(
-                nearbyProvidersStream.map((e) => e.searchKey).toList(),
-                options: FuzzyOptions());
-            List<Result<String>> matches = f.search(searchText);
-            List<UserModel> filterList = [];
+              Fuzzy<String> f = Fuzzy(
+                  nearbyProvidersStream.map((e) => e.searchKey).toList(),
+                  options: FuzzyOptions());
+              List<Result<String>> matches = f.search(searchText);
+              List<UserModel> filterList = [];
 
-            if (searchText != '') {
-              for (var match in matches) {
-                var userModel = nearbyProvidersStream
-                    .firstWhere((element) => element.searchKey == match.item);
-                filterList.add(userModel);
+              if (searchText != '') {
+                for (var match in matches) {
+                  var userModel = nearbyProvidersStream
+                      .firstWhere((element) => element.searchKey == match.item);
+                  filterList.add(userModel);
+                }
               }
-            }
-            List<UserModel> filterByService =
-                userController.selectedServicesFilter.isEmpty
-                    ? nearbyProvidersStream
-                    : filterProvidersByServices(nearbyProvidersStream,
-                        userController.selectedServicesFilter);
+              List<UserModel> filterByService =
+                  userController.selectedServicesFilter.isEmpty
+                      ? nearbyProvidersStream
+                      : filterProvidersByServices(nearbyProvidersStream,
+                          userController.selectedServicesFilter);
 
-            List<Marker> markers = addMarkers(filterByService);
-            markers.add(
-              Marker(
-                markerId: const MarkerId('current'),
-                position: LatLng(userModel.lat, userModel.long),
-              ),
-            );
-            return Stack(
-              children: [
-                GoogleMap(
-                  markers: markers.toSet(),
-                  liteModeEnabled: false,
-                  compassEnabled: false,
-                  myLocationEnabled: false,
-                  mapType: isSatLite ? MapType.satellite : MapType.normal,
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: true,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(lat, long),
-                    zoom: 14.0,
-                  ),
-                  onTap: (s) {
-                    if (selectedMarker != null) {
-                      selectedMarker = null;
-                      setState(() {});
-                    }
-                  },
-                  onMapCreated: (controller) {
-                    if (!_controller.isCompleted) {
-                      _controller.complete(controller);
-                    }
-                  },
+              List<Marker> markers = addMarkers(filterByService);
+              markers.add(
+                Marker(
+                  markerId: const MarkerId('current'),
+                  position: LatLng(userModel.lat, userModel.long),
                 ),
-                Align(
-                    alignment: Alignment.topCenter,
-                    child: SafeArea(
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Card(
-                            margin: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(200),
+              );
+              return Stack(
+                children: [
+                  GoogleMap(
+                    markers: markers.toSet(),
+                    liteModeEnabled: false,
+                    compassEnabled: false,
+                    myLocationEnabled: false,
+                    mapType: isSatLite ? MapType.satellite : MapType.normal,
+                    zoomControlsEnabled: false,
+                    zoomGesturesEnabled: true,
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(lat, long),
+                      zoom: 14.0,
+                    ),
+                    onTap: (s) {
+                      if (selectedMarker != null) {
+                        selectedMarker = null;
+                        setState(() {});
+                      }
+                    },
+                    onMapCreated: (controller) {
+                      if (!_controller.isCompleted) {
+                        _controller.complete(controller);
+                      }
+                    },
+                  ),
+                  Align(
+                      alignment: Alignment.topCenter,
+                      child: SafeArea(
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 20,
                             ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(200),
-                              ),
-                              width: Get.width * 0.9,
-                              height: 50,
-                              padding:
-                                  const EdgeInsets.only(left: 10, right: 10),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.search_outlined,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    size: 30,
+                            // if (searchnode.hasFocus)/
+                            Visibility(
+                              visible: focus,
+                              child: Card(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                                margin: EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                      child: TextFormField(
-                                    controller: text,
-                                    onTap: () {
-                                      if (selectedMarker != null) {
-                                        selectedMarker = null;
-                                        setState(() {});
-                                      }
-                                    },
-                                    onTapOutside: (s) {
-                                      FocusScope.of(context)
-                                          .requestFocus(FocusNode());
-                                    },
-                                    textInputAction: TextInputAction.search,
-                                    onChanged: (s) {
-                                      setState(() {
-                                        searchText = s;
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: 'Search by Name or Service'),
-                                  )),
-                                  if (searchText.isNotEmpty)
-                                    IconButton(
-                                        onPressed: () {
+                                  width: Get.width * 0.9,
+                                  height: 50,
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.search_outlined,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                        size: 30,
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                          child: TextFormField(
+                                        focusNode: searchnode,
+                                        controller: text,
+                                        onTap: () {
+                                          if (selectedMarker != null) {
+                                            selectedMarker = null;
+
+                                            setState(() {});
+                                          }
+                                        },
+                                        onTapOutside: (s) {
+                                          if (searchText.isEmpty) {
+                                            setState(() {
+                                              focus = false;
+                                            });
+                                          }
+                                          FocusScope.of(context)
+                                              .requestFocus(FocusNode());
+                                        },
+                                        textInputAction: TextInputAction.search,
+                                        onChanged: (s) {
                                           setState(() {
-                                            searchText = '';
-                                            filterList = [];
-                                            text.clear();
+                                            searchText = s;
                                           });
                                         },
-                                        icon: Icon(
-                                          Icons.close,
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
-                                        ))
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (filterList.isEmpty && searchedUsers.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 0,
-                                right: 15,
-                                top: 15,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        isSatLite = !isSatLite;
-                                      });
-                                    },
-                                    child: Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(200),
-                                        ),
-                                        color: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Icon(isSatLite
-                                              ? Icons.map
-                                              : Icons.map_outlined),
-                                        )),
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintStyle: TextStyle(
+                                              fontWeight: FontWeight.w200,
+                                            ),
+                                            hintText:
+                                                'Search by Name or Service'),
+                                      )),
+
+                                      // SearchField(
+                                      //   onSearchTextChanged: (query) {
+
+                                      //     return searchedUsers
+                                      //         .map((e) =>
+                                      //             SearchFieldListItem<String>(
+                                      //                 e.searchKey,
+                                      //                 child: ProviderShortWidget(
+                                      //                   profile: e,
+                                      //                 )))
+                                      //         .toList();
+                                      //   },
+                                      //   onTap: () async {},
+
+                                      //   /// widget to show when suggestions are empty
+                                      //   emptyWidget: Container(
+                                      //       // decoration: suggestionDecoration,
+                                      //       height: 200,
+                                      //       child: const Center(
+                                      //           child: CircularProgressIndicator(
+                                      //               // color: Colors.white,
+                                      //               ))),
+                                      //   hint: 'Search by Name or Service',
+                                      //   itemHeight: 50,
+                                      //   scrollbarDecoration: ScrollbarDecoration(),
+                                      //   // suggestionStyle: const TextStyle(
+                                      //   //     fontSize: 24, color: Colors.white),
+                                      //   // searchInputDecoration: InputDecoration(...),
+                                      //   // border: OutlineInputBorder(...)p
+                                      //   // fillColor: Colors.white,
+                                      //   // filled: true,
+                                      //   onTapOutside: (s) {
+                                      //     FocusScope.of(context)
+                                      //         .requestFocus(FocusNode());
+                                      //   },
+                                      //   textInputAction: TextInputAction.search,
+                                      //   // suggestionsDecoration: suggestionDecoration,
+                                      //   suggestions: searchedUsers
+                                      //       .map((e) => SearchFieldListItem<String>(
+                                      //           e.searchKey,
+                                      //           child: ProviderShortWidget(
+                                      //             profile: e,
+                                      //           )))
+                                      //       .toList(),
+                                      //   // focusNode: ,
+                                      //   suggestionState: Suggestion.expand,
+                                      //   onSuggestionTap:
+                                      //       (SearchFieldListItem<String> x) {
+                                      //     FocusScope.of(context)
+                                      //         .requestFocus(FocusNode());
+                                      //     // focus.unfocus();
+                                      //   },
+                                      // ),
+
+                                      if (searchText.isNotEmpty)
+                                        IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                searchText = '';
+                                                filterList = [];
+                                                text.clear();
+                                                focus = false;
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
+                                            ))
+                                    ],
                                   ),
-                                ],
+                                ),
+                              ),
+                            ),
+                            if (filterList.isNotEmpty)
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(6),
+                                      topRight: Radius.circular(6),
+                                    ),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                  ),
+                                  margin: const EdgeInsets.only(top: 10),
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Expanded(
+                                        child: ListView.builder(
+                                            itemCount: filterList.length,
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              return ProviderShortWidget(
+                                                  profile: filterList[index]);
+                                            }),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                          ],
+                        ),
+                      )),
+                  if (selectedMarker != null)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Column(
+                        children: [
+                          ProviderShortWidget(
+                            profile: selectedMarker!,
+                          ),
+                        ],
+                      ),
+                    ),
+                  Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (searchText.isEmpty && focus == false)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 0, right: 15, top: 0, bottom: 0),
+                              child: InkWell(
+                                onTap: () async {
+                                  // FocusScope.of(context).requestFocus(searchnode);
+                                  final GoogleMapController mapController =
+                                      await _controller.future;
+
+// Define a new camera position
+                                  CameraPosition newPosition = CameraPosition(
+                                    target: LatLng(lat,
+                                        long), // Example coordinates (San Francisco)
+                                    zoom: 14.0, // Example zoom level
+                                  );
+
+// Create a CameraUpdate object with the new position
+                                  CameraUpdate cameraUpdate =
+                                      CameraUpdate.newCameraPosition(
+                                          newPosition);
+
+// Animate the camera to the new position
+                                  mapController.animateCamera(cameraUpdate);
+                                },
+                                child: Card(
+                                    elevation: 1.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.my_location_outlined,
+                                      ),
+                                    )),
                               ),
                             ),
                           if (filterList.isEmpty && searchedUsers.isEmpty)
@@ -358,211 +496,153 @@ class _ExplorePageState extends State<ExplorePage> {
                               padding: const EdgeInsets.only(
                                 left: 0,
                                 right: 15,
-                                top: 5,
+                                // top: 15,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedMarker = null;
-                                      });
-                                      Get.bottomSheet(
-                                        ServiceFilterSheet(),
-                                        backgroundColor: userController.isDark
-                                            ? primaryColor
-                                            : Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(24),
-                                        ),
-                                        isScrollControlled: true,
-                                      );
-                                    },
-                                    child: SizedBox(
-                                      height: 45,
-                                      width: 45,
-                                      child: Card(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(200),
-                                          ),
-                                          color: userController.isDark
-                                              ? primaryColor
-                                              : Colors.white,
-                                          child: Center(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(0.0),
-                                              child: Stack(
-                                                children: [
-                                                  SvgPicture.asset(
-                                                    'assets/filter.svg',
-                                                    height: 24,
-                                                    width: 24,
-                                                    color: userController.isDark
-                                                        ? Colors.white
-                                                        : primaryColor,
-                                                  ),
-                                                  if (userController
-                                                      .selectedServicesFilter
-                                                      .isNotEmpty)
-                                                    Positioned(
-                                                      top: 0,
-                                                      right: 0,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        200),
-                                                            color: Colors.red),
-                                                        height: 15,
-                                                        width: 15,
-                                                        child: Center(
-                                                          child: Text(
-                                                            userController
-                                                                .selectedServicesFilter
-                                                                .length
-                                                                .toString(),
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    isSatLite = !isSatLite;
+                                  });
+                                },
+                                child: Card(
+                                    elevation: 1.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(isSatLite
+                                          ? Icons.map
+                                          : Icons.map_outlined),
+                                    )),
+                              ),
+                            ),
+                          if (filterList.isEmpty && searchedUsers.isEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: 0,
+                                right: 15,
+                                bottom: searchnode.hasFocus ? 15 : 0,
+                                top: 0,
+                              ),
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    selectedMarker = null;
+                                  });
+                                  Get.bottomSheet(
+                                    ServiceFilterSheet(),
+                                    backgroundColor: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    isScrollControlled: true,
+                                  );
+                                },
+                                child: SizedBox(
+                                  height: 50,
+                                  width: 50,
+                                  child: Card(
+                                      elevation: 1.0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(0.0),
+                                          child: Stack(
+                                            children: [
+                                              SvgPicture.asset(
+                                                'assets/filter.svg',
+                                                height: 24,
+                                                width: 24,
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                              ),
+                                              if (userController
+                                                  .selectedServicesFilter
+                                                  .isNotEmpty)
+                                                Positioned(
+                                                  top: 0,
+                                                  right: 0,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(200),
+                                                        color: Colors.red),
+                                                    height: 15,
+                                                    width: 15,
+                                                    child: Center(
+                                                      child: Text(
+                                                        userController
+                                                            .selectedServicesFilter
+                                                            .length
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                         ),
                                                       ),
                                                     ),
-                                                ],
-                                              ),
-                                            ),
-                                          )),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          // if (searchedUsers.isNotEmpty)
-                          //   Expanded(
-                          //     child: Container(
-                          //       decoration: BoxDecoration(
-                          //         borderRadius: BorderRadius.only(
-                          //           topLeft: Radius.circular(30),
-                          //           topRight: Radius.circular(30),
-                          //         ),
-                          //         color: userController.isDark
-                          //             ? primaryColor
-                          //             : Colors.white,
-                          //       ),
-                          //       margin: const EdgeInsets.only(top: 20),
-                          //       child: Column(
-                          //         children: [
-                          //           Align(
-                          //             alignment: Alignment.centerRight,
-                          //             child: Padding(
-                          //               padding: const EdgeInsets.all(12.0),
-                          //               child: IconButton(
-                          //                 onPressed: () {
-                          //                   setState(() {
-                          //                     searchedUsers = [];
-                          //                     // filterList = [];
-                          //                   });
-                          //                 },
-                          //                 icon: Icon(
-                          //                   Icons.close,
-                          //                   color: userController.isDark
-                          //                       ? Colors.white
-                          //                       : primaryColor,
-                          //                 ),
-                          //               ),
-                          //             ),
-                          //           ),
-                          //           Expanded(
-                          //             child: ListView.builder(
-                          //                 itemCount: searchedUsers.length,
-                          //                 shrinkWrap: true,
-                          //                 itemBuilder: (context, index) {
-                          //                   return ProviderShortWidget(
-                          //                       profile: searchedUsers[index]);
-                          //                 }),
-                          //           ),
-                          //         ],
-                          //       ),
-                          //     ),
-                          //   ),
-                          if (filterList.isNotEmpty)
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(30),
-                                    topRight: Radius.circular(30),
-                                  ),
-                                  color: userController.isDark
-                                      ? primaryColor
-                                      : Colors.white,
-                                ),
-                                margin: const EdgeInsets.only(top: 20),
-                                child: Column(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              searchText = '';
-                                              filterList = [];
-                                              text.clear();
-                                            });
-                                          },
-                                          icon: Icon(
-                                            Icons.close,
-                                            color: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListView.builder(
-                                          itemCount: filterList.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (context, index) {
-                                            return ProviderShortWidget(
-                                                profile: filterList[index]);
-                                          }),
-                                    ),
-                                  ],
+                                      )),
                                 ),
                               ),
-                            )
+                            ),
+                          if (searchText.isEmpty && focus == false)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 0, right: 15, top: 0, bottom: 15),
+                              child: InkWell(
+                                onTap: () {
+                                  // FocusScope.of(context).requestFocus(searchnode);
+
+                                  setState(() {
+                                    focus = true;
+                                  });
+                                  Future.delayed(Durations.medium4).then((s) {
+                                    FocusScope.of(context)
+                                        .requestFocus(searchnode);
+                                  });
+                                },
+                                child: Card(
+                                    elevation: 1.0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.search_outlined,
+                                      ),
+                                    )),
+                              ),
+                            ),
                         ],
-                      ),
-                    )),
-                if (selectedMarker != null)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      children: [
-                        ProviderShortWidget(
-                          profile: selectedMarker!,
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            );
-          }),
+                      ))
+                ],
+              );
+            }),
+      ),
     );
   }
 
@@ -574,44 +654,14 @@ class _ExplorePageState extends State<ExplorePage> {
         .toList()
         .isEmpty) {
       toastification.show(
-        context: context, // optional if you use ToastificationWrapper
+        context: context,
         type: ToastificationType.error,
         style: ToastificationStyle.flat,
         autoCloseDuration: const Duration(seconds: 5),
         title: Text(
           'No Providers found for ${service.name}.',
-          style: TextStyle(
-            color: userController.isDark ? primaryColor : Colors.white,
-          ),
         ),
-        // you can also use RichText widget for title and description parameters
-        // description: RichText(text: const TextSpan(text: '')),
-        alignment: Alignment.topCenter,
-        direction: TextDirection.ltr,
-        animationDuration: const Duration(milliseconds: 300),
-
-        icon: const Icon(Icons.close),
-        primaryColor: Colors.red,
-        backgroundColor: userController.isDark ? Colors.white : primaryColor,
-        // foregroundColor: Colors.black,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
-        borderRadius: BorderRadius.circular(12),
-
-        showProgressBar: false,
-        closeButtonShowType: CloseButtonShowType.onHover,
-        closeOnClick: true,
-        pauseOnHover: true,
-        dragToClose: true,
-        applyBlurEffect: false,
-        callbacks: ToastificationCallbacks(
-          onTap: (toastItem) => print('Toast ${toastItem.id} tapped'),
-          onCloseButtonTap: (toastItem) =>
-              print('Toast ${toastItem.id} close button tapped'),
-          onAutoCompleteCompleted: (toastItem) =>
-              print('Toast ${toastItem.id} auto complete completed'),
-          onDismissed: (toastItem) => print('Toast ${toastItem.id} dismissed'),
-        ),
+        showProgressBar: true,
       );
     } else {
       setState(() {

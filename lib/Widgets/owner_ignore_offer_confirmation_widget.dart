@@ -1,13 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
+import '../Controllers/notification_controller.dart';
 import '../Controllers/owner_offers_controller.dart';
 import '../Controllers/user_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/offers_model.dart';
+import '../Models/user_model.dart';
 import 'loading_dialog.dart';
 
 class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
@@ -51,14 +54,27 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                           .ignoreOffer(offersModel, offersReceivedModel);
                       OffersController().updateNotificationForOffers(
                           offerId: offersModel.offerId,
-                          userId: userController.userModel!.userId,
+                          userId: offersReceivedModel.offerBy,
                           senderId: userController.userModel!.userId,
-
                           checkByList: offersModel.checkByList,
-                          isAdd: false,
+                          isAdd: true,
                           offersReceived: offersReceivedModel.id,
-                          notificationTitle: '',
+                          notificationTitle:
+                              'The offer was declined by ${userController.userModel!.name}',
                           notificationSubtitle: '');
+                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(offersReceivedModel.ownerId)
+                              .get();
+                      NotificationController().sendNotification(
+                          userIds: [UserModel.fromJson(ownerSnap).userId],
+                          offerId: offersModel.offerId,
+                          requestId: offersReceivedModel.id,
+                          title:
+                              'The offer was declined by ${userController.userModel!.name}',
+                          subtitle: '');
+
                       ChatModel? chatModel = await ChatController().getChat(
                           userController.userModel!.userId,
                           offersModel.ownerId,
@@ -71,7 +87,7 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      elevation: 1.0,
+                      elevation: 0.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -79,12 +95,12 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                       minimumSize: Size(Get.width * 0.6, 50),
                     ),
                     child: Text(
-                      'Confirm Ignore',
+                      'Confirm Reject',
                       style: TextStyle(
                         fontSize: 16,
-                        fontFamily: 'Avenir',
+                        // fontFamily: 'Avenir',
                         color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -110,8 +126,8 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                           'Cancel',
                           style: TextStyle(
                             fontSize: 16,
-                            fontFamily: 'Avenir',
-                            fontWeight: FontWeight.w500,
+                            // fontFamily: 'Avenir',
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),

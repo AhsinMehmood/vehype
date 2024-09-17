@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,7 +70,7 @@ class _SplashPageState extends State<SplashPage> {
                     .doc(userId + userModel.accountType)
                     .get();
             if (accountTypeUserSnap.exists) {
-              userController.pushTokenUpdate(userId + userModel.accountType);
+              OneSignal.login(userId + userModel.accountType);
 
               // await FirebaseFirestore.instance
               //     .collection('users')
@@ -115,7 +116,7 @@ class _SplashPageState extends State<SplashPage> {
               });
               // await Future.delayed(const Duration(seconds: 1));
               // OneSignal.login(userId + userModel.accountType);
-              userController.pushTokenUpdate(userId + userModel.accountType);
+              OneSignal.login(userId + userModel.accountType);
 
               // Position position = await Geolocator.getCurrentPosition();
 

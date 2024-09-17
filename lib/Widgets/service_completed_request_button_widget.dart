@@ -51,24 +51,10 @@ class ServiceCompletedRequestPageButtonWidget extends StatelessWidget {
                 if (offersReceivedModel.ratingTwo == 0.0)
                   InkWell(
                     onTap: () {
-                      showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          // constraints: BoxConstraints(
-                          //   maxHeight: Get.height * 0.95,
-                          //   minHeight: Get.height * 0.95,
-                          //   minWidth: Get.width,
-                          // ),
-                          isScrollControlled: true,
-                          // showDragHandle: true,
-                          builder: (contex) {
-                            return ServiceToOwnerRatingSheet(
-                                offersReceivedModel: offersReceivedModel,
-                                offersModel: offersModel,
-                                isDark: userController.isDark);
-                          });
+                      Get.to(() => ServiceToOwnerRatingSheet(
+                          offersReceivedModel: offersReceivedModel,
+                          offersModel: offersModel,
+                          isDark: userController.isDark));
                     },
                     child: Container(
                       height: 50,
@@ -144,30 +130,15 @@ class ServiceCompletedRequestButtonWidget extends StatelessWidget {
                     offerId: offersModel.offerId,
                     userId: userController.userModel!.userId,
                     isAdd: false,
-                          senderId: userController.userModel!.userId,
-
+                    senderId: userController.userModel!.userId,
                     offersReceived: offersReceivedModel.id,
                     checkByList: offersModel.checkByList,
                     notificationTitle: '',
                     notificationSubtitle: '');
-                showModalBottomSheet(
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    // constraints: BoxConstraints(
-                    //   maxHeight: Get.height * 0.95,
-                    //   minHeight: Get.height * 0.95,
-                    //   minWidth: Get.width,
-                    // ),
-                    isScrollControlled: true,
-                    // showDragHandle: true,
-                    builder: (contex) {
-                      return ServiceToOwnerRatingSheet(
-                          offersReceivedModel: offersReceivedModel,
-                          offersModel: offersModel,
-                          isDark: userController.isDark);
-                    });
+                Get.to(() => ServiceToOwnerRatingSheet(
+                    offersReceivedModel: offersReceivedModel,
+                    offersModel: offersModel,
+                    isDark: userController.isDark));
               },
               child: Container(
                 height: 50,
@@ -201,8 +172,7 @@ class ServiceCompletedRequestButtonWidget extends StatelessWidget {
               OffersController().updateNotificationForOffers(
                   offerId: offersModel.offerId,
                   userId: userController.userModel!.userId,
-                          senderId: userController.userModel!.userId,
-
+                  senderId: userController.userModel!.userId,
                   isAdd: false,
                   notificationTitle: '',
                   checkByList: offersModel.checkByList,

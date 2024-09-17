@@ -123,19 +123,20 @@ class _ProviderShortWidget extends State<ProviderShortWidget> {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(8.0),
       child: InkWell(
         onTap: () {
           Get.to(() => SecondUserProfile(userId: widget.profile.userId));
         },
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          color: userController.isDark
-              ? Colors.blueGrey
-              : Theme.of(context).cardColor,
-          elevation: 1.0,
+        child: Container(
+          decoration: BoxDecoration(
+              color: userController.isDark ? primaryColor : Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: userController.isDark
+                    ? Colors.white.withOpacity(0.4)
+                    : primaryColor.withOpacity(0.4),
+              )),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -257,8 +258,10 @@ class _ProviderShortWidget extends State<ProviderShortWidget> {
                             height: 40,
                             width: 40,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(200),
-                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(6),
+                              color: userController.isDark
+                                  ? Colors.white
+                                  : primaryColor,
                             ),
                             child: Center(
                               child: Row(
@@ -266,7 +269,9 @@ class _ProviderShortWidget extends State<ProviderShortWidget> {
                                 children: [
                                   Icon(
                                     Icons.directions_outlined,
-                                    color: Colors.white,
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
                                     size: 30,
                                   ),
                                 ],

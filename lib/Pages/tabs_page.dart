@@ -3,12 +3,13 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -20,7 +21,6 @@ import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/chat_page.dart';
 import 'package:vehype/Pages/explore_page.dart';
-import 'package:vehype/Pages/message_page.dart';
 import 'package:vehype/Pages/my_garage.dart';
 import 'package:vehype/Pages/orders_history_provider.dart';
 import 'package:vehype/Pages/profile_page.dart';
@@ -54,77 +54,39 @@ class _TabsPageState extends State<TabsPage> {
   @override
   void initState() {
     super.initState();
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // Handle foreground messages
-
-      try {
-        if (message.notification != null) {
-          if (message.data['type'] == 'chat') {
-            // FlutterAppBadger.updateBadgeCount(1);
-            // print(event.notification.additionalData);
-            ChatController().updateMessage(
-                message.data['chatId'], message.data['messageId'], 1);
-            NotificationController().showNotificationToastForChat(
-                message.notification!.title!,
-                message.notification!.body ?? 'Nothing',
-                context,
-                message.data,
-                userController);
-          } else {
-            NotificationController().showNotificationToast(
-                message.notification!.title!,
-                message.notification!.body ?? 'Nothing',
-                context,
-                message.data,
-                userController);
-          }
-        }
-      } catch (e) {
-        print(e.toString());
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      // Handle when the user taps on a notification when the app is in the background
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        // NotificationController().showNotificationToast(
-        //     message.notification!.title!,
-        //     message.notification!.body ?? 'Nothing',
-        //     context);
-
-        if (message.data['type'] == 'chat') {
+    OneSignal.Notifications.addForegroundWillDisplayListener(
+        (OSNotificationWillDisplayEvent message) {
+      if (message.notification.additionalData != null) {
+        if (message.notification.additionalData!['type'] == 'chat') {
           // FlutterAppBadger.updateBadgeCount(1);
           // print(event.notification.additionalData);
           ChatController().updateMessage(
-              message.data['chatId'], message.data['messageId'], 1);
-          NotificationController().navigateChat(message.data);
-        } else {
-          NotificationController().navigateOwner(message.data);
-        }
+              message.notification.additionalData!['chatId'],
+              message.notification.additionalData!['messageId'],
+              1);
+        } else {}
       }
     });
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) async {
-      if (message != null) {
-        // Handle the notification when the app is opened from a terminated state
-        if (message.data['type'] == 'chat') {
+    OneSignal.Notifications.addClickListener(
+        (OSNotificationClickEvent listener) {
+      if (listener.notification.additionalData != null) {
+        if (listener.notification.additionalData!['type'] == 'chat') {
           // FlutterAppBadger.updateBadgeCount(1);
           // print(event.notification.additionalData);
           ChatController().updateMessage(
-              message.data['chatId'], message.data['messageId'], 1);
-          NotificationController().navigateChat(message.data);
+              listener.notification.additionalData!['chatId'],
+              listener.notification.additionalData!['messageId'],
+              1);
+          NotificationController()
+              .navigateChat(listener.notification.additionalData!);
         } else {
-          NotificationController().navigateOwner(message.data);
+          NotificationController()
+              .navigateOwner(listener.notification.additionalData!);
         }
       }
     });
+
     Future.delayed(const Duration(seconds: 1)).then((s) {
       getNotificationSetting();
     });
@@ -182,6 +144,8 @@ class _TabsPageState extends State<TabsPage> {
               // enableDrag: false,
             );
           });
+        } else {
+          userController.pushTokenUpdate(userController.userModel!.userId);
         }
       }
     }
@@ -606,14 +570,7 @@ class _TabsPageState extends State<TabsPage> {
     ];
   }
 
-  Color labelAndIconColor(int index) {
-    final UserController userController = Provider.of<UserController>(context);
 
-    int tabIndex = userController.tabIndex;
-    bool isDark = userController.isDark;
-    Color color = tabIndex == index && isDark ? Colors.white : primaryColor;
-    return Color(tabIndex);
-  }
 
   Color labelAndIconColorDark(int index) {
     final UserController userController = Provider.of<UserController>(context);
@@ -716,6 +673,8 @@ class LocationPermissionSheet extends StatelessWidget {
                     'long': position.longitude,
                     'geo': geoFirePoint.data,
                   });
+                  userController
+                      .pushTokenUpdate(userController.userModel!.userId);
                   // Get.close(1);
                 }
               }
@@ -892,12 +851,9 @@ class NotificationSheet extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await FirebaseMessaging.instance.requestPermission();
+              await OneSignal.Notifications.requestPermission(true);
 
-              String? pushToken = await FirebaseMessaging.instance.getToken();
-
-              userController.updateToken(
-                  userController.userModel!.userId, pushToken ?? '');
+              OneSignal.login(userController.userModel!.userId);
               Get.close(1);
             },
             style: ElevatedButton.styleFrom(

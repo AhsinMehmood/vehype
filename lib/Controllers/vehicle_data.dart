@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 //   List<Service> getServices() {
 //     return [
 //       Service(name: "Diagnostics", code: Services.diagnostics),
-//       Service(name: "Detailing", code: Services.detailing),
+//        Service(name: "Detailing", code: Services.detailing),
 //       Service(name: "Towing", code: Services.towing),
 //       Service(name: "Upholstery repair", code: Services.upholsteryRepair),
 //       Service(name: "Windshield service", code: Services.windshieldServices),
@@ -118,7 +118,6 @@ Future<List<VehicleModel>> getSubModels(
       'Authorization': 'Bearer $jwtToken'
     });
     final data = jsonDecode(response.body);
-    print(data);
 
     List listOfData = data['data'] as List;
     for (var element in listOfData) {
@@ -173,18 +172,15 @@ Future<List<VehicleModel>> getTrims(String make, String year, String type,
     'Authorization': 'Bearer $jwtToken'
   });
   final data = jsonDecode(response.body);
-  print(data);
   List listOfData = data['data'] as List;
   // print(listOfData[0]);
   for (var element in listOfData) {
-    print(element);
     vehicleMakeList.add(VehicleModel(
         id: element['make_model_id'] ?? 0,
         title: element['description'] ?? '',
         icon: '',
         vehicleTypeId: 0,
         vehicleMakeId: element['make_id'] ?? 0));
-    print(element);
   }
   // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
   return vehicleMakeList;
@@ -205,7 +201,6 @@ Future<List> getVehicleMakeToSaveData(String type, String jwtToken) async {
       });
       final data = jsonDecode(response.body);
       List listOfData = data['data'] as List;
-      print(listOfData[0]);
       for (var element in listOfData) {
         // print(element);
         vehicleMakeList.add(element);
@@ -214,7 +209,6 @@ Future<List> getVehicleMakeToSaveData(String type, String jwtToken) async {
 
     return vehicleMakeList;
   } catch (e) {
-    print(e);
     return [];
   }
 }
@@ -234,7 +228,6 @@ Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
       });
       final data = jsonDecode(response.body);
       List listOfData = data['data'] as List;
-      print(listOfData[0]);
       for (var element in listOfData) {
         // print(element);
         vehicleMakeList.add(VehicleMake(
@@ -267,7 +260,6 @@ Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
 
     return vehicleMakeList;
   } catch (e) {
-    print(e);
     return [];
   }
 }

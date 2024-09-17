@@ -9,7 +9,7 @@ import '../Models/user_model.dart';
 
 class OffersProvider extends ChangeNotifier {
   StreamSubscription<List<OffersReceivedModel>>? _offersReceivedSubscription;
-  StreamSubscription<List<OffersModel>>? _offersSubscription;
+   StreamSubscription<List<OffersModel>>? _offersSubscription;
   List<OffersModel> offers = [];
   List<OffersReceivedModel> offersReceived = [];
 

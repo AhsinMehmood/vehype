@@ -102,7 +102,7 @@ class _AddVehicleState extends State<AddVehicle> {
               children: [
                 const SizedBox(
                   height: 10,
-                ),
+                ), 
                 InkWell(
                   onTap: () {
                     // completeProfileProvider.selectImages(0, context);

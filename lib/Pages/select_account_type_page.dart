@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -51,7 +52,6 @@ class SelectAccountType extends StatelessWidget {
                     onTap: () async {
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
-                      print(userModelAccount.userId);
 
                       await FirebaseFirestore.instance
                           .collection('users')
@@ -95,9 +95,7 @@ class SelectAccountType extends StatelessWidget {
                         });
                       }
 
-                      // OneSignal.login('${userModelAccount.userId}provider');
-                      userController.pushTokenUpdate(
-                          '${userModelAccount.userId}provider');
+                      OneSignal.login('${userModelAccount.userId}provider');
 
                       userController.getUserStream(
                         '${userModelAccount.userId}provider',
@@ -172,8 +170,7 @@ class SelectAccountType extends StatelessWidget {
                           .update({
                         'accountType': 'seeker',
                       });
-                      userController
-                          .pushTokenUpdate('${userModelAccount.userId}seeker');
+                      OneSignal.login('${userModelAccount.userId}seeker');
 
                       LatLng latLng = await UserController().getLocations();
 

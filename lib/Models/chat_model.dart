@@ -24,7 +24,7 @@ class ChatModel {
       required this.isClosed,
       required this.offerId,
       required this.offerRequestId,
-      required this.userRoles,
+       required this.userRoles,
       required this.text});
 
   factory ChatModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {

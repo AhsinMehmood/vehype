@@ -8,7 +8,7 @@ class OwnerOffersController {
   ignoreOffer(
       OffersModel offersModel, OffersReceivedModel offersReceivedModel) async {
     await firebaseFirestore
-        .collection('offersReceived')
+         .collection('offersReceived')
         .doc(offersReceivedModel.id)
         .update({
       'status': 'ignore',

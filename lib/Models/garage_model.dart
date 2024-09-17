@@ -13,7 +13,7 @@ class GarageModel {
   final String imageUrl;
 
   final String garageId;
-
+ 
   factory GarageModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> data = snapshot.data()!;

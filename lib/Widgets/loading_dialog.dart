@@ -23,14 +23,14 @@ class LoadingDialog extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: userController.isDark ? primaryColor : Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(6),
           ),
           height: 100,
           width: Get.width * 0.2,
           child: Center(
             child: CircularProgressIndicator(
               color: userController.isDark ? Colors.white : primaryColor,
-              strokeCap: StrokeCap.round,
+              strokeCap: StrokeCap.butt,
               strokeWidth: 2.0,
             ),
           ),

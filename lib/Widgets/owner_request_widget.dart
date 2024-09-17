@@ -10,10 +10,10 @@ import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 
 import 'package:vehype/const.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import 'owner_active_request_button_widget.dart';
 import 'owner_inprogress_button_widget.dart';
+import 'service_request_widget.dart';
 
 class OwnerRequestWidget extends StatelessWidget {
   final OffersModel offersModel;
@@ -129,7 +129,7 @@ class OwnerRequestWidget extends StatelessWidget {
                           top: 10,
                         ),
                         child: Text(
-                          timeago.format(createdAt),
+                          formatDateForRequestWidget(createdAt.toLocal()),
                           style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,

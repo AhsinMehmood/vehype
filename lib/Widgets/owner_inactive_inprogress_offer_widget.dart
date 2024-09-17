@@ -250,36 +250,55 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                           ),
                           if (offersReceivedModel.status == 'Upcoming')
                             InkWell(
-                              onTap: () {
+                              onTap: () async {
                                 final CalendarPlugin myPlugin =
                                     CalendarPlugin();
 
-                                if (offersReceivedModel.ownerCalendarId == '') {
-                                  myPlugin.hasPermissions().then((value) async {
-                                    if (!value!) {
-                                      myPlugin.requestPermissions();
-                                    } else {
-                                      List<Calendar> calendar =
-                                          await myPlugin.getCalendars() ?? [];
-                                      if (calendar.isEmpty) {
-                                        toastification.show(
-                                            context: context,
-                                            autoCloseDuration:
-                                                Duration(seconds: 3),
-                                            title: Text(
-                                                'No calendar found, please try again.'));
-                                      } else {
-                                        Get.bottomSheet(CalendersList(
-                                          calenders: calendar,
-                                          offersModel: offersModel,
-                                          offersReceivedModel:
-                                              offersReceivedModel,
-                                        ));
-                                      }
+                                if (offersReceivedModel.ownerEventId == '') {
+                                  bool? hasPermissions =
+                                      await myPlugin.hasPermissions();
+
+                                  if (!hasPermissions!) {
+                                    // Request permissions
+                                    await myPlugin.requestPermissions();
+
+                                    // Recheck permissions after request
+                                    hasPermissions =
+                                        await myPlugin.hasPermissions();
+
+                                    if (!hasPermissions!) {
+                                      toastification.show(
+                                        context: context,
+                                        autoCloseDuration: Duration(seconds: 3),
+                                        title: Text(
+                                            'Permissions are required to access calendars.'),
+                                      );
+                                      return; // Exit early if permissions are not granted
                                     }
-                                  });
+                                  }
+
+                                  // Fetch calendars after ensuring permissions are granted
+                                  List<Calendar> calendar =
+                                      await myPlugin.getCalendars() ?? [];
+
+                                  if (calendar.isEmpty) {
+                                    toastification.show(
+                                      context: context,
+                                      autoCloseDuration: Duration(seconds: 3),
+                                      title: Text('No calendar found.'),
+                                    );
+                                  } else {
+                                    Get.bottomSheet(
+                                      CalendersList(
+                                        calenders: calendar,
+                                        offersModel: offersModel,
+                                        offersReceivedModel:
+                                            offersReceivedModel,
+                                      ),
+                                    );
+                                  }
                                 } else {
-                                  CalendarPlugin()
+                                  myPlugin
                                       .deleteEvent(
                                           calendarId: offersReceivedModel
                                               .ownerCalendarId,
@@ -314,7 +333,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                       ? 'Add to Calendar'
                                       : 'Remove Event',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -690,7 +709,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Ignore',
+                                    'Reject',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -774,8 +793,8 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                     garageModel);
 
                                 NotificationController().sendNotification(
-                                    userTokens: [
-                                      UserModel.fromJson(offerByQuery).pushToken
+                                    userIds: [
+                                      UserModel.fromJson(offerByQuery).userId
                                     ],
                                     offerId: offersModel.offerId,
                                     requestId: offersReceivedModel.id,
@@ -964,26 +983,10 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                             if (offersReceivedModel.ratingOne == 0.0)
                               InkWell(
                                 onTap: () async {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      // constraints: BoxConstraints(
-                                      //   maxHeight: Get.height * 0.95,
-                                      //   minHeight: Get.height * 0.95,
-                                      //   minWidth: Get.width,
-                                      // ),
-                                      isScrollControlled: true,
-                                      // showDragHandle: true,
-                                      // enableDrag: true,
-                                      builder: (contex) {
-                                        return OwnerToServiceRatingSheet(
-                                            offersReceivedModel:
-                                                offersReceivedModel,
-                                            offersModel: offersModel,
-                                            isDark: userController.isDark);
-                                      });
+                                  Get.to(() => OwnerToServiceRatingSheet(
+                                      offersReceivedModel: offersReceivedModel,
+                                      offersModel: offersModel,
+                                      isDark: userController.isDark));
                                 },
                                 child: Container(
                                   height: 50,

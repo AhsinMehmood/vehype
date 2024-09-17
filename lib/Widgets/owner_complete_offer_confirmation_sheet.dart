@@ -78,7 +78,7 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                               .get();
 
                       NotificationController().sendNotification(
-                          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+                          userIds: [UserModel.fromJson(ownerSnap).userId],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Request Completed Successfully',

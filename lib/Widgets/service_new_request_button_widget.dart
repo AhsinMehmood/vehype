@@ -494,7 +494,6 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                   senderId: userController.userModel!.userId,
                   notificationTitle: '',
                   notificationSubtitle: '');
-              print('this taap');
               Get.to(() => ServiceRequestDetails(
                   offersModel: offersModel, offersReceivedModel: null));
             },

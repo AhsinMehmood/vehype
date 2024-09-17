@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -129,7 +130,7 @@ class LoginController {
               Get.close(1);
 
               // await OneSignal.Notifications.requestPermission(true);
-              userController.pushTokenUpdate(userId + userModel.accountType);
+              OneSignal.login(userId + userModel.accountType);
 
               Get.offAll(() => const TabsPage());
             }
@@ -159,7 +160,6 @@ class LoginController {
       // print(rawNonce);
       final nonce = sha256ofString(rawNonce);
       bool isAvail = await SignInWithApple.isAvailable();
-      print(isAvail.toString());
       //Danyal223344.@
       final AuthorizationCredentialAppleID credential =
           await SignInWithApple.getAppleIDCredential(
@@ -169,14 +169,12 @@ class LoginController {
         ],
         nonce: nonce,
       );
-      print(credential.identityToken ?? 'IDENTY TOKEN NULL');
 
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
         rawNonce: rawNonce,
         // secret: nonce,
       );
-      print(oauthCredential.toString());
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
       UserCredential userCredential =
@@ -233,8 +231,7 @@ class LoginController {
                     .collection('users')
                     .doc(userId)
                     .get();
-            userController.pushTokenUpdate(userId + userModel.accountType);
-            // OneSignal.login();
+            OneSignal.login(userId + userModel.accountType);
 
             Get.offAll(() => const TabsPage());
           }
@@ -242,7 +239,6 @@ class LoginController {
       }
     } on FirebaseAuthException catch (e) {
       Get.close(1);
-      print(e);
       Get.showSnackbar(GetSnackBar(
         message: e.message,
         duration: const Duration(seconds: 3),

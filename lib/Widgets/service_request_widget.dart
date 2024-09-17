@@ -16,8 +16,22 @@ import 'package:vehype/Widgets/service_new_request_button_widget.dart';
 import 'package:vehype/Widgets/service_pending_request_button_widget.dart';
 import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:intl/intl.dart';
 
 import 'undo_ignore_provider.dart';
+
+String formatDateForRequestWidget(DateTime sentAt) {
+  final now = DateTime.now();
+  final difference = now.difference(sentAt.toLocal());
+
+  if (difference.inHours >= 24) {
+    // Return date in format like "21 Aug"
+    return DateFormat('d MMM').format(sentAt);
+  } else {
+    // Return time in format like "4:26 PM"
+    return DateFormat('h:mm a').format(sentAt);
+  }
+}
 
 class ServiceRequestWidget extends StatelessWidget {
   final OffersModel offersModel;
@@ -27,8 +41,6 @@ class ServiceRequestWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        '${offersModel.garageId} ${offersModel.offerId} This is offer deeetail');
     final UserController userController = Provider.of<UserController>(context);
     DateTime createdAt = DateTime.parse(offersModel.createdAt);
     return StreamBuilder<GarageModel>(
@@ -145,7 +157,8 @@ class ServiceRequestWidget extends StatelessWidget {
                                   top: 10,
                                 ),
                                 child: Text(
-                                  timeago.format(createdAt),
+                                  formatDateForRequestWidget(
+                                      createdAt.toLocal()),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -354,6 +367,8 @@ class ServiceRequestWidget extends StatelessWidget {
                               ServiceCancelledRequestButtonWidget(
                                   offersModel: offersModel,
                                   offersReceivedModel: offersReceivedModel!)
+                            else if (offersReceivedModel!.status == 'ignore')
+                              const SizedBox.shrink()
                           ],
                         )
                     ],

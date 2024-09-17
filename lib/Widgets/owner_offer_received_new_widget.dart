@@ -307,7 +307,7 @@ class OwnerOfferReceivedNewWidget extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Ignore',
+                      'Reject',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,

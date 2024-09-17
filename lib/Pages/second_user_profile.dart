@@ -377,6 +377,7 @@ class PhotosTab extends StatelessWidget {
   Widget build(BuildContext context) {
     List gallery = profile.gallery.reversed.toList();
 
+    // ignore: avoid_unnecessary_containers
     return Container(
       child: ListView.builder(
         // numberOfColumn: 2,
@@ -961,7 +962,6 @@ class SecondUserHeaderWidget extends StatelessWidget {
     List imageUrls = [];
     for (var element in rating) {
       if (element.images != '') {
-        print(element.images);
         imageUrls.add(element.images);
       }
     }

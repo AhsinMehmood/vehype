@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 // import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:image_select/image_selector.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -30,11 +31,10 @@ import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/crop_image_page.dart';
-import 'package:vehype/Pages/location_permission.dart';
 import 'package:vehype/Pages/splash_page.dart';
-import 'package:http/http.dart' as http;
-import 'package:vehype/Pages/tabs_page.dart';
+// import 'package:vehype/Pages/tabs_page.dart';
 import '../Models/chat_model.dart';
+import '../Pages/tabs_page.dart';
 import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
 
@@ -44,14 +44,14 @@ enum AccountType {
 }
 
 class UserController with ChangeNotifier {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  // FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   pushTokenUpdate(String userId) async {
-    NotificationSettings settings = await messaging.getNotificationSettings();
+    // NotificationSettings settings = await messaging.getNotificationSettings();
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      String? pushToken = await FirebaseMessaging.instance.getToken();
-      await updateToken(userId, pushToken ?? '');
+    bool permission = OneSignal.Notifications.permission;
+    if (permission) {
+      // OneSignal.login(userId);
     } else {
       Future.delayed(const Duration(seconds: 3)).then((s) {
         Get.bottomSheet(
@@ -67,11 +67,11 @@ class UserController with ChangeNotifier {
     }
   }
 
-  updateToken(String userId, String pushToken) async {
-    await FirebaseFirestore.instance.collection('users').doc(userId).update({
-      'pushToken': pushToken,
-    });
-  }
+  // updateToken(String userId, String pushToken) async {
+  //   await FirebaseFirestore.instance.collection('users').doc(userId).update({
+  //     'pushToken': pushToken,
+  //   });
+  // }
 
   UserModel? _userModel;
   List selectedServicesFilter = [];
@@ -196,7 +196,8 @@ class UserController with ChangeNotifier {
 
   logout(UserModel userModel) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
-    await updateToken(userModel.userId, '');
+    // await updateToken(userModel.userId, '');
+    await OneSignal.logout();
     streamSubscription?.cancel();
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -396,14 +397,7 @@ class UserController with ChangeNotifier {
     return earthRadius * c;
   }
 
-  deleteUserAccount(String userId) async {
-    http.Response response = await http.get(
-        Uri.parse(
-            'https://us-central1-vehype-386313.cloudfunctions.net/deleteUserAccount?uid=$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-        });
-  }
+  deleteUserAccount(String userId) async {}
 
   bool isAdmin = false;
 
@@ -468,7 +462,7 @@ class UserController with ChangeNotifier {
         .get();
 
     NotificationController().sendNotification(
-        userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+        userIds: [UserModel.fromJson(ownerSnap).userId],
         offerId: offersModel.offerId,
         requestId: offersReceivedModel.id,
         title: 'Offer Cancellation Alert',
@@ -537,7 +531,7 @@ class UserController with ChangeNotifier {
           .get();
 
       NotificationController().sendNotification(
-          userTokens: [UserModel.fromJson(ownerSnap).pushToken],
+          userIds: [UserModel.fromJson(ownerSnap).userId],
           offerId: offersModel.offerId,
           requestId: offersReceivedModel.id,
           title: 'Offer Cancelled',

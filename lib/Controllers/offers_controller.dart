@@ -61,7 +61,6 @@ class OffersController {
         });
       }
     } else {
-      print('Notification Length ${notifications.length}');
       notifications.removeWhere((test) => test.checkById == userId);
       for (var element in notifications) {
         mapData.add({
@@ -74,7 +73,6 @@ class OffersController {
           'offersReceivedId': offersReceived ?? '',
         });
       }
-      print('Notification Length After ${notifications.length}');
 
       await FirebaseFirestore.instance
           .collection('offers')
@@ -115,7 +113,7 @@ class OffersController {
     });
     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
         .instance
-        .collection('offersReceived')
+         .collection('offersReceived')
         .where('status', isEqualTo: 'Pending')
         .where('offerId', isEqualTo: offersModel.offerId)
         .get();

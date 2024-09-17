@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 
 import 'package:flutter/material.dart';
-
+ 
 import 'package:get/get.dart';
 // import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:provider/provider.dart';
