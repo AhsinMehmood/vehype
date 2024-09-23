@@ -647,12 +647,8 @@ class LogoutConfirmation extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Get.close(1);
-                OffersProvider offersProvider =
-                    Provider.of<OffersProvider>(context, listen: false);
-                userController.closeStream();
-                offersProvider.stopListening();
 
-                UserController().logout(userController.userModel!);
+                UserController().logout(userController.userModel!, context);
               },
               style: ElevatedButton.styleFrom(
                   elevation: 0.0,

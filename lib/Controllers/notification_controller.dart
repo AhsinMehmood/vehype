@@ -261,15 +261,17 @@ class NotificationController {
     required List<String> userIds,
   }) async {
     try {
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       final message = {
         'app_id': appId,
         'headings': {'en': title},
         'contents': {'en': subtitle},
-        'include_external_user_ids': userIds,
+        'include_external_user_ids': [sharedPreferences.getString('userId')],
         'data': {
           'offerId': offerId,
           'type': 'request',
-          'requestId': requestId,
+        'requestId': requestId,
         },
       };
 

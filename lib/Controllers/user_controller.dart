@@ -22,6 +22,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:provider/provider.dart';
 // import 'package:image_select/image_selector.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -35,8 +36,10 @@ import 'package:vehype/Pages/splash_page.dart';
 // import 'package:vehype/Pages/tabs_page.dart';
 import '../Models/chat_model.dart';
 import '../Pages/tabs_page.dart';
+import 'package:http/http.dart' as http;
 import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
+import 'offers_provider.dart';
 
 enum AccountType {
   seeker,
@@ -194,26 +197,33 @@ class UserController with ChangeNotifier {
     // notifyListeners();
   }
 
-  logout(UserModel userModel) async {
-    Get.dialog(const LoadingDialog(), barrierDismissible: false);
+  logout(UserModel userModel, BuildContext buildContext) async {
+    // Get.dialog(const LoadingDialog(), barrierDismissible: false);
     // await updateToken(userModel.userId, '');
     await OneSignal.logout();
-    streamSubscription?.cancel();
 
+    streamSubscription?.cancel();
+    OffersProvider offersProvider =
+        Provider.of<OffersProvider>(buildContext, listen: false);
+    closeStream();
+    offersProvider.stopListening();
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.clear();
-
+    try {
+      await GoogleSignIn().disconnect();
+    } catch (e) {
+      print(e);
+    }
     // Mixpanel mixpanel = await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
     //     trackAutomaticEvents: true);
     // mixpanel.reset();
     await FirebaseAuth.instance.signOut();
 
-    await GoogleSignIn().disconnect();
     changeTabIndex(0);
 
-    Get.close(1);
+    // Get.close(1);
 
-    Get.offAll(() => const SplashPage());
+    // Get.offAll(() => const SplashPage());
   }
 
   updateTexts(UserModel userModel, String fieldName, String value) async {
@@ -397,7 +407,26 @@ class UserController with ChangeNotifier {
     return earthRadius * c;
   }
 
-  deleteUserAccount(String userId) async {}
+  final String cloudFunctionUrl =
+      'https://us-central1-vehype-386313.cloudfunctions.net/deleteUserAccount';
+
+  deleteUserAccount(String uid) async {
+    try {
+      // Construct the URL with the UID as a query parameter
+      final uri = Uri.parse('$cloudFunctionUrl?uid=$uid');
+
+      // Make the GET request to your Cloud Function
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        print('User account deleted successfully: ${response.body}');
+      } else {
+        print('Failed to delete user account: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred while deleting user account: $e');
+    }
+  }
 
   bool isAdmin = false;
 

@@ -18,6 +18,8 @@ import 'package:vehype/const.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:intl/intl.dart';
 
+import '../Controllers/offers_controller.dart';
+import '../Pages/service_request_details.dart';
 import 'undo_ignore_provider.dart';
 
 String formatDateForRequestWidget(DateTime sentAt) {
@@ -349,6 +351,7 @@ class ServiceRequestWidget extends StatelessWidget {
                       else
                         Column(
                           children: [
+                            // Text(offersReceivedModel!.status),
                             if (offersReceivedModel!.status == 'Pending')
                               ServicePendingRequestButtonWidget(
                                   offersModel: offersModel,
@@ -367,8 +370,55 @@ class ServiceRequestWidget extends StatelessWidget {
                               ServiceCancelledRequestButtonWidget(
                                   offersModel: offersModel,
                                   offersReceivedModel: offersReceivedModel!)
-                            else if (offersReceivedModel!.status == 'ignore')
-                              const SizedBox.shrink()
+                            else
+                              InkWell(
+                                onTap: () async {
+                                  OffersController()
+                                      .updateNotificationForOffers(
+                                          offerId: offersModel.offerId,
+                                          userId:
+                                              userController.userModel!.userId,
+                                          senderId:
+                                              userController.userModel!.userId,
+                                          isAdd: false,
+                                          notificationTitle: '',
+                                          checkByList: offersModel.checkByList,
+                                          offersReceived:
+                                              offersReceivedModel!.id,
+                                          notificationSubtitle: '');
+                                  Get.to(() => ServiceRequestDetails(
+                                      offersModel: offersModel,
+                                      offersReceivedModel:
+                                          offersReceivedModel));
+                                },
+                                child: Container(
+                                  height: 50,
+                                  width: Get.width * 0.88,
+                                  decoration: BoxDecoration(
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'See Details',
+                                      style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         )
                     ],

@@ -358,6 +358,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           if (deleteBoth || secondAccount == null) {
                             await userController.deleteUserAccount(userId);
                           }
+                          try {
+                            await GoogleSignIn().disconnect();
+                          } catch (e) {}
 
                           OffersProvider offersProvider =
                               Provider.of<OffersProvider>(context,
@@ -369,12 +372,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           offersProvider.stopListening();
                           sharedPreferences.clear();
                           userController.changeTabIndex(0);
+                          Get.close(1); // Close the loading dialog
 
                           await FirebaseAuth.instance.signOut();
-                          await GoogleSignIn().disconnect();
 
-                          Get.close(1); // Close the loading dialog
-                          Get.offAll(() => SplashPage());
+                          // Get.offAll(() => SplashPage());
                         },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

@@ -487,7 +487,7 @@ packages:
     source: hosted
     version: "9.4.1"
   flutter_google_maps_webservices:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_google_maps_webservices
       sha256: "0a1ad0619d5a8ec37b4a8a47776c26fe7491f5a3b8031a5191607ea1a4996ead"
@@ -689,13 +689,13 @@ packages:
     source: hosted
     version: "4.6.6"
   google_api_headers:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: google_api_headers
-      sha256: "59ebb30d12fea5a77525b8e66cf3cec9593a9433dc0f0168497ebca1d3142311"
+      sha256: "4eb80b187da80e46caa5a30438922eebf32d893e1049ad208b2855d6cd3b1777"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "4.2.1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -760,14 +760,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.10"
-  google_maps_place_picker_mb:
-    dependency: "direct main"
-    description:
-      name: google_maps_place_picker_mb
-      sha256: c9a9cb652518f982f5aa77893a9719a892a8d178fe2cde9669637dbaee6690bc
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.2"
   google_maps_webapi:
     dependency: transitive
     description:
@@ -1093,18 +1085,18 @@ packages:
     dependency: transitive
     description:
       name: package_info_plus
-      sha256: "7e76fad405b3e4016cd39d08f455a4eb5199723cf594cd1b8916d47140d93017"
+      sha256: a75164ade98cb7d24cfd0a13c6408927c6b217fa60dee5a7ff5c116a58f28918
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "8.0.2"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
       name: package_info_plus_platform_interface
-      sha256: "9bc8ba46813a4cc42c66ab781470711781940780fd8beddd0c3da62506d3a6c6"
+      sha256: ac1f4a4847f1ade8e6a87d1f39f5d7c67490738642e2542f559ec38c37489a66
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "3.0.1"
   path:
     dependency: "direct main"
     description:
@@ -1241,14 +1233,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  searchfield:
-    dependency: "direct main"
-    description:
-      name: searchfield
-      sha256: efb2197f17c13a1fb1a0d4dc89d2b89dfcc91d8c0be4cd3916cfdd8a6dc1c008
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   sentry:
     dependency: transitive
     description:
@@ -1487,7 +1471,7 @@ packages:
     source: hosted
     version: "2.2.0"
   tuple:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: tuple
       sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
@@ -1583,13 +1567,13 @@ packages:
     source: hosted
     version: "3.1.2"
   uuid:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: uuid
-      sha256: "83d37c7ad7aaf9aa8e275490669535c8080377cfa7a7004c24dfac53afffaa90"
+      sha256: f33d6bb662f0e4f79dcd7ada2e6170f3b3a2530c28fc41f49a411ddedd576a77
       url: "https://pub.dev"
     source: hosted
-    version: "4.4.2"
+    version: "4.5.0"
   vector_graphics:
     dependency: transitive
     description:
@@ -1682,10 +1666,10 @@ packages:
     dependency: transitive
     description:
       name: wakelock_plus
-      sha256: "26ebc8b5e0037c15e2a1b661dcec8a475cb7205befcce8a33f545ae8c86b367c"
+      sha256: bf4ee6f17a2fa373ed3753ad0e602b7603f8c75af006d5b9bdade263928c0484
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.6"
+    version: "1.2.8"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
@@ -1735,5 +1719,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.5.0 <4.0.0"
-  flutter: ">=3.24.0"
+  dart: ">=3.5.1 <4.0.0"
+  flutter: ">=3.24.1"

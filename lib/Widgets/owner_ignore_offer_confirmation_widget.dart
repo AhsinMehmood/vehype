@@ -61,7 +61,8 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
                           offersReceived: offersReceivedModel.id,
                           notificationTitle:
                               'The offer was declined by ${userController.userModel!.name}',
-                          notificationSubtitle: '');
+                          notificationSubtitle:
+                              'The offer was declined by ${userController.userModel!.name}');
                       DocumentSnapshot<Map<String, dynamic>> ownerSnap =
                           await FirebaseFirestore.instance
                               .collection('users')

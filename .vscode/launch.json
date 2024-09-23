@@ -9,14 +9,14 @@
           "request": "launch",
           "type": "dart",
           "program": "lib/main.dart",
-          "deviceId": "3d56030b7d78"
+          "deviceId": "f0017a01"
         },
-        {
-          "name": "Flutter on Device 2",
-          "request": "launch",
-          "type": "dart",
-          "program": "lib/main.dart",
-          "deviceId": "A069BDA0-726F-4FB5-8AD6-68AB982970BE"
-        }
+        // {
+        //   "name": "Flutter on Device 2",
+        //   "request": "launch",
+        //   "type": "dart",
+        //   "program": "lib/main.dart",
+        //   "deviceId": "A069BDA0-726F-4FB5-8AD6-68AB982970BE"
+        // }
       ]
 }

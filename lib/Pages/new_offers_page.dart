@@ -16,6 +16,7 @@ import 'package:vehype/Widgets/service_request_widget.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
+import 'choose_account_type.dart';
 
 class NewOffers extends StatelessWidget {
   const NewOffers({
@@ -214,6 +215,32 @@ class SelectYourServices extends StatelessWidget {
               onPressed: userController.selectedServices.isEmpty
                   ? null
                   : () async {
+                      if (userModel.email == 'No email set') {
+                        Get.showSnackbar(GetSnackBar(
+                          message: 'Login to continue',
+                          duration: const Duration(
+                            seconds: 3,
+                          ),
+                          backgroundColor: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          mainButton: TextButton(
+                            onPressed: () {
+                              Get.to(() => ChooseAccountTypePage());
+                              Get.closeCurrentSnackbar();
+                            },
+                            child: Text(
+                              'Login Page',
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white,
+                              ),
+                            ),
+                          ),
+                        ));
+                        return;
+                      }
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
                       await FirebaseFirestore.instance

@@ -174,7 +174,7 @@ class OwnerSeeOffersNew extends StatelessWidget {
                     stream: FirebaseFirestore.instance
                         .collection('offersReceived')
                         .where('offerId', isEqualTo: offersModel.offerId)
-                        .where('status', isNotEqualTo: 'ignore')
+                        .where('status', isEqualTo: 'Pending')
                         // .orderBy('createdAt', descending: true)
                         .snapshots()
                         .map((QuerySnapshot<Map<String, dynamic>> convert) =>

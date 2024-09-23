@@ -97,6 +97,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                               offer.offerId == map.keys.elementAt(mapIndex));
                       List<OffersNotification> notifications =
                           map[offersModel.offerId]!.toList();
+                      String offerId = map.keys.elementAt(mapIndex);
                       return ListView.builder(
                           itemCount: notifications.length,
                           shrinkWrap: true,
@@ -145,9 +146,6 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                       Map<String, dynamic>>
                                                   garageSnap =
                                                   await FirebaseFirestore
-                                        
-                                        
-                                        
                                                       .instance
                                                       .collection('garages')
                                                       .doc(offersModel.garageId)
@@ -229,82 +227,166 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                 }
                                               }
                                             },
-                                            child: Container(
-                                              padding: const EdgeInsets.only(
-                                                left: 12,
-                                                right: 12,
-                                                top: 12,
-                                                bottom: 12,
+                                            child: Dismissible(
+                                              key: Key(
+                                                  notificationsModel.createdAt),
+                                              onDismissed: (direction) async {
+                                                notificationsModel.isRead =
+                                                    true;
+                                                // notifications.removeAt(index);
+                                                // map.removeWhere(offerId, )
+
+                                                OffersReceivedModel?
+                                                    offersReceivedModel;
+
+                                                if (notificationsModel
+                                                        .offersReceivedId !=
+                                                    '') {
+                                                  DocumentSnapshot<
+                                                          Map<String, dynamic>>
+                                                      offerSnap =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection(
+                                                              'offersReceived')
+                                                          .doc(notificationsModel
+                                                              .offersReceivedId)
+                                                          .get();
+
+                                                  offersReceivedModel =
+                                                      OffersReceivedModel
+                                                          .fromJson(offerSnap);
+                                                  map.remove(offerId);
+                                                  setState(() {});
+                                                }
+                                                OffersController()
+                                                    .updateNotificationForOffers(
+                                                        offerId: offersModel
+                                                            .offerId,
+                                                        userId: userModel
+                                                            .userId,
+                                                        checkByList: offersModel
+                                                            .checkByList,
+                                                        isAdd: false,
+                                                        offersReceived:
+                                                            offersReceivedModel
+                                                                ?.id,
+                                                        notificationTitle: '',
+                                                        senderId:
+                                                            userModel.userId,
+                                                        notificationSubtitle:
+                                                            '');
+                                              },
+                                              secondaryBackground: Container(
+                                                color: Colors.red,
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete,
+                                                      color: Colors.white,
+                                                    )
+                                                  ],
+                                                ),
                                               ),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            200),
-                                                    child:
-                                                        ExtendedImage.network(
-                                                      senderModel.profileUrl,
-                                                      height: 65,
-                                                      width: 65,
-                                                      fit: BoxFit.cover,
+                                              background: Container(
+                                                color: Colors.red,
+                                                padding:
+                                                    const EdgeInsets.all(10),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete,
+                                                      color: Colors.white,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              child: Container(
+                                                padding: const EdgeInsets.only(
+                                                  left: 12,
+                                                  right: 12,
+                                                  top: 12,
+                                                  bottom: 12,
+                                                ),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              200),
+                                                      child:
+                                                          ExtendedImage.network(
+                                                        senderModel.profileUrl,
+                                                        height: 65,
+                                                        width: 65,
+                                                        fit: BoxFit.cover,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 6,
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          notificationsModel
-                                                              .subtitle,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 2,
-                                                          style: TextStyle(
-                                                            color: userController
-                                                                    .isDark
-                                                                ? Colors.white
-                                                                : primaryColor,
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          timeago.format(
-                                                              createdAt),
-                                                          style: TextStyle(
-                                                            color: userController
-                                                                    .isDark
-                                                                ? Colors.white
-                                                                : primaryColor,
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                          ),
-                                                        ),
-                                                      ],
+                                                    const SizedBox(
+                                                      width: 6,
                                                     ),
-                                                  ),
-                                                  // Column(
-                                                  //   mainAxisAlignment:
-                                                  //       MainAxisAlignment.start,
-                                                  //   children: [
-                                                  //     Icon(Icons
-                                                  //         .more_horiz_outlined),
-                                                  //   ],
-                                                  // )
-                                                ],
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            notificationsModel
+                                                                .subtitle,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            maxLines: 2,
+                                                            style: TextStyle(
+                                                              color: userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                  : primaryColor,
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Text(
+                                                            timeago.format(
+                                                                createdAt),
+                                                            style: TextStyle(
+                                                              color: userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                  : primaryColor,
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    // Column(
+                                                    //   mainAxisAlignment:
+                                                    //       MainAxisAlignment.start,
+                                                    //   children: [
+                                                    //     Icon(Icons
+                                                    //         .more_horiz_outlined),
+                                                    //   ],
+                                                    // )
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -316,40 +398,40 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                           });
                     }),
           ),
-          if (map.isNotEmpty)
-            Container(
-              color: userController.isDark ? primaryColor : Colors.white,
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 15,
-                bottom: 30,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // for (var element in offers) {
-                      //   FirebaseFirestore.instance
-                      //       .collection('users')
-                      //       .doc(userModel.userId)
-                      //       .collection('notifications')
-                      //       .doc(element.id)
-                      //       .delete();
-                      // }
-                    },
-                    child: Text(
-                      'Clear All',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // if (map.isNotEmpty)
+          //   Container(
+          //     color: userController.isDark ? primaryColor : Colors.white,
+          //     padding: const EdgeInsets.only(
+          //       left: 20,
+          //       right: 20,
+          //       top: 15,
+          //       bottom: 30,
+          //     ),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.end,
+          //       children: [
+          //         InkWell(
+          //           onTap: () {
+          //             // for (var element in offers) {
+          //             //   FirebaseFirestore.instance
+          //             //       .collection('users')
+          //             //       .doc(userModel.userId)
+          //             //       .collection('notifications')
+          //             //       .doc(element.id)
+          //             //       .delete();
+          //             // }
+          //           },
+          //           child: Text(
+          //             'Clear All',
+          //             style: TextStyle(
+          //               fontSize: 16,
+          //               fontWeight: FontWeight.bold,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
         ],
       ),
     );

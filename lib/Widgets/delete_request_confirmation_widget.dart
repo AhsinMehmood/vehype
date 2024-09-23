@@ -72,7 +72,7 @@ class DeleteRequestConfirmationWidget extends StatelessWidget {
                         await FirebaseFirestore.instance
                             .collection('offersReceived')
                             .doc(element.id)
-                            .update({'checkByList': [], 'status': 'Rejected'});
+                            .update({'checkByList': [], 'status': 'ignore'});
                       }
                       await FirebaseFirestore.instance
                           .collection('offers')

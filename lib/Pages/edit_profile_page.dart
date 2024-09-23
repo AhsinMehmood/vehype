@@ -12,7 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
+// import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -30,6 +30,7 @@ import 'package:vehype/const.dart';
 import '../Controllers/garage_controller.dart';
 import '../Controllers/offers_provider.dart';
 import '../Controllers/vehicle_data.dart';
+import '../google_maps_place_picker.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -219,19 +220,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         child: PhotosTab(profile: userModel),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SingleChildScrollView(
-                          child: ReviewsTab(userData: userModel)),
-                    ),
+                    ReviewsTab(userData: userModel),
                   ]
                 : [
                     EditProfileTab(),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SingleChildScrollView(
-                          child: ReviewsTab(userData: userModel)),
-                    ),
+                    ReviewsTab(userData: userModel),
                   ]),
       ),
     );
@@ -1012,8 +1005,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                               Text(
                                 'I\'m Vehicle Owner',
                                 style: TextStyle(
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w600,
+                                  // fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.w700,
                                   fontSize: 16,
                                   color: Colors.white,
                                 ),
@@ -1085,6 +1078,9 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                 apiKey:
                                                     'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
                                                 selectText: 'Pick This Place',
+                                                onTapBack: () {
+                                                  Get.close(1);
+                                                },
                                                 onPlacePicked: (result) async {
                                                   Get.dialog(LoadingDialog(),
                                                       barrierDismissible:
@@ -1125,7 +1121,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                 },
                                                 initialPosition:
                                                     LatLng(lat, long),
-                                                useCurrentLocation: true,
+                                                // useCurrentLocation: true,
                                                 selectInitialPosition: true,
                                                 resizeToAvoidBottomInset:
                                                     false, // only works in page mode, less flickery, remove if wrong offsets
@@ -1201,7 +1197,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                             Get.close(2);
                                           },
                                           initialPosition: LatLng(lat, long),
-                                          useCurrentLocation: true,
+                                          // useCurrentLocation: true,
                                           selectInitialPosition: true,
                                           resizeToAvoidBottomInset:
                                               false, // only works in page mode, less flickery, remove if wrong offsets

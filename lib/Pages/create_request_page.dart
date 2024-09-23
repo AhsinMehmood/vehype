@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_image/extended_image.dart';
@@ -8,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
@@ -22,6 +23,7 @@ import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import '../const.dart';
+import '../google_maps_place_picker.dart';
 import 'add_vehicle.dart';
 import 'full_image_view_page.dart';
 

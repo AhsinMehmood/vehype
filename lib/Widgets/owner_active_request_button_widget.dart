@@ -31,7 +31,7 @@ class OwnerActiveRequestButtonWidget extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('offersReceived')
             .where('offerId', isEqualTo: offersModel.offerId)
-            .where('status', isNotEqualTo: 'ignore')
+            .where('status', isEqualTo: 'Pending')
             .snapshots()
             .map((QuerySnapshot<Map<String, dynamic>> convert) => convert.docs
                 .map((DocumentSnapshot<Map<String, dynamic>> doc) =>

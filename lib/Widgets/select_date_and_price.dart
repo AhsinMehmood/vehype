@@ -20,6 +20,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Widgets/service_to_owner_rating_sheet.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/const.dart';
 
@@ -247,7 +248,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             focusedBorder: InputBorder.none,
                             prefixText: '\$ ',
                             hintStyle: TextStyle(
-                              fontFamily: 'Avenir',
+                              // fontFamily: 'Avenir',
                               fontWeight: FontWeight.w600,
                               // color: changeColor(color: '7B7B7B'),
                               fontSize: 28,
@@ -257,7 +258,8 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             ),
 
                         // textCapitalization: TextCapitalization.sentences,
-                        keyboardType: TextInputType.number,
+                        keyboardType:
+                            TextInputType.numberWithOptions(decimal: true),
 
                         // maxLines: 1,
                         style: TextStyle(
@@ -354,6 +356,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
 
                             textCapitalization: TextCapitalization.sentences,
                             maxLines: 3,
+                            maxLength: 256,
                             style: TextStyle(
                               fontFamily: 'Avenir',
                               fontWeight: FontWeight.w400,
@@ -388,7 +391,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             Text(
                               'Select Start Date *',
                               style: TextStyle(
-                                fontFamily: 'Avenir',
+                                // fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w400,
                                 // color: Colors.black,
                                 fontSize: 16,
@@ -402,25 +405,19 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                 DateTime? dateTime =
                                     await showOmniDateTimePicker(
                                   context: context,
-                                  initialDate: garageController.startDate,
-                                  firstDate: garageController.startDate,
+                                  initialDate: garageController.startDate ??
+                                      DateTime.now(),
+                                  firstDate: garageController.startDate ??
+                                      DateTime.now(),
                                   lastDate: DateTime.now().add(
                                     const Duration(days: 30),
                                   ),
                                   is24HourMode: false,
                                   isShowSeconds: false,
-                                  minutesInterval: 15,
+                                  minutesInterval: 30,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(16)),
+                                      Radius.circular(6)),
                                   barrierDismissible: false,
-                                  selectableDayPredicate: (dateTime) {
-                                    // Disable 25th Feb 2023
-                                    if (dateTime == DateTime(2023, 2, 25)) {
-                                      return false;
-                                    } else {
-                                      return true;
-                                    }
-                                  },
                                   padding: const EdgeInsets.all(10),
                                 );
                                 if (dateTime != null) {
@@ -517,9 +514,9 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                   ),
                                   is24HourMode: false,
                                   isShowSeconds: false,
-                                  minutesInterval: 15,
+                                  minutesInterval: 30,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(16)),
+                                      Radius.circular(6)),
                                   barrierDismissible: false,
                                   selectableDayPredicate: (dateTime) {
                                     // Disable 25th Feb 2023
@@ -951,7 +948,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
 }
 
 String formatDateTime(DateTime dateTime) {
-  DateFormat format = DateFormat.yMMMMd('en_US').add_jm();
+  DateFormat format = DateFormat.yMMMMd().add_jm();
 //  -> July 10, 2024 5:08 PM
   String dateString = format.format(dateTime.toLocal());
 
@@ -959,7 +956,7 @@ String formatDateTime(DateTime dateTime) {
 }
 
 String formatDate(DateTime dateTime) {
-  DateFormat format = DateFormat.yMMMMd('en_US');
+  DateFormat format = DateFormat.yMMMMd();
 //  -> July 10, 2024 5:08 PM
   String dateString = format.format(dateTime.toLocal());
 

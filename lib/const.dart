@@ -3,15 +3,13 @@ import 'package:vehype/bad_words.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:math';
-// import 'package';
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-int currentVersion = 85;
+int currentVersion = 87;
 // Color cardColor = Color.fromARGB(255, 22, 32, 44);
 // Color backColor = changeColor(color: '1B1C1E');
 
@@ -63,7 +61,8 @@ Color changeColor({required String color}) {
 
 String defaultImage =
     'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757';
-Color primaryColor = const Color(0xff2A2E43);
+
+Color primaryColor = changeColor(color: '033043');
 Color primaryColor2 = changeColor(color: 'FF2F53');
 String carApiToken = 'ba831f89-cd77-4efc-9b3b-2a4ef151f959';
 String carApiSecret = '2670c17201df7e3ecb7c5f82c274c855';

@@ -42,7 +42,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
     UserModel userModel = userController.userModel!;
-
+    // print(widget.offers.length);
     for (OffersModel offer in widget.offers) {
       List<OffersNotification> offersNotifications = offer.checkByList
           .where((noti) => noti.checkById == userModel.userId)
@@ -163,193 +163,305 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         : changeColor(color: '#658cf6')
                                             .withOpacity(0.2),
                                     child: InkWell(
-                                      onTap: () async {
-                                        notificationsModel.isRead = true;
-                                        setState(() {});
+                                      // onTap: () async {
 
-                                        Get.dialog(LoadingDialog(),
-                                            barrierDismissible: false);
-                                        if (selectedModel is OffersModel) {
-                                          OffersReceivedModel?
-                                              offersReceivedModels;
+                                      //   notificationsModel.isRead = true;
+                                      //   setState(() {});
 
-                                          if (notificationsModel
-                                                  .offersReceivedId !=
-                                              '') {
-                                            DocumentSnapshot<
-                                                    Map<String, dynamic>>
-                                                offerSnap =
-                                                await FirebaseFirestore.instance
-                                                    .collection(
-                                                        'offersReceived')
-                                                    .doc(notificationsModel
-                                                        .offersReceivedId)
-                                                    .get();
+                                      //   Get.dialog(LoadingDialog(),
+                                      //       barrierDismissible: false);
+                                      //   if (selectedModel is OffersModel) {
+                                      //     OffersReceivedModel?
+                                      //         offersReceivedModels;
 
-                                            offersReceivedModels =
-                                                OffersReceivedModel.fromJson(
-                                                    offerSnap);
-                                          }
-                                          Get.close(1);
-                                          OffersController()
-                                              .updateNotificationForOffers(
-                                                  offerId:
-                                                      selectedModel.offerId,
-                                                  userId: userModel.userId,
-                                                  checkByList:
-                                                      selectedModel.checkByList,
-                                                  isAdd: false,
-                                                  offersReceived:
-                                                      offersReceivedModels?.id,
-                                                  notificationTitle: '',
-                                                  senderId: userModel.userId,
-                                                  notificationSubtitle: '');
+                                      //     if (notificationsModel
+                                      //             .offersReceivedId !=
+                                      //         '') {
+                                      //       DocumentSnapshot<
+                                      //               Map<String, dynamic>>
+                                      //           offerSnap =
+                                      //           await FirebaseFirestore.instance
+                                      //               .collection(
+                                      //                   'offersReceived')
+                                      //               .doc(notificationsModel
+                                      //                   .offersReceivedId)
+                                      //               .get();
 
-                                          if (selectedModel
-                                              .offersReceived.isNotEmpty) {
-                                            Get.to(() => ServiceRequestDetails(
-                                                  offersModel: selectedModel,
-                                                  // chatId: chatModel.id,
-                                                  offersReceivedModel:
-                                                      offersReceivedModels,
-                                                ));
-                                          } else {
-                                            if (offersReceivedModels == null) {
-                                              Get.to(() =>
-                                                  ServiceRequestDetails(
-                                                    offersModel: selectedModel,
-                                                    // chatId: chatModel.id,
-                                                    offersReceivedModel:
-                                                        offersReceivedModels,
-                                                  ));
-                                            } else {
-                                              toastification.show(
-                                                context: context,
-                                                title: Text(
-                                                    'This request was deleted.'),
-                                                autoCloseDuration:
-                                                    const Duration(seconds: 3),
-                                              );
+                                      //       offersReceivedModels =
+                                      //           OffersReceivedModel.fromJson(
+                                      //               offerSnap);
+                                      //     }
+                                      //     Get.close(1);
+                                      //     OffersController()
+                                      //         .updateNotificationForOffers(
+                                      //             offerId:
+                                      //                 selectedModel.offerId,
+                                      //             userId: userModel.userId,
+                                      //             checkByList:
+                                      //                 selectedModel.checkByList,
+                                      //             isAdd: false,
+                                      //             offersReceived:
+                                      //                 offersReceivedModels?.id,
+                                      //             notificationTitle: '',
+                                      //             senderId: userModel.userId,
+                                      //             notificationSubtitle: '');
+
+                                      //     if (selectedModel
+                                      //         .offersReceived.isNotEmpty) {
+                                      //       Get.to(() => ServiceRequestDetails(
+                                      //             offersModel: selectedModel,
+                                      //             // chatId: chatModel.id,
+                                      //             offersReceivedModel:
+                                      //                 offersReceivedModels,
+                                      //           ));
+                                      //     } else {
+                                      //       if (offersReceivedModels == null) {
+                                      //         Get.to(() =>
+                                      //             ServiceRequestDetails(
+                                      //               offersModel: selectedModel,
+                                      //               // chatId: chatModel.id,
+                                      //               offersReceivedModel:
+                                      //                   offersReceivedModels,
+                                      //             ));
+                                      //       } else {
+                                      //         toastification.show(
+                                      //           context: context,
+                                      //           title: Text(
+                                      //               'This request was deleted.'),
+                                      //           autoCloseDuration:
+                                      //               const Duration(seconds: 3),
+                                      //         );
+                                      //       }
+                                      //     }
+                                      //   } else if (selectedModel
+                                      //       is OffersReceivedModel) {
+                                      //     DocumentSnapshot<Map<String, dynamic>>
+                                      //         offerSnap =
+                                      //         await FirebaseFirestore.instance
+                                      //             .collection('offers')
+                                      //             .doc(selectedModel.offerId)
+                                      //             .get();
+
+                                      //     Get.close(1);
+                                      //     OffersController()
+                                      //         .updateNotificationForOffers(
+                                      //             offerId:
+                                      //                 selectedModel.offerId,
+                                      //             userId: userModel.userId,
+                                      //             checkByList:
+                                      //                 selectedModel.checkByList,
+                                      //             isAdd: false,
+                                      //             offersReceived:
+                                      //                 selectedModel.id,
+                                      //             notificationTitle: '',
+                                      //             senderId: userModel.userId,
+                                      //             notificationSubtitle: '');
+
+                                      //     Get.to(() => ServiceRequestDetails(
+                                      //           offersModel:
+                                      //               OffersModel.fromJson(
+                                      //                   offerSnap),
+                                      //           // chatId: chatModel.id,
+                                      //           offersReceivedModel:
+                                      //               selectedModel,
+                                      //         ));
+                                      //     // if (offersReceivedModels ==
+                                      //     //     null) {
+
+                                      //     // } else {
+                                      //     //   toastification.show(
+                                      //     //     context: context,
+                                      //     //     title: Text(
+                                      //     //         'This request was deleted.'),
+                                      //     //     autoCloseDuration:
+                                      //     //         const Duration(
+                                      //     //             seconds: 3),
+                                      //     //   );
+                                      //     // }
+                                      //   }
+                                      // },
+
+                                      child: Dismissible(
+                                        key: Key(notificationsModel.createdAt),
+                                        onDismissed: (direction) async {
+                                          notificationsModel.isRead = true;
+                                          // notifications.removeAt(index);
+                                          // map.removeWhere(offerId, )
+                                          map.remove(offerId);
+                                          setState(() {});
+
+                                          Get.dialog(LoadingDialog(),
+                                              barrierDismissible: false);
+                                          if (selectedModel is OffersModel) {
+                                            OffersReceivedModel?
+                                                offersReceivedModels;
+
+                                            if (notificationsModel
+                                                    .offersReceivedId !=
+                                                '') {
+                                              DocumentSnapshot<
+                                                      Map<String, dynamic>>
+                                                  offerSnap =
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection(
+                                                          'offersReceived')
+                                                      .doc(notificationsModel
+                                                          .offersReceivedId)
+                                                      .get();
+
+                                              offersReceivedModels =
+                                                  OffersReceivedModel.fromJson(
+                                                      offerSnap);
                                             }
+                                            Get.close(1);
+                                            OffersController()
+                                                .updateNotificationForOffers(
+                                                    offerId:
+                                                        selectedModel.offerId,
+                                                    userId: userModel.userId,
+                                                    checkByList: selectedModel
+                                                        .checkByList,
+                                                    isAdd: false,
+                                                    offersReceived:
+                                                        offersReceivedModels
+                                                            ?.id,
+                                                    notificationTitle: '',
+                                                    senderId: userModel.userId,
+                                                    notificationSubtitle: '');
+                                          } else if (selectedModel
+                                              is OffersReceivedModel) {
+                                            Get.close(1);
+                                            OffersController()
+                                                .updateNotificationForOffers(
+                                                    offerId:
+                                                        selectedModel.offerId,
+                                                    userId: userModel.userId,
+                                                    checkByList: selectedModel
+                                                        .checkByList,
+                                                    isAdd: false,
+                                                    offersReceived:
+                                                        selectedModel.id,
+                                                    notificationTitle: '',
+                                                    senderId: userModel.userId,
+                                                    notificationSubtitle: '');
+
+                                            // if (offersReceivedModels ==
+                                            //     null) {
+
+                                            // } else {
+                                            //   toastification.show(
+                                            //     context: context,
+                                            //     title: Text(
+                                            //         'This request was deleted.'),
+                                            //     autoCloseDuration:
+                                            //         const Duration(
+                                            //             seconds: 3),
+                                            //   );
+                                            // }
                                           }
-                                        } else if (selectedModel
-                                            is OffersReceivedModel) {
-                                          DocumentSnapshot<Map<String, dynamic>>
-                                              offerSnap =
-                                              await FirebaseFirestore.instance
-                                                  .collection('offers')
-                                                  .doc(selectedModel.offerId)
-                                                  .get();
-
-                                          Get.close(1);
-                                          OffersController()
-                                              .updateNotificationForOffers(
-                                                  offerId:
-                                                      selectedModel.offerId,
-                                                  userId: userModel.userId,
-                                                  checkByList:
-                                                      selectedModel.checkByList,
-                                                  isAdd: false,
-                                                  offersReceived:
-                                                      selectedModel.id,
-                                                  notificationTitle: '',
-                                                  senderId: userModel.userId,
-                                                  notificationSubtitle: '');
-
-                                          Get.to(() => ServiceRequestDetails(
-                                                offersModel:
-                                                    OffersModel.fromJson(
-                                                        offerSnap),
-                                                // chatId: chatModel.id,
-                                                offersReceivedModel:
-                                                    selectedModel,
-                                              ));
-                                          // if (offersReceivedModels ==
-                                          //     null) {
-
-                                          // } else {
-                                          //   toastification.show(
-                                          //     context: context,
-                                          //     title: Text(
-                                          //         'This request was deleted.'),
-                                          //     autoCloseDuration:
-                                          //         const Duration(
-                                          //             seconds: 3),
-                                          //   );
-                                          // }
-                                        }
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.only(
-                                          left: 12,
-                                          right: 12,
-                                          top: 12,
-                                          bottom: 12,
+                                        },
+                                        secondaryBackground: Container(
+                                          color: Colors.red,
+                                          padding: const EdgeInsets.all(10),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Icon(
+                                                Icons.delete,
+                                                color: Colors.white,
+                                              )
+                                            ],
+                                          ),
                                         ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(200),
-                                              child: ExtendedImage.network(
-                                                senderModel.profileUrl,
-                                                height: 65,
-                                                width: 65,
-                                                fit: BoxFit.cover,
+                                        background: Container(
+                                          color: Colors.red,
+                                          padding: const EdgeInsets.all(10),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(
+                                                Icons.delete,
+                                                color: Colors.white,
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.only(
+                                            left: 12,
+                                            right: 12,
+                                            top: 12,
+                                            bottom: 12,
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(200),
+                                                child: ExtendedImage.network(
+                                                  senderModel.profileUrl,
+                                                  height: 65,
+                                                  width: 65,
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(
-                                              width: 6,
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    notificationsModel.subtitle,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 2,
-                                                    style: TextStyle(
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  Text(
-                                                    timeago.format(createdAt),
-                                                    style: TextStyle(
-                                                      color:
-                                                          userController.isDark
-                                                              ? Colors.white
-                                                              : primaryColor,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                    ),
-                                                  ),
-                                                ],
+                                              const SizedBox(
+                                                width: 6,
                                               ),
-                                            ),
-                                            // Column(
-                                            //   mainAxisAlignment:
-                                            //       MainAxisAlignment.start,
-                                            //   children: [
-                                            //     Icon(Icons
-                                            //         .more_horiz_outlined),
-                                            //   ],
-                                            // )
-                                          ],
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      notificationsModel
+                                                          .subtitle,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 2,
+                                                      style: TextStyle(
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      timeago.format(createdAt),
+                                                      style: TextStyle(
+                                                        color: userController
+                                                                .isDark
+                                                            ? Colors.white
+                                                            : primaryColor,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              // Column(
+                                              //   mainAxisAlignment:
+                                              //       MainAxisAlignment.start,
+                                              //   children: [
+                                              //     Icon(Icons
+                                              //         .more_horiz_outlined),
+                                              //   ],
+                                              // )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -358,42 +470,105 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           });
                     }),
           ),
-          if (map.isNotEmpty)
-            Container(
-              color: userController.isDark ? primaryColor : Colors.white,
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 15,
-                bottom: 30,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // for (var element in offers) {
-                      //   FirebaseFirestore.instance
-                      //       .collection('users')
-                      //       .doc(userModel.userId)
-                      //       .collection('notifications')
-                      //       .doc(element.id)
-                      //       .delete();
-                      // }
-                    },
-                    child: Text(
-                      'Clear All',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // if (map.isNotEmpty)
+          //   Container(
+          //     color: userController.isDark ? primaryColor : Colors.white,
+          //     padding: const EdgeInsets.only(
+          //       left: 20,
+          //       right: 20,
+          //       top: 15,
+          //       bottom: 30,
+          //     ),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.end,
+          //       children: [
+          //         InkWell(
+          //           onTap: () async {
+          //             for (String offerId in map.keys) {
+          //               List<OffersNotification> notifications = map[offerId]!;
+
+          //               OffersModel? offersModel =
+          //                   widget.offers.firstWhereOrNull(
+          //                 (offer) => offer.offerId == offerId,
+          //               );
+
+          //               OffersReceivedModel? offersReceivedModel =
+          //                   widget.offersReceivedModelList.firstWhereOrNull(
+          //                 (offer) => offer.id == offerId,
+          //               );
+
+          //               var selectedModel = offersModel ?? offersReceivedModel;
+
+          //               if (selectedModel == null) continue;
+
+          //               for (OffersNotification notification in notifications) {
+          //                 processNotification(
+          //                     offerId, notification, selectedModel);
+          //               }
+          //             }
+          //             map.clear();
+          //             setState(() {});
+
+          //             // Clear the map after processing all notifications
+          //           },
+          //           child: Text(
+          //             'Clear All',
+          //             style: TextStyle(
+          //               fontSize: 16,
+          //               fontWeight: FontWeight.bold,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
         ],
       ),
     );
+  }
+
+  Future<void> processNotification(String offerId,
+      OffersNotification notification, dynamic selectedModel) async {
+    // Get.dialog(LoadingDialog(), barrierDismissible: false);
+    final UserModel userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (selectedModel is OffersModel) {
+      OffersReceivedModel? offersReceivedModels;
+
+      if (notification.offersReceivedId != '') {
+        DocumentSnapshot<Map<String, dynamic>> offerSnap =
+            await FirebaseFirestore.instance
+                .collection('offersReceived')
+                .doc(notification.offersReceivedId)
+                .get();
+
+        offersReceivedModels = OffersReceivedModel.fromJson(offerSnap);
+      }
+      // Get.close(1);
+
+      OffersController().updateNotificationForOffers(
+        offerId: selectedModel.offerId,
+        userId: userModel.userId,
+        checkByList: selectedModel.checkByList,
+        isAdd: false,
+        offersReceived: offersReceivedModels?.id,
+        notificationTitle: '',
+        senderId: userModel.userId,
+        notificationSubtitle: '',
+      );
+    } else if (selectedModel is OffersReceivedModel) {
+      // Get.close(1);
+
+      OffersController().updateNotificationForOffers(
+        offerId: selectedModel.offerId,
+        userId: userModel.userId,
+        checkByList: selectedModel.checkByList,
+        isAdd: false,
+        offersReceived: selectedModel.id,
+        notificationTitle: '',
+        senderId: userModel.userId,
+        notificationSubtitle: '',
+      );
+    }
   }
 }

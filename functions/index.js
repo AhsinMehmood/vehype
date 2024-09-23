@@ -514,31 +514,12 @@ exports.sendPushNotifications = functions.https.onRequest(async (req, res) => {
 });
 exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
     const uid = req.query.uid;
-    const currentUserID = req.query.uid;
+    // const currentUserID = req.query.uid;
 
     try
     {
    
-        // const offersReceived = admin.firestore().collection('offers').doc().collection('offersReceived').where('ownerId', '==', uid);
-        /// 35116023
-        //////
-
-
-        // developer1@vehype.com
-
-        // Devel@per1@@
-        // Vehype@pp01
-        /////
-        // offersReceived
-     
-
-
-
-        // firestoreDeleteBatch.delete(connectionsRed);
-
-        // firestoreDeleteBatch.delete(purchasesRed);
-       
-        // Delete the user from Firebase Authentication
+      
         await admin.auth().deleteUser(uid);
 
         // Commit the Firestore batch delete
@@ -567,3 +548,23 @@ exports.updateOfferStatus = functions.firestore
         });
     });
 
+  // const offersReceived = admin.firestore().collection('offers').doc().collection('offersReceived').where('ownerId', '==', uid);
+        /// 35116023
+        //////
+
+
+        // developer1@vehype.com
+
+        // Devel@per1@@
+        // Vehype@pp01
+        /////
+        // offersReceived
+     
+
+
+
+        // firestoreDeleteBatch.delete(connectionsRed);
+
+        // firestoreDeleteBatch.delete(purchasesRed);
+       
+        // Delete the user from Firebase Authentication

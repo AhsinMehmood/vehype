@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
+import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
@@ -151,7 +152,7 @@ class _TabsPageState extends State<TabsPage> {
     }
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     final UserModel userModel = userController.userModel!;
@@ -258,10 +259,23 @@ class _TabsPageState extends State<TabsPage> {
   }
 
   List<BottomNavigationBarItem> providerTabs() {
-    // final UserController userController = Provider.of<UserController>(context);/
+    final UserController userController = Provider.of<UserController>(context);
     final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
 
     final UserModel userModel = Provider.of<UserController>(context).userModel!;
+    List<OffersModel> filteredOffers = offersProvider.offers
+        .where((offer) => !offer.offersReceived.contains(userModel.userId))
+        .where((offer) => !offer.ignoredBy.contains(userModel.userId))
+        .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
+        .where((offer) => userModel.services.contains(offer.issue))
+        .toList();
+
+    List<OffersModel> newOffers = userModel.lat == 0.0
+        ? filteredOffers
+        : userController.filterOffers(
+            filteredOffers, userModel.lat, userModel.long, 50);
+    // print(
+    //     '${offersProvider.offers.where((offer) => offer.checkByList.any((check) => check.checkById == userModel.userId)).toList().first.status} ');
     return [
       // if (userModel.accountType == 'seeker')
       BottomNavigationBarItem(
@@ -281,7 +295,7 @@ class _TabsPageState extends State<TabsPage> {
                 top: 0,
                 right: 0,
                 child: Visibility(
-                  visible: offersProvider.offers
+                  visible: newOffers
                           .where((offer) => offer.checkByList.any(
                               (check) => check.checkById == userModel.userId))
                           .toList()
@@ -569,8 +583,6 @@ class _TabsPageState extends State<TabsPage> {
       ),
     ];
   }
-
-
 
   Color labelAndIconColorDark(int index) {
     final UserController userController = Provider.of<UserController>(context);

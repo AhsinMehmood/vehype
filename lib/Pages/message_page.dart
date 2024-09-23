@@ -1102,13 +1102,15 @@ class _MessagePageState extends State<MessagePage> {
                                                           margin:
                                                               const EdgeInsets
                                                                   .all(5),
-                                                          child:
-                                                              SvgPicture.asset(
-                                                            'assets/send.svg',
-                                                            color: userController
-                                                                    .isDark
-                                                                ? primaryColor
-                                                                : Colors.white,
+                                                          child: Center(
+                                                            child: Image.asset(
+                                                              'assets/send.png',
+                                                              color: userController
+                                                                      .isDark
+                                                                  ? primaryColor
+                                                                  : Colors
+                                                                      .white,
+                                                            ),
                                                           ),
                                                         ))
                                                 ],
@@ -1269,7 +1271,10 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   List<InlineSpan> _getClickableTextSpans(String message) {
-    RegExp urlRegExp = RegExp(r'https?://\S+');
+    RegExp urlRegExp = RegExp(r'(https?:\/\/)?([\w\-]+\.)+[\w]{2,}(\/\S*)?');
+    RegExp emailRegExp =
+        RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b');
+
     RegExp phoneRegExp = RegExp(
         r"\b(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})\b");
 
@@ -1278,14 +1283,20 @@ class _MessagePageState extends State<MessagePage> {
 
     Iterable<Match> urlMatches = urlRegExp.allMatches(message);
     Iterable<Match> phoneMatches = phoneRegExp.allMatches(message);
+    Iterable<Match> emailMatches = emailRegExp.allMatches(message);
 
     // Combine URL and phone matches into a single iterable
-    Iterable<Match> allMatches = [...urlMatches, ...phoneMatches];
+    Iterable<Match> allMatches = [
+      ...emailMatches,
+      ...urlMatches,
+      ...phoneMatches
+    ];
 
     // Sort matches by their start position in the text
     List<Match> sortedMatches = allMatches.toList()
       ..sort((a, b) => a.start.compareTo(b.start));
 
+    // Process the sorted matches
     for (Match match in sortedMatches) {
       if (match.start > currentIndex) {
         textSpans
@@ -1293,6 +1304,8 @@ class _MessagePageState extends State<MessagePage> {
       }
 
       String matchText = match.group(0)!;
+
+      // Check for URL match
       if (urlRegExp.hasMatch(matchText)) {
         textSpans.add(
           TextSpan(
@@ -1300,18 +1313,38 @@ class _MessagePageState extends State<MessagePage> {
             style: TextStyle(decoration: TextDecoration.underline),
             recognizer: TapGestureRecognizer()
               ..onTap = () async {
-                await launchUrl(Uri.parse(matchText));
+                String url = matchText.startsWith('http')
+                    ? matchText
+                    : 'http://$matchText';
+                await launchUrlString(url);
               },
           ),
         );
-      } else if (phoneRegExp.hasMatch(matchText)) {
+      }
+      // Check for phone number match
+      else if (phoneRegExp.hasMatch(matchText)) {
         textSpans.add(
           TextSpan(
             text: matchText,
             style: TextStyle(decoration: TextDecoration.underline),
             recognizer: TapGestureRecognizer()
               ..onTap = () async {
-                await launchUrl(Uri.parse("tel:$matchText"));
+                String telUrl = "tel:$matchText";
+                await launchUrlString(telUrl);
+              },
+          ),
+        );
+      }
+      // Check for email match
+      else if (emailRegExp.hasMatch(matchText)) {
+        textSpans.add(
+          TextSpan(
+            text: matchText,
+            style: TextStyle(decoration: TextDecoration.underline),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () async {
+                String mailUrl = "mailto:$matchText";
+                await launchUrlString(mailUrl);
               },
           ),
         );
@@ -1320,6 +1353,7 @@ class _MessagePageState extends State<MessagePage> {
       currentIndex = match.end;
     }
 
+    // Add any remaining text after the last match
     if (currentIndex < message.length) {
       textSpans.add(TextSpan(text: message.substring(currentIndex)));
     }

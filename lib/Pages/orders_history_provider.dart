@@ -101,7 +101,7 @@ class OrdersHistoryProvider extends StatelessWidget {
             rejectedOffersNotifications;
 
     return DefaultTabController(
-      length: 6,
+      length: 7,
       initialIndex: 0,
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -122,6 +122,9 @@ class OrdersHistoryProvider extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: InkWell(
                   onTap: () {
+                    // print(notificationToCheckOffersNewOffers.length);
+                    // print(notificationsOffersReceived.length);
+
                     Get.to(() => NotificationsPage(
                           offers: notificationToCheckOffersNewOffers,
                           offersReceivedModelList: notificationsOffersReceived,
@@ -135,18 +138,8 @@ class OrdersHistoryProvider extends StatelessWidget {
                             userController.isDark ? Colors.white : primaryColor,
                         size: 28,
                       ),
-                      if ((offersProvider.offers
-                                  .where((offer) => offer.checkByList.any(
-                                      (check) =>
-                                          check.checkById == userModel.userId))
-                                  .toList()
-                                  .length +
-                              offersProvider.offersReceived
-                                  .where((offer) => offer.checkByList.any(
-                                      (check) =>
-                                          check.checkById == userModel.userId))
-                                  .toList()
-                                  .length) !=
+                      if ((notificationToCheckOffersNewOffers.length +
+                              notificationsOffersReceived.length) !=
                           0)
                         Container(
                           height: 16,
@@ -158,20 +151,8 @@ class OrdersHistoryProvider extends StatelessWidget {
                           padding: const EdgeInsets.all(1),
                           child: Center(
                             child: Text(
-                              (offersProvider.offers
-                                          .where((offer) => offer.checkByList
-                                              .any((check) =>
-                                                  check.checkById ==
-                                                  userModel.userId))
-                                          .toList()
-                                          .length +
-                                      offersProvider.offersReceived
-                                          .where((offer) => offer.checkByList
-                                              .any((check) =>
-                                                  check.checkById ==
-                                                  userModel.userId))
-                                          .toList()
-                                          .length)
+                              (notificationToCheckOffersNewOffers.length +
+                                      notificationsOffersReceived.length)
                                   .toString(),
                               style: TextStyle(
                                 color: Colors.white,
@@ -357,7 +338,7 @@ class OrdersHistoryProvider extends StatelessWidget {
                 userController: userController,
                 id: 5,
                 emptyText: 'No Rejected Offers Yet!',
-                offersPending: offersCencelled),
+                offersPending: rejectedOffers),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -8,18 +9,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/splash_page.dart';
+import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
 import 'package:vehype/firebase_options.dart';
 
@@ -36,6 +41,41 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 //   }
 // }
 
+class AuthController extends GetxController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Listen to auth state changes
+    _auth.authStateChanges().listen((User? user) async {
+      if (user == null) {
+        // User logged out
+        await _handleLogout();
+      } else {
+        // User logged in
+        // Get.offAllNamed('/home');
+      }
+    });
+  }
+
+  Future<void> _handleLogout() async {
+    // Clear shared preferences
+    await OneSignal.logout();
+    // await GoogleSignIn().disconnect();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    try {
+      await GoogleSignIn().disconnect();
+    } catch (e) {
+      print(e);
+    }
+    // Navigate to the Splash Page
+    Get.offAll(() => SplashPage());
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // if (Platform.isAndroid) {
@@ -49,6 +89,8 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
+  Get.put(AuthController());
+
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // NotificationController().listenOneSignalNotification();
@@ -76,6 +118,10 @@ void main() async {
       appRunner: () => runApp(
             MultiProvider(
               providers: [
+                StreamProvider<User?>.value(
+                  value: FirebaseAuth.instance.authStateChanges(),
+                  initialData: null,
+                ),
                 ChangeNotifierProvider<UserController>(
                     create: (context) => UserController()),
                 ChangeNotifierProvider<OffersProvider>(
@@ -187,8 +233,29 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       darkTheme: ThemeData.dark().copyWith(textTheme: textTheme),
       theme: ThemeData().copyWith(
         textTheme: textTheme,
+        primaryColor: primaryColor,
       ),
       home: const SplashPage(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SplashPage();
+        } else if (snapshot.hasData) {
+          return TabsPage(); // User is logged in
+        } else {
+          return ChooseAccountTypePage(); // User is not logged in
+        }
+      },
     );
   }
 }

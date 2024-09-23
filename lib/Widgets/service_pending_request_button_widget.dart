@@ -96,7 +96,19 @@ class ServicePendingPageButtonWidget extends StatelessWidget {
                                     onPressed: () async {
                                       Get.dialog(LoadingDialog(),
                                           barrierDismissible: false);
-
+                                      OffersController()
+                                          .updateNotificationForOffers(
+                                              offerId: offersModel.offerId,
+                                              userId: offersModel.ownerId,
+                                              isAdd: false,
+                                              notificationTitle: '',
+                                              offersReceived:
+                                                  offersReceivedModel.id,
+                                              checkByList:
+                                                  offersModel.checkByList,
+                                              senderId: userController
+                                                  .userModel!.userId,
+                                              notificationSubtitle: '');
                                       await FirebaseFirestore.instance
                                           .collection('offersReceived')
                                           .doc(offersReceivedModel.id)
@@ -425,6 +437,19 @@ class ServicePendingRequestButtonWidget extends StatelessWidget {
                                     onPressed: () async {
                                       Get.dialog(LoadingDialog(),
                                           barrierDismissible: false);
+                                      OffersController()
+                                          .updateNotificationForOffers(
+                                              offerId: offersModel.offerId,
+                                              userId: offersModel.ownerId,
+                                              isAdd: false,
+                                              notificationTitle: '',
+                                              offersReceived:
+                                                  offersReceivedModel.id,
+                                              checkByList:
+                                                  offersModel.checkByList,
+                                              senderId: userController
+                                                  .userModel!.userId,
+                                              notificationSubtitle: '');
 
                                       await FirebaseFirestore.instance
                                           .collection('offersReceived')

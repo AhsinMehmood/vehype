@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
@@ -7,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
@@ -50,6 +52,11 @@ class SelectAccountType extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(6),
                     onTap: () async {
+                      // if (2 == 2) {
+                      //   await FirebaseAuth.instance.signOut();
+
+                      //   return;
+                      // }
                       Get.dialog(const LoadingDialog(),
                           barrierDismissible: false);
 
@@ -207,27 +214,9 @@ class SelectAccountType extends StatelessWidget {
                           'geo': geoFirePoint.data,
                         });
                       }
+                      userController
+                          .getUserStream('${userModelAccount.userId}seeker');
 
-                      userController.getUserStream(
-                        '${userModelAccount.userId}seeker',
-                        onDataReceived: (userModel) {
-                          OffersProvider offersProvider =
-                              Provider.of<OffersProvider>(context,
-                                  listen: false);
-                          offersProvider
-                              .startListeningOwnerOffers(userModel.userId);
-
-                          // await OneSignal.Notifications.requestPermission(true);
-
-                          Get.close(1);
-
-                          Get.offAll(() => const TabsPage());
-                        },
-                      );
-                      userController.getUserStream(
-                        '${userModelAccount.userId}provider',
-                        onDataReceived: (userModel) {},
-                      );
                       DocumentSnapshot<Map<String, dynamic>> usersnap =
                           await FirebaseFirestore.instance
                               .collection('users')

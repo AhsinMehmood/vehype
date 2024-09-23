@@ -55,7 +55,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
               Get.close(1);
             },
             icon: Icon(
-              Icons.close,
+              Icons.arrow_back_ios_new,
               color: userController.isDark ? Colors.white : primaryColor,
             )),
         title: Text(
@@ -76,6 +76,72 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
               children: [
                 Column(
                   children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        'Enter Feedback*',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: TextFormField(
+                        maxLines: 5,
+                        maxLength: 256,
+                        controller: commentController,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.done,
+                        onTapOutside: (s) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                        onChanged: (u) {
+                          // setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Share your experience and any feedback...',
+                          hintStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 15,
+                            // color: Colors.grey[400],
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                  color: userController.isDark
+                                      ? Colors.white.withOpacity(0.2)
+                                      : primaryColor.withOpacity(0.2))),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                  color: userController.isDark
+                                      ? Colors.white.withOpacity(0.2)
+                                      : primaryColor.withOpacity(0.2))),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                  color: userController.isDark
+                                      ? Colors.white.withOpacity(0.2)
+                                      : primaryColor.withOpacity(0.2))),
+                        ),
+                      ),
+                    ),
+                    // SizedBox(
+                    //   height: 30,
+                    // ),
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
@@ -257,7 +323,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                                 ),
                               )),
                     const SizedBox(
-                      height: 30,
+                      height: 20,
                     ),
                     Align(
                       alignment: Alignment.bottomLeft,
@@ -293,70 +359,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                     SizedBox(
                       height: 30,
                     ),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        'Enter Feedback*',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
                   ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: TextFormField(
-                    maxLines: 5,
-                    maxLength: 256,
-                    controller: commentController,
-                    keyboardType: TextInputType.text,
-                    textCapitalization: TextCapitalization.sentences,
-                    textInputAction: TextInputAction.done,
-                    onTapOutside: (s) {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    },
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                    onChanged: (u) {
-                      // setState(() {});
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Share your experience and any feedback...',
-                      hintStyle: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 15,
-                        // color: Colors.grey[400],
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.2)
-                                  : primaryColor.withOpacity(0.2))),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.2)
-                                  : primaryColor.withOpacity(0.2))),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.2)
-                                  : primaryColor.withOpacity(0.2))),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 30,
                 ),
                 const SizedBox(
                   height: 20,

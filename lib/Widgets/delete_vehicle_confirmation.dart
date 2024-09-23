@@ -139,8 +139,6 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
             ),
             ElevatedButton(
               onPressed: () async {
-                Get.close(1);
-                Get.dialog(LoadingDialog(), barrierDismissible: false);
                 if (isAgree == false) {
                   toastification.show(
                       context: context,
@@ -148,9 +146,12 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                       title: Text(
                           'Acknowledge to our rating\'s policy to cancel the offer'),
                       autoCloseDuration: const Duration(seconds: 3));
+                  // Get.close(1);
+
                   return;
                 }
-                // Get.close(1);
+                Get.close(1);
+                Get.dialog(LoadingDialog(), barrierDismissible: false);
                 QuerySnapshot<Map<String, dynamic>> offersSnap =
                     await FirebaseFirestore.instance
                         .collection('offers')
@@ -253,7 +254,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                   elevation: 0.0,
                   backgroundColor:
                       userController.isDark ? Colors.white : primaryColor,
-                  minimumSize: Size(Get.width * 0.6, 50),
+                  minimumSize: Size(Get.width * 0.8, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   )),
@@ -275,7 +276,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
               },
               child: Container(
                 height: 50,
-                width: Get.width * 0.6,
+                width: Get.width * 0.8,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
