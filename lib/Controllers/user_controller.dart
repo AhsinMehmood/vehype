@@ -55,6 +55,10 @@ class UserController with ChangeNotifier {
     bool permission = OneSignal.Notifications.permission;
     if (permission) {
       // OneSignal.login(userId);
+      await OneSignal.Notifications.requestPermission(true);
+      // await OneSignal.Notifications.
+      print('object');
+      OneSignal.login(userModel!.userId);
     } else {
       Future.delayed(const Duration(seconds: 3)).then((s) {
         Get.bottomSheet(

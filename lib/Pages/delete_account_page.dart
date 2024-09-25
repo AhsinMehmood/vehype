@@ -8,6 +8,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -76,6 +77,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   Widget build(BuildContext context) {
     final UserModel userModel = Provider.of<UserController>(context).userModel!;
     final UserController userController = Provider.of<UserController>(context);
+    String accountName =
+        userModel.accountType == 'provider' ? 'Vehicle Owner' : 'Service Owner';
+    String accountNames = userModel.accountType == 'provider'
+        ? 'Vehicle Owners'
+        : 'Service Owners';
+
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       appBar: AppBar(
@@ -120,59 +127,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               const SizedBox(
                 height: 25,
               ),
-              Text(
-                'Please tell us why you want to delete your account and any feedback for improvement.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: TextFormField(
-                  maxLines: 5,
-                  controller: reason,
-                  maxLength: 256,
-                  keyboardType: TextInputType.text,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.done,
-                  onTapOutside: (s) {
-                    FocusScope.of(context).requestFocus(FocusNode());
-                  },
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                  onChanged: (u) {
-                    setState(() {});
-                  },
-                  cursorColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  decoration: InputDecoration(
-                    hintText: 'You could add a guestbook feature.',
-                    hintStyle: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 16,
-                      // color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6)),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
 
               // const SizedBox(
               //   height: 10,
               // ),
               Text(
-                'All active and in-progress requests will be canceled, and service owners will be notified.',
+                'All active and in-progress requests will be canceled, and $accountNames will be notified.',
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
@@ -266,13 +226,14 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     const SizedBox(
                       height: 15,
                     ),
-                    Text(
-                      'Please note that your Service Owner account will remain active. You will still be able to log in to the Service Owner account using your current email address. This ensures that your services and associated data are preserved, and you can continue to manage them without interruption.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                    if (!deleteBoth)
+                      Text(
+                        'Please note that your $accountName account will remain active. You will still be able to log in to the $accountName account using your current email address. This ensures that your services and associated data are preserved, and you can continue to manage them without interruption.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -296,7 +257,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                                     ? Colors.green
                                     : Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
                                 value: deleteBoth,
                                 onChanged: (s) {
@@ -336,7 +297,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 height: secondAccount == null ? 140 : 30,
               ),
               ElevatedButton(
-                  onPressed: reason.text.length < 3 || !isAgree
+                  onPressed: !isAgree
                       ? null
                       : () async {
                           Get.dialog(LoadingDialog(),
@@ -375,6 +336,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           Get.close(1); // Close the loading dialog
 
                           await FirebaseAuth.instance.signOut();
+                          toastification.show(
+                              context: context,
+                              title: Text(
+                                  'The account has been deleted successfully!'),
+                              autoCloseDuration: Duration(seconds: 4),
+                              type: ToastificationType.success,
+                              style: ToastificationStyle.flatColored);
 
                           // Get.offAll(() => SplashPage());
                         },

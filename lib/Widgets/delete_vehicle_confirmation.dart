@@ -144,7 +144,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                       context: context,
                       type: ToastificationType.error,
                       title: Text(
-                          'Acknowledge to our rating\'s policy to cancel the offer'),
+                          'Acknowledge to our rating\'s policy to delete the vehicle'),
                       autoCloseDuration: const Duration(seconds: 3));
                   // Get.close(1);
 

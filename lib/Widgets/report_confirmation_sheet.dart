@@ -48,7 +48,7 @@ class ReportConfirmationSheet extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Get.close(1);
-                Get.close(1);
+                // Get.close(1);
                 userController.blockAndReport(
                     widget.chatModel.id,
                     userController.userModel!.userId,
@@ -69,7 +69,7 @@ class ReportConfirmationSheet extends StatelessWidget {
               child: Text(
                 'Confirm',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: userController.isDark ? primaryColor : Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),

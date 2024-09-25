@@ -49,7 +49,7 @@ class _ReportConfirmationState extends State<ReportConfirmation> {
                     Text(
                       'We’ll investigate this profile.',
                       style: TextStyle(
-                        color: Colors.black,
+                        // color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                       ),
@@ -65,7 +65,7 @@ class _ReportConfirmationState extends State<ReportConfirmation> {
                   ElevatedButton(
                       onPressed: () {
                         // UserController().addPushToken(userModel.id);
-                        Get.close(1);
+                        Get.close(2);
                         // Get.to(() => AddProfileImagesPage());
                       },
                       style: ElevatedButton.styleFrom(
@@ -77,10 +77,12 @@ class _ReportConfirmationState extends State<ReportConfirmation> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           )),
-                      child: const Text(
+                      child: Text(
                         'Continue',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: userController.isDark
+                              ? primaryColor
+                              : Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),

@@ -69,6 +69,7 @@ class _TabsPageState extends State<TabsPage> {
         } else {}
       }
     });
+
     OneSignal.Notifications.addClickListener(
         (OSNotificationClickEvent listener) {
       if (listener.notification.additionalData != null) {
@@ -152,7 +153,7 @@ class _TabsPageState extends State<TabsPage> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     final UserModel userModel = userController.userModel!;
@@ -864,6 +865,7 @@ class NotificationSheet extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               await OneSignal.Notifications.requestPermission(true);
+              // await OneSignal.Notifications.
 
               OneSignal.login(userController.userModel!.userId);
               Get.close(1);

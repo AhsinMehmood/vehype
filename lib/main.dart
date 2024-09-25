@@ -179,49 +179,49 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final UserController userController = Provider.of<UserController>(context);
 
     TextTheme textTheme = TextTheme(
-      displayLarge: GoogleFonts.notoSansOsage(
+      displayLarge: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      displayMedium: GoogleFonts.notoSansOsage(
+      displayMedium: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      displaySmall: GoogleFonts.notoSansOsage(
+      displaySmall: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineLarge: GoogleFonts.notoSansOsage(
+      headlineLarge: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineMedium: GoogleFonts.notoSansOsage(
+      headlineMedium: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      headlineSmall: GoogleFonts.notoSansOsage(
+      headlineSmall: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleLarge: GoogleFonts.notoSansOsage(
+      titleLarge: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleMedium: GoogleFonts.notoSansOsage(
+      titleMedium: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      titleSmall: GoogleFonts.notoSansOsage(
+      titleSmall: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodyLarge: GoogleFonts.notoSansOsage(
+      bodyLarge: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodyMedium: GoogleFonts.notoSansOsage(
+      bodyMedium: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      bodySmall: GoogleFonts.notoSansOsage(
+      bodySmall: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelLarge: GoogleFonts.notoSansOsage(
+      labelLarge: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelMedium: GoogleFonts.notoSansOsage(
+      labelMedium: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
-      labelSmall: GoogleFonts.notoSansOsage(
+      labelSmall: GoogleFonts.poppins(
         color: userController.isDark ? Colors.white : primaryColor,
       ),
     );
@@ -230,10 +230,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       title: 'VEHYPE',
       navigatorKey: navigatorKey,
       themeMode: userController.isDark ? ThemeMode.dark : ThemeMode.light,
-      darkTheme: ThemeData.dark().copyWith(textTheme: textTheme),
+      darkTheme: ThemeData.dark().copyWith(
+        textTheme: textTheme,
+        // primaryColor: primaryColor,
+        // colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+      ),
       theme: ThemeData().copyWith(
         textTheme: textTheme,
         primaryColor: primaryColor,
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
       ),
       home: const SplashPage(),
     );

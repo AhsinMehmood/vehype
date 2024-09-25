@@ -311,7 +311,7 @@ class _PlacePickerState extends State<PlacePicker> {
                           userController.isDark ? primaryColor : Colors.white,
                       key: ValueKey<int>(provider.hashCode),
                       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-                      extendBodyBehindAppBar: true,
+                      // extendBodyBehindAppBar: true,
                       appBar: AppBar(
                         key: appBarKey,
                         automaticallyImplyLeading: false,
@@ -367,27 +367,20 @@ class _PlacePickerState extends State<PlacePicker> {
     return Row(
       children: <Widget>[
         SizedBox(width: 15),
-        provider!.placeSearchingState == SearchingState.Idle &&
-                (widget.automaticallyImplyAppBarLeading ||
-                    widget.onTapBack != null)
-            ? IconButton(
-                onPressed: () {
-                  if (!showIntroModal ||
-                      widget.introModalWidgetBuilder == null) {
-                    provider?.debounceTimer?.cancel();
-                    if (widget.onTapBack != null) {
-                      widget.onTapBack!();
-                      return;
-                    }
-                    Navigator.maybePop(context);
-                  }
-                },
-                icon: Icon(
-                  Icons.arrow_back_ios,
-                ),
-                color: userController.isDark ? Colors.white : primaryColor,
-                padding: EdgeInsets.zero)
-            : Container(),
+        IconButton(
+            onPressed: () {
+              provider?.debounceTimer?.cancel();
+              if (widget.onTapBack != null) {
+                widget.onTapBack!();
+                return;
+              }
+              Navigator.maybePop(context);
+            },
+            icon: Icon(
+              Icons.arrow_back_ios,
+            ),
+            color: userController.isDark ? Colors.white : primaryColor,
+            padding: EdgeInsets.zero),
         Expanded(
           child: AutoCompleteSearch(
               appBarKey: appBarKey,

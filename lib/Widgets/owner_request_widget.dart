@@ -331,8 +331,8 @@ class OwnerRequestWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(12),
-                          bottomRight: Radius.circular(12),
+                          bottomLeft: Radius.circular(6),
+                          bottomRight: Radius.circular(6),
                         )),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,

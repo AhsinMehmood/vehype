@@ -1105,6 +1105,8 @@ class _MessagePageState extends State<MessagePage> {
                                                           child: Center(
                                                             child: Image.asset(
                                                               'assets/send.png',
+                                                              height: 34,
+                                                              width: 28,
                                                               color: userController
                                                                       .isDark
                                                                   ? primaryColor
@@ -1696,9 +1698,9 @@ class TopBarMessage extends StatelessWidget {
                                     'View Profile',
                                     style: TextStyle(
                                       // color: Colors.black,
-                                      fontSize: 22,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 17,
+                                      // fontFamily: 'Avenir'/,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -1710,15 +1712,15 @@ class TopBarMessage extends StatelessWidget {
                                     Get.close(1);
 
                                     Get.bottomSheet(
-                                        reportBottomSheet(userModel));
+                                        reportBottomSheet(userModel, context));
                                   },
                                   child: Text(
                                     'Block & Report',
                                     style: TextStyle(
                                       // color: Colors.black,
-                                      fontSize: 22,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 17,
+                                      // fontFamily: 'Avenir'/,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -1735,9 +1737,9 @@ class TopBarMessage extends StatelessWidget {
                                     'Delete Chat',
                                     style: TextStyle(
                                       // color: Colors.black,
-                                      fontSize: 20,
-                                      fontFamily: 'Avenir',
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 17,
+                                      // fontFamily: 'Avenir'/,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -1759,12 +1761,14 @@ class TopBarMessage extends StatelessWidget {
     );
   }
 
-  reportBottomSheet(UserModel userModel) {
+  reportBottomSheet(UserModel userModel, BuildContext context) {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
     return Container(
       height: Get.height * 0.8,
       width: Get.width,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: userController.isDark ? primaryColor : Colors.white,
         borderRadius: BorderRadius.circular(6),
       ),
       child: SingleChildScrollView(
