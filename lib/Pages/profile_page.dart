@@ -15,6 +15,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
@@ -54,37 +55,15 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(
-                height: 20,
+                height: 0,
               ),
               Row(
                 // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   InkWell(
                     onTap: () {
-                      if (userModel.email == 'No email set') {
-                        Get.showSnackbar(GetSnackBar(
-                          message: 'Login to continue',
-                          duration: const Duration(
-                            seconds: 3,
-                          ),
-                          backgroundColor: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          mainButton: TextButton(
-                            onPressed: () {
-                              Get.to(() => ChooseAccountTypePage());
-                              Get.closeCurrentSnackbar();
-                            },
-                            child: Text(
-                              'Login Page',
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? primaryColor
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        ));
+                      if (userModel.isGuest) {
+                        Get.bottomSheet(LoginSheet());
                       } else {
                         Get.to(() => EditProfilePage());
                       }
@@ -212,86 +191,32 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Appearance',
+                        icon: Icons.style_outlined,
                         onTap: () async {
-                          // Get.to(() => EditProfilePage());
                           userController.changeTheme(!userController.isDark);
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Theme ${userController.isDark ? 'Dark' : 'Light'}',
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 17,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 45,
-                              height: 30,
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: CupertinoSwitch(
-                                    value: userController.isDark,
-                                    activeColor: Colors.white30,
-                                    onChanged: (bool value) {
-                                      userController.changeTheme(value);
-                                    }),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
 
                       const SizedBox(
                         height: 10,
                       ),
 
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Manage Profile',
+                        icon: Icons.person,
                         onTap: () async {
-                          if (userModel.email == 'No email set') {
-                            Get.showSnackbar(GetSnackBar(
-                              message: 'Login to continue',
-                              duration: const Duration(
-                                seconds: 3,
-                              ),
-                              backgroundColor: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              mainButton: TextButton(
-                                onPressed: () {
-                                  Get.to(() => ChooseAccountTypePage());
-                                  Get.closeCurrentSnackbar();
-                                },
-                                child: Text(
-                                  'Login Page',
-                                  style: TextStyle(
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ));
+                          if (userModel.isGuest) {
+                            Get.bottomSheet(LoginSheet());
                           } else {
                             Get.to(() => EditProfilePage());
                           }
                         },
-                        child: Text(
-                          'Manage Profile',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
                       ),
+
                       // const SizedBox(
                       //   height: 10,
                       // ),
@@ -315,200 +240,151 @@ class ProfilePage extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                      //   InkWell(
-                      //     onTap: () async {
-                      //       Get.to(() => OrdersHistoryProvider());
-                      //     },
-                      //     child: Text(
-                      //       'Requests History',
-                      //       style: TextStyle(
-                      //         color: userController.isDark
-                      //             ? Colors.white
-                      //             : primaryColor,
-                      //         fontFamily: 'Avenir',
-                      //         fontWeight: FontWeight.w800,
-                      //         fontSize: 20,
-                      //       ),
-                      //     ),
-                      //   ),
+
                       const SizedBox(
                         height: 10,
                       ),
-                      // if (userModel.accountType != 'seeker')
-
-                      // if (userModel.status != 'approved')
 
                       if (userModel.accountType == 'seeker')
-                        InkWell(
+                        MenuCard(
+                          userController: userController,
+                          title: 'My Favourites',
+                          icon: Icons.favorite,
                           onTap: () async {
                             Get.to(() => MyFavPage());
                           },
-                          child: Text(
-                            'My Favourites',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 17,
-                            ),
-                          ),
                         ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Container(
-                        height: 1,
-                        width: Get.width * 0.8,
-                        color: changeColor(color: 'D9D9D9'),
-                      ),
 
+                      const SizedBox(
+                        height: 10,
+                      ),
                       // Container(
                       //   height: 1,
-                      //   width: Get.width * 0.8,
+                      //   width: Get.width,
                       //   color: changeColor(color: 'D9D9D9'),
                       // ),
-                      // if (userModel.status != 'approved')
-                      const SizedBox(
-                        height: 20,
-                      ),
 
-                      InkWell(
+                      // // Container(
+                      // //   height: 1,
+                      // //   width: Get.width * 0.8,
+                      // //   color: changeColor(color: 'D9D9D9'),
+                      // // ),
+                      // // if (userModel.status != 'approved')
+                      // const SizedBox(
+                      //   height: 20,
+                      // ),
+                      MenuCard(
+                        userController: userController,
+                        title: 'Share VEHYPE',
+                        icon: Icons.share,
                         onTap: () async {
-                          // Get.offAll(() => SplashPage());
                           Share.share(
                               'Spread the Word: VEHYPE Connects Vehicle Owners with Top Service Owners! https://vehype.com/');
                         },
-                        child: Text(
-                          'Share VEHYPE',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
                       ),
+
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Contact Us',
+                        icon: Icons.contact_support,
                         onTap: () async {
-                          // Get.offAll(() => SplashPage());
                           launchUrlString('mailto:support@vehype.com');
                         },
-                        child: Text(
-                          'Contact Us',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
                       ),
+
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Report a Bug',
+                        icon: Icons.bug_report,
                         onTap: () async {
-                          // Get.offAll(() => SplashPage());
-                          launchUrl(Uri.parse(
-                              'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
+                          launchUrlString('mailto:support@vehype.com');
                         },
-                        child: Text(
-                          'Privacy Policy',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
                       ),
+
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Privacy Policy',
+                        icon: Icons.privacy_tip,
                         onTap: () async {
                           launchUrl(Uri.parse(
                               'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
                           // Get.offAll(() => SplashPage());
                         },
-                        child: Text(
-                          'Terms of Service',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 10,
+                      ),
+
+                      MenuCard(
+                        userController: userController,
+                        title: 'Terms of Service',
+                        icon: Icons.security,
+                        onTap: () async {
+                          launchUrl(Uri.parse(
+                              'https://www.freeprivacypolicy.com/live/d0f1eec9-aea1-45e3-b40d-52f205295d4e'));
+                          // Get.offAll(() => SplashPage());
+                        },
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
+                      MenuCard(
+                        userController: userController,
+                        title: 'Delete Account',
+                        icon: Icons.delete,
                         onTap: () async {
-                          if (userModel.email == 'No email set') {
-                            Get.showSnackbar(GetSnackBar(
-                              message: 'Login to continue',
-                              duration: const Duration(
-                                seconds: 3,
-                              ),
-                              backgroundColor: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              mainButton: TextButton(
-                                onPressed: () {
-                                  Get.to(() => ChooseAccountTypePage());
-                                  Get.closeCurrentSnackbar();
-                                },
-                                child: Text(
-                                  'Login Page',
-                                  style: TextStyle(
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ));
+                          if (userModel.isGuest) {
+                            Get.bottomSheet(LoginSheet());
                           } else {
                             Get.to(() => DeleteAccountPage());
                           }
                         },
-                        child: Text(
-                          'Delete Account',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
-                          ),
-                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      MenuCard(
+                        userController: userController,
+                        title: 'Log Out',
+                        icon: Icons.logout,
+                        onTap: () async {
+                          Get.bottomSheet(LogoutConfirmation());
+                        },
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      InkWell(
-                        // 89
-                        onTap: () async {
-                          Get.bottomSheet(LogoutConfirmation());
-                        },
-                        child: Text(
-                          'Log Out',
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 17,
+                      Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Column(
+                            children: [
+                              InkWell(
+                                onTap: () async {},
+                                child: Text(
+                                  'App Version: 3.0.3.$currentVersion',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -516,100 +392,6 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               )),
-              const SizedBox(
-                height: 30,
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      InkWell(
-                        onTap: () async {
-                          // List ooo = [
-                          //   'x7PQVwdWnc14dS1cij4O',
-                          //   'yf5y8dWdzhAYLVDxgbHV',
-                          //   'tKIK5bnXNNkgomMJf0DW',
-                          //   'sv3yUlk7PFvwpbslA6WU',
-                          //   'sskm4ngC1Dt25bZPM4Rl',
-                          //   'f7EF2OpJ3SVIOYn1C6Yc',
-                          //   'c3b96p3ABZaOf1hslKPP',
-                          //   'ax0QMCvkzHsZcV6LeVOS',
-                          //   'Ulqy4uEtJ5wiOL6Prego',
-                          //   'U93H8n7mWPh0WrvsdwlY',
-                          //   'QUAXU4wZQmKJibZp5ZP9',
-                          //   'LWfswqfZHdRhFRHz063I',
-                          //   'KpPGfnynSrpoqBQwglgV',
-                          //   'Ay5LEbBJqHPwdJ2m5AJt',
-                          //   'A75ctiAnB29MEQjvt16y',
-                          //   '9MZu0LegYFOUkr0p1TQ8',
-                          //   '7L63wFpOJXJI266lHIgQ',
-                          //   '73ESk7pJehHxOSOWvGCM',
-                          //   '1t1PDUS2U43OkfHnaRmY',
-                          // ];
-                          // for (var id in ooo) {
-                          //   DocumentSnapshot<Map<String, dynamic>> offeee =
-                          //       await FirebaseFirestore.instance
-                          //           .collection('offers')
-                          //           .doc(id)
-                          //           .get();
-                          //   print(offeee.data()!['status']);
-                          //   print(offeee.data()!['garageId'] ?? 'GARAAfwe id');
-                          // }
-                          // QuerySnapshot<Map<String, dynamic>> offersSnap =
-                          //     await FirebaseFirestore.instance
-                          //         .collection('chats')
-                          //         .get();
-                          // List<ChatModel> offers = [];
-                          // for (var offer in offersSnap.docs) {
-                          //   offers.add(ChatModel.fromJson(offer));
-                          // }
-                          // for (var element in offers) {
-                          //   DocumentSnapshot<Map<String, dynamic>> garageSnp =
-                          //       await FirebaseFirestore.instance
-                          //           .collection('offers')
-                          //           .doc(element.offerId)
-                          //           .get();
-                          //   if (!garageSnp.exists) {
-                          //     await FirebaseFirestore.instance
-                          //         .collection('chats')
-                          //         .doc(element.id)
-                          //         .delete();
-                          //   }
-
-                          // if (element.offerRequestId == '') {
-
-                          //   await FirebaseFirestore.instance
-                          //       .collection('offers')
-                          //       .doc(element.offerId)
-                          //       .update({
-                          //     'garageId': garageSnp.docs.first.id,
-                          //   }); p
-                          //   print(element.offerId +
-                          //       ' goingggg' +
-                          //       garageSnp.docs.first.id);
-                          // }
-                          // }
-                        },
-                        child: Text(
-                          'App Version: 3.0.3.$currentVersion',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -699,6 +481,60 @@ class LogoutConfirmation extends StatelessWidget {
             const SizedBox(
               height: 20,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MenuCard extends StatelessWidget {
+  final String title;
+  final Function onTap;
+  final IconData icon;
+  final UserController userController;
+  const MenuCard(
+      {super.key,
+      required this.userController,
+      required this.title,
+      required this.icon,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: Get.width,
+      padding: const EdgeInsets.all(12),
+      height: 55,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: userController.isDark
+                ? Colors.white.withOpacity(0.4)
+                : primaryColor.withOpacity(0.4),
+          )),
+      child: InkWell(
+        onTap: () => onTap(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(icon),
+                const SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                  ),
+                ),
+              ],
+            ),
+            Icon(Icons.arrow_forward_ios_outlined)
           ],
         ),
       ),

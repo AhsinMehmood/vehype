@@ -140,7 +140,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                         'Sign in with Google',
                                         style: TextStyle(
                                             fontWeight: FontWeight.w700,
-                                            fontSize: 16,
+                                            fontSize: 17,
                                             color: userController.isDark
                                                 ? primaryColor
                                                 : Colors.white),
@@ -179,7 +179,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     width: Get.width * 0.8,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(6),
-                                      color: Colors.black,
+                                      color: changeColor(color: '#0A516F'),
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
@@ -196,7 +196,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                           'Sign in with Apple',
                                           style: TextStyle(
                                             fontWeight: FontWeight.w700,
-                                            fontSize: 16,
+                                            fontSize: 17,
                                             color: Colors.white,
                                           ),
                                         )
@@ -225,7 +225,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 //     'userId', userCredential.user!.uid);
                                 // Get.close(1);
                                 await FirebaseAuth.instance.signInAnonymously();
- 
+
                                 User? user = FirebaseAuth.instance.currentUser;
 
                                 await FirebaseFirestore.instance
@@ -258,17 +258,31 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       userModelAccount: userModel,
                                     ));
                               },
-                              child: Text(
-                                'Continue as a Guest',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  // textBaseline: TextBaseline.ideographic,
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 17,
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
+                              child: Container(
+                                height: 50,
+                                padding: const EdgeInsets.only(
+                                  top: 5,
+                                  bottom: 5,
+                                  left: 5,
+                                  right: 5,
+                                ),
+                                width: Get.width * 0.8,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  color: changeColor(color: '#0A516F'),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Continue as a Guest',
+                                    style: TextStyle(
+                                      // decoration: TextDecoration.underline,
+                                      // textBaseline: TextBaseline.ideographic,
+                                      // fontFamily: 'Avenir',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 17,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -281,7 +295,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 text: TextSpan(
                                   style: const TextStyle(
-                                    fontFamily: 'Avenir',
+                                    // fontFamily: 'Avenir',
                                     fontWeight: FontWeight.w400,
                                     fontSize: 14,
                                     color: Colors.black,
@@ -341,7 +355,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     TextSpan(
                                       text: ' and ',
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
+                                        //fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
                                         color: userController.isDark
@@ -361,7 +375,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                     TextSpan(
                                       text: '.',
                                       style: TextStyle(
-                                        fontFamily: 'Avenir',
+                                        //  fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
                                         fontSize: 16,
                                         color: userController.isDark

@@ -629,9 +629,9 @@ class LocationPermissionSheet extends StatelessWidget {
             height: 20,
           ),
           Text(
-            userController.userModel!.accountType == 'Provider'
+            userController.userModel!.accountType == 'provider'
                 ? 'Enable Location for Service\nAvailability'
-                : 'Enable Location for Nearby\nService Providers',
+                : 'Enable Location for Nearby\nService Owners',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,

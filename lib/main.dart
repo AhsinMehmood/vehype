@@ -22,9 +22,9 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Pages/choose_account_type.dart';
+
 import 'package:vehype/Pages/splash_page.dart';
-import 'package:vehype/Pages/tabs_page.dart';
+
 import 'package:vehype/const.dart';
 import 'package:vehype/firebase_options.dart';
 
@@ -245,25 +245,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SplashPage();
-        } else if (snapshot.hasData) {
-          return TabsPage(); // User is logged in
-        } else {
-          return ChooseAccountTypePage(); // User is not logged in
-        }
-      },
-    );
-  }
-}
 
 class AppUpdate extends StatelessWidget {
   const AppUpdate({super.key});

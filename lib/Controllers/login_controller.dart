@@ -157,10 +157,14 @@ class LoginController {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
       final rawNonce = generateNonce();
-      // print(rawNonce);
       final nonce = sha256ofString(rawNonce);
+
+      // Check if Sign in with Apple is available
       bool isAvail = await SignInWithApple.isAvailable();
-      //Danyal223344.@
+      if (!isAvail) {
+        throw Exception('Sign in with Apple is not available on this device.');
+      }
+
       final AuthorizationCredentialAppleID credential =
           await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -170,11 +174,15 @@ class LoginController {
         nonce: nonce,
       );
 
+      // Log for debugging purposes
+      print("identityToken: ${credential.identityToken}");
+      print("nonce: $rawNonce");
+
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
         rawNonce: rawNonce,
-        // secret: nonce,
       );
+
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
       UserCredential userCredential =
@@ -185,54 +193,46 @@ class LoginController {
       String? name = userCredential.user!.displayName;
 
       sharedPreferences.setString('userId', userId);
+
       if (userCredential.additionalUserInfo!.isNewUser) {
         String? urlAvatar = userCredential.user!.photoURL;
         await FirebaseFirestore.instance.collection('users').doc(userId).set({
           'name': name,
-          // 'accountType': 'owner',
           'profileUrl': urlAvatar,
           'id': userId,
           'email': email,
         });
+
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(userId)
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
-        Get.close(1);
 
-        Get.offAll(() => SelectAccountType(
-              userModelAccount: userModel,
-            ));
+        Get.close(1);
+        Get.offAll(() => SelectAccountType(userModelAccount: userModel));
       } else {
         UserController userController =
             Provider.of<UserController>(context, listen: false);
 
-        // if(){}
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(userId)
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
+
         Get.close(1);
+
         if (userModel.accountType == '') {
-          Get.offAll(() => SelectAccountType(
-                userModelAccount: userModel,
-              ));
+          Get.offAll(() => SelectAccountType(userModelAccount: userModel));
         } else {
           if (userModel.adminStatus == 'blocked') {
             Get.offAll(() => const DisabledWidget());
           } else {
             userController.getUserStream(userId + userModel.accountType);
-            DocumentSnapshot<Map<String, dynamic>> accountType =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userId)
-                    .get();
             OneSignal.login(userId + userModel.accountType);
-
             Get.offAll(() => const TabsPage());
           }
         }
@@ -240,9 +240,17 @@ class LoginController {
     } on FirebaseAuthException catch (e) {
       Get.close(1);
       Get.showSnackbar(GetSnackBar(
-        message: e.message,
+        message: 'Firebase Auth Error: ${e.message}',
         duration: const Duration(seconds: 3),
       ));
+      print('Firebase Auth Exception: $e');
+    } catch (e) {
+      Get.close(1);
+      Get.showSnackbar(GetSnackBar(
+        message: 'Error: ${e.toString()}',
+        duration: const Duration(seconds: 3),
+      ));
+      print('Exception: $e');
     }
   }
 

@@ -32,6 +32,14 @@
 				<string>com.googleusercontent.apps.832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc</string>
 			</array>
 		</dict>
+  <dict>
+    <key>CFBundleURLName</key>
+    <string>com.nomadllc.vehype</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    </array>
+  </dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
