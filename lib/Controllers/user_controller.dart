@@ -481,11 +481,7 @@ class UserController with ChangeNotifier {
         .get();
     OffersModel offersModel = OffersModel.fromJson(requestSnap);
 
-    OffersController().cancelOfferByService(
-        offersReceivedModel,
-        offersModel,
-        userModel.userId,
-        offersReceivedModel.offerBy,
+    OffersController().cancelOfferByService(offersReceivedModel, offersModel,
         'The request was automatically canceled.');
 
     DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore

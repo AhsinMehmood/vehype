@@ -113,7 +113,7 @@ class OffersController {
     });
     QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
         .instance
-         .collection('offersReceived')
+        .collection('offersReceived')
         .where('status', isEqualTo: 'Pending')
         .where('offerId', isEqualTo: offersModel.offerId)
         .get();
@@ -273,12 +273,8 @@ class OffersController {
     });
   }
 
-  cancelOfferByService(
-      OffersReceivedModel offersReceivedModel,
-      OffersModel offersModel,
-      String userId,
-      String serviceId,
-      String cancelReason) async {
+  cancelOfferByService(OffersReceivedModel offersReceivedModel,
+      OffersModel offersModel, String cancelReason) async {
     await FirebaseFirestore.instance
         .collection('offersReceived')
         .doc(offersReceivedModel.id)

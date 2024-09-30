@@ -232,8 +232,6 @@ class _ServiceCancelRequestConfirmationSheetState
                       OffersController().cancelOfferByService(
                           widget.offersReceivedModel,
                           widget.offersModel,
-                          widget.userController.userModel!.userId,
-                          widget.offersReceivedModel.offerBy,
                           cancelReason.text.trim());
                       DocumentSnapshot<Map<String, dynamic>> ownerSnap =
                           await FirebaseFirestore.instance

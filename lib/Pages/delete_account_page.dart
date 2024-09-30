@@ -326,7 +326,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           OffersProvider offersProvider =
                               Provider.of<OffersProvider>(context,
                                   listen: false);
-                          await OneSignal.logout();
+                          OneSignal.logout();
 
                           userController.closeStream();
 

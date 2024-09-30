@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -158,6 +159,7 @@ class LoginController {
           await SharedPreferences.getInstance();
       final rawNonce = generateNonce();
       final nonce = sha256ofString(rawNonce);
+      Logger().d("nonce: $rawNonce");
 
       // Check if Sign in with Apple is available
       bool isAvail = await SignInWithApple.isAvailable();
@@ -171,18 +173,18 @@ class LoginController {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName
         ],
-        nonce: nonce,
+        // nonce: nonce,
       );
 
       // Log for debugging purposes
-      print("identityToken: ${credential.identityToken}");
-      print("nonce: $rawNonce");
+      // Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
-        rawNonce: rawNonce,
+        // rawNonce: rawNonce,
       );
-
+      Logger().d("identityToken: ${credential.identityToken}");
+      Logger().d("nonce: $rawNonce");
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
       UserCredential userCredential =
