@@ -43,7 +43,7 @@ dependencies:
   # image_select: ^0.0.3
   # advanced_media_picker: ^0.0.16
   # flutter_image_compress: ^2.3.0
-  extended_image: ^8.2.1
+  # extended_image: ^8.2.1
   map_location_picker: 
   # media_picker_widget: ^1.0.7
   # mixpanel_flutter: ^2.3.1

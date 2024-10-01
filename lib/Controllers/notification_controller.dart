@@ -271,7 +271,7 @@ class NotificationController {
         'data': {
           'offerId': offerId,
           'type': 'request',
-        'requestId': requestId,
+          'requestId': requestId,
         },
       };
 

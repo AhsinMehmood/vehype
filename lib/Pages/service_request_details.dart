@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -328,10 +328,23 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                                                     ));
                                                               },
                                                               child:
-                                                                  ExtendedImage
-                                                                      .network(
-                                                                garageModel
-                                                                    .imageUrl,
+                                                                  CachedNetworkImage(
+                                                                placeholder:
+                                                                    (context,
+                                                                        url) {
+                                                                  return Center(
+                                                                    child:
+                                                                        CircularProgressIndicator(),
+                                                                  );
+                                                                },
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    const SizedBox
+                                                                        .shrink(),
+                                                                imageUrl:
+                                                                    garageModel
+                                                                        .imageUrl,
                                                                 fit: BoxFit
                                                                     .cover,
                                                                 height: 300,
@@ -363,9 +376,21 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                                                     ));
                                                               },
                                                               child:
-                                                                  ExtendedImage
-                                                                      .network(
-                                                                url,
+                                                                  CachedNetworkImage(
+                                                                placeholder:
+                                                                    (context,
+                                                                        url) {
+                                                                  return Center(
+                                                                    child:
+                                                                        CircularProgressIndicator(),
+                                                                  );
+                                                                },
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    const SizedBox
+                                                                        .shrink(),
+                                                                imageUrl: url,
                                                                 fit: BoxFit
                                                                     .cover,
                                                                 height: 300,

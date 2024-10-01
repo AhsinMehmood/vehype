@@ -192,7 +192,14 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
-        // print(userModel.userId);
+        print(userModel.userId);
+        // OneSignal.login(userModel.userId);
+        NotificationController().sendNotification(
+            offerId: 'offerId',
+            requestId: 'requestId',
+            title: 'title',
+            subtitle: 'subtitle',
+            userIds: [userModel.userId]);
         userController.changeTabIndex(index);
 
         // QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -235,7 +242,7 @@ class _TabsPageState extends State<TabsPage> {
 
   BottomNavigationBar bottomNavigationBarSeeker() {
     final UserController userController = Provider.of<UserController>(context);
-    // final UserModel userModel = Provider.of<UserController>(context).userModel!;
+    final UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -252,6 +259,17 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
+        print(userModel.userId);
+        OneSignal.Notifications.requestPermission(true);
+        print(OneSignal.User.pushSubscription.id);
+
+        OneSignal.login(userModel.userId);
+        NotificationController().sendNotification(
+            offerId: 'offerId',
+            requestId: 'requestId',
+            title: 'title',
+            subtitle: 'subtitle',
+            userIds: [userModel.userId]);
         userController.changeTabIndex(index);
       },
       items: seekerTabs(),
@@ -831,7 +849,7 @@ class NotificationSheet extends StatelessWidget {
         ),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      height: 300,
+      // height: 300,
       width: Get.width,
       padding: const EdgeInsets.all(15),
       child: Column(

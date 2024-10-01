@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -269,19 +270,30 @@ class _MessagePageState extends State<MessagePage> {
                                                               currentIndex: 0,
                                                             ));
                                                       },
-                                                      child:
-                                                          ExtendedImage.network(
-                                                        widget.garageModel
-                                                            .imageUrl,
-                                                        height: 50,
-                                                        width: 50,
-                                                        fit: BoxFit.cover,
-                                                        cache: true,
-                                                        shape:
-                                                            BoxShape.rectangle,
+                                                      child: ClipRRect(
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(6),
+                                                        child:
+                                                            CachedNetworkImage(
+                                                          placeholder:
+                                                              (context, url) {
+                                                            return Center(
+                                                              child:
+                                                                  CircularProgressIndicator(),
+                                                            );
+                                                          },
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              const SizedBox
+                                                                  .shrink(),
+                                                          imageUrl: widget
+                                                              .garageModel
+                                                              .imageUrl,
+                                                          height: 50,
+                                                          width: 50,
+                                                          fit: BoxFit.cover,
+                                                        ),
                                                       ),
                                                     ),
                                                     const SizedBox(
@@ -664,18 +676,20 @@ class _MessagePageState extends State<MessagePage> {
                                                           if (mediaModel
                                                                   .isVideo ==
                                                               false)
-                                                            ExtendedImage.file(
-                                                              mediaModel.file,
-                                                              shape: BoxShape
-                                                                  .rectangle,
+                                                            ClipRRect(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          12),
-                                                              fit: BoxFit.cover,
-                                                              height: 200,
-                                                              width: Get.width *
-                                                                  0.45,
+                                                                          6),
+                                                              child: Image.file(
+                                                                mediaModel.file,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                height: 200,
+                                                                width:
+                                                                    Get.width *
+                                                                        0.45,
+                                                              ),
                                                             )
                                                           else
                                                             VideoPlayerLocal(
@@ -1227,8 +1241,14 @@ class _MessagePageState extends State<MessagePage> {
             ),
             ClipRRect(
               borderRadius: BorderRadius.circular(200),
-              child: ExtendedImage.network(
-                secondUser.profileUrl,
+              child: CachedNetworkImage(
+                placeholder: (context, url) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+                errorWidget: (context, url, error) => const SizedBox.shrink(),
+                imageUrl: secondUser.profileUrl,
                 height: 22,
                 width: 22,
                 fit: BoxFit.cover,
@@ -1499,18 +1519,26 @@ class SecondUserMessageWidget extends StatelessWidget {
                         // fit: StackFit.expand,
                         children: [
                           SizedBox(
-                            child: ExtendedImage.network(
-                              message.thumbnailUrl,
-                              shape: BoxShape.rectangle,
+                            child: ClipRRect(
                               borderRadius: message.text != ''
                                   ? BorderRadius.only(
                                       topLeft: Radius.circular(6),
                                       topRight: Radius.circular(6),
                                     )
                                   : BorderRadius.circular(6),
-                              fit: BoxFit.cover,
-                              height: 200,
-                              width: Get.width * 0.75,
+                              child: CachedNetworkImage(
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox.shrink(),
+                                imageUrl: message.thumbnailUrl,
+                                fit: BoxFit.cover,
+                                height: 200,
+                                width: Get.width * 0.75,
+                              ),
                             ),
                           ),
                           Align(
@@ -1541,18 +1569,26 @@ class SecondUserMessageWidget extends StatelessWidget {
                     onTap: () {
                       Get.to(() => FullImagePageView(urls: [message.mediaUrl]));
                     },
-                    child: ExtendedImage.network(
-                      message.mediaUrl,
-                      shape: BoxShape.rectangle,
+                    child: ClipRRect(
                       borderRadius: message.text != ''
                           ? BorderRadius.only(
                               topLeft: Radius.circular(6),
                               topRight: Radius.circular(6),
                             )
                           : BorderRadius.circular(6),
-                      fit: BoxFit.cover,
-                      height: 200,
-                      width: Get.width * 0.75,
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorWidget: (context, url, error) =>
+                            const SizedBox.shrink(),
+                        imageUrl: message.mediaUrl,
+                        fit: BoxFit.cover,
+                        height: 200,
+                        width: Get.width * 0.75,
+                      ),
                     ),
                   ),
                 // const SizedBox(
@@ -1644,8 +1680,15 @@ class TopBarMessage extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(200),
-                    child: ExtendedImage.network(
-                      secondUser.profileUrl,
+                    child: CachedNetworkImage(
+                      placeholder: (context, url) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      errorWidget: (context, url, error) =>
+                          const SizedBox.shrink(),
+                      imageUrl: secondUser.profileUrl,
                       height: 45,
                       width: 45,
                       fit: BoxFit.cover,
@@ -2085,18 +2128,26 @@ class MessageWidget extends StatelessWidget {
                           // fit: StackFit.expand,
                           children: [
                             SizedBox(
-                              child: ExtendedImage.network(
-                                message.thumbnailUrl,
-                                shape: BoxShape.rectangle,
+                              child: ClipRRect(
                                 borderRadius: message.text != ''
                                     ? BorderRadius.only(
                                         topLeft: Radius.circular(6),
                                         topRight: Radius.circular(6),
                                       )
                                     : BorderRadius.circular(6),
-                                fit: BoxFit.cover,
-                                height: 200,
-                                width: Get.width * 0.75,
+                                child: CachedNetworkImage(
+                                  placeholder: (context, url) {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  },
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox.shrink(),
+                                  imageUrl: message.thumbnailUrl,
+                                  fit: BoxFit.cover,
+                                  height: 200,
+                                  width: Get.width * 0.75,
+                                ),
                               ),
                             ),
                             Align(
@@ -2128,18 +2179,26 @@ class MessageWidget extends StatelessWidget {
                         Get.to(
                             () => FullImagePageView(urls: [message.mediaUrl]));
                       },
-                      child: ExtendedImage.network(
-                        message.mediaUrl,
-                        shape: BoxShape.rectangle,
+                      child: ClipRRect(
                         borderRadius: message.text != ''
                             ? BorderRadius.only(
                                 topLeft: Radius.circular(6),
                                 topRight: Radius.circular(6),
                               )
                             : BorderRadius.circular(6),
-                        fit: BoxFit.cover,
-                        height: 200,
-                        width: Get.width * 0.75,
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorWidget: (context, url, error) =>
+                              const SizedBox.shrink(),
+                          imageUrl: message.mediaUrl,
+                          fit: BoxFit.cover,
+                          height: 200,
+                          width: Get.width * 0.75,
+                        ),
                       ),
                     ),
                   // const SizedBox(

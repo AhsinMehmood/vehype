@@ -1,5 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -322,9 +323,20 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               200),
-                                                      child:
-                                                          ExtendedImage.network(
-                                                        senderModel.profileUrl,
+                                                      child: CachedNetworkImage(
+                                                        placeholder:
+                                                            (context, url) {
+                                                          return Center(
+                                                            child:
+                                                                CircularProgressIndicator(),
+                                                          );
+                                                        },
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            const SizedBox
+                                                                .shrink(),
+                                                        imageUrl: senderModel
+                                                            .profileUrl,
                                                         height: 65,
                                                         width: 65,
                                                         fit: BoxFit.cover,

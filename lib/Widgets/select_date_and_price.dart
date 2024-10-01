@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -129,14 +130,21 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ExtendedImage.network(
-                          widget.garageModel.imageUrl,
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.cover,
-                          cache: true,
-                          shape: BoxShape.rectangle,
+                        ClipRRect(
                           borderRadius: BorderRadius.circular(6),
+                          child: CachedNetworkImage(
+                            placeholder: (context, url) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorWidget: (context, url, error) =>
+                                const SizedBox.shrink(),
+                            imageUrl: widget.garageModel.imageUrl,
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         const SizedBox(
                           width: 8,

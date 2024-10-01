@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_masonry_view/flutter_masonry_view.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -150,16 +150,19 @@ class SeekerProfileWidget extends StatelessWidget {
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(200),
-                        child: ExtendedImage.network(
-                          profileModel.profileUrl,
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorWidget: (context, url, error) =>
+                              const SizedBox.shrink(),
+                          imageUrl: profileModel.profileUrl,
                           width: 65,
                           height: 65,
                           fit: BoxFit.fill,
-                          cache: true,
-                          // border: Border.all(color: Colors.red, width: 1.0),
-                          shape: BoxShape.circle,
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(200.0)),
+
                           //cancelToken: cancellationToken,
                         ),
                       ),
@@ -867,15 +870,18 @@ class SecondUserHeaderWidget extends StatelessWidget {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(200),
-                child: ExtendedImage.network(
-                  profile.profileUrl,
+                child: CachedNetworkImage(
+                  placeholder: (context, url) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorWidget: (context, url, error) => const SizedBox.shrink(),
+                  imageUrl: profile.profileUrl,
                   width: 55,
                   height: 55,
                   fit: BoxFit.fill,
-                  cache: true,
-                  // border: Border.all(color: Colors.red, width: 1.0),
-                  shape: BoxShape.circle,
-                  borderRadius: BorderRadius.all(Radius.circular(200.0)),
+
                   //cancelToken: cancellationToken,
                 ),
               ),
@@ -1206,7 +1212,15 @@ class SecondUserHeaderWidget extends StatelessWidget {
                             currentIndex: index,
                           ));
                     },
-                    child: ExtendedImage.network(item));
+                    child: CachedNetworkImage(
+                        placeholder: (context, url) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorWidget: (context, url, error) =>
+                            const SizedBox.shrink(),
+                        imageUrl: item));
               },
             ),
           ),

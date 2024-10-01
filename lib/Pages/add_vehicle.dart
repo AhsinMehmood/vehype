@@ -2,7 +2,8 @@
 
 // import 'dart:math';
 
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -102,7 +103,7 @@ class _AddVehicleState extends State<AddVehicle> {
               children: [
                 const SizedBox(
                   height: 10,
-                ), 
+                ),
                 InkWell(
                   onTap: () {
                     // completeProfileProvider.selectImages(0, context);
@@ -175,9 +176,15 @@ class _AddVehicleState extends State<AddVehicle> {
                               )
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
-                                child: ExtendedImage.network(
-                                  garageController.imageOneUrl,
-                                  handleLoadingProgress: true,
+                                child: CachedNetworkImage(
+                                  placeholder: (context, url) {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  },
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox.shrink(),
+                                  imageUrl: garageController.imageOneUrl,
                                   fit: BoxFit.cover,
                                 ),
                               )),

@@ -3,8 +3,9 @@
 import 'dart:async';
 // import 'package:fuse/fuse.dart'; // Import the fuse package
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fuzzy/data/result.dart';
@@ -703,14 +704,17 @@ class _ExplorePageState extends State<ExplorePage> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(200),
-                child: ExtendedImage.network(
-                  userData.profileUrl,
+                child: CachedNetworkImage(
+                  placeholder: (context, url) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorWidget: (context, url, error) => const SizedBox.shrink(),
+                  imageUrl: userData.profileUrl,
                   fit: BoxFit.cover,
                   height: 20,
-                  cache: true,
                   width: 20,
-                  shape: BoxShape.circle,
-                  borderRadius: BorderRadius.circular(200),
                 ),
               ),
             ),

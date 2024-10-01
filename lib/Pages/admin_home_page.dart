@@ -1,14 +1,15 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/comments_page.dart';
-import 'package:vehype/const.dart'; 
+import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
 
@@ -146,16 +147,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(200),
-                                        child: ExtendedImage.network(
-                                          reportToUserModel.profileUrl,
+                                        child: CachedNetworkImage(
+                                          placeholder: (context, url) {
+                                            return Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
+                                          },
+                                          errorWidget: (context, url, error) =>
+                                              const SizedBox.shrink(),
+                                          imageUrl:
+                                              reportToUserModel.profileUrl,
                                           width: 75,
                                           height: 75,
                                           fit: BoxFit.fill,
-                                          cache: true,
-                                          // border: Border.all(color: Colors.red, width: 1.0),
-                                          shape: BoxShape.circle,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(200.0)),
+
                                           //cancelToken: cancellationToken,
                                         ),
                                       ),
@@ -401,16 +407,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(200),
-                                        child: ExtendedImage.network(
-                                          reportToUserModel.profileUrl,
+                                        child: CachedNetworkImage(
+                                          placeholder: (context, url) {
+                                            return Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            );
+                                          },
+                                          errorWidget: (context, url, error) =>
+                                              const SizedBox.shrink(),
+                                          imageUrl:
+                                              reportToUserModel.profileUrl,
                                           width: 75,
                                           height: 75,
                                           fit: BoxFit.fill,
-                                          cache: true,
-                                          // border: Border.all(color: Colors.red, width: 1.0),
-                                          shape: BoxShape.circle,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(200.0)),
+
                                           //cancelToken: cancellationToken,
                                         ),
                                       ),

@@ -1,5 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
@@ -77,8 +78,15 @@ class OwnerOfferReceivedNewWidget extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(200),
-                          child: ExtendedImage.network(
-                            secondUser.profileUrl,
+                          child: CachedNetworkImage(
+                            placeholder: (context, url) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorWidget: (context, url, error) =>
+                                const SizedBox.shrink(),
+                            imageUrl: secondUser.profileUrl,
                             height: 65,
                             width: 65,
                             fit: BoxFit.cover,

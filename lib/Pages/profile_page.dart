@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -15,6 +16,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
+import 'package:vehype/Pages/theme_page.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
 
@@ -70,16 +72,20 @@ class ProfilePage extends StatelessWidget {
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(200),
-                      child: ExtendedImage.network(
-                        userModel.profileUrl,
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorWidget: (context, url, error) =>
+                            const SizedBox.shrink(),
+                        imageUrl: userModel.profileUrl,
 
                         width: 75,
                         height: 75,
                         fit: BoxFit.fill,
-                        cache: true,
-                        // border: Border.all(color: Colors.red, width: 1.0),
-                        shape: BoxShape.circle,
-                        borderRadius: BorderRadius.all(Radius.circular(200.0)),
+
                         //cancelToken: cancellationToken,
                       ),
                     ),
@@ -105,30 +111,8 @@ class ProfilePage extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: () {
-                          if (userModel.email == 'No email set') {
-                            Get.showSnackbar(GetSnackBar(
-                              message: 'Login to continue',
-                              duration: const Duration(
-                                seconds: 3,
-                              ),
-                              backgroundColor: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              mainButton: TextButton(
-                                onPressed: () {
-                                  Get.to(() => ChooseAccountTypePage());
-                                  Get.closeCurrentSnackbar();
-                                },
-                                child: Text(
-                                  'Login Page',
-                                  style: TextStyle(
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ));
+                          if (userModel.isGuest) {
+                            Get.bottomSheet(LoginSheet());
                           } else {
                             Get.to(() => CommentsPage(data: userModel));
                           }
@@ -192,11 +176,17 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: userController.sameAsSystem
+                            ? 'Same as System'
+                            : userController.isDark
+                                ? 'Dark Theme'
+                                : 'Light Theme',
                         userController: userController,
                         title: 'Appearance',
                         icon: Icons.style_outlined,
                         onTap: () async {
-                          userController.changeTheme(!userController.isDark);
+                          // userController.changeTheme(!userController.isDark);
+                          Get.to(() => ThemePage());
                         },
                       ),
 
@@ -205,6 +195,7 @@ class ProfilePage extends StatelessWidget {
                       ),
 
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Manage Profile',
                         icon: Icons.person,
@@ -247,6 +238,7 @@ class ProfilePage extends StatelessWidget {
 
                       if (userModel.accountType == 'seeker')
                         MenuCard(
+                          secondTitle: '',
                           userController: userController,
                           title: 'My Favourites',
                           icon: Icons.favorite,
@@ -274,6 +266,7 @@ class ProfilePage extends StatelessWidget {
                       //   height: 20,
                       // ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Share VEHYPE',
                         icon: Icons.share,
@@ -287,6 +280,7 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Contact Us',
                         icon: Icons.contact_support,
@@ -299,6 +293,7 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Report a Bug',
                         icon: Icons.bug_report,
@@ -311,6 +306,7 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Privacy Policy',
                         icon: Icons.privacy_tip,
@@ -326,6 +322,7 @@ class ProfilePage extends StatelessWidget {
                       ),
 
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Terms of Service',
                         icon: Icons.security,
@@ -339,6 +336,7 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Delete Account',
                         icon: Icons.delete,
@@ -355,6 +353,7 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
                       MenuCard(
+                        secondTitle: '',
                         userController: userController,
                         title: 'Log Out',
                         icon: Icons.logout,
@@ -490,11 +489,13 @@ class LogoutConfirmation extends StatelessWidget {
 
 class MenuCard extends StatelessWidget {
   final String title;
+  final String secondTitle;
   final Function onTap;
   final IconData icon;
   final UserController userController;
   const MenuCard(
       {super.key,
+      required this.secondTitle,
       required this.userController,
       required this.title,
       required this.icon,
@@ -520,21 +521,39 @@ class MenuCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon),
+                Icon(
+                  icon,
+                  size: 20,
+                ),
                 const SizedBox(
-                  width: 10,
+                  width: 5,
                 ),
                 Text(
                   title,
                   style: TextStyle(
                     color: userController.isDark ? Colors.white : primaryColor,
                     fontWeight: FontWeight.w700,
-                    fontSize: 17,
+                    fontSize: 15,
                   ),
                 ),
               ],
             ),
-            Icon(Icons.arrow_forward_ios_outlined)
+            Row(
+              children: [
+                Text(
+                  secondTitle,
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_outlined,
+                  size: 18,
+                ),
+              ],
+            )
           ],
         ),
       ),

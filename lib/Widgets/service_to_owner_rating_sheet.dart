@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -226,7 +226,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                                             : primaryColor.withOpacity(0.2))),
                                 child: Stack(
                                   children: [
-                                    ExtendedImage.file(
+                                    Image.file(
                                       image!,
                                       fit: BoxFit.cover,
                                       height: 220,

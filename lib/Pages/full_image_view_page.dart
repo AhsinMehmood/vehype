@@ -1,4 +1,5 @@
-import 'package:extended_image/extended_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -25,14 +26,20 @@ class FullImagePageView extends StatelessWidget {
             return Stack(
               children: [
                 Center(
-                  child: ExtendedImage.network(
-                    urls[index],
+                  child: CachedNetworkImage(
+                    placeholder: (context, url) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                    errorWidget: (context, url, error) =>
+                        const SizedBox.shrink(),
+                    imageUrl: urls[index],
                     // height: Get.height,
                     // width: Get.width,
-                    cache: true,
+
                     // fit: BoxFit.cover,
                     filterQuality: FilterQuality.high,
-                    mode: ExtendedImageMode.gesture,
                   ),
                 ),
                 Padding(

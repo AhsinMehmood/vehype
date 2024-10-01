@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -217,8 +218,15 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(6),
-                                    child: ExtendedImage.network(
-                                      garageController.imageOneUrl,
+                                    child: CachedNetworkImage(
+                                      placeholder: (context, url) {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      },
+                                      errorWidget: (context, url, error) =>
+                                          const SizedBox.shrink(),
+                                      imageUrl: garageController.imageOneUrl,
                                       height: Get.width * 0.45,
                                       width: Get.width,
                                       fit: BoxFit.cover,
@@ -1099,11 +1107,19 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                         child: garageController.requestImages[0].imageFile ==
                                 null
-                            ? ExtendedImage.network(
-                                garageController.requestImages[0].imageUrl,
+                            ? CachedNetworkImage(
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox.shrink(),
+                                imageUrl:
+                                    garageController.requestImages[0].imageUrl,
                                 fit: BoxFit.cover,
                               )
-                            : ExtendedImage.file(
+                            : Image.file(
                                 garageController.requestImages[0].imageFile!,
                                 fit: BoxFit.cover,
                               ),
@@ -1158,11 +1174,19 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                         child: garageController.requestImages[1].imageFile ==
                                 null
-                            ? ExtendedImage.network(
-                                garageController.requestImages[1].imageUrl,
+                            ? CachedNetworkImage(
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox.shrink(),
+                                imageUrl:
+                                    garageController.requestImages[1].imageUrl,
                                 fit: BoxFit.cover,
                               )
-                            : ExtendedImage.file(
+                            : Image.file(
                                 garageController.requestImages[1].imageFile!,
                                 fit: BoxFit.cover,
                               ),
@@ -1217,11 +1241,19 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(13),
                         child: garageController.requestImages[2].imageFile ==
                                 null
-                            ? ExtendedImage.network(
-                                garageController.requestImages[2].imageUrl,
+                            ? CachedNetworkImage(
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox.shrink(),
+                                imageUrl:
+                                    garageController.requestImages[2].imageUrl,
                                 fit: BoxFit.cover,
                               )
-                            : ExtendedImage.file(
+                            : Image.file(
                                 garageController.requestImages[2].imageFile!,
                                 fit: BoxFit.cover,
                               ),
@@ -1447,9 +1479,16 @@ class CreateRequestImageWidget extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: ExtendedImage.network(
-                    requestImageModel.imageUrl,
-                    handleLoadingProgress: true,
+                  child: CachedNetworkImage(
+                    placeholder: (context, url) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
+                    errorWidget: (context, url, error) =>
+                        const SizedBox.shrink(),
+                    imageUrl: requestImageModel.imageUrl,
+                    // handleLoadingProgress: true,
                     fit: BoxFit.cover,
                     width: Get.width * 0.30,
                     height: Get.width * 0.30,
@@ -1628,16 +1667,21 @@ class SelectVehicle extends StatelessWidget {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(6),
-                                          child: ExtendedImage.network(
-                                            vehicle.imageUrl,
+                                          child: CachedNetworkImage(
+                                            placeholder: (context, url) {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const SizedBox.shrink(),
+                                            imageUrl: vehicle.imageUrl,
                                             width: Get.width * 0.9,
                                             height: Get.width * 0.35,
                                             fit: BoxFit.cover,
-                                            cache: true,
-                                            // border: Border.all(color: Colors.red, width: 1.0),
-                                            shape: BoxShape.rectangle,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(6.0)),
+
                                             //cancelToken: cancellationToken,
                                           ),
                                         ),

@@ -1,5 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -139,8 +140,17 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                                   currentIndex: 0,
                                                 ));
                                           },
-                                          child: ExtendedImage.network(
-                                            garageModel.imageUrl,
+                                          child: CachedNetworkImage(
+                                            placeholder: (context, url) {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const SizedBox.shrink(),
+                                            imageUrl: garageModel.imageUrl,
                                             fit: BoxFit.cover,
                                             height: 300,
                                             width: Get.width,
@@ -160,8 +170,17 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                                   currentIndex: index - 1,
                                                 ));
                                           },
-                                          child: ExtendedImage.network(
-                                            url,
+                                          child: CachedNetworkImage(
+                                            placeholder: (context, url) {
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const SizedBox.shrink(),
+                                            imageUrl: url,
                                             fit: BoxFit.cover,
                                             height: 300,
                                             width: Get.width,

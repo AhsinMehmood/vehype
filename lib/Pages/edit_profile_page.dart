@@ -4,8 +4,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_image/extended_image.dart';
+// import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -555,16 +556,19 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(200),
-                        child: ExtendedImage.network(
-                          userController.userModel!.profileUrl,
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorWidget: (context, url, error) =>
+                              const SizedBox.shrink(),
+                          imageUrl: userController.userModel!.profileUrl,
                           width: 125,
                           height: 125,
                           fit: BoxFit.fill,
-                          cache: true,
-                          // border: Border.all(color: Colors.red, width: 1.0),
-                          shape: BoxShape.circle,
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(200.0)),
+
                           //cancelToken: cancellationToken,
                         ),
                       ),

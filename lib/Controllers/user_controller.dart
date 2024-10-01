@@ -116,9 +116,11 @@ class UserController with ChangeNotifier {
           ? Brightness.light
           : Brightness.dark, // Sets the icon brightness
     ));
+    notifyListeners();
   }
 
   bool isDark = false;
+  bool sameAsSystem = false;
 
   initTheme() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -129,21 +131,35 @@ class UserController with ChangeNotifier {
       // Check the system theme mode and set `isDark` accordingly
       isDark =
           WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+      sameAsSystem = true;
     } else {
       // Use the saved preference
       isDark = theme;
+      sameAsSystem = false;
     }
     updateStatusBarColor(isDark); // Update status bar color
 
     notifyListeners();
+    return theme;
   }
 
   changeTheme(bool value) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setBool('isDark', value);
     isDark = value;
+    sameAsSystem = false;
     updateStatusBarColor(isDark); // Update status bar color
 
+    notifyListeners();
+  }
+
+  sameAsSystemChange() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.remove('isDark');
+    isDark =
+        WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    updateStatusBarColor(isDark);
+    sameAsSystem = true;
     notifyListeners();
   }
 

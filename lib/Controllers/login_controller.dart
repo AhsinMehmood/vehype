@@ -173,7 +173,7 @@ class LoginController {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName
         ],
-        // nonce: nonce,
+        nonce: nonce,
       );
 
       // Log for debugging purposes
@@ -181,7 +181,7 @@ class LoginController {
 
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
-        // rawNonce: rawNonce,
+        rawNonce: rawNonce,
       );
       Logger().d("identityToken: ${credential.identityToken}");
       Logger().d("nonce: $rawNonce");
@@ -272,6 +272,33 @@ class LoginController {
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
+
+
+
+  Future<UserCredential?> signInWithApple() async {
+  try {
+    // Request credentials from Apple
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    // Create an OAuth credential using the received token
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleCredential.identityToken,
+      accessToken: appleCredential.authorizationCode,
+    );
+
+    // Sign in to Firebase using the Apple OAuth credential
+    return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+  } catch (error) {
+    print("Error during Apple Sign In: $error");
+    return null;
+  }
+}
+
 }
 
 

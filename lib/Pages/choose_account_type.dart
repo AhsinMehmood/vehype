@@ -151,7 +151,20 @@ class ChooseAccountTypePage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(
-                              height: 15,
+                              height: 10,
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                UserCredential? userCredential =
+                                    await LoginController().signInWithApple();
+                                if (userCredential != null) {
+                                  print(
+                                      "Signed in successfully: ${userCredential.user?.uid}");
+                                } else {
+                                  print("Sign in with Apple failed");
+                                }
+                              },
+                              child: Text('Sign In with Apple'),
                             ),
                             if (Platform.isIOS)
                               InkWell(
@@ -207,7 +220,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                               ),
                             if (Platform.isIOS)
                               const SizedBox(
-                                height: 15,
+                                height: 10,
                               ),
                             InkWell(
                               onTap: () async {
