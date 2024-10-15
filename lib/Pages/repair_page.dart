@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -52,33 +51,10 @@ class RepairPage extends StatelessWidget {
               // OneSignal.login(userModel.userId);
               // await sendNotification(userModel.userId, userModel.name);
               // print(dd);
-              if (userModel.email == 'No email set') {
-                Get.showSnackbar(GetSnackBar(
-                  message: 'Login to continue',
-                  duration: const Duration(
-                    seconds: 3,
-                  ),
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  mainButton: TextButton(
-                    onPressed: () {
-                      Get.to(() => ChooseAccountTypePage());
-                      Get.closeCurrentSnackbar();
-                    },
-                    child: Text(
-                      'Login Page',
-                      style: TextStyle(
-                        color:
-                            userController.isDark ? primaryColor : Colors.white,
-                      ),
-                    ),
-                  ),
-                ));
-              } else {
-                Get.to(() => CreateRequestPage(
-                      offersModel: null,
-                    ));
-              }
+
+              Get.to(() => CreateRequestPage(
+                    offersModel: null,
+                  ));
             },
             child: Center(
               child: Icon(

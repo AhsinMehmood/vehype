@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
@@ -55,7 +56,8 @@ class _ExplorePageState extends State<ExplorePage> {
   FocusNode searchnode = FocusNode();
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-
+  // GoogleMapController? mapController;
+  // String _mapStyle = '';
   double lat = 0.0;
   double long = 0.0;
   bool focus = false;
@@ -149,7 +151,9 @@ class _ExplorePageState extends State<ExplorePage> {
     final GarageController garageController =
         Provider.of<GarageController>(context);
     GeoPoint tokyoStation = GeoPoint(userModel.lat, userModel.long);
-
+//  rootBundle.loadString('assets/dark_mode_map.json').then((style) {
+//       _mapStyle = style;
+//     });
     final GeoFirePoint center = GeoFirePoint(tokyoStation);
 // Function to get GeoPoint instance from Cloud Firestore document data.
     GeoPoint geopointFrom(Map<String, dynamic> data) =>

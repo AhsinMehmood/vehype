@@ -71,6 +71,7 @@ class ServiceIgnoreConfirm extends StatelessWidget {
                         .update({
                       'ignoredBy': FieldValue.arrayUnion([userModel.userId]),
                     });
+                 
                     ChatModel? chatModel = await ChatController().getChat(
                         userModel.userId,
                         offersModel.ownerId,

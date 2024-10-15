@@ -2,6 +2,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -88,7 +89,8 @@ class _MessagePageState extends State<MessagePage> {
     final ChatController chatController = Provider.of<ChatController>(context);
     // String offerId =
     //     ;
-
+    final messageQuery =
+        ChatController().getSingleChatStream(widget.chatModel.id);
     UserModel userModel = userController.userModel!;
 
     return WillPopScope(

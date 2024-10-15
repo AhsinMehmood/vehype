@@ -53,31 +53,32 @@ class OwnerInprogressPageWidget extends StatelessWidget {
                         .doc(inProgressOffers[index].garageId)
                         .snapshots()
                         .map((cc) => GarageModel.fromJson(cc)),
-                  builder: (context, garasnap) {
-                    if (garasnap.hasData && garasnap.data != null) {
-                      GarageModel garageModel = garasnap.data!;
-                      return OwnerRequestWidget(
-                        offersModel: inProgressOffers[index],
-                        garageModel: garageModel,
-                        offersReceivedModel: offersReceivedModel,
-                      );
-                    } else {
-                      return OwnerRequestWidget(
-                        offersModel: inProgressOffers[index],
-                        garageModel: GarageModel(
-                            ownerId: 'ownerId',
-                            submodel: 'submodel',
-                            title: 'title',
-                            imageUrl: defaultImage,
-                            bodyStyle: 'Truck',
-                            make: 'make',
-                            year: 'year',
-                            model: 'model',
-                            vin: 'vin',
-                            garageId: 'garageId'),
-                        offersReceivedModel: offersReceivedModel,
-                      );
-                    }
+                    builder: (context, garasnap) {
+                      if (garasnap.hasData && garasnap.data != null) {
+                        GarageModel garageModel = garasnap.data!;
+                        return OwnerRequestWidget(
+                          offersModel: inProgressOffers[index],
+                          garageModel: garageModel,
+                          offersReceivedModel: offersReceivedModel,
+                        );
+                      } else {
+                        return OwnerRequestWidget(
+                          offersModel: inProgressOffers[index],
+                          garageModel: GarageModel(
+                              ownerId: 'ownerId',
+                              submodel: 'submodel',
+                              title: 'title',
+                              isCustomModel: false,
+                              imageUrl: defaultImage,
+                              bodyStyle: 'Truck',
+                              make: 'make',
+                              year: 'year',
+                              model: 'model',
+                              vin: 'vin',
+                              garageId: 'garageId'),
+                          offersReceivedModel: offersReceivedModel,
+                        );
+                      }
                     });
               });
         });

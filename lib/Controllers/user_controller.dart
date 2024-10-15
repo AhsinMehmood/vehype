@@ -40,6 +40,7 @@ import 'package:http/http.dart' as http;
 import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
 import 'offers_provider.dart';
+import 'owner_offers_controller.dart';
 
 enum AccountType {
   seeker,
@@ -131,6 +132,7 @@ class UserController with ChangeNotifier {
       // Check the system theme mode and set `isDark` accordingly
       isDark =
           WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+
       sameAsSystem = true;
     } else {
       // Use the saved preference
@@ -181,10 +183,6 @@ class UserController with ChangeNotifier {
       UserModel newUserModel = UserModel.fromJson(event);
       _userModel = newUserModel;
       notifyListeners();
-
-      if (onDataReceived != null) {
-        onDataReceived(newUserModel);
-      }
     });
     notifyListeners();
   }
@@ -293,6 +291,26 @@ class UserController with ChangeNotifier {
     return LatLng(position.latitude, position.longitude);
   }
 
+  List selectedAdditionalServices = [];
+  selectAdditionalServices(String name) {
+    if (selectedAdditionalServices.contains(name)) {
+      selectedAdditionalServices.remove(name);
+    } else {
+      selectedAdditionalServices.add(name);
+    }
+    notifyListeners();
+  }
+
+  selectAllAdditionalServices(List services) {
+    selectedAdditionalServices = services;
+    notifyListeners();
+  }
+
+  clearAdditionalServices() {
+    selectedAdditionalServices = [];
+    notifyListeners();
+  }
+
   List selectedServices = [];
   selectServices(String name) {
     if (selectedServices.contains(name)) {
@@ -300,6 +318,22 @@ class UserController with ChangeNotifier {
     } else {
       selectedServices.add(name);
     }
+    notifyListeners();
+  }
+
+  selectAllServices(List services) {
+    selectedServices = services;
+    notifyListeners();
+  }
+
+  clearServices() {
+    selectedServices = [];
+    notifyListeners();
+  }
+
+  double radiusMiles = 100;
+  changeRadius(double newRadius) {
+    radiusMiles = newRadius;
     notifyListeners();
   }
 
@@ -450,7 +484,8 @@ class UserController with ChangeNotifier {
 
   bool isAdmin = false;
 
-  Future<void> handleUserAccountActions(UserModel userModel) async {
+  Future<void> handleUserAccountActions(
+      UserModel userModel, UserController userController) async {
     // Determine if the user is a 'seeker' or 'provider'
     bool isSeeker = userModel.accountType == 'seeker';
 
@@ -463,7 +498,8 @@ class UserController with ChangeNotifier {
 
     for (var element in offersSnap.docs) {
       if (isSeeker) {
-        await _handleSeekerOffers(userModel, OffersModel.fromJson(element));
+        await _handleSeekerOffers(
+            userModel, OffersModel.fromJson(element), userController);
       } else {
         await _handleProviderOffers(
             userModel, OffersReceivedModel.fromJson(element));
@@ -471,10 +507,10 @@ class UserController with ChangeNotifier {
     }
   }
 
-  Future<void> _handleSeekerOffers(
-      UserModel userModel, OffersModel offersModel) async {
+  Future<void> _handleSeekerOffers(UserModel userModel, OffersModel offersModel,
+      UserController userController) async {
     if (offersModel.status == 'active') {
-      await _rejectAllOffers(offersModel);
+      await _rejectAllOffers(offersModel, userController);
       await FirebaseFirestore.instance
           .collection('offers')
           .doc(offersModel.offerId)
@@ -496,44 +532,82 @@ class UserController with ChangeNotifier {
         .doc(offersReceivedModel.offerId)
         .get();
     OffersModel offersModel = OffersModel.fromJson(requestSnap);
+    if (offersModel.status == 'inProgress') {
+      OffersController().cancelOfferByService(offersReceivedModel, offersModel,
+          'The request was automatically canceled.');
+      OffersController().updateNotificationForOffers(
+          offerId: offersModel.offerId,
+          senderId: userModel.userId,
+          userId: offersModel.ownerId,
+          isAdd: true,
+          offersReceived: offersReceivedModel.id,
+          checkByList: offersModel.checkByList,
+          notificationTitle: '${userModel.name} has canceled their offer.',
+          notificationSubtitle:
+              '${userModel.name} has canceled their offer. Rate and review their service.');
+      DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(offersReceivedModel.ownerId)
+          .get();
 
-    OffersController().cancelOfferByService(offersReceivedModel, offersModel,
-        'The request was automatically canceled.');
+      NotificationController().sendNotification(
+          userIds: [UserModel.fromJson(ownerSnap).userId],
+          offerId: offersModel.offerId,
+          requestId: offersReceivedModel.id,
+          title: 'Offer Cancellation Alert',
+          subtitle:
+              '${userModel.name} has canceled their offer. Rate and review their service.');
 
-    DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
-        .instance
-        .collection('users')
-        .doc(offersReceivedModel.ownerId)
-        .get();
+      ChatModel? chatModel = await ChatController()
+          .getChat(userModel.userId, offersModel.ownerId, offersModel.offerId);
+      if (chatModel != null) {
+        ChatController().updateChatToClose(
+            chatModel.id, '${userModel.name} has canceled their offer.');
+      }
+    } else if (offersModel.status == 'active') {
+      await FirebaseFirestore.instance
+          .collection('offersReceived')
+          .doc(offersReceivedModel.id)
+          .update({
+        'status': 'Cancelled',
+        'cancelBy': 'provider',
+        'checkByList': [],
+      });
+      ChatModel? chatModel = await ChatController()
+          .getChat(userModel.userId, offersModel.ownerId, offersModel.offerId);
+      if (chatModel != null) {
+        ChatController().updateChatToClose(
+            chatModel.id, '${userModel.name} has withdrawn their offer.');
+      }
+      // OffersController().updateNotificationForOffers(
+      //     offerId: offersModel.offerId,
+      //     senderId: userModel.userId,
+      //     userId: offersModel.ownerId,
+      //     isAdd: true,
+      //     offersReceived: offersReceivedModel.id,
+      //     checkByList: offersModel.checkByList,
+      //     notificationTitle: '${userModel.name} has canceled their offer.',
+      //     notificationSubtitle:
+      //         '${userModel.name} has canceled their offer. Rate and review their service.');
+      // DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
+      //     .instance
+      //     .collection('users')
+      //     .doc(offersReceivedModel.ownerId)
+      //     .get();
 
-    NotificationController().sendNotification(
-        userIds: [UserModel.fromJson(ownerSnap).userId],
-        offerId: offersModel.offerId,
-        requestId: offersReceivedModel.id,
-        title: 'Offer Cancellation Alert',
-        subtitle:
-            '${userModel.name} has canceled their offer. Rate and review their service.');
-
-    ChatModel? chatModel = await ChatController()
-        .getChat(userModel.userId, offersModel.ownerId, offersModel.offerId);
-    if (chatModel != null) {
-      ChatController().updateChatToClose(
-          chatModel.id, '${userModel.name} has canceled their offer.');
+      // NotificationController().sendNotification(
+      //     userIds: [UserModel.fromJson(ownerSnap).userId],
+      //     offerId: offersModel.offerId,
+      //     requestId: offersReceivedModel.id,
+      //     title: 'Offer Cancellation Alert',
+      //     subtitle:
+      //         '${userModel.name} has canceled their offer. Rate and review their service.');
     }
-
-    OffersController().updateNotificationForOffers(
-        offerId: offersModel.offerId,
-        senderId: userModel.userId,
-        userId: offersModel.ownerId,
-        isAdd: true,
-        offersReceived: offersReceivedModel.id,
-        checkByList: offersModel.checkByList,
-        notificationTitle: '${userModel.name} has canceled their offer.',
-        notificationSubtitle:
-            '${userModel.name} has canceled their offer. Rate and review their service.');
   }
 
-  Future<void> _rejectAllOffers(OffersModel offersModel) async {
+  Future<void> _rejectAllOffers(
+      OffersModel offersModel, UserController userController) async {
     QuerySnapshot<Map<String, dynamic>> offersReceivedSnap =
         await FirebaseFirestore.instance
             .collection('offersReceived')
@@ -541,13 +615,44 @@ class UserController with ChangeNotifier {
             .get();
 
     for (var element in offersReceivedSnap.docs) {
-      await FirebaseFirestore.instance
-          .collection('offersReceived')
-          .doc(element.id)
-          .update({
-        'checkByList': [],
-        'status': 'Rejected',
-      });
+      OffersReceivedModel offersReceivedModel =
+          OffersReceivedModel.fromJson(element);
+      if (offersReceivedModel.status == 'Pending') {
+        await OwnerOffersController()
+            .ignoreOffer(offersModel, offersReceivedModel);
+        OffersController().updateNotificationForOffers(
+            offerId: offersModel.offerId,
+            userId: offersReceivedModel.offerBy,
+            senderId: userController.userModel!.userId,
+            checkByList: offersModel.checkByList,
+            isAdd: true,
+            offersReceived: offersReceivedModel.id,
+            notificationTitle:
+                'The offer was declined by ${userController.userModel!.name}',
+            notificationSubtitle:
+                'The offer was declined by ${userController.userModel!.name}');
+        DocumentSnapshot<Map<String, dynamic>> ownerSnap =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(offersReceivedModel.ownerId)
+                .get();
+        NotificationController().sendNotification(
+            userIds: [UserModel.fromJson(ownerSnap).userId],
+            offerId: offersModel.offerId,
+            requestId: offersReceivedModel.id,
+            title:
+                'The offer was declined by ${userController.userModel!.name}',
+            subtitle: '');
+
+        ChatModel? chatModel = await ChatController().getChat(
+            userController.userModel!.userId,
+            offersModel.ownerId,
+            offersModel.offerId);
+        if (chatModel != null) {
+          ChatController().updateChatToClose(chatModel.id,
+              'The offer was declined by ${userController.userModel!.name}.');
+        }
+      }
     }
   }
 
@@ -564,11 +669,7 @@ class UserController with ChangeNotifier {
           OffersReceivedModel.fromJson(element);
 
       OffersController().cancelOfferByOwner(
-          offersReceivedModel,
-          offersModel,
-          userModel.userId,
-          offersReceivedModel.offerBy,
-          'The request was automatically canceled.');
+          offersReceivedModel, 'The request was automatically canceled.');
       DocumentSnapshot<Map<String, dynamic>> ownerSnap = await FirebaseFirestore
           .instance
           .collection('users')

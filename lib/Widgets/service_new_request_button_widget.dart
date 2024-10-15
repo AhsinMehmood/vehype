@@ -6,6 +6,7 @@ import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/service_request_details.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/Widgets/service_ignore_confirm.dart';
 import 'package:vehype/Widgets/undo_ignore_provider.dart';
 
@@ -56,29 +57,36 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () {
-                    if (userController.userModel!.email == 'No email set') {
-                      Get.showSnackbar(GetSnackBar(
-                        message: 'Login to continue',
-                        duration: const Duration(
-                          seconds: 3,
-                        ),
-                        backgroundColor:
-                            userController.isDark ? Colors.white : primaryColor,
-                        mainButton: TextButton(
-                          onPressed: () {
-                            Get.to(() => ChooseAccountTypePage());
-                            Get.closeCurrentSnackbar();
-                          },
-                          child: Text(
-                            'Login Page',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                            ),
-                          ),
-                        ),
-                      ));
+                    if (userController.userModel!.isGuest) {
+                      Get.bottomSheet(LoginSheet(onSuccess: () async {
+                        OffersController().updateNotificationForOffers(
+                            offerId: offersModel.offerId,
+                            userId: userController.userModel!.userId,
+                            offersReceived: null,
+                            checkByList: offersModel.checkByList,
+                            isAdd: false,
+                            senderId: userController.userModel!.userId,
+                            notificationTitle: '',
+                            notificationSubtitle: '');
+                        showDialog(
+                            context: context,
+                            // backgroundColor: userController.isDark
+                            //     ? primaryColor
+                            //     : Colors.white,
+                            // shape: RoundedRectangleBorder(
+                            //   borderRadius: BorderRadius.only(
+                            //     topLeft: Radius.circular(22),
+                            //     topRight: Radius.circular(22),
+                            //   ),
+                            // ),
+                            builder: (context) {
+                              return ServiceIgnoreConfirm(
+                                  userController: userController,
+                                  offersModel: offersModel,
+                                  userModel: userController.userModel!);
+                            });
+                      }));
+                      // return;
                     } else {
                       OffersController().updateNotificationForOffers(
                           offerId: offersModel.offerId,
@@ -135,6 +143,67 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                 if (chatId == null)
                   InkWell(
                     onTap: () async {
+                      if (userController.userModel!.isGuest) {
+                        Get.bottomSheet(LoginSheet(onSuccess: () async {
+                          Get.dialog(LoadingDialog(),
+                              barrierDismissible: false);
+                          DocumentSnapshot<Map<String, dynamic>> onwerSnap =
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(offersModel.ownerId)
+                                  .get();
+
+                          OffersController().updateNotificationForOffers(
+                              offerId: offersModel.offerId,
+                              userId: userController.userModel!.userId,
+                              offersReceived: null,
+                              isAdd: false,
+                              senderId: userController.userModel!.userId,
+                              checkByList: offersModel.checkByList,
+                              notificationTitle: '',
+                              notificationSubtitle: '');
+                          UserModel ownerDetails =
+                              UserModel.fromJson(onwerSnap);
+                          ChatModel? chatModel = await ChatController().getChat(
+                              userController.userModel!.userId,
+                              offersModel.ownerId,
+                              offersModel.offerId);
+                          if (chatModel == null) {
+                            await ChatController().createChat(
+                                userController.userModel!,
+                                ownerDetails,
+                                '',
+                                offersModel,
+                                'New Message',
+                                '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
+                                'chat');
+                            ChatModel? newchat = await ChatController().getChat(
+                              userController.userModel!.userId,
+                              offersModel.ownerId,
+                              offersModel.offerId,
+                            );
+                            // ChatController(). updateOfferId(newchat!, userModel.userId);
+
+                            Get.close(1);
+                            Get.to(() => MessagePage(
+                                  chatModel: newchat!,
+                                  secondUser: ownerDetails,
+                                  offersModel: offersModel,
+                                  garageModel: garageModel,
+                                ));
+                          } else {
+                            Get.close(1);
+
+                            Get.to(() => MessagePage(
+                                  chatModel: chatModel,
+                                  garageModel: garageModel,
+                                  offersModel: offersModel,
+                                  secondUser: ownerDetails,
+                                ));
+                          }
+                        }));
+                        return;
+                      }
                       Get.dialog(LoadingDialog(), barrierDismissible: false);
                       DocumentSnapshot<Map<String, dynamic>> onwerSnap =
                           await FirebaseFirestore.instance
@@ -318,28 +387,35 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              if (userController.userModel!.email == 'No email set') {
-                Get.showSnackbar(GetSnackBar(
-                  message: 'Login to continue',
-                  duration: const Duration(
-                    seconds: 3,
-                  ),
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  mainButton: TextButton(
-                    onPressed: () {
-                      Get.to(() => ChooseAccountTypePage());
-                      Get.closeCurrentSnackbar();
-                    },
-                    child: Text(
-                      'Login Page',
-                      style: TextStyle(
-                        color:
-                            userController.isDark ? primaryColor : Colors.white,
-                      ),
-                    ),
-                  ),
-                ));
+              if (userController.userModel!.isGuest) {
+                Get.bottomSheet(LoginSheet(onSuccess: () {
+                  OffersController().updateNotificationForOffers(
+                      offerId: offersModel.offerId,
+                      userId: userController.userModel!.userId,
+                      offersReceived: null,
+                      senderId: userController.userModel!.userId,
+                      checkByList: offersModel.checkByList,
+                      isAdd: false,
+                      notificationTitle: '',
+                      notificationSubtitle: '');
+                  Get.bottomSheet(
+                    ServiceIgnoreConfirm(
+                        userController: userController,
+                        offersModel: offersModel,
+                        userModel: userController.userModel!),
+                    // backgroundColor: userController.isDark
+                    //     ? primaryColor
+                    //     : Colors.white,
+                    // shape: RoundedRectangleBorder(
+                    //   borderRadius: BorderRadius.only(
+                    //     topLeft: Radius.circular(22),
+                    //     topRight: Radius.circular(22),
+                    //   ),
+                    // ),
+                    enableDrag: true,
+                    // showDragHandle: true,
+                  );
+                }));
               } else {
                 OffersController().updateNotificationForOffers(
                     offerId: offersModel.offerId,
@@ -394,6 +470,65 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
           if (chatId == null)
             InkWell(
               onTap: () async {
+                if (userController.userModel!.isGuest) {
+                  Get.bottomSheet(LoginSheet(onSuccess: () async {
+                    Get.dialog(LoadingDialog(), barrierDismissible: false);
+                    DocumentSnapshot<Map<String, dynamic>> onwerSnap =
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(offersModel.ownerId)
+                            .get();
+                    UserModel ownerDetails = UserModel.fromJson(onwerSnap);
+
+                    OffersController().updateNotificationForOffers(
+                        offerId: offersModel.offerId,
+                        userId: userController.userModel!.userId,
+                        senderId: userController.userModel!.userId,
+                        isAdd: false,
+                        notificationTitle: '',
+                        checkByList: offersModel.checkByList,
+                        offersReceived: null,
+                        notificationSubtitle: '');
+                    ChatModel? chatModel = await ChatController().getChat(
+                        userController.userModel!.userId,
+                        offersModel.ownerId,
+                        offersModel.offerId);
+                    if (chatModel == null) {
+                      await ChatController().createChat(
+                          userController.userModel!,
+                          ownerDetails,
+                          '',
+                          offersModel,
+                          'New Message',
+                          '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
+                          'chat');
+                      ChatModel? newchat = await ChatController().getChat(
+                        userController.userModel!.userId,
+                        offersModel.ownerId,
+                        offersModel.offerId,
+                      );
+                      // ChatController(). updateOfferId(newchat!, userModel.userId);
+
+                      Get.close(1);
+                      Get.to(() => MessagePage(
+                            chatModel: newchat!,
+                            secondUser: ownerDetails,
+                            garageModel: garageModel,
+                            offersModel: offersModel,
+                          ));
+                    } else {
+                      Get.close(1);
+
+                      Get.to(() => MessagePage(
+                            chatModel: chatModel,
+                            garageModel: garageModel,
+                            offersModel: offersModel,
+                            secondUser: ownerDetails,
+                          ));
+                    }
+                  }));
+                  return;
+                }
                 Get.dialog(LoadingDialog(), barrierDismissible: false);
                 DocumentSnapshot<Map<String, dynamic>> onwerSnap =
                     await FirebaseFirestore.instance

@@ -410,40 +410,68 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                           });
                     }),
           ),
-          // if (map.isNotEmpty)
-          //   Container(
-          //     color: userController.isDark ? primaryColor : Colors.white,
-          //     padding: const EdgeInsets.only(
-          //       left: 20,
-          //       right: 20,
-          //       top: 15,
-          //       bottom: 30,
-          //     ),
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.end,
-          //       children: [
-          //         InkWell(
-          //           onTap: () {
-          //             // for (var element in offers) {
-          //             //   FirebaseFirestore.instance
-          //             //       .collection('users')
-          //             //       .doc(userModel.userId)
-          //             //       .collection('notifications')
-          //             //       .doc(element.id)
-          //             //       .delete();
-          //             // }
-          //           },
-          //           child: Text(
-          //             'Clear All',
-          //             style: TextStyle(
-          //               fontSize: 16,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
+          if (map.isNotEmpty)
+            Container(
+              color: userController.isDark ? primaryColor : Colors.white,
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 15,
+                bottom: 30,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  InkWell(
+                    onTap: () async {
+                      for (String offerId in map.keys) {
+                        List<OffersNotification> notifications = map[offerId]!;
+
+                        OffersModel offersModel = widget.offers.firstWhere(
+                          (offer) => offer.offerId == offerId,
+                        );
+
+                        for (OffersNotification notificationsModel
+                            in notifications) {
+                          OffersReceivedModel? offersReceivedModel;
+
+                          if (notificationsModel.offersReceivedId != '') {
+                          DocumentSnapshot<Map<String, dynamic>> offerSnap =
+                                await FirebaseFirestore.instance
+                                    .collection('offersReceived')
+                                    .doc(notificationsModel.offersReceivedId)
+                                    .get();
+
+                            offersReceivedModel =
+                                OffersReceivedModel.fromJson(offerSnap);
+                            OffersController().updateNotificationForOffers(
+                                offerId: offersModel.offerId,
+                                userId: userModel.userId,
+                                checkByList: offersModel.checkByList,
+                                isAdd: false,
+                                offersReceived: offersReceivedModel.id,
+                                notificationTitle: '',
+                                senderId: userModel.userId,
+                                notificationSubtitle: '');
+                            map.remove(offerId);
+                            setState(() {});
+                          }
+                        }
+                      }
+                      map.clear();
+                      setState(() {});
+                    },
+                    child: Text(
+                      'Clear All',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

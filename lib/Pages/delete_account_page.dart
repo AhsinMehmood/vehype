@@ -307,8 +307,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                               await SharedPreferences.getInstance();
                           final String userId =
                               sharedPreferences.getString('userId')!;
-                          await userController
-                              .handleUserAccountActions(userModel);
+                          await userController.handleUserAccountActions(
+                              userModel, userController);
                           if (deleteBoth) {
                             await updateAndDeleteAccount(defaultImage);
                           } else {

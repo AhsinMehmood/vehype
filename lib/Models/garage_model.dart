@@ -10,10 +10,11 @@ class GarageModel {
   final String title;
   final String vin;
 
+  final bool isCustomModel;
   final String imageUrl;
 
   final String garageId;
- 
+
   factory GarageModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> data = snapshot.data()!;
@@ -22,6 +23,7 @@ class GarageModel {
     String id = snapshot.id;
     return GarageModel(
       ownerId: data['ownerId'] ?? '',
+      isCustomModel: data['isCustomModel'] ?? false,
       bodyStyle: data['bodyStyle'] ?? '',
       make: data['make'] ?? '',
       year: data['year'] ?? '',
@@ -38,6 +40,7 @@ class GarageModel {
 
   GarageModel(
       {required this.ownerId,
+      required this.isCustomModel,
       required this.submodel,
       required this.title,
       required this.imageUrl,

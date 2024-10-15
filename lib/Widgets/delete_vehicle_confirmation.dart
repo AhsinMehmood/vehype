@@ -197,11 +197,7 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                         in offersReceivedSnap.docs) {
                       OffersReceivedModel offersReceivedModel =
                           OffersReceivedModel.fromJson(element);
-                      OffersController().cancelOfferByOwner(
-                          offersReceivedModel,
-                          offersModel,
-                          userController.userModel!.userId,
-                          offersReceivedModel.offerBy,
+                      OffersController().cancelOfferByOwner(offersReceivedModel,
                           'The request was automatically canceled.');
                       DocumentSnapshot<Map<String, dynamic>> offerByQuery =
                           await FirebaseFirestore.instance

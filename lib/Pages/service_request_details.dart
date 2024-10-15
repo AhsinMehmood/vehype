@@ -165,6 +165,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                         builder: (context, snapshot) {
                           GarageModel garageModel = snapshot.data ??
                               GarageModel(
+                                  isCustomModel: false,
                                   ownerId: 'ownerId',
                                   submodel: '',
                                   title: '',

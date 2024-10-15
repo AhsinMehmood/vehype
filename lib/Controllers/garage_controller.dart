@@ -91,13 +91,14 @@ class GarageController with ChangeNotifier {
   List<int> vehicleYearsByMake = [];
   List<VehicleModel> vehicleSubModels = [];
   String jwtToken = '';
+  bool isCustomModel = false;
   selectVehicleType(VehicleType? vehicleType) async {
     selectedVehicleMake = null;
     selectedVehicleModel = null;
     selectedYear = '';
     vehiclesMakesByVehicleType = [];
     selectedSubModel = null;
-
+    isCustomModel = false;
     selectedVehicleType = vehicleType;
     notifyListeners();
     jwtToken = await getJwtToken();
@@ -127,22 +128,25 @@ class GarageController with ChangeNotifier {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-        } else {
-        }
-      } else {
-      }
-    } catch (e) {
-    }
+        } else {}
+      } else {}
+    } catch (e) {}
   }
 
-  selectModel(VehicleModel newBodyStyle) async {
+  selectModel(VehicleModel newBodyStyle, bool isCustom) async {
     selectedVehicleModel = newBodyStyle;
     selectedSubModel = null;
+    isCustomModel = isCustom;
     notifyListeners();
-
-    vehicleSubModels = await getTrims(selectedVehicleMake!.title, selectedYear,
-        selectedVehicleType!.title, newBodyStyle.title, jwtToken);
-    notifyListeners();
+    if (!isCustom) {
+      vehicleSubModels = await getTrims(
+          selectedVehicleMake!.title,
+          selectedYear,
+          selectedVehicleType!.title,
+          newBodyStyle.title,
+          jwtToken);
+      notifyListeners();
+    }
 
     // selectedVehicleMake = null;
     // selectedYear = '';
@@ -166,16 +170,19 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
+  bool loadingModel = false;
   selectYear(String newBodyStyle) async {
     selectedYear = newBodyStyle;
     selectedVehicleModel = null;
     vehiclesModelsByYear = [];
     selectedSubModel = null;
 
+    // notifyListeners();
+    loadingModel = true;
     notifyListeners();
-
     vehiclesModelsByYear = await getSubModels(selectedVehicleMake!.title,
         newBodyStyle, selectedVehicleType!.title, jwtToken);
+    loadingModel = false;
 
     notifyListeners();
   }
@@ -314,9 +321,8 @@ class GarageController with ChangeNotifier {
         requestImageModel.isLoading = false;
         notifyListeners(); // Notify listeners to update UI
       });
-    } catch (e) {
-    }
-  } 
+    } catch (e) {}
+  }
 
   selectImage(BuildContext context, UserModel userModel, int index,
       ImageSource imageSource) async {
@@ -372,7 +378,7 @@ class GarageController with ChangeNotifier {
       return false;
     }
 
-    if (selectedVehicleType!.title == 'Passenger vehicle') {
+    if (selectedVehicleType!.title == 'Passenger vehicle' && !isCustomModel) {
       return selectedSubModel != null;
     }
 
@@ -396,6 +402,7 @@ class GarageController with ChangeNotifier {
           'subModel': selectedSubModel == null ? '' : selectedSubModel!.title,
           'vin': vin,
           'imageOne': imageOneUrl,
+          'isCustomModel': isCustomModel,
           'imageTwo': imageTwoUrl,
           'updatedAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -409,6 +416,7 @@ class GarageController with ChangeNotifier {
           'subModel': selectedSubModel == null ? '' : selectedSubModel!.title,
           'vin': vin,
           'imageOne': imageOneUrl,
+          'isCustomModel': isCustomModel,
           'imageTwo': imageTwoUrl,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -444,12 +452,14 @@ class GarageController with ChangeNotifier {
         id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0));
     await selectYear(garageModel.year);
 
-    await selectModel(VehicleModel(
-        id: 1,
-        title: garageModel.model,
-        icon: 'icon',
-        vehicleMakeId: 0,
-        vehicleTypeId: 0));
+    await selectModel(
+        VehicleModel(
+            id: 1,
+            title: garageModel.model,
+            icon: 'icon',
+            vehicleMakeId: 0,
+            vehicleTypeId: 0),
+        garageModel.isCustomModel);
 
     await selectSubModel(VehicleModel(
         id: 1,

@@ -381,49 +381,53 @@ class PhotosTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List gallery = profile.gallery.reversed.toList();
-    print(gallery.first);
+    // print(gallery.first);
     // ignore: avoid_unnecessary_containers
     return Container(
-      child: ListView.builder(
-        // numberOfColumn: 2,
-        itemCount: gallery.length,
-        padding: const EdgeInsets.only(
-          bottom: 70,
-        ),
-        itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () {
-              // int index = profile.gallery.indexOf(item);
+      child: gallery.isEmpty
+          ? Center(
+              child: Text('Nothing here!'),
+            )
+          : ListView.builder(
+              // numberOfColumn: 2,
+              itemCount: gallery.length,
+              padding: const EdgeInsets.only(
+                bottom: 70,
+              ),
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () {
+                    // int index = profile.gallery.indexOf(item);
 
-              Get.to(() => FullImagePageView(
-                    urls: profile.gallery,
-                    currentIndex: index,
-                  ));
-            },
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: CachedNetworkImage(
-                  imageUrl: profile.gallery[index],
-                  width: Get.width * 0.9,
-                  height: Get.width * 0.5,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(
-                    child: CircularProgressIndicator(),
+                    Get.to(() => FullImagePageView(
+                          urls: profile.gallery,
+                          currentIndex: index,
+                        ));
+                  },
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: CachedNetworkImage(
+                        imageUrl: profile.gallery[index],
+                        width: Get.width * 0.9,
+                        height: Get.width * 0.5,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => SizedBox(
+                          child: Center(child: Text('No Image Found')),
+                        ),
+                        // borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
-                  errorWidget: (context, url, error) => SizedBox(
-                    child: Center(child: Text('No Image Found')),
-                  ),
-                  // borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

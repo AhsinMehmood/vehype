@@ -106,7 +106,6 @@ class SelectAccountType extends StatelessWidget {
 
                       userController.getUserStream(
                         '${userModelAccount.userId}provider',
-                        onDataReceived: (userModel) {},
                       );
                       DocumentSnapshot<Map<String, dynamic>> usersnap =
                           await FirebaseFirestore.instance

@@ -1,14 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, deprecated_member_use
 
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:logger/logger.dart';
+
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -21,7 +18,6 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/select_account_type_page.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
-import 'package:crypto/crypto.dart';
 
 import '../Pages/splash_page.dart';
 
@@ -157,9 +153,6 @@ class LoginController {
     try {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
-      final rawNonce = generateNonce();
-      final nonce = sha256ofString(rawNonce);
-      Logger().d("nonce: $rawNonce");
 
       // Check if Sign in with Apple is available
       bool isAvail = await SignInWithApple.isAvailable();
@@ -167,24 +160,21 @@ class LoginController {
         throw Exception('Sign in with Apple is not available on this device.');
       }
 
-      final AuthorizationCredentialAppleID credential =
-          await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName
-        ],
-        nonce: nonce,
-      );
-
       // Log for debugging purposes
       // Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-      final oauthCredential = OAuthProvider("apple.com").credential(
-        idToken: credential.identityToken,
-        rawNonce: rawNonce,
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
       );
-      Logger().d("identityToken: ${credential.identityToken}");
-      Logger().d("nonce: $rawNonce");
+
+      // Create an OAuth credential using the received token
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
       UserCredential userCredential =
@@ -247,58 +237,14 @@ class LoginController {
       ));
       print('Firebase Auth Exception: $e');
     } catch (e) {
-      Get.close(1);
+      // Get.close(1);
       Get.showSnackbar(GetSnackBar(
-        message: 'Error: ${e.toString()}',
-        duration: const Duration(seconds: 3),
+        message: 'Error: $e',
+        duration: const Duration(seconds: 2),
       ));
       print('Exception: $e');
     }
   }
-
-  /// Generates a cryptographically secure random nonce, to be included in a
-  /// credential request.
-  String generateNonce([int length = 32]) {
-    const charset =
-        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
-        .join();
-  }
-
-  /// Returns the sha256 hash of [input] in hex notation.
-  String sha256ofString(String input) {
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
-
-
-
-  Future<UserCredential?> signInWithApple() async {
-  try {
-    // Request credentials from Apple
-    final appleCredential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-    );
-
-    // Create an OAuth credential using the received token
-    final oauthCredential = OAuthProvider("apple.com").credential(
-      idToken: appleCredential.identityToken,
-      accessToken: appleCredential.authorizationCode,
-    );
-
-    // Sign in to Firebase using the Apple OAuth credential
-    return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-  } catch (error) {
-    print("Error during Apple Sign In: $error");
-    return null;
-  }
-}
-
 }
 
 

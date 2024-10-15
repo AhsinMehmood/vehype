@@ -233,11 +233,7 @@ class _OwnerCancelOfferConfirmationSheetState
                       }
                       Get.close(1);
                       OffersController().cancelOfferByOwner(
-                          widget.offersReceivedModel,
-                          widget.offersModel,
-                          widget.userController.userModel!.userId,
-                          widget.offersReceivedModel.offerBy,
-                          cancelReason.text.trim());
+                          widget.offersReceivedModel, cancelReason.text.trim());
                       DocumentSnapshot<Map<String, dynamic>> ownerSnap =
                           await FirebaseFirestore.instance
                               .collection('users')

@@ -72,6 +72,8 @@ class OwnerInactiveOffersPageWidget extends StatelessWidget {
                               garageModel: GarageModel(
                                   ownerId: 'ownerId',
                                   submodel: 'submodel',
+                    isCustomModel: false,
+                              
                                   title: 'title',
                                   imageUrl: defaultImage,
                                   bodyStyle: 'Truck',
@@ -105,6 +107,8 @@ class OwnerInactiveOffersPageWidget extends StatelessWidget {
                         garageModel: GarageModel(
                             ownerId: 'ownerId',
                             submodel: 'submodel',
+                    isCustomModel: false,
+                         
                             title: 'title',
                             imageUrl: defaultImage,
                             bodyStyle: 'Truck',

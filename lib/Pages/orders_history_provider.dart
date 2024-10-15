@@ -45,8 +45,8 @@ class OrdersHistoryProvider extends StatelessWidget {
 
     List<OffersModel> newOffers = userModel.lat == 0.0
         ? filteredOffers
-        : userController.filterOffers(
-            filteredOffers, userModel.lat, userModel.long, 50);
+        : userController.filterOffers(filteredOffers, userModel.lat,
+            userModel.long, userModel.radius.toDouble());
     List<OffersModel> notificationToCheckOffersNewOffers = newOffers
         .where((offer) => offer.checkByList
             .any((check) => check.checkById == userModel.userId))
@@ -99,7 +99,9 @@ class OrdersHistoryProvider extends StatelessWidget {
             upcomingOffersNotifications +
             cencelledOffersNotifications +
             rejectedOffersNotifications;
-
+    if (userModel.services.isEmpty) {
+      return SelectYourServices();
+    }
     return DefaultTabController(
       length: 7,
       initialIndex: 0,

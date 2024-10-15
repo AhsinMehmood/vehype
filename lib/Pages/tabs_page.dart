@@ -156,6 +156,15 @@ class _TabsPageState extends State<TabsPage> {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+
+    if (userController.userModel == null) {
+      return Scaffold(
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     final UserModel userModel = userController.userModel!;
     // print(userModel.pushToken);
     // AppController controller = Get.put(AppController());
@@ -166,7 +175,7 @@ class _TabsPageState extends State<TabsPage> {
               : userController.tabIndex,
           children: userModel.accountType == 'seeker' ? _body : _body2,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
         bottomNavigationBar: userModel.accountType == 'seeker'
             ? bottomNavigationBarSeeker()
             : bottomNavigationBarProvider());
@@ -192,14 +201,6 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
-        print(userModel.userId);
-        // OneSignal.login(userModel.userId);
-        NotificationController().sendNotification(
-            offerId: 'offerId',
-            requestId: 'requestId',
-            title: 'title',
-            subtitle: 'subtitle',
-            userIds: [userModel.userId]);
         userController.changeTabIndex(index);
 
         // QuerySnapshot<Map<String, dynamic>> snapshot =
@@ -259,17 +260,6 @@ class _TabsPageState extends State<TabsPage> {
       ),
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
-        print(userModel.userId);
-        OneSignal.Notifications.requestPermission(true);
-        print(OneSignal.User.pushSubscription.id);
-
-        OneSignal.login(userModel.userId);
-        NotificationController().sendNotification(
-            offerId: 'offerId',
-            requestId: 'requestId',
-            title: 'title',
-            subtitle: 'subtitle',
-            userIds: [userModel.userId]);
         userController.changeTabIndex(index);
       },
       items: seekerTabs(),
@@ -306,6 +296,7 @@ class _TabsPageState extends State<TabsPage> {
                 // ignore: deprecated_member_use
                 color: labelAndIconColorDark(0),
               ),
+
               // if (offersProvider.offers.every(
               //         (offer) => offer.checkBy.contains(userModel.userId)) ||
               //     offersProvider.offersReceived.every(
@@ -328,7 +319,7 @@ class _TabsPageState extends State<TabsPage> {
                     height: 18,
                     width: 18,
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: const Color.fromARGB(255, 57, 159, 60),
                       borderRadius: BorderRadius.circular(200),
                     ),
                     child: Align(
@@ -401,7 +392,7 @@ class _TabsPageState extends State<TabsPage> {
                             width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
-                                  ? Colors.red
+                                  ? const Color.fromARGB(255, 57, 159, 60)
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(200),
                             ),
@@ -484,7 +475,7 @@ class _TabsPageState extends State<TabsPage> {
                   height: 16,
                   width: 16,
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: const Color.fromARGB(255, 57, 159, 60),
                     borderRadius: BorderRadius.circular(200),
                   ),
                   child: Align(
@@ -564,7 +555,7 @@ class _TabsPageState extends State<TabsPage> {
                             width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
-                                  ? Colors.red
+                                  ? const Color.fromARGB(255, 57, 159, 60)
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(200),
                             ),

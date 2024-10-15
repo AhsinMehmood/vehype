@@ -37,6 +37,7 @@ class UserModel {
   final List favBy;
   final List additionalServices;
   final bool isGuest;
+  final int radius;
 
   UserModel(
     this.userId,
@@ -73,6 +74,7 @@ class UserModel {
     this.favBy,
     this.additionalServices,
     this.isGuest,
+    this.radius,
   );
 
   factory UserModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -130,7 +132,8 @@ class UserModel {
         data['favProviderIds'] ?? [],
         data['favBy'] ?? [],
         data['additionalServices'] ?? [],
-        isGuestUser);
+        isGuestUser,
+        data['radius'] ?? 100);
   }
 
   Map<String, dynamic> toJson() {

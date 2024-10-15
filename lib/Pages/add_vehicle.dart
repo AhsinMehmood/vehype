@@ -17,6 +17,7 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/delete_vehicle_confirmation.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
@@ -538,7 +539,8 @@ class _AddVehicleState extends State<AddVehicle> {
                 ),
                 if (garageController.selectedVehicleType != null &&
                     garageController.selectedVehicleType!.title ==
-                        'Passenger vehicle')
+                        'Passenger vehicle' &&
+                    !garageController.isCustomModel)
                   InkWell(
                     onTap: () async {
                       if (garageController.selectedVehicleModel != null) {
@@ -631,9 +633,13 @@ class _AddVehicleState extends State<AddVehicle> {
                       ],
                     ),
                   ),
-                const SizedBox(
-                  height: 20,
-                ),
+                if (garageController.selectedVehicleType != null &&
+                    garageController.selectedVehicleType!.title ==
+                        'Passenger vehicle' &&
+                    !garageController.isCustomModel)
+                  const SizedBox(
+                    height: 20,
+                  ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -709,8 +715,15 @@ class _AddVehicleState extends State<AddVehicle> {
                         //   autoCloseDuration: Duration(seconds: 3),
                         //   type: ToastificationType.error,
                         // );
-                        garageController.saveVehicle(
-                            userModel, _vinController.text, widget.addService);
+                        if (userModel.isGuest) {
+                          Get.bottomSheet(LoginSheet(onSuccess: () async {
+                            garageController.saveVehicle(userModel,
+                                _vinController.text, widget.addService);
+                          }));
+                        } else {
+                          garageController.saveVehicle(userModel,
+                              _vinController.text, widget.addService);
+                        }
                       } else {
                         toastification.show(
                           context: context,
@@ -730,7 +743,7 @@ class _AddVehicleState extends State<AddVehicle> {
                           borderRadius: BorderRadius.circular(6),
                         )),
                     child: Text(
-                      'Save',
+                      'Save Vehicle',
                       style: TextStyle(
                         color:
                             userController.isDark ? primaryColor : Colors.white,
@@ -768,7 +781,9 @@ class _MakePickerState extends State<MakePicker> {
     if (query.isEmpty) {
       searchResult.addAll(vehicleList);
     } else {
-      searchResult = vehicleList.where((c) => c.startsWith(query)).toList();
+      searchResult = vehicleList
+          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .toList();
     }
 
     setState(() => _filteredList = searchResult);
@@ -1194,10 +1209,27 @@ class _ModelPickerState extends State<ModelPicker> {
     if (query.isEmpty) {
       searchResult.addAll(vehicleList);
     } else {
-      searchResult = vehicleList.where((c) => c.startsWith(query)).toList();
+      searchResult = vehicleList
+          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .toList();
     }
 
     setState(() => _filteredList = searchResult);
+  }
+
+  String customModel = '';
+  TextEditingController modelController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final GarageController garageController =
+        Provider.of<GarageController>(context, listen: false);
+    if (garageController.isCustomModel) {
+      modelController = TextEditingController(
+          text: garageController.selectedVehicleModel!.title);
+      customModel = garageController.selectedVehicleModel!.title;
+    }
   }
 
   @override
@@ -1206,14 +1238,15 @@ class _ModelPickerState extends State<ModelPicker> {
         Provider.of<GarageController>(context);
     final UserController userController = Provider.of<UserController>(context);
     List<VehicleModel> vehicleModels = garageController.vehiclesModelsByYear;
-    vehicleModels.sort((a, b) => a.title.compareTo(b.title));
+    vehicleModels
+        .sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
       height: Get.height * 0.85,
-      child: vehicleModels.isEmpty
+      child: garageController.loadingModel
           ? Center(
               child: CircularProgressIndicator(
                 color: userController.isDark ? Colors.white : primaryColor,
@@ -1226,15 +1259,100 @@ class _ModelPickerState extends State<ModelPicker> {
                   const SizedBox(
                     height: 10,
                   ),
-                  TextFormField(
-                    onChanged: (String text) {
-                      _filterSearchResults(text, vehicleModels);
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Search',
-                      prefixIcon: Icon(Icons.search),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          onChanged: (String text) {
+                            _filterSearchResults(text, vehicleModels);
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Search',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      ),
+                      // IconButton(onPressed: () {}, icon: Icon(Icons.add))
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Add a Custom Model',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              onChanged: (String text) {
+                                setState(() {
+                                  customModel = text;
+                                });
+                                // _filterSearchResults(text, vehicleModels);
+                              },
+                              keyboardType: TextInputType.text,
+                              controller: modelController,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter Model Name',
+                                // prefixIcon: Icon(Icons.search,
+
+                                // ),
+                              ),
+                            ),
+                          ),
+                          if (customModel.isNotEmpty)
+                            const SizedBox(
+                              width: 10,
+                            ),
+                          if (customModel.isNotEmpty)
+                            InkWell(
+                              onTap: () {
+                                garageController.selectModel(
+                                    VehicleModel(
+                                        id: 0,
+                                        title: customModel,
+                                        icon: 'icon',
+                                        vehicleMakeId: 0,
+                                        vehicleTypeId: 0),
+                                    true);
+                                Get.close(1);
+                              },
+                              child: Container(
+                                height: 50,
+                                width: 50,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                ),
+                                child: Icon(
+                                  Icons.done,
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            )
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(
                     height: 10,
@@ -1248,7 +1366,7 @@ class _ModelPickerState extends State<ModelPicker> {
                         VehicleModel bodyStyle = _filteredList[index];
                         return InkWell(
                           onTap: () {
-                            garageController.selectModel(bodyStyle);
+                            garageController.selectModel(bodyStyle, false);
                             Get.close(1);
                           },
                           child: Column(
@@ -1313,11 +1431,12 @@ class _ModelPickerState extends State<ModelPicker> {
                     Expanded(
                         child: ListView.builder(
                       shrinkWrap: true,
+                      itemCount: vehicleModels.length,
                       itemBuilder: (context, index) {
                         VehicleModel bodyStyle = vehicleModels[index];
                         return InkWell(
                           onTap: () {
-                            garageController.selectModel(bodyStyle);
+                            garageController.selectModel(bodyStyle, false);
                             Get.close(1);
                           },
                           child: Column(
@@ -1375,7 +1494,6 @@ class _ModelPickerState extends State<ModelPicker> {
                           ),
                         );
                       },
-                      itemCount: vehicleModels.length,
                     )),
                 ],
               ),
@@ -1405,7 +1523,9 @@ class _SubModelPickerState extends State<SubModelPicker> {
     if (query.isEmpty) {
       searchResult.addAll(vehicleList);
     } else {
-      searchResult = vehicleList.where((c) => c.startsWith(query)).toList();
+      searchResult = vehicleList
+          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .toList();
     }
 
     setState(() => _filteredList = searchResult);
@@ -1591,79 +1711,6 @@ class _SubModelPickerState extends State<SubModelPicker> {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class FuelPicker extends StatefulWidget {
-  const FuelPicker({super.key});
-
-  @override
-  State<FuelPicker> createState() => _FuelPickerState();
-}
-
-class _FuelPickerState extends State<FuelPicker> {
-  @override
-  Widget build(BuildContext context) {
-    final GarageController garageController =
-        Provider.of<GarageController>(context);
-    final UserController userController = Provider.of<UserController>(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: userController.isDark ? primaryColor : Colors.white,
-      ),
-      height: Get.height * 0.6,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            String fuelType = garageController.fuelTypes[index];
-            return InkWell(
-              onTap: () {
-                garageController.selectFuelType(fuelType);
-                Get.close(1);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        fuelType,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    if (garageController.selectedFuelType == fuelType)
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(200),
-                          color: Colors.green,
-                        ),
-                        child: Icon(
-                          Icons.done,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
-          itemCount: garageController.fuelTypes.length,
-        ),
-      ),
     );
   }
 }

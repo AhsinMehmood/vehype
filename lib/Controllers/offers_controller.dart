@@ -252,11 +252,7 @@ class OffersController {
   }
 
   cancelOfferByOwner(
-      OffersReceivedModel offersReceivedModel,
-      OffersModel offersModel,
-      String userId,
-      String serviceId,
-      String cancelReason) async {
+      OffersReceivedModel offersReceivedModel, String cancelReason) async {
     await FirebaseFirestore.instance
         .collection('offersReceived')
         .doc(offersReceivedModel.id)
@@ -282,6 +278,7 @@ class OffersController {
       'status': 'Cancelled',
       'cancelBy': 'provider',
       'cancelReason': cancelReason,
+      'checkByList': [],
     });
     await FirebaseFirestore.instance
         .collection('offers')

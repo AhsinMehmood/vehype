@@ -64,6 +64,8 @@ class OwnerActiveOffers extends StatelessWidget {
                         ownerId: 'ownerId',
                         submodel: 'submodel',
                         title: 'title',
+                    isCustomModel: false,
+
                         imageUrl: defaultImage,
                         bodyStyle: 'Truck',
                         make: 'make',

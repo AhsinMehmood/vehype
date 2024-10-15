@@ -21,6 +21,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/Widgets/service_to_owner_rating_sheet.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
 import 'package:vehype/const.dart';
@@ -777,8 +778,15 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                     ),
                                   );
                                 } else {
-                                  applyToJob(
-                                      userModel, garageController, comment);
+                                  if (userModel.isGuest) {
+                                    Get.bottomSheet(LoginSheet(onSuccess: () {
+                                      applyToJob(
+                                          userModel, garageController, comment);
+                                    }));
+                                  } else {
+                                    applyToJob(
+                                        userModel, garageController, comment);
+                                  }
                                 }
                               } else {
                                 toastification.show(

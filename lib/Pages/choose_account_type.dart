@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/login_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
@@ -151,20 +152,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(
-                              height: 10,
-                            ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                UserCredential? userCredential =
-                                    await LoginController().signInWithApple();
-                                if (userCredential != null) {
-                                  print(
-                                      "Signed in successfully: ${userCredential.user?.uid}");
-                                } else {
-                                  print("Sign in with Apple failed");
-                                }
-                              },
-                              child: Text('Sign In with Apple'),
+                              height: 5,
                             ),
                             if (Platform.isIOS)
                               InkWell(
@@ -232,18 +220,17 @@ class ChooseAccountTypePage extends StatelessWidget {
                                 //         .signInWithEmailAndPassword(
                                 //             email: 'chilcevscaiaoxana@yahoo.it',
                                 //             password: 'vehypeOxana9');
-                                // SharedPreferences sharedpref =
-                                //     await SharedPreferences.getInstance();
-                                // sharedpref.setString(
-                                //     'userId', userCredential.user!.uid);
+
                                 // Get.close(1);
                                 await FirebaseAuth.instance.signInAnonymously();
 
                                 User? user = FirebaseAuth.instance.currentUser;
-
+                                SharedPreferences sharedpref =
+                                    await SharedPreferences.getInstance();
+                                sharedpref.setString('userId', user!.uid);
                                 await FirebaseFirestore.instance
                                     .collection('users')
-                                    .doc(user!.uid)
+                                    .doc(user.uid)
                                     .set({
                                   'name': 'Guest User',
                                   // 'accountType': 'owner',
@@ -320,7 +307,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       style: TextStyle(
                                         // fontFamily: 'Avenir',ss
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -350,7 +337,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                           '\nLearn how we process your data in our',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -370,7 +357,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       style: TextStyle(
                                         //fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
@@ -390,7 +377,7 @@ class ChooseAccountTypePage extends StatelessWidget {
                                       style: TextStyle(
                                         //  fontFamily: 'Avenir',
                                         fontWeight: FontWeight.w400,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,

@@ -47,32 +47,9 @@ class MyGarage extends StatelessWidget {
       ),
       floatingActionButton: InkWell(
         onTap: () {
-          if (userModel.email == 'No email set') {
-            Get.showSnackbar(GetSnackBar(
-              message: 'Login to continue',
-              duration: const Duration(
-                seconds: 3,
-              ),
-              backgroundColor:
-                  userController.isDark ? Colors.white : primaryColor,
-              mainButton: TextButton(
-                onPressed: () {
-                  Get.to(() => ChooseAccountTypePage());
-                  Get.closeCurrentSnackbar();
-                },
-                child: Text(
-                  'Login Page',
-                  style: TextStyle(
-                    color: userController.isDark ? primaryColor : Colors.white,
-                  ),
-                ),
-              ),
-            ));
-          } else {
-            Get.to(() => AddVehicle(
-                  garageModel: null,
-                ));
-          }
+          Get.to(() => AddVehicle(
+                garageModel: null,
+              ));
         },
         child: Container(
           height: 55,

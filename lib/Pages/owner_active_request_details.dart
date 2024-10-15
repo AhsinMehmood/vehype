@@ -102,6 +102,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                     year: '',
                     model: '',
                     vin: '',
+                    isCustomModel: false,
                     garageId: offersModel.garageId);
             return Scaffold(
               backgroundColor:

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -16,6 +17,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/chat_model.dart';
 import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
+import 'package:vehype/Pages/manage_prefs.dart';
 import 'package:vehype/Pages/theme_page.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
@@ -65,7 +67,11 @@ class ProfilePage extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       if (userModel.isGuest) {
-                        Get.bottomSheet(LoginSheet());
+                        Get.bottomSheet(LoginSheet(
+                          onSuccess: () {
+                            Get.to(() => EditProfilePage());
+                          },
+                        ));
                       } else {
                         Get.to(() => EditProfilePage());
                       }
@@ -112,7 +118,11 @@ class ProfilePage extends StatelessWidget {
                       InkWell(
                         onTap: () {
                           if (userModel.isGuest) {
-                            Get.bottomSheet(LoginSheet());
+                            Get.bottomSheet(LoginSheet(
+                              onSuccess: () {
+                                Get.to(() => CommentsPage(data: userModel));
+                              },
+                            ));
                           } else {
                             Get.to(() => CommentsPage(data: userModel));
                           }
@@ -201,16 +211,37 @@ class ProfilePage extends StatelessWidget {
                         icon: Icons.person,
                         onTap: () async {
                           if (userModel.isGuest) {
-                            Get.bottomSheet(LoginSheet());
+                            Get.bottomSheet(LoginSheet(
+                              onSuccess: () {
+                                Get.to(() => EditProfilePage());
+                              },
+                            ));
                           } else {
                             Get.to(() => EditProfilePage());
                           }
                         },
                       ),
-
-                      // const SizedBox(
-                      //   height: 10,
-                      // ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      if (userModel.accountType == 'provider')
+                        MenuCard(
+                          secondTitle: '',
+                          userController: userController,
+                          title: 'Manage Prefrences',
+                          icon: CupertinoIcons.slider_horizontal_3,
+                          onTap: () async {
+                            // if (userModel.isGuest) {
+                            //   Get.bottomSheet(LoginSheet());
+                            // } else {
+                            Get.to(() => ManagePrefs());
+                            // }
+                          },
+                        ),
+                      if (userModel.accountType == 'provider')
+                        const SizedBox(
+                          height: 10,
+                        ),
                       if (userController.isAdmin)
                         InkWell(
                           onTap: () {
@@ -232,9 +263,9 @@ class ProfilePage extends StatelessWidget {
                           height: 10,
                         ),
 
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      // const SizedBox(
+                      //   height: 10,
+                      // ),
 
                       if (userModel.accountType == 'seeker')
                         MenuCard(
@@ -246,10 +277,10 @@ class ProfilePage extends StatelessWidget {
                             Get.to(() => MyFavPage());
                           },
                         ),
-
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      if (userModel.accountType == 'seeker')
+                        const SizedBox(
+                          height: 10,
+                        ),
                       // Container(
                       //   height: 1,
                       //   width: Get.width,
@@ -335,23 +366,28 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
-                      MenuCard(
-                        secondTitle: '',
-                        userController: userController,
-                        title: 'Delete Account',
-                        icon: Icons.delete,
-                        onTap: () async {
-                          if (userModel.isGuest) {
-                            Get.bottomSheet(LoginSheet());
-                          } else {
-                            Get.to(() => DeleteAccountPage());
-                          }
-                        },
-                      ),
-
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      if (!userModel.isGuest)
+                        MenuCard(
+                          secondTitle: '',
+                          userController: userController,
+                          title: 'Delete Account',
+                          icon: Icons.delete,
+                          onTap: () async {
+                            if (userModel.isGuest) {
+                              Get.bottomSheet(LoginSheet(
+                                onSuccess: () {
+                                  Get.to(() => DeleteAccountPage());
+                                },
+                              ));
+                            } else {
+                              Get.to(() => DeleteAccountPage());
+                            }
+                          },
+                        ),
+                      if (!userModel.isGuest)
+                        const SizedBox(
+                          height: 10,
+                        ),
                       MenuCard(
                         secondTitle: '',
                         userController: userController,
@@ -511,8 +547,8 @@ class MenuCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: userController.isDark
-                ? Colors.white.withOpacity(0.4)
-                : primaryColor.withOpacity(0.4),
+                ? Colors.white.withOpacity(0.2)
+                : primaryColor.withOpacity(0.2),
           )),
       child: InkWell(
         onTap: () => onTap(),

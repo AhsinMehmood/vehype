@@ -11,6 +11,10 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
+import 'package:vehype/Widgets/select_additional_services.dart';
+import 'package:vehype/Widgets/select_services_widget.dart';
+import 'package:vehype/Widgets/service_radius_widget.dart';
 
 import 'package:vehype/Widgets/service_request_widget.dart';
 import 'package:vehype/const.dart';
@@ -34,9 +38,7 @@ class NewOffers extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     final UserModel userModel = userController.userModel!;
-    if (userModel.services.isEmpty) {
-      return SelectYourServices();
-    }
+
     if (newOffers.isEmpty) {
       return Center(
         child: Text(
@@ -64,8 +66,27 @@ class NewOffers extends StatelessWidget {
   }
 }
 
-class SelectYourServices extends StatelessWidget {
-  const SelectYourServices({super.key});
+class SelectYourServices extends StatefulWidget {
+  final bool isPage;
+  const SelectYourServices({super.key, this.isPage = false});
+
+  @override
+  State<SelectYourServices> createState() => _SelectYourServicesState();
+}
+
+class _SelectYourServicesState extends State<SelectYourServices> {
+  @override
+  void initState() {
+    super.initState();
+    final UserModel userModel =
+        Provider.of<UserController>(context, listen: false).userModel!;
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    userController.selectedAdditionalServices = userModel.additionalServices;
+    userController.selectedServices = userModel.services;
+    userController.radiusMiles = userModel.radius.toDouble();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +95,7 @@ class SelectYourServices extends StatelessWidget {
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
       body: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -84,40 +105,22 @@ class SelectYourServices extends StatelessWidget {
                 SizedBox(
                     // height: Get.height * 0.06,
                     ),
-                // Padding(
-                //   padding: EdgeInsets.only(
-                //     left: 10,
-                //     top: 40,
-                //     right: 10,
-                //   ),
-                //   child: Text(
-                //     'Welcome to VEHYPE',
-                //     textAlign: TextAlign.start,
-                //     style: TextStyle(
-                //         fontFamily: 'Avenir',
-                //         fontWeight: FontWeight.w800,
-                //         fontSize: 18,
-                //         color: userController.isDark
-                //             ? Colors.white
-                //             : primaryColor),
-                //   ),
-                // ),
                 Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(
-                      left: 20,
-                      top: 10,
-                      bottom: 10,
-                      right: 10,
+                      // left: 10,
+                      top: 20,
+                      bottom: 20,
+                      // right: 10,
                     ),
                     child: Text(
-                      'Select your services to receive offers',
-                      textAlign: TextAlign.start,
+                      'Set your Prefrences',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontFamily: 'Avenir',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          // fontFamily: 'Avenir',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                           color: userController.isDark
                               ? Colors.white
                               : primaryColor),
@@ -127,81 +130,15 @@ class SelectYourServices extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 10, right: 12, top: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          for (Service service in getServices())
-                            Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    userController.selectServices(service.name);
-                                    // appProvider.selectPrefs(pref);
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Transform.scale(
-                                        scale: 1.5,
-                                        child: Checkbox(
-                                            activeColor: userController.isDark
-                                                ? Colors.white
-                                                : primaryColor,
-                                            checkColor: userController.isDark
-                                                ? Colors.green
-                                                : Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            value: userController
-                                                .selectedServices
-                                                .contains(service.name),
-                                            onChanged: (s) {
-                                              // appProvider.selectPrefs(pref);
-                                              userController
-                                                  .selectServices(service.name);
-                                            }),
-                                      ),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      SvgPicture.asset(service.image,
-                                          height: 40,
-                                          width: 40,
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(
-                                        service.name,
-                                        style: TextStyle(
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
+                    const SizedBox(
+                      height: 30,
                     ),
-                    SizedBox(
-                      height: Get.height * 0.1,
+                    SelectServicesWidget(),
+                    const SizedBox(
+                      height: 10,
                     ),
+                    SelectAdditionalServices(),
+                    ServiceRadiusWidget(),
                   ],
                 )
               ],
@@ -209,68 +146,49 @@ class SelectYourServices extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: userController.selectedServices.isEmpty
-          ? null
-          : ElevatedButton(
-              onPressed: userController.selectedServices.isEmpty
-                  ? null
-                  : () async {
-                      if (userModel.email == 'No email set') {
-                        Get.showSnackbar(GetSnackBar(
-                          message: 'Login to continue',
-                          duration: const Duration(
-                            seconds: 3,
-                          ),
-                          backgroundColor: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          mainButton: TextButton(
-                            onPressed: () {
-                              Get.to(() => ChooseAccountTypePage());
-                              Get.closeCurrentSnackbar();
-                            },
-                            child: Text(
-                              'Login Page',
-                              style: TextStyle(
-                                color: userController.isDark
-                                    ? primaryColor
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        ));
-                        return;
-                      }
-                      Get.dialog(const LoadingDialog(),
-                          barrierDismissible: false);
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userModel.userId)
-                          .update({
-                        'services': FieldValue.arrayUnion(
-                            userController.selectedServices),
-                      });
-                      userController.selectedServices = [];
-
-                      Get.close(1);
-                    },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  maximumSize: Size(Get.width * 0.8, 50),
-                  minimumSize: Size(Get.width * 0.8, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  )),
-              child: Text(
-                'Save',
-                style: TextStyle(
-                  color: userController.isDark ? primaryColor : Colors.white,
-                  fontSize: 17,
-                  fontFamily: 'Avenir',
-                  fontWeight: FontWeight.w700,
-                ),
+      floatingActionButton: ElevatedButton(
+          onPressed: userController.selectedServices.isEmpty
+              ? null
+              : () async {
+                  // if (userModel.email == 'No email set') {
+                  //   Get.bottomSheet(LoginSheet());
+                  //   return;
+                  // }
+                  Get.dialog(const LoadingDialog(), barrierDismissible: false);
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userModel.userId)
+                      .update({
+                    'additionalServices': FieldValue.arrayUnion(
+                        userController.selectedAdditionalServices),
+                    'services':
+                        FieldValue.arrayUnion(userController.selectedServices),
+                    'radius': userController.radiusMiles.toInt(),
+                  });
+                  userController.selectedServices = [];
+                  userController.selectedAdditionalServices = [];
+                  if (widget.isPage) {
+                    Get.close(1);
+                  }
+                  Get.close(1);
+                },
+          style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  userController.isDark ? Colors.white : primaryColor,
+              maximumSize: Size(Get.width * 0.8, 50),
+              minimumSize: Size(Get.width * 0.8, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
               )),
+          child: Text(
+            'Save',
+            style: TextStyle(
+              color: userController.isDark ? primaryColor : Colors.white,
+              fontSize: 17,
+              // fontFamily: 'Avenir',
+              fontWeight: FontWeight.w700,
+            ),
+          )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

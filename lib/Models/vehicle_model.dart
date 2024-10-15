@@ -6,7 +6,7 @@ class VehicleType {
   VehicleType({required this.id, required this.title, required this.icon});
 }
 
-class VehicleMake { 
+class VehicleMake {
   final int id;
   final String title;
   final String icon;
@@ -29,6 +29,7 @@ class VehicleModel {
   final String icon;
   final int vehicleTypeId;
   final int vehicleMakeId;
+  // final bool isCustom;
 
   VehicleModel(
       {required this.id,

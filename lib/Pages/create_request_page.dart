@@ -19,6 +19,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
+import 'package:vehype/Widgets/login_sheet.dart';
 
 import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
@@ -768,24 +769,28 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       return;
                     }
 
-                    Get.dialog(const LoadingDialog(),
-                        barrierDismissible: false);
-                    if (widget.offersModel != null) {
-                      await garageController.saveRequest(
-                          _descriptionController.text,
-                          LatLng(lat, long),
-                          userModel.userId,
-                          widget.offersModel!.offerId,
-                          garageController.garageId);
-                      await sendNotificationOnRequestUpdate(
-                          widget.offersModel!.offerId,
-                          garageController.selectedIssue,
-                          userModel);
-                      Get.back();
-                      Get.back();
-                    } else {
-                      QuerySnapshot<Map<String, dynamic>> snapshot =
-                          await FirebaseFirestore.instance
+                    if (userModel.isGuest) {
+                      Get.bottomSheet(LoginSheet(onSuccess: () async {
+                        Get.dialog(const LoadingDialog(),
+                            barrierDismissible: false);
+                        if (widget.offersModel != null) {
+                          await garageController.saveRequest(
+                              _descriptionController.text,
+                              LatLng(lat, long),
+                              userModel.userId,
+                              widget.offersModel!.offerId,
+                              garageController.garageId);
+                          await sendNotificationOnRequestUpdate(
+                              widget.offersModel!.offerId,
+                              garageController.selectedIssue,
+                              userModel);
+                          Get.back();
+                          Get.back();
+                        } else {
+                          QuerySnapshot<
+                              Map<String,
+                                  dynamic>> snapshot = await FirebaseFirestore
+                              .instance
                               .collection('offers')
                               .where('garageId',
                                   isEqualTo: garageController.garageId)
@@ -795,55 +800,139 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                               // .where('issue',
                               //     isEqualTo: garageController.selectedIssue)
                               .get();
-                      List<OffersModel> offers = [];
-                      for (QueryDocumentSnapshot<
-                          Map<String, dynamic>> documentsnap in snapshot.docs) {
-                        offers.add(OffersModel.fromJson(documentsnap));
-                      }
+                          List<OffersModel> offers = [];
+                          for (QueryDocumentSnapshot<
+                                  Map<String, dynamic>> documentsnap
+                              in snapshot.docs) {
+                            offers.add(OffersModel.fromJson(documentsnap));
+                          }
 
-                      List<OffersModel> filterByVehicle = offers
-                          .where((offer) =>
-                              offer.garageId == garageController.garageId)
-                          .toList();
-                      List<OffersModel> filterByService = filterByVehicle
-                          .where((offer) =>
-                              offer.issue == garageController.selectedIssue)
-                          .toList();
-                      bool anyDiffirence =
-                          filterByService.any((offer) => areLocationsDifferent(
-                                lat,
-                                long,
-                                offer.lat,
-                                offer.long,
-                                1,
-                              ));
+                          List<OffersModel> filterByVehicle = offers
+                              .where((offer) =>
+                                  offer.garageId == garageController.garageId)
+                              .toList();
+                          List<OffersModel> filterByService = filterByVehicle
+                              .where((offer) =>
+                                  offer.issue == garageController.selectedIssue)
+                              .toList();
+                          bool anyDiffirence = filterByService
+                              .any((offer) => areLocationsDifferent(
+                                    lat,
+                                    long,
+                                    offer.lat,
+                                    offer.long,
+                                    1,
+                                  ));
 
-                      if (anyDiffirence) {
-                        Get.close(1);
+                          if (anyDiffirence) {
+                            Get.close(1);
 
-                        toastification.show(
-                          context: context,
-                          title: Text('Duplicate Request Found!'),
-                          style: ToastificationStyle.minimal,
-                          showProgressBar: false,
-                          type: ToastificationType.error,
-                          alignment: Alignment.topCenter,
-                          autoCloseDuration: Duration(seconds: 3),
-                        );
-                      } else {
-                        String requestId = await garageController.saveRequest(
+                            toastification.show(
+                              context: context,
+                              title: Text('Duplicate Request Found!'),
+                              style: ToastificationStyle.minimal,
+                              showProgressBar: false,
+                              type: ToastificationType.error,
+                              alignment: Alignment.topCenter,
+                              autoCloseDuration: Duration(seconds: 3),
+                            );
+                          } else {
+                            String requestId =
+                                await garageController.saveRequest(
+                                    _descriptionController.text,
+                                    LatLng(lat, long),
+                                    userModel.userId,
+                                    null,
+                                    garageController.garageId);
+                            await getUserProviders(requestId,
+                                garageController.selectedIssue, userModel);
+                            Get.back();
+                            Get.back();
+                          }
+
+                          // Get.close(4);
+                        }
+                      }));
+                    } else {
+                      Get.dialog(const LoadingDialog(),
+                          barrierDismissible: false);
+                      if (widget.offersModel != null) {
+                        await garageController.saveRequest(
                             _descriptionController.text,
                             LatLng(lat, long),
                             userModel.userId,
-                            null,
+                            widget.offersModel!.offerId,
                             garageController.garageId);
-                        await getUserProviders(requestId,
-                            garageController.selectedIssue, userModel);
+                        await sendNotificationOnRequestUpdate(
+                            widget.offersModel!.offerId,
+                            garageController.selectedIssue,
+                            userModel);
                         Get.back();
                         Get.back();
-                      }
+                      } else {
+                        QuerySnapshot<
+                            Map<String,
+                                dynamic>> snapshot = await FirebaseFirestore
+                            .instance
+                            .collection('offers')
+                            .where('garageId',
+                                isEqualTo: garageController.garageId)
+                            .where('status', whereIn: ['active', 'inProgress'])
 
-                      // Get.close(4);
+                            // .where('issue',
+                            //     isEqualTo: garageController.selectedIssue)
+                            .get();
+                        List<OffersModel> offers = [];
+                        for (QueryDocumentSnapshot<
+                                Map<String, dynamic>> documentsnap
+                            in snapshot.docs) {
+                          offers.add(OffersModel.fromJson(documentsnap));
+                        }
+
+                        List<OffersModel> filterByVehicle = offers
+                            .where((offer) =>
+                                offer.garageId == garageController.garageId)
+                            .toList();
+                        List<OffersModel> filterByService = filterByVehicle
+                            .where((offer) =>
+                                offer.issue == garageController.selectedIssue)
+                            .toList();
+                        bool anyDiffirence = filterByService
+                            .any((offer) => areLocationsDifferent(
+                                  lat,
+                                  long,
+                                  offer.lat,
+                                  offer.long,
+                                  1,
+                                ));
+
+                        if (anyDiffirence) {
+                          Get.close(1);
+
+                          toastification.show(
+                            context: context,
+                            title: Text('Duplicate Request Found!'),
+                            style: ToastificationStyle.minimal,
+                            showProgressBar: false,
+                            type: ToastificationType.error,
+                            alignment: Alignment.topCenter,
+                            autoCloseDuration: Duration(seconds: 3),
+                          );
+                        } else {
+                          String requestId = await garageController.saveRequest(
+                              _descriptionController.text,
+                              LatLng(lat, long),
+                              userModel.userId,
+                              null,
+                              garageController.garageId);
+                          await getUserProviders(requestId,
+                              garageController.selectedIssue, userModel);
+                          Get.back();
+                          Get.back();
+                        }
+
+                        // Get.close(4);
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -1603,7 +1692,8 @@ class SelectVehicle extends StatelessWidget {
                   child: Text(
                     'Add New',
                     style: TextStyle(
-                      color: Colors.indigo,
+                      // color: ,
+                      decoration: TextDecoration.underline,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
