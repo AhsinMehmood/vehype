@@ -21,6 +21,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 // import 'package:image_select/image_selector.dart';
@@ -41,6 +42,7 @@ import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
 import 'offers_provider.dart';
 import 'owner_offers_controller.dart';
+import 'package:event_bus/event_bus.dart';
 
 enum AccountType {
   seeker,
@@ -48,7 +50,40 @@ enum AccountType {
 }
 
 class UserController with ChangeNotifier {
+  EventBus eventBus = EventBus();
+  AudioPlayer? currentPlayer;
+  setCurrentPlayer(AudioPlayer? event) {
+    currentPlayer = event;
+    notifyListeners();
+  }
+
   // FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  int sortByTime = 0;
+  int sortByDistance = 0;
+  resetSort() {
+    sortByTime = 0;
+    sortByDistance = 0;
+    notifyListeners();
+  }
+
+  changeTimeSort() {
+    if (sortByTime == 0) {
+      sortByTime = 1;
+    } else {
+      sortByTime = 0;
+    }
+    notifyListeners();
+  }
+
+  changeDistanceSort() {
+    if (sortByDistance == 0) {
+      sortByDistance = 1;
+    } else {
+      sortByDistance = 0;
+    }
+    notifyListeners();
+  }
 
   pushTokenUpdate(String userId) async {
     // NotificationSettings settings = await messaging.getNotificationSettings();
@@ -80,9 +115,23 @@ class UserController with ChangeNotifier {
   //     'pushToken': pushToken,
   //   });
   // }
+  List selectedVehicleTypesFilter = [];
 
   UserModel? _userModel;
   List selectedServicesFilter = [];
+  clearSelectedVehicleeTypes() {
+    selectedVehicleTypesFilter = [];
+    notifyListeners();
+  }
+
+  selectVehicleTypesFilter(String name) {
+    if (selectedVehicleTypesFilter.contains(name)) {
+      selectedVehicleTypesFilter.remove(name);
+    } else {
+      selectedVehicleTypesFilter.add(name);
+    }
+    notifyListeners();
+  }
 
   clearServie() {
     selectedServicesFilter = [];
@@ -762,7 +811,22 @@ class UserController with ChangeNotifier {
       'reason': reason,
     });
 
-    FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+  }
+
+  unblockUser(String currentUserId, String secondUserId) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(secondUserId)
+        .update({
+      'blockedBy': FieldValue.arrayRemove([currentUserId])
+    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUserId)
+        .update({
+      'blockedUsers': FieldValue.arrayRemove([secondUserId])
+    });
   }
 
   late Uint8List favMarkar;

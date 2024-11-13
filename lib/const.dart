@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-int currentVersion = 90;
+int currentVersion = 94;
 // Color cardColor = Color.fromARGB(255, 22, 32, 44);
 // Color backColor = changeColor(color: '1B1C1E');
 
@@ -39,6 +39,24 @@ double haversine(double lat1, double lon1, double lat2, double lon2) {
 
 double _degToRad(double deg) {
   return deg * (pi / 180);
+}
+
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  const R = 6371; // Earth's radius in kilometers
+  final dLat = _toRadians(lat2 - lat1);
+  final dLon = _toRadians(lon2 - lon1);
+  final a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(_toRadians(lat1)) *
+          cos(_toRadians(lat2)) *
+          sin(dLon / 2) *
+          sin(dLon / 2);
+  final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  final distanceInKilometers = R * c; // Distance in kilometers
+  return distanceInKilometers * 0.621371; // Distance in miles
+}
+
+double _toRadians(double degree) {
+  return degree * pi / 180;
 }
 
 bool areLocationsDifferent(

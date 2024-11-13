@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 
@@ -9,8 +12,11 @@ import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/audio_page.dart';
+import 'package:vehype/Widgets/short_prefs_widget.dart';
 
 import 'package:vehype/const.dart';
 
@@ -20,8 +26,62 @@ import 'notifications_page.dart';
 
 import 'new_offers_page.dart';
 
-class OrdersHistoryProvider extends StatelessWidget {
+class OrdersHistoryProvider extends StatefulWidget {
   const OrdersHistoryProvider({super.key});
+
+  @override
+  State<OrdersHistoryProvider> createState() => _OrdersHistoryProviderState();
+}
+
+class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
+  OverlayEntry? _overlayEntry;
+
+  void _togglePopup() {
+    if (_overlayEntry == null) {
+      _showPopup();
+    } else {
+      _hidePopup();
+    }
+  }
+
+  void _showPopup() {
+    final overlay = Overlay.of(context);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Detect taps outside the popup to close it
+          GestureDetector(
+            onTap: _hidePopup,
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              color: Colors.transparent, // Transparent background
+            ),
+          ),
+          Positioned(
+            top: kToolbarHeight + 35,
+            right: 60.0,
+            child: ShortPrefsWidget(onPressed: _hidePopup),
+          ),
+        ],
+      ),
+    );
+
+    overlay.insert(_overlayEntry!);
+    setState(() {});
+  }
+
+  void _hidePopup() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _hidePopup(); // Ensure the popup is removed when the widget is disposed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +89,31 @@ class OrdersHistoryProvider extends StatelessWidget {
     final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
 
     UserModel userModel = userController.userModel!;
+    // List>
     List<OffersModel> rawOffers = offersProvider.offers;
+    rawOffers.sort((a, b) {
+      // Primary sort by createdAt
+      final dateA = DateTime.parse(a.createdAt).toLocal();
+      final dateB = DateTime.parse(b.createdAt).toLocal();
 
+      int timeComparison = userController.sortByTime == 1
+          ? dateA.compareTo(dateB) // Ascending order by time
+          : dateB.compareTo(dateA); // Descending order by time
+
+      if (timeComparison != 1) {
+        return timeComparison;
+      }
+
+      // Secondary sort by distance (only if dates are equal)
+      double distanceA =
+          calculateDistance(userModel.lat, userModel.long, a.lat, a.long);
+      double distanceB =
+          calculateDistance(userModel.lat, userModel.long, b.lat, b.long);
+
+      return userController.sortByDistance == 0
+          ? distanceA.compareTo(distanceB) // Ascending order by distance
+          : distanceB.compareTo(distanceA); // Descending order by distance
+    });
 // Filter offers based on user criteria
     List<OffersModel> ignoredOffers = rawOffers
         .where((offer) => offer.ignoredBy.contains(userModel.userId))
@@ -41,7 +124,12 @@ class OrdersHistoryProvider extends StatelessWidget {
         .where((offer) => !offer.ignoredBy.contains(userModel.userId))
         .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
         .where((offer) => userModel.services.contains(offer.issue))
+        .where((offer) => userModel.vehicleTypes.contains(offer.vehicleType))
         .toList();
+
+    for (var element in filteredOffers) {
+      log(element.vehicleType);
+    }
 
     List<OffersModel> newOffers = userModel.lat == 0.0
         ? filteredOffers
@@ -120,6 +208,19 @@ class OrdersHistoryProvider extends StatelessWidget {
             ),
           ),
           actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                  onTap: () {
+                    Get.to(AudioPage());
+                  },
+                  child: Icon(
+                    _overlayEntry == null
+                        ? CupertinoIcons.slider_horizontal_3
+                        : Icons.close,
+                    size: 26,
+                  )),
+            ),
             Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: InkWell(
@@ -380,6 +481,7 @@ class Offers extends StatelessWidget {
         : ListView.builder(
             itemCount: offersPending.length,
             shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
             padding:
                 const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
             itemBuilder: (context, index) {

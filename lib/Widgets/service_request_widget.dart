@@ -8,6 +8,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/service_cancelled_request_button_widget.dart';
 import 'package:vehype/Widgets/service_completed_request_button_widget.dart';
@@ -44,7 +45,10 @@ class ServiceRequestWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+    final UserModel userModel = userController.userModel!;
     DateTime createdAt = DateTime.parse(offersModel.createdAt);
+    double distance = calculateDistance(
+        userModel.lat, userModel.long, offersModel.lat, offersModel.long);
     return StreamBuilder<GarageModel>(
         stream: FirebaseFirestore.instance
             .collection('garages')
@@ -161,6 +165,7 @@ class ServiceRequestWidget extends StatelessWidget {
                                 child: Text(
                                   formatDateForRequestWidget(
                                       createdAt.toLocal()),
+                                  // offersModel.vehicleType,
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -194,30 +199,43 @@ class ServiceRequestWidget extends StatelessWidget {
                                 height: 10,
                               ),
                               Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SvgPicture.asset(
-                                    getVehicleType()
-                                        .firstWhere((test) =>
-                                            test.title ==
-                                            garageModel.bodyStyle
-                                                .split(',')
-                                                .first
-                                                .trim())
-                                        .icon,
-                                    height: 20,
-                                    width: 20,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
+                                  Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        getVehicleType()
+                                            .firstWhere((test) =>
+                                                test.title ==
+                                                garageModel.bodyStyle
+                                                    .split(',')
+                                                    .first
+                                                    .trim())
+                                            .icon,
+                                        height: 20,
+                                        width: 20,
+                                        color: userController.isDark
+                                            ? Colors.white
+                                            : primaryColor,
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(
+                                        garageModel.bodyStyle,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Text(
-                                    garageModel.bodyStyle,
+                                    "${distance.toStringAsFixed(2)} mi",
                                     style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w400,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],

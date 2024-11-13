@@ -61,9 +61,9 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
           Provider.of<GarageController>(context, listen: false);
       garageController.agreement = true;
       garageController.startDate =
-          DateTime.parse(widget.offersReceivedModel!.startDate);
+          DateTime.parse(widget.offersReceivedModel!.startDate).toLocal();
       garageController.endDate =
-          DateTime.parse(widget.offersReceivedModel!.endDate);
+          DateTime.parse(widget.offersReceivedModel!.endDate).toLocal();
       comment =
           TextEditingController(text: widget.offersReceivedModel!.comment);
 

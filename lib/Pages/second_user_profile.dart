@@ -112,145 +112,142 @@ class SeekerProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 40,
-              left: 12,
-              right: 12,
-            ),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                      onPressed: () {
-                        Get.close(1);
-                      },
-                      icon: Icon(
-                        Icons.close,
-                        size: 24,
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
-                      )),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Get.to(() =>
-                            FullImagePageView(urls: [profileModel.profileUrl]));
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(200),
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          },
-                          errorWidget: (context, url, error) =>
-                              const SizedBox.shrink(),
-                          imageUrl: profileModel.profileUrl,
-                          width: 65,
-                          height: 65,
-                          fit: BoxFit.fill,
-
-                          //cancelToken: cancellationToken,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          profileModel.name,
-                          style: TextStyle(
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            // Get.to(()=>Rat);
-                          },
-                          child: Row(
-                            children: [
-                              RatingBarIndicator(
-                                rating: profileModel.rating,
-                                itemBuilder: (context, index) => Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                ),
-                                itemCount: 5,
-                                itemSize: 20.0,
-                                direction: Axis.horizontal,
-                              ),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              Text(
-                                '(${profileModel.ratings.length.toString()})',
-                                style: TextStyle(
-                                  color: userController.isDark
-                                      ? Colors.white
-                                      : primaryColor,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 1,
-                  width: Get.width * 0.8,
-                  color: changeColor(color: 'D9D9D9'),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Reviews',
-                    style: TextStyle(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 40,
+            left: 12,
+            right: 12,
+          ),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                    onPressed: () {
+                      Get.close(1);
+                    },
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 24,
                       color:
                           userController.isDark ? Colors.white : primaryColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                    )),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Get.to(() =>
+                          FullImagePageView(urls: [profileModel.profileUrl]));
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(200),
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorWidget: (context, url, error) =>
+                            const SizedBox.shrink(),
+                        imageUrl: profileModel.profileUrl,
+                        width: 65,
+                        height: 65,
+                        fit: BoxFit.fill,
+
+                        //cancelToken: cancellationToken,
+                      ),
                     ),
                   ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        profileModel.name,
+                        style: TextStyle(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          // Get.to(()=>Rat);
+                        },
+                        child: Row(
+                          children: [
+                            RatingBarIndicator(
+                              rating: profileModel.rating,
+                              itemBuilder: (context, index) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20.0,
+                              direction: Axis.horizontal,
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              '(${profileModel.ratings.length.toString()})',
+                              style: TextStyle(
+                                color: userController.isDark
+                                    ? Colors.white
+                                    : primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                height: 1,
+                width: Get.width * 0.8,
+                color: changeColor(color: 'D9D9D9'),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Reviews',
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                ReviewsTab(userData: profileModel),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Expanded(child: ReviewsTab(userData: profileModel)),
+      ],
     );
   }
 }
@@ -796,49 +793,40 @@ class ReviewsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
 
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-              itemCount: userData.ratings.length,
-              shrinkWrap: true,
-              // physics: const Ne(),
-              padding: const EdgeInsets.only(
-                top: 5,
-                bottom: 20,
-              ),
-              itemBuilder: (context, inde) {
-                // print(userData.ratings[inde]['id']);
-                return StreamBuilder<UserModel>(
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userData.ratings[inde]['id'])
-                        .snapshots()
-                        .map((event) => UserModel.fromJson(event)),
-                    builder: (context, AsyncSnapshot<UserModel> snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox(
-                          height: 100,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                          ),
-                        );
-                      }
-                      UserModel commenterData = snapshot.data!;
-
-                      return CommentWidget(
-                          commenterData: commenterData,
-                          data: userData,
-                          inde: inde);
-                    });
-              }),
+    return ListView.builder(
+        itemCount: userData.ratings.length,
+        shrinkWrap: true,
+        // physics: const Ne(),
+        padding: const EdgeInsets.only(
+          top: 5,
+          bottom: 50,
         ),
-      ],
-    );
+        itemBuilder: (context, inde) {
+          // print(userData.ratings[inde]['id']);
+          return StreamBuilder<UserModel>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userData.ratings[inde]['id'])
+                  .snapshots()
+                  .map((event) => UserModel.fromJson(event)),
+              builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox(
+                    height: 100,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
+                      ),
+                    ),
+                  );
+                }
+                UserModel commenterData = snapshot.data!;
+
+                return CommentWidget(
+                    commenterData: commenterData, data: userData, inde: inde);
+              });
+        });
   }
 }
 

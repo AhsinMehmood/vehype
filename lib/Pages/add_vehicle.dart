@@ -715,15 +715,16 @@ class _AddVehicleState extends State<AddVehicle> {
                         //   autoCloseDuration: Duration(seconds: 3),
                         //   type: ToastificationType.error,
                         // );
-                        if (userModel.isGuest) {
-                          Get.bottomSheet(LoginSheet(onSuccess: () async {
-                            garageController.saveVehicle(userModel,
-                                _vinController.text, widget.addService);
-                          }));
-                        } else {
-                          garageController.saveVehicle(userModel,
-                              _vinController.text, widget.addService);
-                        }
+                        // if (userModel.isGuest) {
+                        //   Get.bottomSheet(LoginSheet(onSuccess: () async {
+                        //     garageController.saveVehicle(userModel,
+                        //         _vinController.text, widget.addService);
+                        //   }));
+                        // } else {
+
+                        // }
+                        garageController.saveVehicle(
+                            userModel, _vinController.text, widget.addService);
                       } else {
                         toastification.show(
                           context: context,
@@ -782,7 +783,7 @@ class _MakePickerState extends State<MakePicker> {
       searchResult.addAll(vehicleList);
     } else {
       searchResult = vehicleList
-          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .where((c) => c.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
 
@@ -1163,6 +1164,7 @@ class BodyStylePicker extends StatelessWidget {
                               ),
                           ],
                         ),
+                     
                       ),
                       const SizedBox(
                         height: 5,
@@ -1176,6 +1178,7 @@ class BodyStylePicker extends StatelessWidget {
                       ),
                     ],
                   ),
+                
                 ),
               const SizedBox(
                 height: 10,
@@ -1210,7 +1213,7 @@ class _ModelPickerState extends State<ModelPicker> {
       searchResult.addAll(vehicleList);
     } else {
       searchResult = vehicleList
-          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .where((c) => c.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
 
@@ -1524,7 +1527,7 @@ class _SubModelPickerState extends State<SubModelPicker> {
       searchResult.addAll(vehicleList);
     } else {
       searchResult = vehicleList
-          .where((c) => c.title.toLowerCase().startsWith(query.toLowerCase()))
+          .where((c) => c.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
 

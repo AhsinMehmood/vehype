@@ -51,6 +51,7 @@ class OffersModel {
   final List<OffersNotification> checkByList;
   final String offerReceivedIdJob;
   final String address;
+  final String vehicleType;
 
   OffersModel(
       {required this.offerId,
@@ -70,7 +71,8 @@ class OffersModel {
       required this.description,
       required this.createdAt,
       required this.checkByList,
-      required this.images});
+      required this.images,
+      required this.vehicleType});
 
   factory OffersModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -83,24 +85,26 @@ class OffersModel {
     // print(data.toString());
     String id = snapshot.id;
     return OffersModel(
-        offerId: id,
-        createdAt: data['createdAt'] ?? DateTime.now().toIso8601String(),
-        garageId: data['garageId'] ?? '',
-        ignoredBy: data['ignoredBy'] ?? [],
-        offersReceived: data['offersReceived'] ?? [],
-        ownerId: data['ownerId'] ?? '',
-        vehicleId: data['vehicleName'] ?? '',
-        address: data['address'] ?? '',
-        issue: data['issue'] ?? '',
-        additionalService: data['additionalService'] ?? '',
-        offerReceivedIdJob: data['offerReceivedIdJob'] ?? 'nothing',
-        imageOne: data['imageOne'] ?? '',
-        status: data['status'] ?? '',
-        lat: data['lat'] ?? 0.0,
-        long: data['long'] ?? 0.0,
-        description: data['description'] ?? '',
-        checkByList: offersNotifications,
-        images: data['images'] ?? []);
+      offerId: id,
+      createdAt: data['createdAt'] ?? DateTime.now().toIso8601String(),
+      garageId: data['garageId'] ?? '',
+      ignoredBy: data['ignoredBy'] ?? [],
+      offersReceived: data['offersReceived'] ?? [],
+      ownerId: data['ownerId'] ?? '',
+      vehicleId: data['vehicleName'] ?? '',
+      address: data['address'] ?? '',
+      issue: data['issue'] ?? '',
+      additionalService: data['additionalService'] ?? '',
+      offerReceivedIdJob: data['offerReceivedIdJob'] ?? 'nothing',
+      imageOne: data['imageOne'] ?? '',
+      status: data['status'] ?? '',
+      lat: data['lat'] ?? 0.0,
+      long: data['long'] ?? 0.0,
+      description: data['description'] ?? '',
+      checkByList: offersNotifications,
+      images: data['images'] ?? [],
+      vehicleType: data['vehicleType'] ?? '',
+    );
   }
 }
 

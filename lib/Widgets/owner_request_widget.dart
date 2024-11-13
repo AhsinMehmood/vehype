@@ -7,6 +7,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/create_request_page.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 
 import 'package:vehype/const.dart';
@@ -137,6 +138,68 @@ class OwnerRequestWidget extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (offersModel.status == 'inactive' &&
+                        offersReceivedModel != null)
+                      Positioned(
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: offersModel.offersReceived.isEmpty
+                                ? Colors.red
+                                : primaryColor,
+                          ),
+                          padding: const EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                            bottom: 5,
+                            top: 5,
+                          ),
+                          margin: const EdgeInsets.only(
+                            right: 10,
+                            top: 10,
+                          ),
+                          child: Text(
+                            offersReceivedModel!.status,
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: offersModel.offersReceived.isEmpty
+                                    ? Colors.white
+                                    : Colors.greenAccent),
+                          ),
+                        ),
+                      )
+                    else if (offersModel.offersReceived.isEmpty &&
+                        offersModel.status == 'inactive')
+                      Positioned(
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.red,
+                          ),
+                          padding: const EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                            bottom: 5,
+                            top: 5,
+                          ),
+                          margin: const EdgeInsets.only(
+                            right: 10,
+                            top: 10,
+                          ),
+                          child: Text(
+                            'Deleted',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: offersModel.offersReceived.isEmpty
+                                    ? Colors.white
+                                    : Colors.greenAccent),
+                          ),
+                        ),
+                      )
                   ],
                 ),
               ),
@@ -328,25 +391,35 @@ class OwnerRequestWidget extends StatelessWidget {
                   Container(
                     height: 30,
                     width: Get.width,
+                    padding: const EdgeInsets.only(left: 10, right: 10),
                     decoration: BoxDecoration(
-                        color: Colors.red,
+                        color:
+                            userController.isDark ? Colors.white : primaryColor,
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(6),
                           bottomRight: Radius.circular(6),
                         )),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          'Deleted',
-                          style: TextStyle(
-                            color: Colors.white,
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(
+                            () => CreateRequestPage(offersModel: offersModel));
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Edit & Repost >',
+                            style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: userController.isDark
+                                    ? primaryColor
+                                    : Colors.white),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
             ],

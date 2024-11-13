@@ -41,9 +41,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
         Provider.of<UserController>(context, listen: false);
     UserModel userModel = userController.userModel!;
     for (OffersModel offer in widget.offers) {
-      List<OffersNotification> offersNotifications = offer.checkByList
-          .where((noti) => noti.checkById == userModel.userId)
-          .toList();
+      List<OffersNotification> offersNotifications = offer.checkByList;
 
       if (map[offer.offerId] != null) {
         map[offer.offerId]!.addAll(offersNotifications);
@@ -102,6 +100,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                       return ListView.builder(
                           itemCount: notifications.length,
                           shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index) {
                             OffersNotification notificationsModel =
                                 notifications[index];
@@ -436,7 +435,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                           OffersReceivedModel? offersReceivedModel;
 
                           if (notificationsModel.offersReceivedId != '') {
-                          DocumentSnapshot<Map<String, dynamic>> offerSnap =
+                            DocumentSnapshot<Map<String, dynamic>> offerSnap =
                                 await FirebaseFirestore.instance
                                     .collection('offersReceived')
                                     .doc(notificationsModel.offersReceivedId)
@@ -453,8 +452,7 @@ class _OwnerNotificationsPageState extends State<OwnerNotificationsPage> {
                                 notificationTitle: '',
                                 senderId: userModel.userId,
                                 notificationSubtitle: '');
-                            map.remove(offerId);
-                            setState(() {});
+                            // map.remove(offerId);
                           }
                         }
                       }

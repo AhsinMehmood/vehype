@@ -24,6 +24,7 @@ import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
 import 'admin_home_page.dart';
+import 'blocked_users.dart';
 import 'comments_page.dart';
 import 'delete_account_page.dart';
 import 'my_fav_page.dart';
@@ -203,7 +204,6 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
-
                       MenuCard(
                         secondTitle: '',
                         userController: userController,
@@ -224,6 +224,7 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
+
                       if (userModel.accountType == 'provider')
                         MenuCard(
                           secondTitle: '',
@@ -296,6 +297,7 @@ class ProfilePage extends StatelessWidget {
                       // const SizedBox(
                       //   height: 20,
                       // ),
+
                       MenuCard(
                         secondTitle: '',
                         userController: userController,
@@ -306,10 +308,31 @@ class ProfilePage extends StatelessWidget {
                               'Spread the Word: VEHYPE Connects Vehicle Owners with Top Service Owners! https://vehype.com/');
                         },
                       ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      MenuCard(
+                        secondTitle: '',
+                        userController: userController,
+                        title: 'Blocked Users',
+                        icon: Icons.block_rounded,
+                        onTap: () async {
+                          if (userModel.isGuest) {
+                            Get.bottomSheet(LoginSheet(
+                              onSuccess: () {
+                                Get.to(() => BlockedUsers());
+                              },
+                            ));
+                          } else {
+                            Get.to(() => BlockedUsers());
+                          }
+                        },
+                      ),
 
                       const SizedBox(
                         height: 10,
                       ),
+
                       MenuCard(
                         secondTitle: '',
                         userController: userController,

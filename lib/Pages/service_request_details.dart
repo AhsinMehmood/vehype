@@ -89,7 +89,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
             json['results'] != null &&
             json['results'].isNotEmpty) {
           setState(() {
-            address = json['results'][1]['formatted_address'];
+            address = json['results'][0]['formatted_address'];
           });
         } else {
           setState(() {
@@ -116,6 +116,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
     // final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
     String? documentId =
         widget.offersReceivedModel?.id; // Use a default valid ID if needed
+    final UserModel userModel = userController.userModel!;
 
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -134,6 +135,8 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                 .map((convert) => OffersModel.fromJson(convert)),
             builder: (context, snapshot) {
               OffersModel offersModel = snapshot.data ?? widget.offersModel;
+              double distance = calculateDistance(userModel.lat, userModel.long,
+                  offersModel.lat, offersModel.long);
               return StreamBuilder(
                   // initialData: widget.offersReceivedModel,
                   stream: FirebaseFirestore.instance
@@ -504,7 +507,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                                                 ),
                                                                 Flexible(
                                                                   child: Text(
-                                                                    address,
+                                                                    '${distance.toStringAsFixed(2)} miles away',
                                                                     style:
                                                                         TextStyle(
                                                                       fontSize:
@@ -1099,173 +1102,171 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                                                     .withOpacity(
                                                                         0.2),
                                                           ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          Align(
-                                                            alignment: Alignment
-                                                                .centerLeft,
-                                                            child: Text(
-                                                              'Location',
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w800,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          Column(
-                                                            children: [
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Expanded(
-                                                                    child: Row(
+                                                          if (offersReceivedModel !=
+                                                                  null &&
+                                                              offersModel
+                                                                      .status !=
+                                                                  'active')
+                                                            Column(
+                                                              children: [
+                                                                const SizedBox(
+                                                                  height: 20,
+                                                                ),
+                                                                Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .centerLeft,
+                                                                  child: Text(
+                                                                    'Location',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 20,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .start,
                                                                       children: [
-                                                                        Icon(
-                                                                          Icons
-                                                                              .location_on_outlined,
-                                                                          size:
-                                                                              18,
-                                                                        ),
-                                                                        const SizedBox(
-                                                                          width:
-                                                                              5,
-                                                                        ),
-                                                                        Flexible(
+                                                                        Expanded(
                                                                           child:
-                                                                              Text(
-                                                                            address,
-                                                                            style:
-                                                                                TextStyle(
-                                                                              fontSize: 14,
-                                                                              fontWeight: FontWeight.w400,
+                                                                              Row(
+                                                                            children: [
+                                                                              Icon(
+                                                                                Icons.location_on_outlined,
+                                                                                size: 18,
+                                                                              ),
+                                                                              const SizedBox(
+                                                                                width: 5,
+                                                                              ),
+                                                                              Flexible(
+                                                                                child: Text(
+                                                                                  address,
+                                                                                  style: TextStyle(
+                                                                                    fontSize: 14,
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Container(
+                                                                  height: 140,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                  ),
+                                                                  width:
+                                                                      Get.width,
+                                                                  child:
+                                                                      ClipRRect(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(6),
+                                                                    child:
+                                                                        Stack(
+                                                                      children: [
+                                                                        GoogleMap(
+                                                                          markers: {
+                                                                            Marker(
+                                                                              markerId: MarkerId('current'),
+                                                                              position: LatLng(offersModel.lat, offersModel.long),
+                                                                            ),
+                                                                          },
+                                                                          zoomControlsEnabled:
+                                                                              false,
+                                                                          initialCameraPosition:
+                                                                              CameraPosition(
+                                                                            target:
+                                                                                LatLng(offersModel.lat, offersModel.long),
+                                                                            zoom:
+                                                                                16.0,
+                                                                          ),
+                                                                        ),
+                                                                        Align(
+                                                                          alignment:
+                                                                              Alignment.center,
+                                                                          child:
+                                                                              InkWell(
+                                                                            onTap:
+                                                                                () {
+                                                                              MapsLauncher.launchCoordinates(offersModel.lat, offersModel.long);
+                                                                            },
+                                                                            child:
+                                                                                Container(
+                                                                              width: Get.width * 0.6,
+                                                                              height: 50,
+                                                                              decoration: BoxDecoration(
+                                                                                  borderRadius: BorderRadius.circular(4),
+                                                                                  color: userController.isDark ? primaryColor : Colors.white,
+                                                                                  border: Border.all(
+                                                                                    color: userController.isDark ? Colors.white : primaryColor,
+                                                                                  )),
+                                                                              child: Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                children: [
+                                                                                  Icon(
+                                                                                    Icons.location_on_outlined,
+                                                                                    size: 20,
+                                                                                  ),
+                                                                                  const SizedBox(
+                                                                                    width: 5,
+                                                                                  ),
+                                                                                  Text(
+                                                                                    'See Location',
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 14,
+                                                                                      fontWeight: FontWeight.w900,
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                           ),
                                                                         ),
                                                                       ],
                                                                     ),
                                                                   ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 5,
-                                                          ),
-                                                          Container(
-                                                            height: 140,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 20,
+                                                                ),
+                                                                Container(
+                                                                  height: 0.5,
+                                                                  width:
+                                                                      Get.width,
+                                                                  color: userController
+                                                                          .isDark
+                                                                      ? Colors
+                                                                          .white
+                                                                          .withOpacity(
+                                                                              0.2)
+                                                                      : primaryColor
+                                                                          .withOpacity(
+                                                                              0.2),
+                                                                ),
+                                                              ],
                                                             ),
-                                                            width: Get.width,
-                                                            child: ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          6),
-                                                              child: Stack(
-                                                                children: [
-                                                                  GoogleMap(
-                                                                    markers: {
-                                                                      Marker(
-                                                                        markerId:
-                                                                            MarkerId('current'),
-                                                                        position: LatLng(
-                                                                            offersModel.lat,
-                                                                            offersModel.long),
-                                                                      ),
-                                                                    },
-                                                                    zoomControlsEnabled:
-                                                                        false,
-                                                                    initialCameraPosition:
-                                                                        CameraPosition(
-                                                                      target: LatLng(
-                                                                          offersModel
-                                                                              .lat,
-                                                                          offersModel
-                                                                              .long),
-                                                                      zoom:
-                                                                          16.0,
-                                                                    ),
-                                                                  ),
-                                                                  Align(
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    child:
-                                                                        InkWell(
-                                                                      onTap:
-                                                                          () {
-                                                                        MapsLauncher.launchCoordinates(
-                                                                            offersModel.lat,
-                                                                            offersModel.long);
-                                                                      },
-                                                                      child:
-                                                                          Container(
-                                                                        width: Get.width *
-                                                                            0.6,
-                                                                        height:
-                                                                            50,
-                                                                        decoration: BoxDecoration(
-                                                                            borderRadius: BorderRadius.circular(4),
-                                                                            color: userController.isDark ? primaryColor : Colors.white,
-                                                                            border: Border.all(
-                                                                              color: userController.isDark ? Colors.white : primaryColor,
-                                                                            )),
-                                                                        child:
-                                                                            Row(
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.center,
-                                                                          children: [
-                                                                            Icon(
-                                                                              Icons.location_on_outlined,
-                                                                              size: 20,
-                                                                            ),
-                                                                            const SizedBox(
-                                                                              width: 5,
-                                                                            ),
-                                                                            Text(
-                                                                              'See Location',
-                                                                              style: TextStyle(
-                                                                                fontSize: 14,
-                                                                                fontWeight: FontWeight.w900,
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 20,
-                                                          ),
-                                                          Container(
-                                                            height: 0.5,
-                                                            width: Get.width,
-                                                            color: userController
-                                                                    .isDark
-                                                                ? Colors.white
-                                                                    .withOpacity(
-                                                                        0.2)
-                                                                : primaryColor
-                                                                    .withOpacity(
-                                                                        0.2),
-                                                          ),
                                                           const SizedBox(
                                                             height: 120,
                                                           ),

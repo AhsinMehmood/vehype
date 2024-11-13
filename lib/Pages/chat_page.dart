@@ -20,7 +20,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   // bool isShow = false;
 
-
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -40,7 +39,7 @@ class _ChatPageState extends State<ChatPage> {
             fontWeight: FontWeight.w800,
           ),
         ),
-      ), 
+      ),
       body: SafeArea(
         child: StreamBuilder<List<ChatModel>>(
             // initialData: [],
@@ -57,19 +56,25 @@ class _ChatPageState extends State<ChatPage> {
 
               List<ChatModel> chats = snap.data ?? [];
               chats.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
-              return ListView.builder(
-                  itemCount: chats.length,
-                  // physics:const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(0),
-                  itemBuilder: (context, index) {
-                    ChatModel chat = chats[index];
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: chats.length,
+                        // physics:const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(0),
+                        itemBuilder: (context, index) {
+                          ChatModel chat = chats[index];
 
-                    return ChatWidget(
-                      user: userModel,
-                      chat: chat,
-                    );
-                  });
+                          return ChatWidget(
+                            user: userModel,
+                            chat: chat,
+                          );
+                        }),
+                  ),
+                ],
+              );
             }),
       ),
     );

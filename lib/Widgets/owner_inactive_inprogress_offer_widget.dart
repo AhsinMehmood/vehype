@@ -458,31 +458,33 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                       if (offersReceivedModel.status == 'Cancelled')
                         Row(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  child: Text(
-                                    'Cancelled By',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InkWell(
+                                    child: Text(
+                                      'Cancelled By',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  offersReceivedModel.cancelBy == 'owner'
-                                      ? 'This offer was cancelled by You.'
-                                      : 'This offer was cancelled by ${secondUser.name}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                  const SizedBox(
+                                    height: 5,
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    offersReceivedModel.cancelBy == 'owner'
+                                        ? 'This offer was cancelled by You.'
+                                        : 'This offer was cancelled by ${secondUser.name}',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

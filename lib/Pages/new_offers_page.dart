@@ -20,6 +20,7 @@ import 'package:vehype/Widgets/service_request_widget.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
+import '../Widgets/select_vehicle_type.dart';
 import 'choose_account_type.dart';
 
 class NewOffers extends StatelessWidget {
@@ -55,10 +56,11 @@ class NewOffers extends StatelessWidget {
     return ListView.builder(
         itemCount: newOffers.length,
         // shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0, top: 15),
         itemBuilder: (context, index) {
           OffersModel offersModel = newOffers[index];
-
+          print(offersModel.vehicleType);
           return ServiceRequestWidget(
             offersModel: offersModel,
           );
@@ -84,8 +86,13 @@ class _SelectYourServicesState extends State<SelectYourServices> {
         Provider.of<UserController>(context, listen: false);
     userController.selectedAdditionalServices = userModel.additionalServices;
     userController.selectedServices = userModel.services;
+    userController.selectedVehicleTypesFilter = [];
+    userController.selectedVehicleTypesFilter = userModel.vehicleTypes;
     userController.radiusMiles = userModel.radius.toDouble();
     setState(() {});
+    // for (var element in userModel.vehicleTypes) {
+    //   userController.selectVehicleTypesFilter(element);
+    // }
   }
 
   @override
@@ -137,6 +144,10 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                     const SizedBox(
                       height: 10,
                     ),
+                    SelectVehicleType(),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     SelectAdditionalServices(),
                     ServiceRadiusWidget(),
                   ],
@@ -159,11 +170,11 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                       .collection('users')
                       .doc(userModel.userId)
                       .update({
-                    'additionalServices': FieldValue.arrayUnion(
-                        userController.selectedAdditionalServices),
-                    'services':
-                        FieldValue.arrayUnion(userController.selectedServices),
+                    'additionalServices':
+                        userController.selectedAdditionalServices,
+                    'services': userController.selectedServices,
                     'radius': userController.radiusMiles.toInt(),
+                    'vehicleTypes': userController.selectedVehicleTypesFilter,
                   });
                   userController.selectedServices = [];
                   userController.selectedAdditionalServices = [];

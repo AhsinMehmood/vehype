@@ -277,12 +277,17 @@ class _TabsPageState extends State<TabsPage> {
         .where((offer) => !offer.ignoredBy.contains(userModel.userId))
         .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
         .where((offer) => userModel.services.contains(offer.issue))
+        .where((offer) => userModel.vehicleTypes.contains(offer.vehicleType))
         .toList();
 
     List<OffersModel> newOffers = userModel.lat == 0.0
         ? filteredOffers
         : userController.filterOffers(
             filteredOffers, userModel.lat, userModel.long, 50);
+    List<OffersModel> notificationToCheckOffersNewOffers = newOffers
+        .where((offer) => offer.checkByList
+            .any((check) => check.checkById == userModel.userId))
+        .toList();
     // print(
     //     '${offersProvider.offers.where((offer) => offer.checkByList.any((check) => check.checkById == userModel.userId)).toList().first.status} ');
     return [
@@ -305,11 +310,7 @@ class _TabsPageState extends State<TabsPage> {
                 top: 0,
                 right: 0,
                 child: Visibility(
-                  visible: newOffers
-                          .where((offer) => offer.checkByList.any(
-                              (check) => check.checkById == userModel.userId))
-                          .toList()
-                          .isNotEmpty ||
+                  visible: notificationToCheckOffersNewOffers.isNotEmpty ||
                       offersProvider.offersReceived
                           .where((offer) => offer.checkByList.any(
                               (check) => check.checkById == userModel.userId))
@@ -319,19 +320,13 @@ class _TabsPageState extends State<TabsPage> {
                     height: 18,
                     width: 18,
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 57, 159, 60),
+                      color: Colors.red,
                       borderRadius: BorderRadius.circular(200),
                     ),
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
-                        (offersProvider.offers
-                                    .where((offer) => offer.checkByList.any(
-                                        (check) =>
-                                            check.checkById ==
-                                            userModel.userId))
-                                    .toList()
-                                    .length +
+                        (notificationToCheckOffersNewOffers.length +
                                 offersProvider.offersReceived
                                     .where((offer) => offer.checkByList.any(
                                         (check) =>
@@ -392,7 +387,7 @@ class _TabsPageState extends State<TabsPage> {
                             width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
-                                  ? const Color.fromARGB(255, 57, 159, 60)
+                                  ? Colors.red
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(200),
                             ),
@@ -475,7 +470,7 @@ class _TabsPageState extends State<TabsPage> {
                   height: 16,
                   width: 16,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 57, 159, 60),
+                    color: Colors.red,
                     borderRadius: BorderRadius.circular(200),
                   ),
                   child: Align(
@@ -555,7 +550,7 @@ class _TabsPageState extends State<TabsPage> {
                             width: 16,
                             decoration: BoxDecoration(
                               color: unreadMessages.isNotEmpty
-                                  ? const Color.fromARGB(255, 57, 159, 60)
+                                  ? Colors.red
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(200),
                             ),
@@ -843,79 +838,81 @@ class NotificationSheet extends StatelessWidget {
       // height: 300,
       width: Get.width,
       padding: const EdgeInsets.all(15),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Get Important Updates',
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 20,
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'We will notify you about updates to Requests, new Offers, and Messages.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(
-            height: 40,
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await OneSignal.Notifications.requestPermission(true);
-              // await OneSignal.Notifications.
-
-              OneSignal.login(userController.userModel!.userId);
-              Get.close(1);
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    userController.isDark ? Colors.white : primaryColor,
-                minimumSize: Size(Get.width * 0.8, 45),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                )),
-            child: Text(
-              'Yes, notify me',
+            Text(
+              'Get Important Updates',
               style: TextStyle(
-                color: userController.isDark ? primaryColor : Colors.white,
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              'We will notify you about updates to Requests, new Offers, and Messages.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
                 fontSize: 16,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          InkWell(
-            onTap: () {
-              Get.close(1);
-            },
-            child: Text(
-              'Maybe later',
-              style: TextStyle(
-                decoration: TextDecoration.underline,
-                color: userController.isDark
-                    ? Colors.white.withOpacity(0.7)
-                    : primaryColor,
+            const SizedBox(
+              height: 40,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await OneSignal.Notifications.requestPermission(true);
+                // await OneSignal.Notifications.
+
+                OneSignal.login(userController.userModel!.userId);
+                Get.close(1);
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                  minimumSize: Size(Get.width * 0.8, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  )),
+              child: Text(
+                'Yes, notify me',
+                style: TextStyle(
+                  color: userController.isDark ? primaryColor : Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+            InkWell(
+              onTap: () {
+                Get.close(1);
+              },
+              child: Text(
+                'Maybe later',
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  color: userController.isDark
+                      ? Colors.white.withOpacity(0.7)
+                      : primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

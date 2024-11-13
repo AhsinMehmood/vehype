@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/user_controller.dart';
@@ -47,15 +48,23 @@ class ReportConfirmationSheet extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                Get.close(1);
                 // Get.close(1);
-                userController.blockAndReport(
-                    widget.chatModel.id,
-                    userController.userModel!.userId,
-                    widget.secondUser.userId,
-                    widget.secondUser,
-                    reason);
-                Get.to(() => ReportConfirmation());
+                try {
+                  Get.dialog(LoadingDialog(), barrierDismissible: false);
+
+                  await userController.blockAndReport(
+                      widget.chatModel.id,
+                      userController.userModel!.userId,
+                      widget.secondUser.userId,
+                      widget.secondUser,
+                      reason);
+                  Get.close(2);
+
+                  Get.to(() => ReportConfirmation());
+                } catch (e) {
+                  print(e);
+                  Get.close(1);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:

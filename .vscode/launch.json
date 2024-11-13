@@ -1,22 +1,24 @@
-// {
-//     // Use IntelliSense to learn about possible attributes.
-//     // Hover to view descriptions of existing attributes.
-//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-//     "version": "0.2.0",
-//     "configurations": [
-//         {
-//           "name": "Flutter on Device 1",
-//           "request": "launch",
-//           "type": "dart",
-//           "program": "lib/main.dart",
-//           "deviceId": "f0017a01"
-//         },
-//         {
-//           "name": "Flutter on Device 2",
-//           "request": "launch",
-//           "type": "dart",
-//           "program": "lib/main.dart",
-//           "deviceId": "00008110-000129AE0286801E"
-//         }
-//       ]
-// }
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+        // {
+        //   "name": "Ahsin iPhone Wireless",
+        //   "request": "launch",
+        //   "type": "dart",
+        //   "program": "lib/main.dart",
+        //   "deviceId": "00008030-0012286E3AD0402E"
+        // },
+        // {
+        //   "name": "Flutter on Device 2",
+        //   "request": "launch",
+        //   "type": "dart",
+        //   "program": "lib/main.dart",
+        //   "deviceId": "00008110-000129AE0286801E"
+        // }
+      ]
+}

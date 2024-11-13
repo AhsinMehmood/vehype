@@ -30,7 +30,6 @@ class VideoPlayerLocal extends StatefulWidget {
 
 class _VideoPlayerLocalState extends State<VideoPlayerLocal> {
   late VideoPlayerController _controller;
-  Image? _thumbnail;
 
   @override
   void initState() {
@@ -40,6 +39,12 @@ class _VideoPlayerLocalState extends State<VideoPlayerLocal> {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
       });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -59,7 +64,9 @@ class _VideoPlayerLocalState extends State<VideoPlayerLocal> {
               children: [
                 ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: VideoPlayer(_controller)),
+                    child: AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
+                        child: VideoPlayer(_controller))),
                 Align(
                   alignment: Alignment.center,
                   child: InkWell(

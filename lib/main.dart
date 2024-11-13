@@ -27,6 +27,7 @@ import 'package:vehype/Pages/splash_page.dart';
 
 import 'package:vehype/const.dart';
 import 'package:vehype/firebase_options.dart';
+import 'package:vehype/providers/audio_player_provider.dart';
 
 // import 'package:json_theme/json_theme.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -122,6 +123,8 @@ void main() async {
                   value: FirebaseAuth.instance.authStateChanges(),
                   initialData: null,
                 ),
+                ChangeNotifierProvider<AudioPlayerProvider>(
+                    create: (context) => AudioPlayerProvider()),
                 ChangeNotifierProvider<UserController>(
                     create: (context) => UserController()),
                 ChangeNotifierProvider<OffersProvider>(
@@ -244,5 +247,3 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 }
-
-

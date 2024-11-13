@@ -72,8 +72,11 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         setState(() {});
       } else {
         if (widget.garageModel != null) {
-          garageController.selectVehicle(widget.garageModel!.title,
-              widget.garageModel!.imageUrl, widget.garageModel!.garageId);
+          garageController.selectVehicle(
+              widget.garageModel!.title,
+              widget.garageModel!.imageUrl,
+              widget.garageModel!.garageId,
+              widget.garageModel!.bodyStyle);
           garageController.garageId = widget.garageModel!.garageId;
         } else {
           garageController.selectedVehicle = '';
@@ -144,10 +147,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               color: userController.isDark ? Colors.white : primaryColor,
             )),
         title: Text(
-          widget.offersModel == null ? 'Create Request' : 'Update Request',
+          widget.offersModel == null
+              ? 'Create Request'
+              : 'Update & Repost Request',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -292,18 +297,10 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             topLeft: Radius.circular(15),
                             topRight: Radius.circular(15),
                           )),
-                          // constraints: BoxConstraints(
-                          //   minHeight: Get.height * 0.7,
-                          //   maxHeight: Get.height * 0.7,
-                          // ),
                           isScrollControlled: true,
-                          // showDragHandle: true,
                           builder: (context) {
                             return IssuesPicker();
-                          }).then((value) {
-                        // editProfileProvider
-                        //     .upadeteUpcomingDestinations(userModel);
-                      });
+                          }).then((value) {});
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -314,7 +311,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                               'Select Service*',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 16,
+                                fontSize: 14,
                               ),
                             ),
                             Icon(
@@ -402,7 +399,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                               'Additional Service',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 16,
+                                fontSize: 14,
                               ),
                             ),
                             Icon(
@@ -945,7 +942,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         borderRadius: BorderRadius.circular(6),
                       )),
                   child: Text(
-                    widget.offersModel == null ? 'Create' : 'Update',
+                    widget.offersModel == null ? 'Create' : 'Update & Repost',
                     style: TextStyle(
                       color:
                           userController.isDark ? primaryColor : Colors.white,
@@ -1507,159 +1504,6 @@ class CreateRequestImageAddWidget extends StatelessWidget {
   }
 }
 
-class CreateRequestImageWidget extends StatelessWidget {
-  final RequestImageModel requestImageModel;
-  final int index;
-
-  const CreateRequestImageWidget(
-      {super.key, required this.requestImageModel, required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    final UserController userController = Provider.of<UserController>(context);
-    final UserModel userModel = userController.userModel!;
-    final GarageController garageController =
-        Provider.of<GarageController>(context);
-    return Card(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (requestImageModel.isLoading)
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: Image.file(
-                    requestImageModel.imageFile!,
-                    fit: BoxFit.cover,
-                    width: Get.width * 0.30,
-                    height: Get.width * 0.30,
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Stack(
-                      children: [
-                        Align(
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: CircularProgressIndicator(
-                              value: requestImageModel.progress,
-                              // backgroundColor: Colors.white,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            )
-          else
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: CachedNetworkImage(
-                    placeholder: (context, url) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    },
-                    errorWidget: (context, url, error) =>
-                        const SizedBox.shrink(),
-                    imageUrl: requestImageModel.imageUrl,
-                    // handleLoadingProgress: true,
-                    fit: BoxFit.cover,
-                    width: Get.width * 0.30,
-                    height: Get.width * 0.30,
-                  ),
-                ),
-                Positioned(
-                    right: 0,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
-                            color: Colors.white,
-                          ),
-                          child: Center(
-                            child: InkWell(
-                                onTap: () {
-                                  garageController.removeRequestImage(index);
-                                },
-                                child: Icon(
-                                  Icons.delete_outline,
-                                  color: primaryColor,
-                                )),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
-                            color: Colors.white,
-                          ),
-                          child: InkWell(
-                              onTap: () {
-                                Get.bottomSheet(
-                                  ChooseGalleryCamera(
-                                    onTapCamera: () {
-                                      garageController
-                                          .selectRequestImageUpdateSingleImage(
-                                              ImageSource.camera,
-                                              userModel.userId,
-                                              index);
-                                      Get.close(1);
-                                    },
-                                    onTapGallery: () {
-                                      garageController
-                                          .selectRequestImageUpdateSingleImage(
-                                              ImageSource.gallery,
-                                              userModel.userId,
-                                              index);
-                                      Get.close(1);
-                                    },
-                                  ),
-                                  backgroundColor: userController.isDark
-                                      ? primaryColor
-                                      : Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      topRight: Radius.circular(20),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: primaryColor,
-                              )),
-                        ),
-                      ],
-                    ))
-              ],
-            )
-        ],
-      ),
-    );
-  }
-}
-
 class SelectVehicle extends StatelessWidget {
   const SelectVehicle({super.key});
 
@@ -1731,8 +1575,11 @@ class SelectVehicle extends StatelessWidget {
                           for (GarageModel vehicle in vehicles)
                             InkWell(
                               onTap: () {
-                                garageController.selectVehicle(vehicle.title,
-                                    vehicle.imageUrl, vehicle.garageId);
+                                garageController.selectVehicle(
+                                    vehicle.title,
+                                    vehicle.imageUrl,
+                                    vehicle.garageId,
+                                    vehicle.bodyStyle);
 
                                 Get.close(1);
                               },
@@ -1850,7 +1697,8 @@ class SelectVehicle extends StatelessWidget {
                                                       .selectVehicle(
                                                           vehicle.title,
                                                           vehicle.imageUrl,
-                                                          vehicle.garageId);
+                                                          vehicle.garageId,
+                                                          vehicle.bodyStyle);
                                                   Get.close(1);
                                                 },
                                                 style: ElevatedButton.styleFrom(

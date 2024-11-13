@@ -580,11 +580,15 @@ class GarageController with ChangeNotifier {
 
   String selectedVehicle = '';
   String garageId = '';
+  String vehicleType = '';
 
-  selectVehicle(String vehicle, String imageUrl, String garageIds) {
+  selectVehicle(
+      String vehicle, String imageUrl, String garageIds, String type) {
     selectedVehicle = vehicle;
+    vehicleType = type;
     garageId = garageIds;
     imageOneUrl = imageUrl;
+
     notifyListeners();
   }
 
@@ -637,6 +641,7 @@ class GarageController with ChangeNotifier {
             .update({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
+          'vehicleType': vehicleType,
           'address': address,
           'geo': geoFirePoint.data,
           'issue': selectedIssue,
@@ -656,6 +661,7 @@ class GarageController with ChangeNotifier {
           'ownerId': userId,
           'vehicleName': selectedVehicle,
           'issue': selectedIssue,
+          'vehicleType': vehicleType,
           'lat': latLng.latitude,
           'garageId': garageId,
           'long': latLng.longitude,

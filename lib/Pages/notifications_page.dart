@@ -549,20 +549,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 notificationTitle: '',
                                 senderId: userModel.userId,
                                 notificationSubtitle: '');
-
-                            // if (offersReceivedModels ==
-                            //     null) {
-
-                            // } else {
-                            //   toastification.show(
-                            //     context: context,
-                            //     title: Text(
-                            //         'This request was deleted.'),
-                            //     autoCloseDuration:
-                            //         const Duration(
-                            //             seconds: 3),
-                            //   );
-                            // }
                           }
                         }
                       }
