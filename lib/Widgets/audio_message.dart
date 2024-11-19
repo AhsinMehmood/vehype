@@ -15,11 +15,13 @@ import 'package:vehype/providers/audio_player_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'audio_video_progress.dart';
+import 'package:dio/dio.dart';
 
 class AudioMessage extends StatefulWidget {
   final String url;
+  final bool isMe;
 
-  const AudioMessage({super.key, required this.url});
+  const AudioMessage({super.key, required this.url, required this.isMe});
 
   @override
   State<AudioMessage> createState() => _AudioMessageState();
@@ -91,28 +93,51 @@ class _AudioMessageState extends State<AudioMessage> {
 
   getDuration() async {
     try {
-      final audioSource = AudioSource.uri(Uri.parse(widget.url));
-      // File audioFile = await audioSource.cacheFile;
-      // final waveFile =
-      //     File(p.join((await getTemporaryDirectory()).path, 'waveform.wave'));
-
-      // final audioManager = Provider.of<AudioPlayerProvider>(context, listen: false);
-      // progressStream = JustWaveform.extract(
-      //   audioInFile: audioFile,
-      //   waveOutFile: waveFile,
-      //   zoom: const WaveformZoom.pixelsPerSecond(100),
-      // );
-
-      await audioPlayer.setAudioSource(audioSource).then((duration) async {
+      // final cachedFile = await _downloadAndCacheAudio(widget.url);
+      // dev.log(cachedFile!.path);
+      await audioPlayer.setUrl(widget.url).then((duration) async {
         if (duration != null) {
           totalDuration = duration;
         }
         setState(() {});
         return duration;
       });
-      audioPlayer.setLoopMode(LoopMode.one);
+      audioPlayer.setLoopMode(LoopMode.all);
     } catch (e) {
-      dev.log(e.toString());
+      dev.log('${e}Heello');
+    }
+  }
+
+  final Dio _dio = Dio();
+
+  Future<String> _getCacheDirPath() async {
+    final dir = await getTemporaryDirectory();
+    return dir.path;
+  }
+
+  Future<File?> _downloadAndCacheAudio(String url) async {
+    try {
+      final cacheDir = await _getCacheDirPath();
+      final fileName = url.split('/').last;
+      final filePath = '$cacheDir/$fileName';
+
+      final file = File(filePath);
+
+      // Download if file does not already exist in cache
+      if (!await file.exists()) {
+        final response = await _dio.download(url, filePath);
+
+        if (response.statusCode == 200) {
+          return file;
+        } else {
+          print("Failed to download audio: ${response.statusCode}");
+          return null;
+        }
+      }
+      return file;
+    } catch (e) {
+      print("Error downloading or caching audio: $e");
+      return null;
     }
   }
 
@@ -156,60 +181,85 @@ class _AudioMessageState extends State<AudioMessage> {
     final userControler = Provider.of<UserController>(context);
 
     return Container(
-      // color: Colors.red,
-      child: Row(
-        children: [
-          if (loading)
-            CupertinoActivityIndicator()
-          else
-            IconButton(
-              icon: Icon(
-                isPlaying ? Icons.pause : Icons.play_arrow,
-              ),
-              onPressed: () {
-                // audioManager.play(widget.url);
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: widget.isMe
+              ? userControler.isDark
+                  ? Colors.white
+                  : primaryColor
+              : changeColor(color: 'F1F1F1'),
+        ),
+        padding: const EdgeInsets.only(
+          top: 8,
+          bottom: 8,
+        ),
+        child: Row(
+          children: [
+            if (loading)
+              IconButton(
+                icon: CupertinoActivityIndicator(
+                  color: userControler.isDark ? primaryColor : Colors.white,
+                ),
+                onPressed: () {},
+              )
+            else
+              IconButton(
+                icon: Icon(
+                  isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: userControler.isDark ? primaryColor : Colors.white,
+                ),
+                iconSize: 28,
+                onPressed: () {
+                  // audioManager.play(widget.url);
 
-                if (userControler.currentPlayer == null) {
-                  playPause();
-
-                  userControler.setCurrentPlayer(audioPlayer);
-                } else {
-                  if (userControler.currentPlayer == audioPlayer) {
-                    playPause();
-                  } else {
-                    userControler.currentPlayer!.pause();
+                  if (userControler.currentPlayer == null) {
                     playPause();
 
                     userControler.setCurrentPlayer(audioPlayer);
+                  } else {
+                    if (userControler.currentPlayer == audioPlayer) {
+                      playPause();
+                    } else {
+                      userControler.currentPlayer!.pause();
+                      playPause();
+
+                      userControler.setCurrentPlayer(audioPlayer);
+                    }
                   }
-                }
 
-                setState(() {});
-              },
+                  setState(() {});
+                },
+              ),
+            SizedBox(
+              width: 45,
+              child: Text(
+                _getTimeString(isPlaying ? position : totalDuration),
+                style: TextStyle(
+                  color: userControler.isDark ? primaryColor : Colors.white,
+                ),
+              ),
             ),
-          SizedBox(
-            width: 45,
-            child: Text(_getTimeString(isPlaying ? position : totalDuration)),
-          ),
-          Expanded(
-            child: ProgressBar(
-              barHeight: 0.0,
-              progress: position,
-              total: totalDuration,
-              progressBarColor: Colors.green,
-              baseBarColor: Colors.cyan,
-              timeLabelLocation: TimeLabelLocation.none,
+            Expanded(
+              child: ProgressBar(
+                barHeight: 3.0,
+                progress: position,
+                total: totalDuration,
+                progressBarColor: userControler.isDark
+                    ? primaryColor.withOpacity(0.2)
+                    : Colors.white.withOpacity(0.2),
+                baseBarColor:
+                    userControler.isDark ? primaryColor : Colors.white,
+                timeLabelLocation: TimeLabelLocation.none,
 
-              onSeek: seekAudio,
-              buffered: bufferedPosition, // Handle seek interaction
+                onSeek: seekAudio,
+                buffered: bufferedPosition, // Handle seek interaction
+              ),
             ),
-          ),
-          SizedBox(
-            width: 45,
-          )
-        ],
-      ),
-    );
+            SizedBox(
+              width: 15,
+            )
+          ],
+        ));
   }
 }
 

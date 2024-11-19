@@ -1,8 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -16,8 +20,10 @@ import 'package:get/get.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
+// import 'package:record/record.dart';
 import 'package:toastification/toastification.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -37,6 +43,7 @@ import 'package:vehype/Pages/owner_request_details_inprogress_inactive_page.dart
 import 'package:vehype/Pages/service_request_details.dart';
 
 import 'package:vehype/Pages/second_user_profile.dart';
+import 'package:vehype/Widgets/audio_message.dart';
 import 'package:vehype/Widgets/delete_chat_confirmation_sheet.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
 
@@ -73,6 +80,35 @@ class _MessagePageState extends State<MessagePage> {
     super.initState();
 
     getChatModel();
+  }
+
+  // final _recorder = AudioRecorder();
+  bool isRecording = false;
+
+  String filePath = '';
+
+  void startRecording() async {
+    // try {
+    //   Directory directory = await getTemporaryDirectory();
+    //   await _recorder.start(const RecordConfig(),
+    //       path:
+    //           '${directory.path}${DateTime.now().microsecondsSinceEpoch}.m4a');
+    // } catch (e) {
+    //   log(e.toString());
+    // }
+  }
+
+  void stopRecording() async {}
+
+  final storageRef = FirebaseStorage.instance.ref();
+  Future<String> uploadImage(File file, String userId) async {
+    final poiImageRef = storageRef
+        .child("users/$userId/${DateTime.now().microsecondsSinceEpoch}.m4a");
+    await poiImageRef.putData(file.readAsBytesSync());
+    // uploadTaskOne!.
+    String imageUrl = await poiImageRef.getDownloadURL();
+
+    return imageUrl;
   }
 
   getChatModel() async {
@@ -544,6 +580,8 @@ class _MessagePageState extends State<MessagePage> {
                                               shrinkWrap: true,
                                               controller:
                                                   messageScrollController,
+                                              physics:
+                                                  const ClampingScrollPhysics(),
                                               reverse: true,
                                               itemBuilder:
                                                   (context, dateIndex) {
@@ -894,13 +932,17 @@ class _MessagePageState extends State<MessagePage> {
                                                                   userModel,
                                                                   widget
                                                                       .chatModel,
-                                                                  s.trim(),
+                                                                  textMessageController
+                                                                      .text
+                                                                      .trim(),
                                                                   widget
                                                                       .secondUser,
                                                                   '',
                                                                   '',
                                                                   false,
-                                                                  offersModel);
+                                                                  offersModel,
+                                                                  false,
+                                                                  '');
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -929,7 +971,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                       .thumbnailUrl,
                                                                   element
                                                                       .isVideo,
-                                                                  offersModel);
+                                                                  offersModel,
+                                                                  false,
+                                                                  '');
                                                               messageScrollController
                                                                   .jumpTo(0);
                                                               chatController
@@ -1030,6 +1074,62 @@ class _MessagePageState extends State<MessagePage> {
                                                   else
                                                     InkWell(
                                                         onTap: () {
+                                                          // if (userController
+                                                          //         .currentPlayer !=
+                                                          //     null) {
+                                                          //   userController
+                                                          //       .currentPlayer!
+                                                          //       .stop();
+                                                          // }
+
+                                                          // startRecording();
+                                                          // Future.delayed(
+                                                          //         Duration(
+                                                          //             seconds:
+                                                          //                 10))
+                                                          //     .then((s) async {
+                                                          //   try {
+                                                          //     final path =
+                                                          //         await _recorder
+                                                          //             .stop();
+                                                          //     filePath = path ??
+                                                          //         'null';
+                                                          //     log('Recording stopped. File path: $filePath');
+                                                          //     final file = File(
+                                                          //         filePath);
+                                                          //     if (!await file
+                                                          //         .exists()) {
+                                                          //       log('File does not exist at the specified path.');
+                                                          //       return;
+                                                          //     }
+
+                                                          //     String url =
+                                                          //         await uploadImage(
+                                                          //             file,
+                                                          //             'user');
+                                                          //     log('Audio URL: $url');
+                                                          //     chatController.sendMessage(
+                                                          //         userModel,
+                                                          //         widget
+                                                          //             .chatModel,
+                                                          //         textMessageController
+                                                          //             .text
+                                                          //             .trim(),
+                                                          //         widget
+                                                          //             .secondUser,
+                                                          //         '',
+                                                          //         '',
+                                                          //         false,
+                                                          //         offersModel,
+                                                          //         true,
+                                                          //         url);
+
+                                                          //     log('Audio uploaded successfully: ');
+                                                          //   } catch (e) {
+                                                          //     log(e.toString());
+                                                          //   }
+                                                          // });
+
                                                           if (chatController
                                                               .pickedMedia
                                                               .isEmpty) {
@@ -1048,7 +1148,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                   '',
                                                                   '',
                                                                   false,
-                                                                  offersModel);
+                                                                  offersModel,
+                                                                  false,
+                                                                  '');
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -1085,7 +1187,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                       .thumbnailUrl,
                                                                   element
                                                                       .isVideo,
-                                                                  offersModel);
+                                                                  offersModel,
+                                                                  false,
+                                                                  '');
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -1483,27 +1587,32 @@ class SecondUserMessageWidget extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: Get.width * 0.75,
               ),
-              child: Container(
-                // margin: const EdgeInsets.all(7),
-                padding: const EdgeInsets.all(12),
-                // width: Get.width * 0.75,
+              child: message.isAudio
+                  ? AudioMessage(
+                      url: message.audioUrl,
+                      isMe: false,
+                    )
+                  : Container(
+                      // margin: const EdgeInsets.all(7),
+                      padding: const EdgeInsets.all(12),
+                      // width: Get.width * 0.75,
 
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: changeColor(color: 'F1F1F1'),
-                ),
-                child: RichText(
-                  text: TextSpan(
-                    children: textSpans,
-                    style: TextStyle(
-                      // fontFamily: 'Avenir',
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: changeColor(color: 'F1F1F1'),
+                      ),
+                      child: RichText(
+                        text: TextSpan(
+                          children: textSpans,
+                          style: TextStyle(
+                            // fontFamily: 'Avenir',
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2091,150 +2200,157 @@ class MessageWidget extends StatelessWidget {
     final UserController userController = Provider.of<UserController>(context);
     return Column(
       children: [
-        message.mediaUrl == ''
-            ? Container(
-                // margin: const EdgeInsets.all(7),
+        if (message.isAudio)
+          AudioMessage(
+            url: message.audioUrl,
+            isMe: true,
+          )
+        else
+          message.mediaUrl == ''
+              ? Container(
+                  // margin: const EdgeInsets.all(7),
 
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: userController.isDark
-                      ? changeColor(color: '#444655')
-                      : primaryColor,
-                ),
-                child: RichText(
-                  text: TextSpan(
-                    children: textSpans,
-                    style: TextStyle(
-                      // fontFamily: 'Avenir',
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: userController.isDark
+                        ? changeColor(color: '#444655')
+                        : primaryColor,
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      children: textSpans,
+                      style: TextStyle(
+                        // fontFamily: 'Avenir',
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (message.isVideo)
-                    InkWell(
-                      onTap: () {
-                        Get.to(() => VideoPlayerNetwork(url: message.mediaUrl));
-                      },
-                      child: SizedBox(
-                        height: 200,
-                        width: Get.width * 0.75,
-                        child: Stack(
-                          // fit: StackFit.expand,
-                          children: [
-                            SizedBox(
-                              child: ClipRRect(
-                                borderRadius: message.text != ''
-                                    ? BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                        topRight: Radius.circular(6),
-                                      )
-                                    : BorderRadius.circular(6),
-                                child: CachedNetworkImage(
-                                  placeholder: (context, url) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  },
-                                  errorWidget: (context, url, error) =>
-                                      const SizedBox.shrink(),
-                                  imageUrl: message.thumbnailUrl,
-                                  fit: BoxFit.cover,
-                                  height: 200,
-                                  width: Get.width * 0.75,
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: InkWell(
-                                // onTap: () {},
-                                child: Container(
-                                  height: 30,
-                                  width: 30,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(200),
-                                    color: Colors.white,
-                                  ),
-                                  child: Icon(
-                                    Icons.play_arrow,
-                                    // size: 90,
-                                    color: primaryColor,
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    InkWell(
-                      onTap: () {
-                        Get.to(
-                            () => FullImagePageView(urls: [message.mediaUrl]));
-                      },
-                      child: ClipRRect(
-                        borderRadius: message.text != ''
-                            ? BorderRadius.only(
-                                topLeft: Radius.circular(6),
-                                topRight: Radius.circular(6),
-                              )
-                            : BorderRadius.circular(6),
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          },
-                          errorWidget: (context, url, error) =>
-                              const SizedBox.shrink(),
-                          imageUrl: message.mediaUrl,
-                          fit: BoxFit.cover,
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (message.isVideo)
+                      InkWell(
+                        onTap: () {
+                          Get.to(
+                              () => VideoPlayerNetwork(url: message.mediaUrl));
+                        },
+                        child: SizedBox(
                           height: 200,
                           width: Get.width * 0.75,
+                          child: Stack(
+                            // fit: StackFit.expand,
+                            children: [
+                              SizedBox(
+                                child: ClipRRect(
+                                  borderRadius: message.text != ''
+                                      ? BorderRadius.only(
+                                          topLeft: Radius.circular(6),
+                                          topRight: Radius.circular(6),
+                                        )
+                                      : BorderRadius.circular(6),
+                                  child: CachedNetworkImage(
+                                    placeholder: (context, url) {
+                                      return Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    },
+                                    errorWidget: (context, url, error) =>
+                                        const SizedBox.shrink(),
+                                    imageUrl: message.thumbnailUrl,
+                                    fit: BoxFit.cover,
+                                    height: 200,
+                                    width: Get.width * 0.75,
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.center,
+                                child: InkWell(
+                                  // onTap: () {},
+                                  child: Container(
+                                    height: 30,
+                                    width: 30,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(200),
+                                      color: Colors.white,
+                                    ),
+                                    child: Icon(
+                                      Icons.play_arrow,
+                                      // size: 90,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                  // const SizedBox(
-                  //   height: 8,
-                  // ),
-                  if (message.text != '')
-                    Container(
-                      // margin: const EdgeInsets.all(7),
-                      padding: const EdgeInsets.all(12),
-                      width: Get.width * 0.75,
-
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(6),
-                          bottomRight: Radius.circular(6),
-                        ),
-                        color: userController.isDark
-                            ? changeColor(color: '#444655')
-                            : primaryColor,
-                      ),
-                      child: RichText(
-                        text: TextSpan(
-                          children: textSpans,
-                          style: TextStyle(
-                            // fontFamily: 'Avenir',
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
+                      )
+                    else
+                      InkWell(
+                        onTap: () {
+                          Get.to(() =>
+                              FullImagePageView(urls: [message.mediaUrl]));
+                        },
+                        child: ClipRRect(
+                          borderRadius: message.text != ''
+                              ? BorderRadius.only(
+                                  topLeft: Radius.circular(6),
+                                  topRight: Radius.circular(6),
+                                )
+                              : BorderRadius.circular(6),
+                          child: CachedNetworkImage(
+                            placeholder: (context, url) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorWidget: (context, url, error) =>
+                                const SizedBox.shrink(),
+                            imageUrl: message.mediaUrl,
+                            fit: BoxFit.cover,
+                            height: 200,
+                            width: Get.width * 0.75,
                           ),
                         ),
                       ),
-                    )
-                ],
-              ),
+                    // const SizedBox(
+                    //   height: 8,
+                    // ),
+                    if (message.text != '')
+                      Container(
+                        // margin: const EdgeInsets.all(7),
+                        padding: const EdgeInsets.all(12),
+                        width: Get.width * 0.75,
+
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(6),
+                            bottomRight: Radius.circular(6),
+                          ),
+                          color: userController.isDark
+                              ? changeColor(color: '#444655')
+                              : primaryColor,
+                        ),
+                        child: RichText(
+                          text: TextSpan(
+                            children: textSpans,
+                            style: TextStyle(
+                              // fontFamily: 'Avenir',
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
       ],
     );
   }

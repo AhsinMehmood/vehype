@@ -62,10 +62,10 @@ class OwnerActiveOffers extends StatelessWidget {
                     offersModel: offersPosted[index],
                     garageModel: GarageModel(
                         ownerId: 'ownerId',
+                        isCustomMake: false,
                         submodel: 'submodel',
                         title: 'title',
-                    isCustomModel: false,
-
+                        isCustomModel: false,
                         imageUrl: defaultImage,
                         bodyStyle: 'Truck',
                         make: 'make',

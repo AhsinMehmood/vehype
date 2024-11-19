@@ -8,12 +8,16 @@ class MessageModel {
   final bool isVideo;
   final String thumbnailUrl;
   final int state;
- 
+  final bool isAudio;
+  final String audioUrl;
+
   MessageModel(
       {required this.id,
       required this.isSystemMessage,
+      required this.isAudio,
       required this.sentAt,
       required this.sentById,
+      required this.audioUrl,
       required this.thumbnailUrl,
       required this.isVideo,
       required this.mediaUrl,

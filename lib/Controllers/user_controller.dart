@@ -42,7 +42,7 @@ import '../Widgets/loading_dialog.dart';
 import 'offers_controller.dart';
 import 'offers_provider.dart';
 import 'owner_offers_controller.dart';
-import 'package:event_bus/event_bus.dart';
+// import 'package:event_bus/event_bus.dart';
 
 enum AccountType {
   seeker,
@@ -50,7 +50,7 @@ enum AccountType {
 }
 
 class UserController with ChangeNotifier {
-  EventBus eventBus = EventBus();
+  // EventBus eventBus = EventBus();
   AudioPlayer? currentPlayer;
   setCurrentPlayer(AudioPlayer? event) {
     currentPlayer = event;

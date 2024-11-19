@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-int currentVersion = 94;
+int currentVersion = 96;
 // Color cardColor = Color.fromARGB(255, 22, 32, 44);
 // Color backColor = changeColor(color: '1B1C1E');
 

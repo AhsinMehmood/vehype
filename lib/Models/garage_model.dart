@@ -11,6 +11,7 @@ class GarageModel {
   final String vin;
 
   final bool isCustomModel;
+  final bool isCustomMake;
   final String imageUrl;
 
   final String garageId;
@@ -23,6 +24,7 @@ class GarageModel {
     String id = snapshot.id;
     return GarageModel(
       ownerId: data['ownerId'] ?? '',
+      isCustomMake: data['isCustomMake'] ?? false,
       isCustomModel: data['isCustomModel'] ?? false,
       bodyStyle: data['bodyStyle'] ?? '',
       make: data['make'] ?? '',
@@ -34,13 +36,14 @@ class GarageModel {
           ? 'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/WhatsApp%20Image%202024-07-25%20at%2022.08.41.jpeg?alt=media&token=3e2daa79-95e1-45a2-ab01-52a484423618'
           : imageOne,
       submodel: data['subModel'] ?? '',
-      title: '${data['year']}, ${data['model']}',
+      title: '${data['make']}, ${data['year']}, ${data['model']}',
     );
   }
 
   GarageModel(
       {required this.ownerId,
       required this.isCustomModel,
+      required this.isCustomMake,
       required this.submodel,
       required this.title,
       required this.imageUrl,

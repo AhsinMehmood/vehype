@@ -21,7 +21,6 @@ import just_waveform
 import maps_launcher
 import package_info_plus
 import path_provider_foundation
-import record_darwin
 import sentry_flutter
 import share_plus
 import shared_preferences_foundation
@@ -49,7 +48,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   MapsLauncherPlugin.register(with: registry.registrar(forPlugin: "MapsLauncherPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
-  RecordPlugin.register(with: registry.registrar(forPlugin: "RecordPlugin"))
   SentryFlutterPlugin.register(with: registry.registrar(forPlugin: "SentryFlutterPlugin"))
   SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))

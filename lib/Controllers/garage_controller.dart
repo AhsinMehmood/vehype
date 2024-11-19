@@ -157,15 +157,20 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  Future selectMake(VehicleMake newBodyStyle) async {
+  bool isCustomMake = false;
+  Future selectMake(VehicleMake newBodyStyle, bool isCustom) async {
     selectedVehicleMake = newBodyStyle;
+    isCustomMake = isCustom;
+
     selectedYear = '';
     selectedVehicleModel = null;
     vehicleYearsByMake = [];
     selectedSubModel = null;
 
     notifyListeners();
-    vehicleYearsByMake = await getVehicleYear(newBodyStyle.title, jwtToken);
+
+    vehicleYearsByMake =
+        await getVehicleYear(newBodyStyle.title, jwtToken, isCustom);
 
     notifyListeners();
   }
@@ -378,7 +383,9 @@ class GarageController with ChangeNotifier {
       return false;
     }
 
-    if (selectedVehicleType!.title == 'Passenger vehicle' && !isCustomModel) {
+    if (selectedVehicleType!.title == 'Passenger vehicle' &&
+        !isCustomModel &&
+        !isCustomMake) {
       return selectedSubModel != null;
     }
 
@@ -403,6 +410,7 @@ class GarageController with ChangeNotifier {
           'vin': vin,
           'imageOne': imageOneUrl,
           'isCustomModel': isCustomModel,
+          'isCustomMake': isCustomMake,
           'imageTwo': imageTwoUrl,
           'updatedAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -417,6 +425,7 @@ class GarageController with ChangeNotifier {
           'vin': vin,
           'imageOne': imageOneUrl,
           'isCustomModel': isCustomModel,
+          'isCustomMake': isCustomMake,
           'imageTwo': imageTwoUrl,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
@@ -448,8 +457,10 @@ class GarageController with ChangeNotifier {
         VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
     // await sele(VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
 
-    await selectMake(VehicleMake(
-        id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0));
+    await selectMake(
+        VehicleMake(
+            id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0),
+        garageModel.isCustomMake);
     await selectYear(garageModel.year);
 
     await selectModel(
@@ -482,6 +493,8 @@ class GarageController with ChangeNotifier {
     endDate = null;
     startDate = null;
     imageOneUrl = '';
+    isCustomMake = false;
+    isCustomModel = false;
     imageTwoUrl = '';
     selectedYear = '';
     editGarage = null;

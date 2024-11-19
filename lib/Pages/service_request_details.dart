@@ -170,6 +170,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                               GarageModel(
                                   isCustomModel: false,
                                   ownerId: 'ownerId',
+                                  isCustomMake: false,
                                   submodel: '',
                                   title: '',
                                   imageUrl: offersModel.imageOne,

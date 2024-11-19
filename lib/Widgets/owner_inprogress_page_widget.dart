@@ -68,6 +68,7 @@ class OwnerInprogressPageWidget extends StatelessWidget {
                               ownerId: 'ownerId',
                               submodel: 'submodel',
                               title: 'title',
+                              isCustomMake: false,
                               isCustomModel: false,
                               imageUrl: defaultImage,
                               bodyStyle: 'Truck',

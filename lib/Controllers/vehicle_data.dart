@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/const.dart';
@@ -264,30 +265,39 @@ Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
   }
 }
 
-Future<List<int>> getVehicleYear(String make, String jwtToken) async {
+Future<List<int>> getVehicleYear(
+    String make, String jwtToken, bool isCustomMake) async {
   List<int> vehicleMakeList = [];
   // await Future.delayed(const Duration(seconds: 5));
-  http.Response response = await http
-      .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
-    'Content-type': 'application/json',
-    'Authorization': 'Bearer $jwtToken'
-  });
-  final data = jsonDecode(response.body);
-  List listOfData = data as List;
-
-  // print(listOfData.length);
-  for (var element in listOfData) {
-    // print(element);
-    vehicleMakeList.add(element);
-  }
-  if (vehicleMakeList.contains(2025)) {
-    vehicleMakeList.remove(2025);
-  }
-  if (vehicleMakeList.isEmpty) {
+  if (isCustomMake) {
     List<int> years =
         List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
 
+    log(years.toString());
     vehicleMakeList = years;
+  } else {
+    http.Response response = await http
+        .get(Uri.parse('https://carapi.app/api/years?make=$make'), headers: {
+      'Content-type': 'application/json',
+      'Authorization': 'Bearer $jwtToken'
+    });
+    final data = jsonDecode(response.body);
+    List listOfData = data as List;
+
+    // print(listOfData.length);
+    for (var element in listOfData) {
+      // print(element);
+      vehicleMakeList.add(element);
+    }
+    if (vehicleMakeList.contains(2025)) {
+      vehicleMakeList.remove(2025);
+    }
+    if (vehicleMakeList.isEmpty) {
+      List<int> years =
+          List<int>.generate(2024 - 1800 + 1, (index) => 2024 - index);
+
+      vehicleMakeList = years;
+    }
   }
 
   return vehicleMakeList;

@@ -24,7 +24,6 @@ import '../Pages/splash_page.dart';
 class LoginController {
   static Future signInWithGoogle(BuildContext context) async {
     try {
-      Get.dialog(const LoadingDialog(), barrierDismissible: false);
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
 
@@ -44,104 +43,117 @@ class LoginController {
         );
         String emailSeeker = 'seeker@gmail.com';
         String emailProvider = 'provider@gmail.com';
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
-        String userId = userCredential.user!.uid;
-        String? email = userCredential.user!.email;
-        String? name = userCredential.user!.displayName;
+        try {
+          Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-        // Mixpanel mixpanel = await Mixpanel.init(
-        //     'c40aeb8e3a8f1030b811314d56973f5a',
-        //     trackAutomaticEvents: true);
-        // mixpanel.identify(userId);
-
-        // mixpanel.getPeople().set('\$name', name ?? '');
-        sharedPreferences.setString('userId', userId);
-        if (userCredential.additionalUserInfo!.isNewUser) {
+          UserCredential userCredential =
+              await FirebaseAuth.instance.signInWithCredential(credential);
+          String userId = userCredential.user!.uid;
+          String? email = userCredential.user!.email;
           String? name = userCredential.user!.displayName;
-          String? urlAvatar = userCredential.user!.photoURL;
-          await FirebaseFirestore.instance.collection('users').doc(userId).set({
-            'name': name,
-            // 'accountType': 'owner',
-            'profileUrl': urlAvatar,
-            'id': userId,
-            'email': email,
-          });
 
-          DocumentSnapshot<Map<String, dynamic>> snapshot =
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId)
-                  .get();
-          UserModel userModel = UserModel.fromJson(snapshot);
+          // Mixpanel mixpanel = await Mixpanel.init(
+          //     'c40aeb8e3a8f1030b811314d56973f5a',
+          //     trackAutomaticEvents: true);
+          // mixpanel.identify(userId);
 
-          Get.close(1);
+          // mixpanel.getPeople().set('\$name', name ?? '');
+          sharedPreferences.setString('userId', userId);
+          if (userCredential.additionalUserInfo!.isNewUser) {
+            String? name = userCredential.user!.displayName;
+            String? urlAvatar = userCredential.user!.photoURL;
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .set({
+              'name': name,
+              // 'accountType': 'owner',
+              'profileUrl': urlAvatar,
+              'id': userId,
+              'email': email,
+            });
 
-          Get.offAll(() => SelectAccountType(
-                userModelAccount: userModel,
-              ));
-        } else {
-          UserController userController =
-              Provider.of<UserController>(context, listen: false);
-          // userController.getUserStream(userId);
+            DocumentSnapshot<Map<String, dynamic>> snapshot =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .get();
+            UserModel userModel = UserModel.fromJson(snapshot);
 
-          // if(){}
-          DocumentSnapshot<Map<String, dynamic>> snapshot =
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId)
-                  .get();
-          UserModel userModel = UserModel.fromJson(snapshot);
-
-          if (userModel.accountType == '') {
             Get.close(1);
 
             Get.offAll(() => SelectAccountType(
                   userModelAccount: userModel,
                 ));
           } else {
-            if (userModel.adminStatus == 'blocked') {
+            UserController userController =
+                Provider.of<UserController>(context, listen: false);
+            // userController.getUserStream(userId);
+
+            // if(){}
+            DocumentSnapshot<Map<String, dynamic>> snapshot =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .get();
+            UserModel userModel = UserModel.fromJson(snapshot);
+
+            if (userModel.accountType == '') {
               Get.close(1);
 
-              Get.offAll(() => const DisabledWidget());
+              Get.offAll(() => SelectAccountType(
+                    userModelAccount: userModel,
+                  ));
             } else {
-              OffersProvider offersProvider =
-                  Provider.of<OffersProvider>(context, listen: false);
-              userController.getUserStream(
-                userId + userModel.accountType,
-                onDataReceived: (userModel) {},
-              );
-              DocumentSnapshot<Map<String, dynamic>> usersnap =
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userId + userModel.accountType)
-                      .get();
-              if (userModel.accountType == 'provider') {
-                offersProvider.startListening(UserModel.fromJson(usersnap));
-                offersProvider
-                    .startListeningOffers(UserModel.fromJson(usersnap).userId);
+              if (userModel.adminStatus == 'blocked') {
+                Get.close(1);
+
+                Get.offAll(() => const DisabledWidget());
               } else {
-                offersProvider.startListeningOwnerOffers(
-                    UserModel.fromJson(usersnap).userId);
+                OffersProvider offersProvider =
+                    Provider.of<OffersProvider>(context, listen: false);
+                userController.getUserStream(
+                  userId + userModel.accountType,
+                  onDataReceived: (userModel) {},
+                );
+                DocumentSnapshot<Map<String, dynamic>> usersnap =
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userId + userModel.accountType)
+                        .get();
+                if (userModel.accountType == 'provider') {
+                  offersProvider.startListening(UserModel.fromJson(usersnap));
+                  offersProvider.startListeningOffers(
+                      UserModel.fromJson(usersnap).userId);
+                } else {
+                  offersProvider.startListeningOwnerOffers(
+                      UserModel.fromJson(usersnap).userId);
+                }
+                Get.close(1);
+
+                // await OneSignal.Notifications.requestPermission(true);
+                OneSignal.login(userId + userModel.accountType);
+
+                Get.offAll(() => const TabsPage());
               }
-              Get.close(1);
-
-              // await OneSignal.Notifications.requestPermission(true);
-              OneSignal.login(userId + userModel.accountType);
-
-              Get.offAll(() => const TabsPage());
             }
           }
+        } catch (e) {
+          Get.close(1);
+          Get.showSnackbar(GetSnackBar(
+            message: 'Cancelled by user',
+            duration: const Duration(seconds: 2),
+          ));
         }
       } else {
-        Get.close(1);
+        // Get.close(1);
         Get.showSnackbar(GetSnackBar(
           message: 'Cancelled by user',
           duration: const Duration(seconds: 2),
         ));
       }
     } on FirebaseAuthException catch (e) {
-      Get.close(1);
+      // Get.close(1);
       Get.showSnackbar(GetSnackBar(
         message: e.message,
         duration: const Duration(seconds: 3),

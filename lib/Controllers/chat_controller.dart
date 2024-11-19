@@ -161,6 +161,8 @@ class ChatController with ChangeNotifier {
       messageData.forEach((key, data) {
         final message = MessageModel(
           isSystemMessage: data['isSystemMessage'] ?? false,
+          isAudio: data['isAudio'] ?? false,
+          audioUrl: data['audioUrl'] ?? '',
           id: key,
           sentAt: data['sentAt'] ?? '',
           sentById: data['sentById'] ?? '',
@@ -180,7 +182,7 @@ class ChatController with ChangeNotifier {
     });
 
     return streamController.stream;
-  } 
+  }
 
   getUnread(String sentAt, String lastOpen, BuildContext context) {
     bool unreadMessage = DateTime.parse(sentAt)
@@ -214,8 +216,7 @@ class ChatController with ChangeNotifier {
       //   getUnread(element.lastMessageAt, element.lastOpen[userId], context);
       // }
       return chats;
-    }).handleError((errors) {
-    });
+    }).handleError((errors) {});
   }
 
   List<MediaModel> pickedMedia = [];
@@ -365,11 +366,15 @@ class ChatController with ChangeNotifier {
       String mediaUrls,
       String thumbnailUrl,
       bool isVide,
-      OffersModel offersModel) async {
+      OffersModel offersModel,
+      bool isAudio,
+      String audioUrl) async {
     DatabaseReference reference = _messagesRef.child(chatModel.id).push();
     await reference.set({
       'sentAt': DateTime.now().toUtc().toIso8601String(),
       'sentById': currentUser.userId,
+      'isAudio': isAudio,
+      'audioUrl': audioUrl,
       'text': message,
       'mediaUrl': mediaUrls,
       'isVideo': isVide,
@@ -408,7 +413,6 @@ class ChatController with ChangeNotifier {
 
       File file = File.fromUri(Uri.parse(savePath));
       if (await file.exists()) {
-
         return file;
       } else {
         await dio.download(videoUrl, savePath);

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:record/record.dart';
+// import 'package:record/record.dart';
 
 class AudioPlayerProvider with ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -96,14 +96,14 @@ class AudioPlayerProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  final record = AudioRecorder();
+  // final record = AudioRecorder();
 
   recordAudio() async {
-    if (await record.hasPermission()) {
-      // Start recording to file
-      await record.start(const RecordConfig(), path: 'aFullPath/myFile.m4a');
-      // ... or to stream
-      // final stream = await record.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
-    }
+    // if (await record.hasPermission()) {
+    //   // Start recording to file
+    //   await record.start(const RecordConfig(), path: 'aFullPath/myFile.m4a');
+    //   // ... or to stream
+    //   // final stream = await record.startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+    // }
   }
 }

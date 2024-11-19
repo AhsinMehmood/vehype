@@ -79,7 +79,7 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
 
   @override
   void dispose() {
-    _hidePopup(); // Ensure the popup is removed when the widget is disposed
+    // _hidePopup(); // Ensure the popup is removed when the widget is disposed
     super.dispose();
   }
 
@@ -212,7 +212,8 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
                   onTap: () {
-                    Get.to(AudioPage());
+                    _showPopup();
+                    // Get.to(AudioPage());
                   },
                   child: Icon(
                     _overlayEntry == null

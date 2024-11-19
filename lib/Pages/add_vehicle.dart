@@ -3,6 +3,8 @@
 // import 'dart:math';
 
 // import 'package:extended_image/extended_image.dart';
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -43,11 +45,20 @@ class _AddVehicleState extends State<AddVehicle> {
     Future.delayed(const Duration(seconds: 0)).then((value) {
       if (widget.garageModel != null) {
         _vinController.text = widget.garageModel!.vin;
-
-        setState(() {});
       }
     });
+    final GarageController garageController =
+        Provider.of<GarageController>(context, listen: false);
+    if (garageController.isCustomModel) {
+      modelController = TextEditingController(
+          text: garageController.selectedVehicleModel!.title);
+      customModel = garageController.selectedVehicleModel!.title;
+    }
+    setState(() {});
   }
+
+  String customModel = '';
+  TextEditingController modelController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -501,35 +512,69 @@ class _AddVehicleState extends State<AddVehicle> {
                       Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.4)
-                                  : primaryColor.withOpacity(0.4),
-                            )),
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              garageController.selectedVehicleModel == null
-                                  ? 'Choose'
-                                  : garageController
-                                      .selectedVehicleModel!.title,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                // color: changeColor(color: '7B7B7B'),
-                                fontSize: 16,
+                            border: garageController.isCustomMake
+                                ? null
+                                : Border.all(
+                                    color: userController.isDark
+                                        ? Colors.white.withOpacity(0.4)
+                                        : primaryColor.withOpacity(0.4),
+                                  )),
+                        padding: EdgeInsets.all(
+                            garageController.isCustomMake ? 0 : 12),
+                        child: garageController.isCustomMake
+                            ? TextFormField(
+                                onChanged: (String text) {
+                                  setState(() {
+                                    customModel = text;
+                                  });
+                                  if (text.isNotEmpty) {
+                                    garageController.selectModel(
+                                        VehicleModel(
+                                            id: 0,
+                                            title: customModel,
+                                            icon: 'icon',
+                                            vehicleMakeId: 0,
+                                            vehicleTypeId: 0),
+                                        true);
+                                  }
+
+                                  // _filterSearchResults(text, vehicleModels);
+                                },
+                                keyboardType: TextInputType.text,
+                                controller: modelController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Please enter model name',
+                                  // prefixIcon: Icon(Icons.search,
+
+                                  // ),
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    garageController.selectedVehicleModel ==
+                                            null
+                                        ? 'Choose'
+                                        : garageController
+                                            .selectedVehicleModel!.title,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      // color: changeColor(color: '7B7B7B'),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    size: 24,
+                                  )
+                                ],
                               ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              size: 24,
-                            )
-                          ],
-                        ),
                       ),
                     ],
                   ),
@@ -540,7 +585,8 @@ class _AddVehicleState extends State<AddVehicle> {
                 if (garageController.selectedVehicleType != null &&
                     garageController.selectedVehicleType!.title ==
                         'Passenger vehicle' &&
-                    !garageController.isCustomModel)
+                    !garageController.isCustomModel &&
+                    !garageController.isCustomMake)
                   InkWell(
                     onTap: () async {
                       if (garageController.selectedVehicleModel != null) {
@@ -790,6 +836,23 @@ class _MakePickerState extends State<MakePicker> {
     setState(() => _filteredList = searchResult);
   }
 
+  String customModel = '';
+  bool addCustom = false;
+  TextEditingController modelController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    final GarageController garageController =
+        Provider.of<GarageController>(context, listen: false);
+    if (garageController.isCustomMake) {
+      addCustom = true;
+      modelController = TextEditingController(
+          text: garageController.selectedVehicleMake!.title);
+      customModel = garageController.selectedVehicleModel!.title;
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final GarageController garageController =
@@ -817,18 +880,115 @@ class _MakePickerState extends State<MakePicker> {
                   const SizedBox(
                     height: 10,
                   ),
-                  TextFormField(
-                    onChanged: (String text) {
-                      _filterSearchResults(text, vehicleMakeList);
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Search',
-                      prefixIcon: Icon(Icons.search),
+                  if (addCustom)
+                    Column(
+                      children: [
+                        // const SizedBox(
+                        //   height: 10,
+                        // ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                onChanged: (String text) {
+                                  setState(() {
+                                    customModel = text;
+                                  });
+                                  // _filterSearchResults(text, vehicleModels);
+                                },
+                                keyboardType: TextInputType.text,
+                                controller: modelController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Please enter your vehicle make',
+                                  // prefixIcon: Icon(Icons.search,
+
+                                  // ),
+                                ),
+                              ),
+                            ),
+                            if (customModel.isNotEmpty)
+                              const SizedBox(
+                                width: 10,
+                              ),
+                            if (customModel.isNotEmpty)
+                              InkWell(
+                                onTap: () {
+                                  garageController.selectMake(
+                                      VehicleMake(
+                                          id: 0,
+                                          title: customModel,
+                                          icon: 'icon',
+                                          vehicleTypeId: 0),
+                                      true);
+                                  Get.close(1);
+                                },
+                                child: Container(
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(6),
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                  ),
+                                  child: Icon(
+                                    Icons.done,
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                              )
+                          ],
+                        ),
+                      ],
+                    )
+                  else
+                    TextFormField(
+                      onChanged: (String text) {
+                        _filterSearchResults(text, vehicleMakeList);
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Search',
+                        prefixIcon: Icon(Icons.search),
+                      ),
                     ),
-                  ),
                   const SizedBox(
                     height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Can\'t find my vehicle?',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      Transform.scale(
+                        scale: 1.5,
+                        child: Checkbox(
+                            activeColor: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            checkColor: userController.isDark
+                                ? Colors.green
+                                : Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            value: addCustom,
+                            onChanged: (s) {
+                              // appProvider.selectPrefs(pref);
+                              setState(() {
+                                addCustom = s ?? false;
+                              });
+                            }),
+                      ),
+                    ],
                   ),
                   if (_filteredList.isNotEmpty)
                     Expanded(
@@ -838,7 +998,7 @@ class _MakePickerState extends State<MakePicker> {
                           VehicleMake bodyStyle = _filteredList[index];
                           return InkWell(
                             onTap: () {
-                              garageController.selectMake(bodyStyle);
+                              garageController.selectMake(bodyStyle, false);
                               Get.close(1);
                             },
                             child: Column(
@@ -919,7 +1079,7 @@ class _MakePickerState extends State<MakePicker> {
                           VehicleMake bodyStyle = vehicleMakeList[index];
                           return InkWell(
                             onTap: () {
-                              garageController.selectMake(bodyStyle);
+                              garageController.selectMake(bodyStyle, false);
                               Get.close(1);
                             },
                             child: Column(
@@ -1010,6 +1170,7 @@ class YearPicker extends StatelessWidget {
         Provider.of<GarageController>(context);
     final UserController userController = Provider.of<UserController>(context);
     List<int> yearList = garageController.vehicleYearsByMake;
+    log(yearList.toString());
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -1164,7 +1325,6 @@ class BodyStylePicker extends StatelessWidget {
                               ),
                           ],
                         ),
-                     
                       ),
                       const SizedBox(
                         height: 5,
@@ -1178,7 +1338,6 @@ class BodyStylePicker extends StatelessWidget {
                       ),
                     ],
                   ),
-                
                 ),
               const SizedBox(
                 height: 10,
