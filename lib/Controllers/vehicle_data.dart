@@ -1,35 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/const.dart';
 import 'package:http/http.dart' as http;
-//   List<Service> getServices() {
-//     return [
-//       Service(name: "Diagnostics", code: Services.diagnostics),
-//        Service(name: "Detailing", code: Services.detailing),
-//       Service(name: "Towing", code: Services.towing),
-//       Service(name: "Upholstery repair", code: Services.upholsteryRepair),
-//       Service(name: "Windshield service", code: Services.windshieldServices),
-//       Service(name: "Door glass service", code: Services.doorGlassServices),
-//       Service(name: "Oil change", code: Services.oilChange),
-//       Service(name: "Wheels and tires", code: Services.wheelsAndTires),
-//       Service(name: "Wheels repair", code: Services.wheelsRepair),
-//       Service(name: "Parts and supplies", code: Services.partsSupplies),
-//       Service(name: "Locksmith", code: Services.locksmith),
-//       Service(name: "Garage rent", code: Services.garageRent),
-//       Service(name: "Car lift", code: Services.carLift),
-//       Service(name: "Jumpstart", code: Services.jumpStart),
-//       Service(name: "Body", code: Services.body),
-//       Service(name: "Electrical", code: Services.electrical),
-//       Service(name: "Engine", code: Services.engine),
-//       Service(name: "Brake system", code: Services.brakeSystem),
-//       Service(name: "Emission", code: Services.emission),
-//       Service(name: "AC (Air conditioning)", code: Services.aCAirConditioning),
-//       Service(name: "Suspension/Chassis", code: Services.suspensionChassis),
-//       Service(name: "Drivetrain", code: Services.drivetrain),
-//     ];
-//   }
 
 List<VehicleType> getVehicleType() {
   List<VehicleType> vehicleTypeList = [
@@ -81,6 +54,80 @@ Future<List<VehicleModel>> getVehicleModel(
         vehicleMakeId: element['Make_ID'],
         vehicleTypeId: 0));
   }
+  if (make == 'Bobcat') {
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'UV34 Gas',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'UV34 Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'UV34 XL Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'UV34 XL GAS',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY11 GAS',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY11 Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY12 GAS',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY12 Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY13 GAS',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY13 Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY14 GAS',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+    vehicleMakeList.add(VehicleModel(
+        id: 0,
+        title: 'MY14 Diesel',
+        icon: '',
+        vehicleMakeId: 0,
+        vehicleTypeId: 0));
+  }
 
   return vehicleMakeList;
 }
@@ -111,30 +158,34 @@ Future<List<VehicleModel>> getSubModels(
     String make, String year, String type, String jwtToken) async {
   // await Future.delayed(const Duration(seconds: 5));
 
-  List<VehicleModel> vehicleMakeList = [];
-  if (type == 'Passenger vehicle') {
-    String recallApi = 'https://carapi.app/api/models?year=$year&make=$make';
-    http.Response response = await http.get(Uri.parse(recallApi), headers: {
-      'Content-type': 'application/json',
-      'Authorization': 'Bearer $jwtToken'
-    });
-    final data = jsonDecode(response.body);
-
-    List listOfData = data['data'] as List;
-    for (var element in listOfData) {
-      // print(element);
-      vehicleMakeList.add(VehicleModel(
-          id: element['make_id'] ?? 0,
-          title: element['name'] ?? '',
-          icon: '',
-          vehicleTypeId: 0,
-          vehicleMakeId: element['make_id'] ?? 0));
+  try {
+    List<VehicleModel> vehicleMakeList = [];
+    if (type == 'Passenger vehicle') {
+      String recallApi = 'https://carapi.app/api/models?year=$year&make=$make';
+      http.Response response = await http.get(Uri.parse(recallApi), headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $jwtToken'
+      });
+      final data = jsonDecode(response.body);
+      print(data);
+      List listOfData = data['data'] as List;
+      for (var element in listOfData) {
+        print(element);
+        vehicleMakeList.add(VehicleModel(
+            id: element['make_id'] ?? 0,
+            title: element['name'] ?? '',
+            icon: '',
+            vehicleTypeId: 0,
+            vehicleMakeId: element['make_id'] ?? 0));
+      }
     }
-  }
 
-  return vehicleMakeList.isEmpty
-      ? await getVehicleModel(int.tryParse(year)!, make, type)
-      : vehicleMakeList;
+    return vehicleMakeList.isEmpty
+        ? await getVehicleModel(int.tryParse(year)!, make, type)
+        : vehicleMakeList;
+  } catch (e) {
+    return await getVehicleModel(int.tryParse(year)!, make, type);
+  }
 }
 
 Future<List> getTrimsToStoreData(String make, String year, String type,
@@ -165,26 +216,29 @@ Future<List<VehicleModel>> getTrims(String make, String year, String type,
   // await Future.delayed(const Duration(seconds: 5));
 
   List<VehicleModel> vehicleMakeList = [];
-
-  String recallApi =
-      'https://carapi.app/api/trims?year=$year&make=$make&model=$model';
-  http.Response response = await http.get(Uri.parse(recallApi), headers: {
-    'Content-type': 'application/json',
-    'Authorization': 'Bearer $jwtToken'
-  });
-  final data = jsonDecode(response.body);
-  List listOfData = data['data'] as List;
-  // print(listOfData[0]);
-  for (var element in listOfData) {
-    vehicleMakeList.add(VehicleModel(
-        id: element['make_model_id'] ?? 0,
-        title: element['description'] ?? '',
-        icon: '',
-        vehicleTypeId: 0,
-        vehicleMakeId: element['make_id'] ?? 0));
+  try {
+    String recallApi =
+        'https://carapi.app/api/trims?year=$year&make=$make&model=$model';
+    http.Response response = await http.get(Uri.parse(recallApi), headers: {
+      'Content-type': 'application/json',
+      'Authorization': 'Bearer $jwtToken'
+    });
+    final data = jsonDecode(response.body);
+    List listOfData = data['data'] as List;
+    // print(listOfData[0]);
+    for (var element in listOfData) {
+      vehicleMakeList.add(VehicleModel(
+          id: element['make_model_id'] ?? 0,
+          title: element['description'] ?? '',
+          icon: '',
+          vehicleTypeId: 0,
+          vehicleMakeId: element['make_id'] ?? 0));
+    }
+    // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
+    return vehicleMakeList;
+  } catch (e) {
+    return vehicleMakeList;
   }
-  // vehicleMakeList.sort((a, b) => b.title.compareTo(a.title));
-  return vehicleMakeList;
 }
 
 Future<List> getVehicleMakeToSaveData(String type, String jwtToken) async {
@@ -256,6 +310,10 @@ Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
             title: element['MakeName'] ?? '',
             icon: '',
             vehicleTypeId: 0));
+      }
+      if (vehicleType == 'Low speed vehicle') {
+        vehicleMakeList.add(
+            VehicleMake(id: 0, title: 'Bobcat', icon: '', vehicleTypeId: 0));
       }
     }
 

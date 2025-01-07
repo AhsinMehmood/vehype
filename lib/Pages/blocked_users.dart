@@ -47,77 +47,81 @@ class BlockedUsers extends StatelessWidget {
                   .map((toElement) => UserModel.fromJson(toElement))
                   .toList()),
           builder: (context, AsyncSnapshot<List<UserModel>> snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
             final List<UserModel> blockedUsers = snap.data ?? [];
+
             if (blockedUsers.isEmpty) {
               return Center(child: Text('Nothing here!'));
             }
 
-            return Expanded(
-              child: ListView.builder(
-                itemCount: blockedUsers.length,
-                itemBuilder: (context, index) {
-                  final UserModel blockedUserModel = blockedUsers[index];
+            return ListView.builder(
+              itemCount: blockedUsers.length,
+              itemBuilder: (context, index) {
+                final UserModel blockedUserModel = blockedUsers[index];
 
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(200),
-                          child: SizedBox(
-                              height: 65,
-                              width: 65,
-                              child: CachedNetworkImage(
-                                imageUrl: blockedUserModel.profileUrl,
-                                fit: BoxFit.cover,
-                              )),
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(200),
+                        child: SizedBox(
+                            height: 65,
+                            width: 65,
+                            child: CachedNetworkImage(
+                              imageUrl: blockedUserModel.profileUrl,
+                              fit: BoxFit.cover,
+                            )),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: Text(
+                          blockedUserModel.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: Text(
-                            blockedUserModel.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          UserController().unblockUser(
+                              userModel.userId, blockedUserModel.userId);
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Unblock',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: userController.isDark
+                                      ? primaryColor
+                                      : Colors.white),
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            UserController().unblockUser(
-                                userModel.userId, blockedUserModel.userId);
-                          },
-                          child: Container(
-                            height: 45,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Unblock',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      )
+                    ],
+                  ),
+                );
+              },
             );
           }),
     );

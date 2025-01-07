@@ -130,7 +130,7 @@ class _AddVehicleState extends State<AddVehicle> {
                     }));
                   },
                   child: Container(
-                    height: 220,
+                    height: 240,
                     width: Get.width * 0.9,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
@@ -1706,36 +1706,41 @@ class _SubModelPickerState extends State<SubModelPicker> {
         color: userController.isDark ? primaryColor : Colors.white,
       ),
       height: Get.height * 0.85,
-      child: vehicleModels.isEmpty
-          ? Center(
-              child: CircularProgressIndicator(
-                color: userController.isDark ? Colors.white : primaryColor,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 10,
+            ),
+            TextFormField(
+              onChanged: (String text) {
+                _filterSearchResults(text, vehicleModels);
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Search',
+                prefixIcon: Icon(Icons.search),
               ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextFormField(
-                    onChanged: (String text) {
-                      _filterSearchResults(text, vehicleModels);
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Search',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  if (_filteredList.isNotEmpty)
-                    // for (VehicleModel bodyStyle in _filteredList)
-                    Expanded(
-                        child: ListView.builder(
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            if (_filteredList.isNotEmpty)
+              vehicleModels.isEmpty
+                  ? Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                        ),
+                      ),
+                    )
+                  :
+                  // for (VehicleModel bodyStyle in _filteredList)
+                  Expanded(
+                      child: ListView.builder(
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
                         VehicleModel bodyStyle = _filteredList[index];
@@ -1801,78 +1806,74 @@ class _SubModelPickerState extends State<SubModelPicker> {
                       },
                       itemCount: _filteredList.length,
                     )),
-                  if (_filteredList.isEmpty)
-                    // for (VehicleModel bodyStyle in widget.listOfModels)
-                    Expanded(
-                        child: ListView.builder(
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        VehicleModel bodyStyle = vehicleModels[index];
-                        return InkWell(
-                          onTap: () {
-                            garageController.selectSubModel(bodyStyle);
-                            Get.close(1);
-                          },
-                          child: Column(
+            if (_filteredList.isEmpty)
+              // for (VehicleModel bodyStyle in widget.listOfModels)
+              Expanded(
+                  child: ListView.builder(
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  VehicleModel bodyStyle = vehicleModels[index];
+                  return InkWell(
+                    onTap: () {
+                      garageController.selectSubModel(bodyStyle);
+                      Get.close(1);
+                    },
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        bodyStyle.title,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: userController.isDark
-                                              ? Colors.white
-                                              : primaryColor,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    if (garageController.selectedSubModel !=
-                                            null &&
-                                        garageController
-                                                .selectedSubModel!.title ==
-                                            bodyStyle.title)
-                                      Container(
-                                        padding: const EdgeInsets.all(2),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(200),
-                                          color: Colors.green,
-                                        ),
-                                        child: Icon(
-                                          Icons.done,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ),
-                                  ],
+                              Expanded(
+                                child: Text(
+                                  bodyStyle.title,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Container(
-                                height: 1,
-                                width: Get.width * 0.9,
-                                color: userController.isDark
-                                    ? Colors.white.withOpacity(0.3)
-                                    : primaryColor.withOpacity(0.3),
-                              ),
+                              if (garageController.selectedSubModel != null &&
+                                  garageController.selectedSubModel!.title ==
+                                      bodyStyle.title)
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(200),
+                                    color: Colors.green,
+                                  ),
+                                  child: Icon(
+                                    Icons.done,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                ),
                             ],
                           ),
-                        );
-                      },
-                      itemCount: vehicleModels.length,
-                    )),
-                ],
-              ),
-            ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          height: 1,
+                          width: Get.width * 0.9,
+                          color: userController.isDark
+                              ? Colors.white.withOpacity(0.3)
+                              : primaryColor.withOpacity(0.3),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                itemCount: vehicleModels.length,
+              )),
+          ],
+        ),
+      ),
     );
   }
 }

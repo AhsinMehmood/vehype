@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
@@ -151,6 +152,7 @@ class ChatController with ChangeNotifier {
     query.onValue.listen((event) {
       if (event.snapshot.value == null) {
         streamController.add(<MessageModel>[]);
+        // print('sdkss;d');
         return;
       }
 
@@ -159,8 +161,13 @@ class ChatController with ChangeNotifier {
       final List<MessageModel> messages = [];
 
       messageData.forEach((key, data) {
+        print(data);
+
         final message = MessageModel(
           isSystemMessage: data['isSystemMessage'] ?? false,
+          isLocation: data['isLocation'] ?? false,
+          lat: data['lat'] ?? 0.0,
+          long: data['long'] ?? 0.0,
           isAudio: data['isAudio'] ?? false,
           audioUrl: data['audioUrl'] ?? '',
           id: key,
@@ -173,12 +180,13 @@ class ChatController with ChangeNotifier {
           state: data['state'] ?? 1,
         );
         messages.add(message);
+        print(message);
       });
       messages.sort((a, b) => b.sentAt.compareTo(a.sentAt));
 
       streamController.add(messages);
     }, onError: (error) {
-      // print(error);.
+      print(error);
     });
 
     return streamController.stream;
@@ -368,7 +376,9 @@ class ChatController with ChangeNotifier {
       bool isVide,
       OffersModel offersModel,
       bool isAudio,
-      String audioUrl) async {
+      String audioUrl,
+      {LatLng? latlng,
+      bool isLocation = false}) async {
     DatabaseReference reference = _messagesRef.child(chatModel.id).push();
     await reference.set({
       'sentAt': DateTime.now().toUtc().toIso8601String(),
@@ -383,6 +393,9 @@ class ChatController with ChangeNotifier {
       'pushToken': secondUser.pushToken,
       'chatId': chatModel.id,
       'state': 0,
+      'isLocation': isLocation,
+      'lat': latlng != null ? latlng.latitude : 0.2,
+      'long': latlng != null ? latlng.longitude : 0.2,
     });
 
     NotificationController().sendMessageNotification(

@@ -24,9 +24,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android;
+        return androidBeta;
       case TargetPlatform.iOS:
-        return ios;
+        return iosBeta;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,6 +58,27 @@ class DefaultFirebaseOptions {
     storageBucket: 'vehype-386313.appspot.com',
   );
 
+  static const FirebaseOptions androidBeta = FirebaseOptions(
+    apiKey: 'AIzaSyAjTQwQ3b74CucTIL2gE1cHXcZ5pZmVKrs',
+    appId: '1:595427669329:android:362c8b6549a1e63467cf70',
+    messagingSenderId: '595427669329',
+    projectId: 'vehype-98f5e',
+    databaseURL: 'https://vehype-98f5e-default-rtdb.firebaseio.com',
+    storageBucket: 'vehype-98f5e.appspot.com',
+  );
+  static const FirebaseOptions iosBeta = FirebaseOptions(
+    apiKey: 'AIzaSyA8c2j0xocvV-mhOHvBFcwe7LCEVzFj2EQ',
+    appId: '1:595427669329:ios:40d8a0e4445416ea67cf70',
+    messagingSenderId: '595427669329',
+    projectId: 'vehype-98f5e',
+    databaseURL: 'https://vehype-98f5e-default-rtdb.firebaseio.com',
+    storageBucket: 'vehype-98f5e.appspot.com',
+    androidClientId:
+        '595427669329-ae83qkekslrjemhtvqc9vkd3bpdb14er.apps.googleusercontent.com',
+    iosClientId:
+        '595427669329-rjmcj7quh0ct1jps6nl0kms706ffndlc.apps.googleusercontent.com',
+    iosBundleId: 'com.nomadllc.vehype.beta',
+  );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAK6KvCmEG7qqs-uE8XnIc8UgltGT-bmuM',
     appId: '1:832920203889:ios:7f1cf1482827a5d2cce1d0',
@@ -65,9 +86,10 @@ class DefaultFirebaseOptions {
     projectId: 'vehype-386313',
     databaseURL: 'https://vehype-386313-default-rtdb.firebaseio.com',
     storageBucket: 'vehype-386313.appspot.com',
-    androidClientId: '832920203889-5e5jgnoecueoahn8qkg29d5bplg2m578.apps.googleusercontent.com',
-    iosClientId: '832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com',
+    androidClientId:
+        '832920203889-5e5jgnoecueoahn8qkg29d5bplg2m578.apps.googleusercontent.com',
+    iosClientId:
+        '832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com',
     iosBundleId: 'com.nomadllc.vehype',
   );
-
 }

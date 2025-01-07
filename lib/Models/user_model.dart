@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
+  final String id;
   final String userId;
   final String profileUrl;
+
   final String name;
   final String email;
   final String phoneNumber;
@@ -41,6 +43,7 @@ class UserModel {
   final List vehicleTypes;
 
   UserModel(
+    this.id,
     this.userId,
     this.profileUrl,
     this.name,
@@ -92,6 +95,7 @@ class UserModel {
         : ratings.fold<double>(
             0.0, (prev, element) => prev + (element['rating']));
     return UserModel(
+      data['userId'] ?? '',
       userId,
       data['profileUrl'] ??
           'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/user_place_holder.png?alt=media&token=c75336b0-87fb-4493-8d62-7c707d0b4757',

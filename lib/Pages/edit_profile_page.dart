@@ -1094,7 +1094,10 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                           result.placeId ?? '');
                                                   lat = latLng.latitude;
                                                   long = latLng.longitude;
-                                                  setState(() {});
+                                                  print('dddsd');
+                                                  userController
+                                                      .changeLocation(latLng);
+                                                  // setState(() {});
 
                                                   final GeoFirePoint
                                                       geoFirePoint =
@@ -1121,6 +1124,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                     target: LatLng(lat, long),
                                                     zoom: 16.0,
                                                   )));
+
                                                   Get.close(2);
                                                 },
                                                 initialPosition:
@@ -1174,6 +1178,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                     result.placeId ?? '');
                                             lat = latLng.latitude;
                                             long = latLng.longitude;
+                                            userController
+                                                .changeLocation(latLng);
                                             setState(() {});
 
                                             final GeoFirePoint geoFirePoint =

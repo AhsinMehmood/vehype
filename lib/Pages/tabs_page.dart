@@ -1,11 +1,13 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -26,6 +28,7 @@ import 'package:vehype/Pages/my_garage.dart';
 import 'package:vehype/Pages/orders_history_provider.dart';
 import 'package:vehype/Pages/profile_page.dart';
 import 'package:vehype/Pages/repair_page.dart';
+import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/notification_controller.dart';
@@ -51,6 +54,7 @@ class _TabsPageState extends State<TabsPage> {
     ChatPage(),
     ProfilePage(),
   ];
+  PackageInfo _packageInfo = PackageInfo();
 
   @override
   void initState() {
@@ -82,6 +86,10 @@ class _TabsPageState extends State<TabsPage> {
               1);
           NotificationController()
               .navigateChat(listener.notification.additionalData!);
+        } else if (listener.notification.additionalData!['type'] ==
+            'new_provider') {
+          Get.to(() => SecondUserProfile(
+              userId: listener.notification.additionalData!['providerId']));
         } else {
           NotificationController()
               .navigateOwner(listener.notification.additionalData!);
@@ -97,15 +105,21 @@ class _TabsPageState extends State<TabsPage> {
   getNotificationSetting() async {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
+
     bool serviceEnabled;
     LocationPermission permission;
-    DocumentSnapshot<Map<String, dynamic>> updateSnap = await FirebaseFirestore
-        .instance
-        .collection('updates')
-        .doc('update')
-        .get();
-    if (updateSnap.exists) {
-      if (updateSnap.data()!['newVersion'] != currentVersion) {
+
+    if (Platform.isAndroid) {
+      InAppUpdateManager manager = InAppUpdateManager();
+      AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
+      if (appUpdateInfo == null) return;
+      if (appUpdateInfo.updateAvailability ==
+          UpdateAvailability.developerTriggeredUpdateInProgress) {
+        //If an in-app update is already running, resume the update.
+        String? message =
+            await manager.startAnUpdate(type: AppUpdateType.immediate);
+      } else if (appUpdateInfo.updateAvailability ==
+          UpdateAvailability.updateAvailable) {
         showModalBottomSheet(
             context: context,
             backgroundColor:
@@ -122,34 +136,61 @@ class _TabsPageState extends State<TabsPage> {
             builder: (context) {
               return UpdateSheet(
                 userController: userController,
+                manager: manager,
               );
             });
-        return;
-      } else {
-        serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        permission = await Geolocator.checkPermission();
-        if (serviceEnabled == false ||
-            permission == LocationPermission.denied ||
-            permission == LocationPermission.deniedForever) {
-          Future.delayed(const Duration(seconds: 1)).then((s) {
-            Get.bottomSheet(
-              LocationPermissionSheet(userController: userController),
-              backgroundColor:
-                  userController.isDark ? primaryColor : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(6),
-                  topRight: Radius.circular(6),
-                ),
-              ),
-              isDismissible: false,
-              // enableDrag: false,
-            );
-          });
-        } else {
-          userController.pushTokenUpdate(userController.userModel!.userId);
-        }
       }
+    } else {
+      _packageInfo = await PackageManager.getPackageInfo();
+
+      VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
+          packageInfo: _packageInfo, regionCode: "US");
+
+      if (double.tryParse(_versionInfo.localVersion)! <
+          double.tryParse(_versionInfo.storeVersion)!) {
+        showModalBottomSheet(
+            context: context,
+            backgroundColor:
+                userController.isDark ? primaryColor : Colors.white,
+            // enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+            isDismissible: false,
+            enableDrag: false,
+            builder: (context) {
+              return UpdateSheet(
+                userController: userController,
+                manager: null,
+              );
+            });
+      }
+    }
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    permission = await Geolocator.checkPermission();
+    if (serviceEnabled == false ||
+        permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      Future.delayed(const Duration(seconds: 1)).then((s) {
+        Get.bottomSheet(
+          LocationPermissionSheet(userController: userController),
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
+          ),
+          isDismissible: false,
+          // enableDrag: false,
+        );
+      });
+    } else {
+      userController.pushTokenUpdate(userController.userModel!.userId);
     }
   }
 
@@ -633,9 +674,7 @@ class LocationPermissionSheet extends StatelessWidget {
             height: 20,
           ),
           Text(
-            userController.userModel!.accountType == 'provider'
-                ? 'Enable Location for Service\nAvailability'
-                : 'Enable Location for Nearby\nService Owners',
+            'Your location allows VEHYPE to provide accurate maps and find services near you.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: userController.isDark ? Colors.white : primaryColor,
@@ -669,14 +708,26 @@ class LocationPermissionSheet extends StatelessWidget {
 
               serviceEnabled = await Geolocator.isLocationServiceEnabled();
               if (!serviceEnabled) {
-                Geolocator.openLocationSettings();
+                Get.showSnackbar(GetSnackBar(
+                  message: 'Location is disabled. Tap to open Settings.',
+                  onTap: (d) {
+                    Geolocator.openLocationSettings();
+                  },
+                  duration: Duration(seconds: 3),
+                ));
               } else {
                 // permission = await Geolocator.checkPermission();
                 // permission = await Geolocator.checkPermission();
                 if (permission == LocationPermission.denied ||
                     permission == LocationPermission.deniedForever ||
                     permission == LocationPermission.unableToDetermine) {
-                  Geolocator.openAppSettings();
+                  Get.showSnackbar(GetSnackBar(
+                    message: 'Location is disabled. Tap to open Settings.',
+                    onTap: (d) {
+                      Geolocator.openAppSettings();
+                    },
+                    duration: Duration(seconds: 3),
+                  ));
                 } else {
                   Position position = await Geolocator.getCurrentPosition();
                   final GeoFirePoint geoFirePoint = GeoFirePoint(
@@ -704,7 +755,7 @@ class LocationPermissionSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 )),
             child: Text(
-              'Allow Access',
+              'Continue',
               style: TextStyle(
                 color: userController.isDark ? primaryColor : Colors.white,
                 fontSize: 16,
@@ -725,9 +776,11 @@ class UpdateSheet extends StatelessWidget {
   const UpdateSheet({
     super.key,
     required this.userController,
+    required this.manager,
   });
 
   final UserController userController;
+  final InAppUpdateManager? manager;
 
   @override
   Widget build(BuildContext context) {
@@ -776,18 +829,44 @@ class UpdateSheet extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
+                PackageInfo _packageInfo = PackageInfo();
+
                 // Get.close(1);
                 if (Platform.isAndroid) {
-                  launchUrl(Uri.parse(
-                      'https://play.google.com/store/apps/details?id=com.nomadllc.vehype'));
+                  InAppUpdateManager manager = InAppUpdateManager();
+                  AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
+                  if (appUpdateInfo == null) return;
+                  if (appUpdateInfo.updateAvailability ==
+                      UpdateAvailability.developerTriggeredUpdateInProgress) {
+                    //If an in-app update is already running, resume the update.
+                    String? message = await manager.startAnUpdate(
+                        type: AppUpdateType.immediate);
+                    debugPrint(message ?? '');
+                  } else if (appUpdateInfo.updateAvailability ==
+                      UpdateAvailability.updateAvailable) {
+                    ///Update available
+                    if (appUpdateInfo.immediateAllowed) {
+                      String? message = await manager.startAnUpdate(
+                          type: AppUpdateType.immediate);
+                      debugPrint(message ?? '');
+                    } else if (appUpdateInfo.flexibleAllowed) {
+                      String? message = await manager.startAnUpdate(
+                          type: AppUpdateType.flexible);
+                      debugPrint(message ?? '');
+                    } else {
+                      launchUrl(Uri.parse(
+                          'https://play.google.com/store/apps/details?id=com.nomadllc.vehype'));
+                    }
+                  }
                 } else {
-                  toastification.show(
-                    context: context,
-                    title: Text('Please update the app from TestFlight'),
-                    style: ToastificationStyle.minimal,
-                    type: ToastificationType.info,
-                    autoCloseDuration: Duration(seconds: 3),
-                  );
+                  _packageInfo = await PackageManager.getPackageInfo();
+
+                  VersionInfo? _versionInfo =
+                      await UpgradeVersion.getiOSStoreVersion(
+                          packageInfo: _packageInfo, regionCode: "US");
+                  debugPrint(_versionInfo.toJson().toString());
+                  launchUrl(Uri.parse(_versionInfo.appStoreLink));
+                  // Get.close(1);
                 }
               },
               style: ElevatedButton.styleFrom(

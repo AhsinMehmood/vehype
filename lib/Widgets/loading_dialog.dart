@@ -17,7 +17,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 6)).then((s) {
+    Future.delayed(Duration(seconds: 8)).then((s) {
       showWait = true;
       setState(() {});
     });
@@ -29,7 +29,7 @@ class _LoadingDialogState extends State<LoadingDialog> {
 
     return WillPopScope(
       onWillPop: () async {
-        return true;
+        return false;
       },
       child: Dialog(
         shape: RoundedRectangleBorder(

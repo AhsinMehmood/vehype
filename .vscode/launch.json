@@ -11,7 +11,8 @@
         //   "request": "launch",
         //   "type": "dart",
         //   "program": "lib/main.dart",
-        //   "deviceId": "00008030-0012286E3AD0402E"
+        //   // "toolArgs": ["--flavor", "prod"],
+        //   // "deviceId": "00008030-0012286E3AD0402E"
         // },
         // {
         //   "name": "Flutter on Device 2",

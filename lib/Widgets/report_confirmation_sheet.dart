@@ -52,7 +52,7 @@ class ReportConfirmationSheet extends StatelessWidget {
                 try {
                   Get.dialog(LoadingDialog(), barrierDismissible: false);
 
-                  await userController.blockAndReport(
+                  userController.blockAndReport(
                       widget.chatModel.id,
                       userController.userModel!.userId,
                       widget.secondUser.userId,

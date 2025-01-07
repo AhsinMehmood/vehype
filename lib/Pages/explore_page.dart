@@ -51,15 +51,19 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
+  String _darkMapStyle = '';
   @override
   void initState() {
     super.initState();
-    getLocations();
+    _loadMapStyles();
+  }
+
+  Future _loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
   }
 
   FocusNode searchnode = FocusNode();
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+
   // GoogleMapController? mapController;
   // String _mapStyle = '';
   double lat = 0.0;
@@ -73,23 +77,16 @@ class _ExplorePageState extends State<ExplorePage> {
 
   final CollectionReference<Map<String, dynamic>> collectionReference =
       FirebaseFirestore.instance.collection('users');
-  getLocations() async {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
-    final UserModel userModel = userController.userModel!;
-
-    setState(() {
-      lat = userModel.lat;
-      long = userModel.long;
-    });
-  }
 
   UserModel? selectedMarker;
 
-  List<WidgetMarker> addMarkers(List<UserModel> nearbyProviders) {
-    final UserController userController =
-        Provider.of<UserController>(context, listen: false);
+  List<WidgetMarker> addMarkers(
+      List<UserModel> nearbyProviders, UserController userController) {
+    // final UserController userController =
+    //     Provider.of<UserController>(context, listen: false);
     final UserModel userModel = userController.userModel!;
+    lat = userModel.lat;
+    long = userModel.long;
     List<WidgetMarker> markers = [];
     for (UserModel element in nearbyProviders) {
       if (element.email == 'No email set') {
@@ -99,7 +96,8 @@ class _ExplorePageState extends State<ExplorePage> {
               markerId: element.userId,
               position: LatLng(element.lat, element.long),
               onTap: () async {
-                GoogleMapController mapController = await _controller.future;
+                GoogleMapController mapController =
+                    await userController.mapController.future;
                 mapController.animateCamera(
                   CameraUpdate.newCameraPosition(
                     CameraPosition(
@@ -112,29 +110,40 @@ class _ExplorePageState extends State<ExplorePage> {
                   selectedMarker = element;
                 });
               },
-              widget: Container(
-              height: 54,
-                // width: 70,
-                child: Column(
+              widget: SizedBox(
+                height: 45,
+                width: 45,
+                child: Stack(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(200),
-                      child: CachedNetworkImage(
-                        imageUrl: element.profileUrl,
-                        height: 35,
-                        width: 35,
-                        fit: BoxFit.cover,
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Image.asset(
+                        'assets/user.png',
+                        height: 50,
+                        width: 50,
                       ),
                     ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Text(
-                      element.name,
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.only(
+                          top: 1,
+                        ),
+                        height: 32,
+                        width: 32,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(200),
+                          child: CachedNetworkImage(
+                            imageUrl: element.profileUrl,
+                            // height: 20,
+                            // width: 20,
+                            // fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -245,7 +254,8 @@ class _ExplorePageState extends State<ExplorePage> {
                         : filterProvidersByServices(nearbyProvidersStream,
                             userController.selectedServicesFilter);
 
-                List<WidgetMarker> markers = addMarkers(filterByService);
+                List<WidgetMarker> markers =
+                    addMarkers(filterByService, userController);
                 markers.add(
                   WidgetMarker(
                     markerId: 'current',
@@ -271,6 +281,7 @@ class _ExplorePageState extends State<ExplorePage> {
                       mapType: isSatLite ? MapType.satellite : MapType.normal,
                       zoomControlsEnabled: false,
                       zoomGesturesEnabled: true,
+                      myLocationButtonEnabled: false,
                       onCameraMove: (position) {
                         lat = position.target.latitude;
                         long = position.target.longitude;
@@ -288,9 +299,13 @@ class _ExplorePageState extends State<ExplorePage> {
                       },
 
                       onMapCreated: (controller) {
-                        if (!_controller.isCompleted) {
-                          _controller.complete(controller);
+                        if (!userController.mapController.isCompleted) {
+                          userController.mapController.complete(controller);
                         }
+                        if (userController.isDark) {
+                          controller.setMapStyle(_darkMapStyle);
+                        }
+                        setState(() {});
                       },
                     ),
                     Align(
@@ -505,24 +520,10 @@ class _ExplorePageState extends State<ExplorePage> {
                                   child: InkWell(
                                     onTap: () async {
                                       // FocusScope.of(context).requestFocus(searchnode);
-                                      final GoogleMapController mapController =
-                                          await _controller.future;
 
+                                      userController
+                                          .changeLocation(LatLng(lat, long));
                                       // Define a new camera position
-                                      CameraPosition newPosition =
-                                          CameraPosition(
-                                        target: LatLng(lat,
-                                            long), // Example coordinates (San Francisco)
-                                        zoom: 14.0, // Example zoom level
-                                      );
-
-                                      // Create a CameraUpdate object with the new position
-                                      CameraUpdate cameraUpdate =
-                                          CameraUpdate.newCameraPosition(
-                                              newPosition);
-
-                                      // Animate the camera to the new position
-                                      mapController.animateCamera(cameraUpdate);
                                     },
                                     child: Card(
                                         elevation: 1.0,

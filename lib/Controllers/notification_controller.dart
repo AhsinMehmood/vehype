@@ -252,6 +252,43 @@ class NotificationController {
   }
 
   // listenOneSignalNotification(RemoteMessage message) {}
+  Future<void> sendNotificationNewProvider({
+    required String providerId,
+    required String requestId,
+    required String title,
+    required String subtitle,
+    required List<String> userIds,
+  }) async {
+    try {
+      final message = {
+        'app_id': appId,
+        'headings': {'en': title},
+        'contents': {'en': subtitle},
+        'include_external_user_ids': userIds,
+        'data': {
+          'providerId': providerId,
+          'type': 'new_provider',
+          // 'requestId': requestId,
+        },
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse('https://onesignal.com/api/v1/notifications'),
+          body: jsonEncode(message),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic $restApiKey',
+          },
+        );
+        print('Notification sent: ${response.body}');
+      } catch (error) {
+        print('Error sending notification: $error');
+      }
+    } catch (error) {
+      print('Error sending notification: $error');
+    }
+  }
 
   Future<void> sendNotification({
     required String offerId,

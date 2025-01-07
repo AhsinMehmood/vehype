@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:vehype/Controllers/notification_controller.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
@@ -165,6 +166,7 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                   //   Get.bottomSheet(LoginSheet());
                   //   return;
                   // }
+
                   Get.dialog(const LoadingDialog(), barrierDismissible: false);
                   await FirebaseFirestore.instance
                       .collection('users')
@@ -180,7 +182,38 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                   userController.selectedAdditionalServices = [];
                   if (widget.isPage) {
                     Get.close(1);
+                  } else {
+                    // await FirebaseFirestore.instance.collection('users')
+                    List<UserModel> providers = [];
+
+                    QuerySnapshot<Map<String, dynamic>> snapshot =
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .where('accountType', isEqualTo: 'seeker')
+                            // .where('services', arrayContains: issue)
+                            // .where('status', isEqualTo: 'active')
+                            .get();
+
+                    for (QueryDocumentSnapshot<Map<String, dynamic>> element
+                        in snapshot.docs) {
+                      providers.add(UserModel.fromJson(element));
+                    }
+                    List<UserModel> filterProviders =
+                        userController.filterProviders(providers, userModel.lat,
+                            userModel.long, userController.radiusMiles);
+                    List<String> userIds = [];
+                    for (var element in filterProviders) {
+                      userIds.add(element.userId);
+                    }
+                    NotificationController().sendNotificationNewProvider(
+                        userIds: userIds,
+                        providerId: userModel.userId,
+                        requestId: '',
+                        title: 'New Service 👨🏻‍🔧',
+                        subtitle:
+                            'Hi, new service just registered in your area. Check it out!!!');
                   }
+
                   Get.close(1);
                 },
           style: ElevatedButton.styleFrom(

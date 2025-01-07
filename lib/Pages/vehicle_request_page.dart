@@ -9,6 +9,7 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/garage_controller.dart';
 import '../Controllers/user_controller.dart';
+import '../Widgets/login_sheet.dart';
 import '../Widgets/owner_request_widget.dart';
 import 'choose_account_type.dart';
 import 'create_request_page.dart';
@@ -39,27 +40,14 @@ class VehicleRequestsPage extends StatelessWidget {
               // OneSignal.login(userModel.userId);
               // await sendNotification(userModel.userId, userModel.name);
               // print(dd);
-              if (userModel.email == 'No email set') {
-                Get.showSnackbar(GetSnackBar(
-                  message: 'Login to continue',
-                  duration: const Duration(
-                    seconds: 3,
-                  ),
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  mainButton: TextButton(
-                    onPressed: () {
-                      Get.to(() => ChooseAccountTypePage());
-                      Get.closeCurrentSnackbar();
-                    },
-                    child: Text(
-                      'Login Page',
-                      style: TextStyle(
-                        color:
-                            userController.isDark ? primaryColor : Colors.white,
-                      ),
-                    ),
-                  ),
+              if (userModel.isGuest) {
+                Get.bottomSheet(LoginSheet(
+                  onSuccess: () {
+                    Get.to(() => CreateRequestPage(
+                          offersModel: null,
+                          garageModel: garageModel,
+                        ));
+                  },
                 ));
               } else {
                 Get.to(() => CreateRequestPage(

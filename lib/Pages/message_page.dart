@@ -17,6 +17,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 // import 'package:flutter/widgets.dart';
 // import 'package:flutter_link_previewer/flutter_link_previewer.dart' as lnp;
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 import 'package:intl/intl.dart';
@@ -43,6 +44,7 @@ import 'package:vehype/Pages/owner_request_details_inprogress_inactive_page.dart
 import 'package:vehype/Pages/service_request_details.dart';
 
 import 'package:vehype/Pages/second_user_profile.dart';
+import 'package:vehype/Pages/shared_location_page.dart';
 import 'package:vehype/Widgets/audio_message.dart';
 import 'package:vehype/Widgets/delete_chat_confirmation_sheet.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
@@ -52,6 +54,7 @@ import 'package:vehype/Widgets/video_player.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/report_confirmation_sheet.dart';
+import 'share_location_page.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatModel chatModel;
@@ -88,14 +91,14 @@ class _MessagePageState extends State<MessagePage> {
   String filePath = '';
 
   void startRecording() async {
-    // try {
-    //   Directory directory = await getTemporaryDirectory();
-    //   await _recorder.start(const RecordConfig(),
-    //       path:
-    //           '${directory.path}${DateTime.now().microsecondsSinceEpoch}.m4a');
-    // } catch (e) {
-    //   log(e.toString());
-    // }
+    try {
+      // Directory directory = await getTemporaryDirectory();
+      // await _recorder.start(const RecordConfig(),
+      //     path:
+      //         '${directory.path}${DateTime.now().microsecondsSinceEpoch}.m4a');
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   void stopRecording() async {}
@@ -887,13 +890,53 @@ class _MessagePageState extends State<MessagePage> {
                                             else
                                               Row(
                                                 children: [
-                                                  // if (chatController.pickedMedia.isEmpty)
+                                                  if (textMessageController
+                                                      .text.isEmpty)
+                                                    IconButton(
+                                                        style: ButtonStyle(
+                                                          padding: WidgetStateProperty
+                                                              .all(EdgeInsets.all(
+                                                                  5)), // Set padding to zero
+                                                          minimumSize:
+                                                              WidgetStateProperty
+                                                                  .all(Size(5,
+                                                                      5)), // Remove minimum size
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap, // Adjust tap target size
+                                                        ),
+                                                        onPressed: () async {
+                                                          Get.to(() =>
+                                                              ShareLocationPage(
+                                                                chatModel: widget
+                                                                    .chatModel,
+                                                                secondUserModel:
+                                                                    widget
+                                                                        .secondUser,
+                                                                offersModel: widget
+                                                                    .offersModel,
+                                                              ));
+                                                        },
+                                                        icon: Icon(Icons
+                                                            .location_on_outlined)),
                                                   IconButton(
                                                       onPressed: () async {
                                                         chatController
                                                             .pickMediaMessage(
                                                                 userModel);
                                                       },
+                                                      style: ButtonStyle(
+                                                        padding: WidgetStateProperty
+                                                            .all(EdgeInsets.all(
+                                                                5)), // Set padding to zero
+                                                        minimumSize:
+                                                            WidgetStateProperty
+                                                                .all(Size(5,
+                                                                    5)), // Remove minimum size
+                                                        tapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap, // Adjust tap target size
+                                                      ),
                                                       icon: Icon(
                                                           Icons.attach_file)),
                                                   Expanded(
@@ -1082,7 +1125,7 @@ class _MessagePageState extends State<MessagePage> {
                                                           //       .stop();
                                                           // }
 
-                                                          // startRecording();
+                                                          //  startRecording();
                                                           // Future.delayed(
                                                           //         Duration(
                                                           //             seconds:
@@ -1333,6 +1376,10 @@ class _MessagePageState extends State<MessagePage> {
     List<InlineSpan> textSpans = _getClickableTextSpans(message.text);
     DateTime now = DateTime.parse(message.sentAt).toLocal();
     String formattedTime = DateFormat.jm().format(now);
+    print(message.isLocation);
+    print(message.lat);
+    print(message.long);
+
     return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: Get.width * 0.85,
@@ -1363,10 +1410,38 @@ class _MessagePageState extends State<MessagePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SecondUserMessageWidget(
-                  textSpans: textSpans,
-                  message: message,
-                ),
+                message.isLocation
+                    ? InkWell(
+                        onTap: () {
+                          Get.to(() => SharedLocationPage(
+                              latLng: LatLng(message.lat, message.long)));
+                        },
+                        child: Container(
+                          height: 140,
+                          width: Get.width * 0.6,
+                          child: GoogleMap(
+                              onTap: (LatLng l) {
+                                Get.to(() => SharedLocationPage(
+                                    latLng: LatLng(message.lat, message.long)));
+                              },
+                              markers: {
+                                Marker(
+                                    markerId: MarkerId(message.id),
+                                    position: LatLng(message.lat, message.long))
+                              },
+                              zoomControlsEnabled: false,
+                              zoomGesturesEnabled: false,
+                              mapToolbarEnabled: false,
+                              myLocationButtonEnabled: false,
+                              myLocationEnabled: false,
+                              initialCameraPosition: CameraPosition(
+                                  zoom: 18,
+                                  target: LatLng(message.lat, message.long))),
+                        ))
+                    : SecondUserMessageWidget(
+                        textSpans: textSpans,
+                        message: message,
+                      ),
                 const SizedBox(
                   height: 5,
                 ),
@@ -1587,32 +1662,33 @@ class SecondUserMessageWidget extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: Get.width * 0.75,
               ),
-              child: message.isAudio
-                  ? AudioMessage(
-                      url: message.audioUrl,
-                      isMe: false,
-                    )
-                  : Container(
-                      // margin: const EdgeInsets.all(7),
-                      padding: const EdgeInsets.all(12),
-                      // width: Get.width * 0.75,
+              //  message.isAudio
+              //     ? AudioMessage(
+              //         url: message.audioUrl,
+              //         isMe: false,
+              //       )
+              //     :
+              child: Container(
+                // margin: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(12),
+                // width: Get.width * 0.75,
 
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        color: changeColor(color: 'F1F1F1'),
-                      ),
-                      child: RichText(
-                        text: TextSpan(
-                          children: textSpans,
-                          style: TextStyle(
-                            // fontFamily: 'Avenir',
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: changeColor(color: 'F1F1F1'),
+                ),
+                child: RichText(
+                  text: TextSpan(
+                    children: textSpans,
+                    style: TextStyle(
+                      // fontFamily: 'Avenir',
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
                     ),
+                  ),
+                ),
+              ),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2200,10 +2276,33 @@ class MessageWidget extends StatelessWidget {
     final UserController userController = Provider.of<UserController>(context);
     return Column(
       children: [
-        if (message.isAudio)
-          AudioMessage(
-            url: message.audioUrl,
-            isMe: true,
+        if (message.isLocation)
+          InkWell(
+            onTap: () {
+              Get.to(() => SharedLocationPage(
+                  latLng: LatLng(message.lat, message.long)));
+            },
+            child: SizedBox(
+              height: 140,
+              width: Get.width * 0.6,
+              child: GoogleMap(
+                  onTap: (LatLng l) {
+                    Get.to(() => SharedLocationPage(
+                        latLng: LatLng(message.lat, message.long)));
+                  },
+                  markers: {
+                    Marker(
+                        markerId: MarkerId(message.id),
+                        position: LatLng(message.lat, message.long))
+                  },
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: false,
+                  mapToolbarEnabled: false,
+                  myLocationButtonEnabled: false,
+                  myLocationEnabled: false,
+                  initialCameraPosition: CameraPosition(
+                      zoom: 18, target: LatLng(message.lat, message.long))),
+            ),
           )
         else
           message.mediaUrl == ''

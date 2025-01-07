@@ -83,8 +83,8 @@ void main() async {
   //   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
   // }
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+      // options: DefaultFirebaseOptions.currentPlatform,
+      );
   // final themeStr = await rootBundle.loadString('assets/theme.json');
   // final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');
   FirebaseFirestore.instance.settings = const Settings(
@@ -102,7 +102,9 @@ void main() async {
   // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
   OneSignal.Debug.setLogLevel(OSLogLevel.debug);
 
-  OneSignal.initialize("e236663f-f5c0-4a40-a2df-81e62c7d411f");
+  OneSignal.initialize("d2e6efea-3e5f-42f9-85ab-9815924277a0");
+  // deebug d2e6efea-3e5f-42f9-85ab-9815924277a0
+  //prod e236663f-f5c0-4a40-a2df-81e62c7d411f
   // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
   //     trackAutomaticEvents: true);
   await SentryFlutter.init((options) {

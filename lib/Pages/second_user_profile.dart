@@ -268,101 +268,70 @@ class ProviderProfileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 4,
-      child: Scaffold(
-        backgroundColor: userController.isDark ? primaryColor : Colors.white,
-        body: Card(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          )),
-          color: userController.isDark ? primaryColor : Colors.white,
-          child: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverAppBar(
-                  elevation: 0.0,
-
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          body: Column(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(
+                    top: 0,
+                    left: 12,
+                    right: 12,
+                  ),
+                  child: SecondUserHeaderWidget(
+                    profile: profileModel,
+                    rating: ratings,
                   )),
-                  expandedHeight: profileModel.gallery.isEmpty ? 250 : 510.0,
-                  leading: IconButton(
-                      onPressed: () {
-                        Get.close(1);
-                      },
-                      icon: Icon(
-                        Icons.close,
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
-                      )),
-                  backgroundColor:
-                      userController.isDark ? primaryColor : Colors.white,
-                  floating: false,
-                  pinned: true,
-                  // snap: true,
-                  flexibleSpace: FlexibleSpaceBar(
-                      centerTitle: true,
-                      background: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 80,
-                          left: 12,
-                          right: 12,
-                        ),
-                        child: SecondUserHeaderWidget(
-                          profile: profileModel,
-                          rating: ratings,
-                        ),
-                      )),
-                  bottom: TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    indicatorColor: userController.isDark
+              SizedBox(
+                height: 40,
+                width: Get.width,
+                child: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicatorColor: userController.isDark
+                      ? Colors.white.withOpacity(0.5)
+                      : primaryColor.withOpacity(0.5),
+                  unselectedLabelStyle: TextStyle(
+                    fontSize: 14,
+                    color: userController.isDark
                         ? Colors.white.withOpacity(0.5)
                         : primaryColor.withOpacity(0.5),
-                    unselectedLabelStyle: TextStyle(
-                      fontSize: 14,
-                      color: userController.isDark
-                          ? Colors.white.withOpacity(0.5)
-                          : primaryColor.withOpacity(0.5),
-                    ),
-                    labelColor:
-                        userController.isDark ? Colors.white : primaryColor,
-                    labelStyle: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          userController.isDark ? Colors.white : primaryColor,
-                    ),
-                    tabs: [
-                      Tab(text: 'Overview'.toUpperCase()),
-                      Tab(text: 'Services'.toUpperCase()),
-                      Tab(text: 'REVIEWS'),
-                      Tab(text: 'GALLERY'),
-
-                      // Text('Overview'),
-                    ],
                   ),
+                  labelColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                  labelStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: userController.isDark ? Colors.white : primaryColor,
+                  ),
+                  tabs: [
+                    Tab(text: 'Overview'.toUpperCase()),
+                    Tab(text: 'Services'.toUpperCase()),
+                    Tab(text: 'REVIEWS'),
+                    Tab(text: 'GALLERY'),
+
+                    // Text('Overview'),
+                  ],
                 ),
-              ];
-            },
-            body: TabBarView(children: [
-              OverviewTab(
-                profileModel: profileModel,
               ),
-              ServicesTab(
-                profileModel: profileModel,
+              Expanded(
+                child: TabBarView(children: [
+                  OverviewTab(
+                    profileModel: profileModel,
+                  ),
+                  ServicesTab(
+                    profileModel: profileModel,
+                  ),
+                  ReviewsTab(
+                    userData: profileModel,
+                  ),
+                  PhotosTab(
+                    profile: profileModel,
+                  ),
+                ]),
               ),
-              ReviewsTab(
-                userData: profileModel,
-              ),
-              PhotosTab(
-                profile: profileModel,
-              ),
-            ]),
+            ],
           ),
         ),
       ),
@@ -856,6 +825,14 @@ class SecondUserHeaderWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           // mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            IconButton(
+                onPressed: () {
+                  Get.close(1);
+                },
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: userController.isDark ? Colors.white : primaryColor,
+                )),
             InkWell(
               onTap: () {
                 Get.to(() => FullImagePageView(urls: [profile.profileUrl]));

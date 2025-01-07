@@ -57,6 +57,24 @@ class UserController with ChangeNotifier {
     notifyListeners();
   }
 
+  final Completer<GoogleMapController> mapController =
+      Completer<GoogleMapController>();
+  changeLocation(LatLng latlng) async {
+    final GoogleMapController ontroller = await mapController.future;
+    CameraPosition newPosition = CameraPosition(
+      target: latlng, // Example coordinates (San Francisco)
+      zoom: 14.0, // Example zoom level
+    );
+
+    // Create a CameraUpdate object with the new position
+    CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(newPosition);
+
+    // Animate the camera to the new position
+    ontroller.animateCamera(cameraUpdate);
+    print('object');
+    notifyListeners();
+  }
+
   // FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   int sortByTime = 0;
@@ -171,6 +189,11 @@ class UserController with ChangeNotifier {
 
   bool isDark = false;
   bool sameAsSystem = false;
+  String _darkMapStyle = '';
+
+  Future _loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
+  }
 
   initTheme() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -189,7 +212,12 @@ class UserController with ChangeNotifier {
       sameAsSystem = false;
     }
     updateStatusBarColor(isDark); // Update status bar color
+    final GoogleMapController ontroller = await mapController.future;
+    if (isDark) {
+      _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
 
+      ontroller.setMapStyle(_darkMapStyle);
+    }
     notifyListeners();
     return theme;
   }
@@ -199,8 +227,16 @@ class UserController with ChangeNotifier {
     sharedPreferences.setBool('isDark', value);
     isDark = value;
     sameAsSystem = false;
-    updateStatusBarColor(isDark); // Update status bar color
+    updateStatusBarColor(isDark);
+    // Update status bar color
+    final GoogleMapController ontroller = await mapController.future;
+    if (isDark) {
+      _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
 
+      ontroller.setMapStyle(_darkMapStyle);
+    } else {
+      ontroller.setMapStyle(null);
+    }
     notifyListeners();
   }
 
@@ -790,20 +826,14 @@ class UserController with ChangeNotifier {
 
   blockAndReport(String chatId, String currentUserId, String secondUserId,
       UserModel secondUserModel, String reason) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(secondUserId)
-        .update({
+    FirebaseFirestore.instance.collection('users').doc(secondUserId).update({
       'blockedBy': FieldValue.arrayUnion([currentUserId])
     });
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUserId)
-        .update({
+    FirebaseFirestore.instance.collection('users').doc(currentUserId).update({
       'blockedUsers': FieldValue.arrayUnion([secondUserId])
     });
 
-    await FirebaseFirestore.instance.collection('reports').add({
+    FirebaseFirestore.instance.collection('reports').add({
       'createdAt': DateTime.now().toUtc().toIso8601String(),
       'status': 'Active',
       'reportBy': currentUserId,
@@ -811,7 +841,7 @@ class UserController with ChangeNotifier {
       'reason': reason,
     });
 
-    await FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
+    FirebaseFirestore.instance.collection('chats').doc(chatId).delete();
   }
 
   unblockUser(String currentUserId, String secondUserId) async {

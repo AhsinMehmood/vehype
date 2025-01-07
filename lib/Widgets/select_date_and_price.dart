@@ -70,12 +70,33 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
       priceController = TextEditingController(
           text: widget.offersReceivedModel!.price.toString());
       setState(() {});
+    } else {
+      // final GarageController garageController =
+      //     Provider.of<GarageController>(context, listen: false);
+
+      // garageController.startDate = DateTime(
+      //         DateTime.now().year,
+      //         DateTime.now().month,
+      //         DateTime.now().day,
+      //         DateTime.now().hour,
+      //         DateTime.now().minute + 15,
+      //         DateTime.now().second)
+      //     .toLocal();
+      // garageController.endDate = DateTime(
+      //         DateTime.now().year,
+      //         DateTime.now().month,
+      //         DateTime.now().day,
+      //         DateTime.now().hour,
+      //         DateTime.now().minute + 45,
+      //         DateTime.now().second)
+      //     .toLocal();
     }
   }
 
   bool showPriceWarning = false;
   bool showDateWarning = false;
   bool showEndDateWarning = false;
+  bool includeEndTime = false;
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
@@ -231,7 +252,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         child: Text(
                           'Price *',
                           style: TextStyle(
-                            fontFamily: 'Avenir',
+                            // fontFamily: 'Avenir',
                             fontWeight: FontWeight.w500,
                             // color: Colors.black,
                             fontSize: 16,
@@ -272,7 +293,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
 
                         // maxLines: 1,
                         style: TextStyle(
-                          fontFamily: 'Avenir',
+                          // fontFamily: 'Avenir',
                           fontWeight: FontWeight.w800,
                           // color: changeColor(color: '7B7B7B'),
                           fontSize: 28,
@@ -305,7 +326,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             Text(
                               'Price is required.*',
                               style: TextStyle(
-                                fontFamily: 'Avenir',
+                                // fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w400,
                                 color: Colors.red,
                                 // color: Colors.black,
@@ -334,7 +355,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                           Text(
                             'Offer Details',
                             style: TextStyle(
-                              fontFamily: 'Avenir',
+                              // fontFamily: 'Avenir',
                               fontWeight: FontWeight.w400,
                               // color: Colors.black,
                               fontSize: 16,
@@ -352,7 +373,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,
                                 hintStyle: TextStyle(
-                                  fontFamily: 'Avenir',
+                                  // fontFamily: 'Avenir',
                                   fontWeight: FontWeight.w400,
                                   color: changeColor(color: '7B7B7B'),
                                   fontSize: 14,
@@ -367,7 +388,7 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                             maxLines: 3,
                             maxLength: 256,
                             style: TextStyle(
-                              fontFamily: 'Avenir',
+                              // fontFamily: 'Avenir',
                               fontWeight: FontWeight.w400,
                               // color: changeColor(color: '7B7B7B'),
                               fontSize: 16,
@@ -397,71 +418,75 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Select Start Date *',
-                              style: TextStyle(
-                                // fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                // color: Colors.black,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                DateTime? dateTime =
-                                    await showOmniDateTimePicker(
-                                  context: context,
-                                  initialDate: garageController.startDate ??
-                                      DateTime.now(),
-                                  firstDate: garageController.startDate ??
-                                      DateTime.now(),
-                                  lastDate: DateTime.now().add(
-                                    const Duration(days: 30),
-                                  ),
-                                  is24HourMode: false,
-                                  isShowSeconds: false,
-                                  minutesInterval: 30,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6)),
-                                  barrierDismissible: false,
-                                  padding: const EdgeInsets.all(10),
-                                );
-                                if (dateTime != null) {
-                                  garageController.selectStartDate(dateTime);
-                                  setState(() {
-                                    showDateWarning = false;
-                                    // showEndDateWarning = false;
-                                    // showPriceWarning = false;
-                                  });
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: userController.isDark
-                                      ? Colors.white54
-                                      : Colors.grey.shade300,
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Text(
-                                  garageController.startDate == null
-                                      ? 'Tap To Select'
-                                      : formatDateTime(
-                                          garageController.startDate!),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Starts At*',
                                   style: TextStyle(
-                                    fontFamily: 'Avenir',
+                                    // fontFamily: 'Avenir',
                                     fontWeight: FontWeight.w400,
                                     // color: Colors.black,
                                     fontSize: 16,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    DateTime? dateTime =
+                                        await showOmniDateTimePicker(
+                                      context: context,
+                                      initialDate: garageController.startDate ??
+                                          DateTime.now(),
+                                      firstDate: garageController.startDate ??
+                                          DateTime.now(),
+                                      lastDate: DateTime.now().add(
+                                        const Duration(days: 30),
+                                      ),
+                                      is24HourMode: false,
+                                      isShowSeconds: false,
+                                      minutesInterval: 30,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6)),
+                                      barrierDismissible: false,
+                                      padding: const EdgeInsets.all(10),
+                                    );
+                                    if (dateTime != null) {
+                                      garageController
+                                          .selectStartDate(dateTime);
+
+                                      setState(() {
+                                        showDateWarning = false;
+                                        // showEndDateWarning = false;
+                                        // showPriceWarning = false;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: userController.isDark
+                                          ? Colors.white54.withOpacity(0.5)
+                                          : Colors.grey.shade300,
+                                    ),
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                      garageController.startDate == null
+                                          ? 'Tap To Select'
+                                          : formatDateTime(
+                                              garageController.startDate!),
+                                      style: TextStyle(
+                                        // fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w400,
+                                        // color: Colors.black,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             if (showDateWarning)
                               Text(
@@ -480,121 +505,130 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                       const SizedBox(
                         height: 20,
                       ),
+                      // if (includeEndTime)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Select End Date *',
-                              style: TextStyle(
-                                fontFamily: 'Avenir',
-                                fontWeight: FontWeight.w400,
-                                // color: Colors.black,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                if (garageController.startDate == null) {
-                                  toastification.show(
-                                    context: context,
-                                    title:
-                                        Text('Please select start date firts'),
-                                    autoCloseDuration: Duration(
-                                      seconds: 3,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                DateTime? dateTime =
-                                    await showOmniDateTimePicker(
-                                  context: context,
-                                  initialDate: garageController.endDate ??
-                                      garageController.startDate!
-                                          .add(Duration(minutes: 30)),
-                                  firstDate: garageController.startDate!
-                                      .add(Duration(minutes: 30)),
-                                  lastDate: garageController.startDate!.add(
-                                    const Duration(days: 30),
-                                  ),
-                                  is24HourMode: false,
-                                  isShowSeconds: false,
-                                  minutesInterval: 30,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6)),
-                                  barrierDismissible: false,
-                                  selectableDayPredicate: (dateTime) {
-                                    // Disable 25th Feb 2023
-                                    if (dateTime ==
-                                        garageController.startDate) {
-                                      return false;
-                                    } else {
-                                      return true;
-                                    }
-                                  },
-                                  padding: const EdgeInsets.all(10),
-                                );
-                                if (dateTime != null) {
-                                  DateTime startDateTime = DateTime(
-                                    garageController.startDate!.year,
-                                    garageController.startDate!.month,
-                                    garageController.startDate!.day,
-                                    garageController.startDate!.hour,
-                                    garageController.startDate!.minute,
-                                  );
-                                  DateTime endDateTime = DateTime(
-                                    dateTime.year,
-                                    dateTime.month,
-                                    dateTime.day,
-                                    dateTime.hour,
-                                    dateTime.minute,
-                                  );
-                                  bool areDateTimesEqual =
-                                      startDateTime == endDateTime;
-
-                                  bool isStartAfterEnd =
-                                      startDateTime.isAfter(dateTime);
-                                  if (isStartAfterEnd || areDateTimesEqual) {
-                                    toastification.show(
-                                        context: context,
-                                        autoCloseDuration: Duration(seconds: 4),
-                                        title: Text(
-                                            'End date and time cannot be same or after start date and time'));
-                                  } else {
-                                    garageController.selectEndDate(dateTime);
-                                    setState(() {
-                                      // showDateWarning = false;
-                                      showEndDateWarning = false;
-                                      // showPriceWarning = false;
-                                    });
-                                  }
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: userController.isDark
-                                      ? Colors.white54
-                                      : Colors.grey.shade300,
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Text(
-                                  garageController.endDate == null
-                                      ? 'Tap To Select'
-                                      : formatDateTime(
-                                          garageController.endDate!),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Ends At*',
                                   style: TextStyle(
-                                    fontFamily: 'Avenir',
+                                    // fontFamily: 'Avenir',
                                     fontWeight: FontWeight.w400,
                                     // color: Colors.black,
                                     fontSize: 16,
                                   ),
                                 ),
-                              ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    if (garageController.startDate == null) {
+                                      toastification.show(
+                                        context: context,
+                                        title: Text(
+                                            'Please select start date firts'),
+                                        autoCloseDuration: Duration(
+                                          seconds: 3,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    DateTime? dateTime =
+                                        await showOmniDateTimePicker(
+                                      context: context,
+                                      initialDate: garageController.endDate ??
+                                          garageController.startDate!
+                                              .add(Duration(minutes: 30)),
+                                      firstDate: garageController.startDate!
+                                          .add(Duration(minutes: 30)),
+                                      lastDate: garageController.startDate!.add(
+                                        const Duration(days: 30),
+                                      ),
+                                      is24HourMode: false,
+                                      isShowSeconds: false,
+                                      minutesInterval: 30,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6)),
+                                      barrierDismissible: false,
+                                      selectableDayPredicate: (dateTime) {
+                                        // Disable 25th Feb 2023
+                                        if (dateTime ==
+                                            garageController.startDate) {
+                                          return false;
+                                        } else {
+                                          return true;
+                                        }
+                                      },
+                                      padding: const EdgeInsets.all(10),
+                                    );
+                                    if (dateTime != null) {
+                                      DateTime startDateTime = DateTime(
+                                        garageController.startDate!.year,
+                                        garageController.startDate!.month,
+                                        garageController.startDate!.day,
+                                        garageController.startDate!.hour,
+                                        garageController.startDate!.minute,
+                                      );
+                                      DateTime endDateTime = DateTime(
+                                        dateTime.year,
+                                        dateTime.month,
+                                        dateTime.day,
+                                        dateTime.hour,
+                                        dateTime.minute,
+                                      );
+                                      bool areDateTimesEqual =
+                                          startDateTime == endDateTime;
+
+                                      bool isStartAfterEnd =
+                                          startDateTime.isAfter(dateTime);
+                                      if (isStartAfterEnd ||
+                                          areDateTimesEqual) {
+                                        toastification.show(
+                                            context: context,
+                                            autoCloseDuration:
+                                                Duration(seconds: 4),
+                                            title: Text(
+                                                'End date and time cannot be same or after start date and time'));
+                                      } else {
+                                        garageController
+                                            .selectEndDate(dateTime);
+                                        setState(() {
+                                          // showDateWarning = false;
+                                          showEndDateWarning = false;
+                                          // showPriceWarning = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: userController.isDark
+                                          ? Colors.white54.withOpacity(0.5)
+                                          : Colors.grey.shade300,
+                                    ),
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                      garageController.endDate == null
+                                          ? 'Tap To Select'
+                                          : formatDateTime(
+                                              garageController.endDate!),
+                                      style: TextStyle(
+                                        // fontFamily: 'Avenir',
+                                        fontWeight: FontWeight.w400,
+                                        // color: Colors.black,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(
                               height: 10,

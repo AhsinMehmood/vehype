@@ -1,11 +1,13 @@
 // ignore_for_file: prefer_const_constructors, empty_catches
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 // import 'dart:js_interop';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_vertexai/firebase_vertexai.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
@@ -24,6 +26,8 @@ import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:vehype/const.dart';
+
+import 'package:together_ai_sdk/together_ai_sdk.dart';
 
 Future<LatLng> getPlaceLatLng(String placeId) async {
   // Use Google Maps Geocoding API to get lat/lng from place ID
@@ -48,6 +52,8 @@ Future<LatLng> getPlaceLatLng(String placeId) async {
 }
 
 class GarageController with ChangeNotifier {
+  final togetherAI = TogetherAISdk(togetherAIKey);
+
   Stream<List<GarageModel>> myVehicles(String userId) {
     return FirebaseFirestore.instance
         .collection('garages')
@@ -415,6 +421,11 @@ class GarageController with ChangeNotifier {
           'updatedAt': DateTime.now().toUtc().toIso8601String(),
         });
       } else {
+        if (imageOneUrl == '') {
+          await generateImages(
+              'Vehicle type: ${selectedVehicleType!.title} Vehicle Make: ${selectedVehicleMake!.title} Vehicle Model Year: $selectedYear Vehicle Model: ${selectedVehicleModel!.title} Vehicle Trims: ${selectedSubModel == null ? '' : selectedSubModel!.title}',
+              userModel.userId);
+        }
         await FirebaseFirestore.instance.collection('garages').add({
           'ownerId': userModel.userId,
           'bodyStyle': selectedVehicleType!.title,
@@ -431,10 +442,88 @@ class GarageController with ChangeNotifier {
         });
       }
 
+      //     String url = await generateVehicleImage(
+      //         '${selectedVehicleType!.title} ${selectedVehicleMake!.title} $selectedYear ${selectedVehicleModel!.title} ${selectedSubModel == null ? '' : selectedSubModel!.title}');
       Get.close(2);
+      // imageOneUrl = url;
+      notifyListeners();
+      // print(url);
       disposeController();
     } catch (e) {
+      // print(e);
       Get.close(1);
+    }
+  }
+
+  Future<void> uploadImageFromUrl(String imageUrl, String userId) async {
+    try {
+      // Fetch the image data from the URL
+      final response = await http.get(Uri.parse(imageUrl));
+      final storageRef = FirebaseStorage.instance.ref();
+
+      final poiImageRef = storageRef
+          .child("users/$userId/${DateTime.now().microsecondsSinceEpoch}.jpg");
+      if (response.statusCode == 200) {
+        // Convert the response body to Uint8List
+        Uint8List imageData = response.bodyBytes;
+
+        // Upload the data to Firebase Storage
+        // final storageRef = FirebaseStorage.instance.ref().child(storagePath);
+        final uploadTask = poiImageRef.putData(imageData);
+
+        // Wait for the upload to complete
+        await uploadTask.whenComplete(() => print("Upload completed"));
+
+        // Get the download URL
+        String downloadUrl = await poiImageRef.getDownloadURL();
+        imageOneUrl = downloadUrl;
+        print("Download URL: $downloadUrl");
+      } else {
+        print("Failed to fetch the image. HTTP status: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
+  }
+
+  generateImages(String datas, String userId) async {
+    const url = "https://api.together.xyz/v1/images/generations";
+    String apiKey = togetherAIKey; // Replace with your API key.
+
+    final headers = {
+      "Authorization": "Bearer $apiKey",
+      "Content-Type": "application/json",
+    };
+
+    final body = jsonEncode({
+      "model": "black-forest-labs/FLUX.1-dev",
+      "prompt": datas,
+      "steps": 10,
+      "n": 1,
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print("Response: ${response.body}");
+        // Parse the response if needed:
+        final data = jsonDecode(response.body);
+        String imageUrl = data['data'][0]['url'];
+        await uploadImageFromUrl(imageUrl, userId);
+        notifyListeners();
+        log(data['data'][0]['url']
+            .toString()); // Process or save the image data here.
+      } else {
+        print("Failed to generate images. Status Code: ${response.statusCode}");
+        print("Error: ${response.body}");
+      }
+    } catch (e) {
+      print("An error occurred: $e");
     }
   }
 
@@ -471,13 +560,19 @@ class GarageController with ChangeNotifier {
             vehicleMakeId: 0,
             vehicleTypeId: 0),
         garageModel.isCustomModel);
-
-    await selectSubModel(VehicleModel(
-        id: 1,
-        title: garageModel.submodel,
-        icon: 'icon',
-        vehicleMakeId: 0,
-        vehicleTypeId: 0));
+    if (garageModel.bodyStyle == 'Passenger vehicle') {
+      if (!garageModel.isCustomMake && !garageModel.isCustomModel) {
+        await selectSubModel(
+          VehicleModel(
+            id: 1,
+            title: garageModel.submodel,
+            icon: 'icon',
+            vehicleMakeId: 0,
+            vehicleTypeId: 0,
+          ),
+        );
+      }
+    }
 
     imageOneUrl = garageModel.imageUrl;
     // selectedYear = ;

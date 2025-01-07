@@ -9,7 +9,7 @@ import '../Models/user_model.dart';
 
 class OffersProvider extends ChangeNotifier {
   StreamSubscription<List<OffersReceivedModel>>? _offersReceivedSubscription;
-   StreamSubscription<List<OffersModel>>? _offersSubscription;
+  StreamSubscription<List<OffersModel>>? _offersSubscription;
   List<OffersModel> offers = [];
   List<OffersReceivedModel> offersReceived = [];
 
@@ -50,19 +50,25 @@ class OffersProvider extends ChangeNotifier {
   }
 
   void startListeningOffers(String userId) {
-    _offersReceivedSubscription = FirebaseFirestore.instance
-        .collection('offersReceived')
-        .where('offerBy', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((event) =>
-            event.docs.map((e) => OffersReceivedModel.fromJson(e)).toList())
-        .listen((offersReceivedList) {
-      offersReceived = offersReceivedList;
-      log('${offersReceived.length} Offers Receeivedd');
+    try {
+      _offersReceivedSubscription = FirebaseFirestore.instance
+          .collection('offersReceived')
+          .where('offerBy', isEqualTo: userId)
+          // .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((event) =>
+              event.docs.map((e) => OffersReceivedModel.fromJson(e)).toList())
+          .listen((offersReceivedList) {
+        offersReceived = offersReceivedList;
+        offersReceivedList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      notifyListeners();
-    });
+        log('${offersReceived.length} Offers Receeivedd');
+
+        notifyListeners();
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   void stopListening() {

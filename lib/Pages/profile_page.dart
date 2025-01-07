@@ -1,21 +1,18 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:clipboard/clipboard.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Models/chat_model.dart';
-import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
 import 'package:vehype/Pages/manage_prefs.dart';
 import 'package:vehype/Pages/theme_page.dart';
@@ -169,6 +166,25 @@ class ProfilePage extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                         ),
                       ),
+                      // InkWell(
+                      //   onTap: () {
+                      //     FlutterClipboard.copy(userModel.id)
+                      //         .then((value) => Get.showSnackbar(GetSnackBar(
+                      //               message: 'User id copied',
+                      //               duration: const Duration(seconds: 2),
+                      //             )));
+                      //   },
+                      //   child: Text(
+                      //     'User id:${userModel.id} Tap to Copy',
+                      //     style: TextStyle(
+                      //       color: userController.isDark
+                      //           ? Colors.white
+                      //           : primaryColor,
+                      //       fontSize: 16,
+                      //       fontWeight: FontWeight.w400,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],
@@ -427,23 +443,31 @@ class ProfilePage extends StatelessWidget {
                         alignment: Alignment.center,
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Column(
-                            children: [
-                              InkWell(
-                                onTap: () async {},
-                                child: Text(
-                                  'App Version: 3.0.3.$currentVersion',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: FutureBuilder<PackageInfo>(
+                              future: PackageManager.getPackageInfo(),
+                              builder: (context,
+                                  AsyncSnapshot<PackageInfo> snapshot) {
+                                if (snapshot.data == null) {
+                                  return SizedBox.shrink();
+                                }
+                                return Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () async {},
+                                      child: Text(
+                                        'App Version: ${snapshot.data!.version}+${snapshot.data!.buildNumber}',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
                         ),
                       ),
                     ],

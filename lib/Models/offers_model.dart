@@ -140,6 +140,7 @@ class OffersReceivedModel {
   final String ownerCalendarId;
   final String seekerEventId;
   final String seekerCalendarId;
+  final String createdAt;
   OffersReceivedModel({
     required this.offerBy,
     required this.cancelReason,
@@ -165,6 +166,7 @@ class OffersReceivedModel {
     required this.ownerCalendarId,
     required this.seekerEventId,
     required this.seekerCalendarId,
+    required this.createdAt,
   });
 
   factory OffersReceivedModel.fromJson(
@@ -178,6 +180,7 @@ class OffersReceivedModel {
     // print(data.toString());
     // String id = snap.id;
     return OffersReceivedModel(
+        createdAt: data['createdAt'] ?? '',
         ratingOne: data['ratingOne'] ?? 0.0,
         ratingTwo: data['ratingTwo'] ?? 0.0,
         offerBy: data['offerBy'] ?? 'null',

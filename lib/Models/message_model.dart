@@ -10,6 +10,9 @@ class MessageModel {
   final int state;
   final bool isAudio;
   final String audioUrl;
+  final bool isLocation;
+  final double lat;
+  final double long;
 
   MessageModel(
       {required this.id,
@@ -22,5 +25,8 @@ class MessageModel {
       required this.isVideo,
       required this.mediaUrl,
       required this.text,
-      required this.state});
+      required this.state,
+      required this.isLocation,
+      required this.lat,
+      required this.long});
 }
