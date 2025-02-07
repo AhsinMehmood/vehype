@@ -1,8 +1,14 @@
 // ignore_for_file: sort_child_properties_last
 
-import 'dart:developer';
 import 'dart:io';
-
+/**
+ * 
+ * 
+ * کبھی کبھی تمہاری اس قدر ضرورت محسوس ہوتی ہے ، کہ
+دل چاہتا ہے 
+دنیا کی ہر عیش و عشرت ٹھکڑا دوں ، 
+اور صرف تمہاری پہلو میں آ کے خود کو فنا کر لوں ! 
+ */
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -11,28 +17,33 @@ import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vehype/Controllers/chat_controller.dart';
-import 'package:vehype/Controllers/offers_controller.dart';
-import 'package:vehype/Controllers/offers_provider.dart';
-import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Models/chat_model.dart';
-import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/chat_page.dart';
-import 'package:vehype/Pages/explore_page.dart';
-import 'package:vehype/Pages/my_garage.dart';
-import 'package:vehype/Pages/orders_history_provider.dart';
-import 'package:vehype/Pages/profile_page.dart';
-import 'package:vehype/Pages/repair_page.dart';
-import 'package:vehype/Pages/second_user_profile.dart';
-import 'package:vehype/const.dart';
+import 'package:vehype/Pages/vehicle_based_request_history.dart';
+import '../Controllers/chat_controller.dart';
+import '../Controllers/offers_provider.dart';
+import '../Controllers/user_controller.dart';
+import '../Models/chat_model.dart';
+import '../Models/user_model.dart';
+import '../Pages/chat_page.dart';
+import '../Pages/explore_page.dart';
+import '../Pages/my_garage.dart';
+import '../Pages/orders_history_provider.dart';
+import '../Pages/profile_page.dart';
+import '../Pages/repair_page.dart';
+import '../Pages/second_user_profile.dart';
+import '../const.dart';
 
+import '../Controllers/garage_controller.dart';
+import '../Controllers/mix_panel_controller.dart';
 import '../Controllers/notification_controller.dart';
 import '../Models/offers_model.dart';
+import '../Widgets/loading_dialog.dart';
+import '../google_maps_place_picker.dart';
+import 'setup_business_provider.dart';
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -51,6 +62,7 @@ class _TabsPageState extends State<TabsPage> {
   ];
   final List<Widget> _body2 = [
     OrdersHistoryProvider(),
+    // VehicleBasedRequestHistory(),
     ChatPage(),
     ProfilePage(),
   ];
@@ -66,6 +78,9 @@ class _TabsPageState extends State<TabsPage> {
         if (message.notification.additionalData!['type'] == 'chat') {
           // FlutterAppBadger.updateBadgeCount(1);
           // print(event.notification.additionalData);
+          mixPanelController
+              .trackEvent(eventName: 'Message Delivered', data: {});
+
           ChatController().updateMessage(
               message.notification.additionalData!['chatId'],
               message.notification.additionalData!['messageId'],
@@ -84,20 +99,30 @@ class _TabsPageState extends State<TabsPage> {
               listener.notification.additionalData!['chatId'],
               listener.notification.additionalData!['messageId'],
               1);
+          mixPanelController.trackEvent(
+              eventName: 'Tapped on Message Notification', data: {});
+
           NotificationController()
               .navigateChat(listener.notification.additionalData!);
         } else if (listener.notification.additionalData!['type'] ==
             'new_provider') {
+          mixPanelController.trackEvent(
+              eventName: 'Tapped on New Provider announcement notification',
+              data: {});
+
           Get.to(() => SecondUserProfile(
               userId: listener.notification.additionalData!['providerId']));
         } else {
+          mixPanelController.trackEvent(
+              eventName: 'Tapped on service notification', data: {});
+
           NotificationController()
               .navigateOwner(listener.notification.additionalData!);
         }
       }
     });
 
-    Future.delayed(const Duration(seconds: 1)).then((s) {
+    Future.delayed(const Duration(seconds: 0)).then((s) {
       getNotificationSetting();
     });
   }
@@ -106,79 +131,23 @@ class _TabsPageState extends State<TabsPage> {
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
 
-    bool serviceEnabled;
-    LocationPermission permission;
+    _packageInfo = await PackageManager.getPackageInfo();
 
-    if (Platform.isAndroid) {
-      InAppUpdateManager manager = InAppUpdateManager();
-      AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
-      if (appUpdateInfo == null) return;
-      if (appUpdateInfo.updateAvailability ==
-          UpdateAvailability.developerTriggeredUpdateInProgress) {
-        //If an in-app update is already running, resume the update.
-        String? message =
-            await manager.startAnUpdate(type: AppUpdateType.immediate);
-      } else if (appUpdateInfo.updateAvailability ==
-          UpdateAvailability.updateAvailable) {
-        showModalBottomSheet(
-            context: context,
-            backgroundColor:
-                userController.isDark ? primaryColor : Colors.white,
-            // enableDrag: false,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(6),
-                topRight: Radius.circular(6),
-              ),
-            ),
-            isDismissible: false,
-            enableDrag: false,
-            builder: (context) {
-              return UpdateSheet(
-                userController: userController,
-                manager: manager,
-              );
-            });
-      }
-    } else {
-      _packageInfo = await PackageManager.getPackageInfo();
+    // VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
+    //     packageInfo: _packageInfo, regionCode: "US");
+    DocumentSnapshot<Map<String, dynamic>> updateInfo = await FirebaseFirestore
+        .instance
+        .collection('versionInfo')
+        .doc('appVersion')
+        .get();
+    print(_packageInfo.buildNumber);
+    mixPanelController.trackEvent(eventName: 'Checked for update', data: {});
 
-      VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
-          packageInfo: _packageInfo, regionCode: "US");
-
-      if (double.tryParse(_versionInfo.localVersion)! <
-          double.tryParse(_versionInfo.storeVersion)!) {
-        showModalBottomSheet(
-            context: context,
-            backgroundColor:
-                userController.isDark ? primaryColor : Colors.white,
-            // enableDrag: false,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(6),
-                topRight: Radius.circular(6),
-              ),
-            ),
-            isDismissible: false,
-            enableDrag: false,
-            builder: (context) {
-              return UpdateSheet(
-                userController: userController,
-                manager: null,
-              );
-            });
-      }
-    }
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    permission = await Geolocator.checkPermission();
-    if (serviceEnabled == false ||
-        permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      Future.delayed(const Duration(seconds: 1)).then((s) {
-        Get.bottomSheet(
-          LocationPermissionSheet(userController: userController),
+    if (int.parse(_packageInfo.buildNumber) < updateInfo['buildNumber']) {
+      showModalBottomSheet(
+          context: context,
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          // enableDrag: false,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(6),
@@ -186,12 +155,78 @@ class _TabsPageState extends State<TabsPage> {
             ),
           ),
           isDismissible: false,
-          // enableDrag: false,
-        );
-      });
-    } else {
-      userController.pushTokenUpdate(userController.userModel!.userId);
+          enableDrag: false,
+          builder: (context) {
+            return UpdateSheet(
+              userController: userController,
+              manager: null,
+            );
+          });
     }
+    // if (Platform.isAndroid) {
+    //   InAppUpdateManager manager = InAppUpdateManager();
+    //   AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
+    //   if (appUpdateInfo == null) return;
+    //   if (appUpdateInfo.updateAvailability ==
+    //       UpdateAvailability.developerTriggeredUpdateInProgress) {
+    //     //If an in-app update is already running, resume the update.
+    //     String? message =
+    //         await manager.startAnUpdate(type: AppUpdateType.immediate);
+    //   } else if (appUpdateInfo.updateAvailability ==
+    //       UpdateAvailability.updateAvailable) {
+    //     showModalBottomSheet(
+    //         context: context,
+    //         backgroundColor:
+    //             userController.isDark ? primaryColor : Colors.white,
+    //         // enableDrag: false,
+    //         shape: RoundedRectangleBorder(
+    //           borderRadius: BorderRadius.only(
+    //             topLeft: Radius.circular(6),
+    //             topRight: Radius.circular(6),
+    //           ),
+    //         ),
+    //         isDismissible: false,
+    //         enableDrag: false,
+    //         builder: (context) {
+    //           return UpdateSheet(
+    //             userController: userController,
+    //             manager: manager,
+    //           );
+    //         });
+    //   }
+    // } else {
+    //   _packageInfo = await PackageManager.getPackageInfo();
+
+    //   VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
+    //       packageInfo: _packageInfo, regionCode: "US");
+
+    //   if (double.tryParse(_versionInfo.localVersion)! <
+    //       double.tryParse(_versionInfo.storeVersion)!) {
+    // showModalBottomSheet(
+    //     context: context,
+    //     backgroundColor:
+    //         userController.isDark ? primaryColor : Colors.white,
+    //     // enableDrag: false,
+    //     shape: RoundedRectangleBorder(
+    //       borderRadius: BorderRadius.only(
+    //         topLeft: Radius.circular(6),
+    //         topRight: Radius.circular(6),
+    //       ),
+    //     ),
+    //     isDismissible: false,
+    //     enableDrag: false,
+    //     builder: (context) {
+    //       return UpdateSheet(
+    //         userController: userController,
+    //         manager: null,
+    //       );
+    //     });
+    // }
+    // }
+
+    // else {
+    userController.pushTokenUpdate(userController.userModel!.userId);
+    // }
   }
 
   @override
@@ -243,38 +278,8 @@ class _TabsPageState extends State<TabsPage> {
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
         userController.changeTabIndex(index);
-
-        // QuerySnapshot<Map<String, dynamic>> snapshot =
-        //     await FirebaseFirestore.instance.collection('users').get();
-        // List<UserModel> users = [];
-        // for (var element in snapshot.docs) {
-        //   users.add(UserModel.fromJson(element));
-        // }
-
-        // for (var element in users) {
-        //   if (element.offerIdsToCheck.isNotEmpty) {
-        //     await FirebaseFirestore.instance
-        //         .collection('users')
-        //         .doc(element.userId)
-        //         .update({
-        //       'offerIdsToCheck': [],
-        //       'isActiveNew': false,
-        //       'isActivePending': false,
-        //       'isActiveInProgress': false,
-        //       'isActiveCompleted': false,
-        //       'isActiveCancelled': false,
-        //       'isActive': false,
-        //       'isHistoryActive': false,
-        //     });
-        //   }
-        // }
-        // print(userModel.userId);
-
-        // FlutterAppBadger.updateBadgeCount(10);
-        // OneSignal.login(userModel.userId);
-        // sendNotification(userModel.userId, 'Ahsinnn', 'Has', 'contents',
-        //     'chatId', 'type', 'messageId');
-        // userController.checkIsAdmin(userModel.email);
+        mixPanelController
+            .trackEvent(eventName: 'Tapped on Tab ${index + 1}', data: {});
       },
       items: providerTabs(),
 
@@ -302,6 +307,8 @@ class _TabsPageState extends State<TabsPage> {
       currentIndex: userController.tabIndex,
       onTap: (int index) async {
         userController.changeTabIndex(index);
+        mixPanelController
+            .trackEvent(eventName: 'Tapped on Tab ${index + 1}', data: {});
       },
       items: seekerTabs(),
       type: BottomNavigationBarType.fixed,
@@ -393,12 +400,12 @@ class _TabsPageState extends State<TabsPage> {
       // if (userModel.accountType != 'seeker')
       // BottomNavigationBarItem(
       //     icon: Icon(
-      //       Icons.notifications_none,
-      //       size: 28,
+      //       Icons.business_sharp,
+      //       size: 24,
       //       // ignore: deprecated_member_use
       //       color: labelAndIconColorDark(1),
       //     ),
-      //     label: 'Notifications'),
+      //     label: 'Sales'),
       BottomNavigationBarItem(
           icon: Stack(
             children: [
@@ -646,14 +653,17 @@ class _TabsPageState extends State<TabsPage> {
 }
 
 String notificationsCount = '0';
+final mixPanelController = Get.find<MixPanelController>();
 
 class LocationPermissionSheet extends StatelessWidget {
   const LocationPermissionSheet({
     super.key,
     required this.userController,
+    this.isProvider = false,
   });
 
   final UserController userController;
+  final bool isProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -666,109 +676,206 @@ class LocationPermissionSheet extends StatelessWidget {
         ),
         color: userController.isDark ? primaryColor : Colors.white,
       ),
-      height: 280,
+      // height: 280,
       padding: const EdgeInsets.all(15),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Your location allows VEHYPE to provide accurate maps and find services near you.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 20,
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          // Text(
-          //   userController.userModel!.accountType == 'Provider'
-          //       ? 'Grant access to connect with nearby customers.'
-          //       : 'Grant access to find service providers near you.',
-          //   textAlign: TextAlign.center,
-          //   style: TextStyle(
-          //     color: userController.isDark ? Colors.white : primaryColor,
-          //     fontSize: 16,
-          //     fontWeight: FontWeight.w500,
-          //   ),
-          // ),
-          const SizedBox(
-            height: 40,
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Get.close(1);
-              bool serviceEnabled;
-              LocationPermission permission =
-                  await Geolocator.requestPermission();
+            Text(
+              'Your location allows VEHYPE to provide accurate maps and find services near you.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            // Text(
+            //   userController.userModel!.accountType == 'Provider'
+            //       ? 'Grant access to connect with nearby customers.'
+            //       : 'Grant access to find service providers near you.',
+            //   textAlign: TextAlign.center,
+            //   style: TextStyle(
+            //     color: userController.isDark ? Colors.white : primaryColor,
+            //     fontSize: 16,
+            //     fontWeight: FontWeight.w500,
+            //   ),
+            // ),
+            const SizedBox(
+              height: 40,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                bool serviceEnabled;
+                LocationPermission permission =
+                    await Geolocator.requestPermission();
 
-              serviceEnabled = await Geolocator.isLocationServiceEnabled();
-              if (!serviceEnabled) {
-                Get.showSnackbar(GetSnackBar(
-                  message: 'Location is disabled. Tap to open Settings.',
-                  onTap: (d) {
-                    Geolocator.openLocationSettings();
-                  },
-                  duration: Duration(seconds: 3),
-                ));
-              } else {
-                // permission = await Geolocator.checkPermission();
-                // permission = await Geolocator.checkPermission();
-                if (permission == LocationPermission.denied ||
-                    permission == LocationPermission.deniedForever ||
-                    permission == LocationPermission.unableToDetermine) {
+                serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                if (!serviceEnabled) {
                   Get.showSnackbar(GetSnackBar(
                     message: 'Location is disabled. Tap to open Settings.',
                     onTap: (d) {
-                      Geolocator.openAppSettings();
+                      Geolocator.openLocationSettings();
                     },
                     duration: Duration(seconds: 3),
                   ));
+                  mixPanelController
+                      .trackEvent(eventName: 'Location is disabled', data: {});
                 } else {
-                  Position position = await Geolocator.getCurrentPosition();
-                  final GeoFirePoint geoFirePoint = GeoFirePoint(
-                      GeoPoint(position.latitude, position.longitude));
+                  // permission = await Geolocator.checkPermission();
+                  // permission = await Geolocator.checkPermission();
+                  if (permission == LocationPermission.denied ||
+                      permission == LocationPermission.deniedForever ||
+                      permission == LocationPermission.unableToDetermine) {
+                    Get.showSnackbar(GetSnackBar(
+                      message: 'Location is disabled. Tap to open Settings.',
+                      onTap: (d) {
+                        Geolocator.openAppSettings();
+                      },
+                      duration: Duration(seconds: 3),
+                    ));
+                    mixPanelController
+                        .trackEvent(eventName: 'Location is denied', data: {});
+                  } else {
+                    Get.dialog(const LoadingDialog(),
+                        barrierDismissible: false);
+                    mixPanelController
+                        .trackEvent(eventName: 'Asked for location', data: {});
+                    Position position = await Geolocator.getCurrentPosition();
+                    if (isProvider) {
+                      Get.close(1);
+                      Get.offAll(
+                        () => PlacePicker(
+                          apiKey: 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                          selectText: 'Pick This Place',
+                          onTapBack: null,
+                          onPlacePicked: (result) async {
+                            Get.dialog(LoadingDialog(),
+                                barrierDismissible: false);
+                            LatLng latLng = LatLng(
+                                result.geometry!.location.lat,
+                                result.geometry!.location.lng);
+                            // if(userController.userModel != null && userController.userModel!)
 
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userController.userModel!.userId)
-                      .update({
-                    'lat': position.latitude,
-                    'long': position.longitude,
-                    'geo': geoFirePoint.data,
-                  });
-                  userController
-                      .pushTokenUpdate(userController.userModel!.userId);
-                  // Get.close(1);
+                            sendNotification(latLng);
+
+                            // userController.changeLocation(latLng);
+                            // setState(() {});
+
+                            final GeoFirePoint geoFirePoint = GeoFirePoint(
+                                GeoPoint(latLng.latitude, latLng.longitude));
+
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userController.userModel!.userId)
+                                .update({
+                              'lat': latLng.latitude,
+                              'geo': geoFirePoint.data,
+                              'long': latLng.longitude,
+                            });
+
+                            Get.close(1);
+                            if (userController.userModel!.isBusinessSetup) {
+                              Get.offAll(() => TabsPage());
+                            } else {
+                              Get.offAll(() => SetupBusinessProvider());
+                            }
+                          },
+                          initialPosition:
+                              LatLng(position.latitude, position.longitude),
+                          // useCurrentLocation: true,
+                          selectInitialPosition: true,
+                          resizeToAvoidBottomInset: false,
+                        ),
+                      );
+                    } else {
+                      final GeoFirePoint geoFirePoint = GeoFirePoint(
+                          GeoPoint(position.latitude, position.longitude));
+
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userController.userModel!.userId)
+                          .update({
+                        'lat': position.latitude,
+                        'long': position.longitude,
+                        'geo': geoFirePoint.data,
+                      });
+                      mixPanelController.trackEvent(
+                          eventName: 'Location is updated', data: {});
+                      // userController.changeLocation(
+                      //     LatLng(position.latitude, position.longitude));
+                      // userController
+                      //     .pushTokenUpdate(userController.userModel!.userId);
+                      await Future.delayed(Duration(seconds: 1));
+                      Get.close(2);
+                      mixPanelController
+                          .trackEvent(eventName: 'Opended tabs page', data: {});
+                      Get.offAll(() => const TabsPage());
+                    }
+
+                    // Get.close(1);
+                  }
                 }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    userController.isDark ? Colors.white : primaryColor,
-                minimumSize: Size(Get.width * 0.8, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                )),
-            child: Text(
-              'Continue',
-              style: TextStyle(
-                color: userController.isDark ? primaryColor : Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                  minimumSize: Size(Get.width * 0.8, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  )),
+              child: Text(
+                'Continue',
+                style: TextStyle(
+                  color: userController.isDark ? primaryColor : Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  sendNotification(LatLng latLng) async {
+    List<UserModel> providers = [];
+
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .where('accountType', isEqualTo: 'seeker')
+            // .where('services', arrayContains: issue)
+            // .where('status', isEqualTo: 'active')
+            .get();
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
+      providers.add(UserModel.fromJson(element));
+    }
+    List<UserModel> filterProviders = userController.filterProviders(providers,
+        latLng.latitude, latLng.longitude, userController.radiusMiles);
+    List<String> userIds = [];
+    for (var element in filterProviders) {
+      userIds.add(element.userId);
+    }
+
+    NotificationController().sendNotificationNewProvider(
+        userIds: userIds,
+        providerId: userController.userModel!.userId,
+        requestId: '',
+        title: 'New Service 👨🏻‍🔧',
+        subtitle:
+            'Hi, new service just registered in your area. Check it out!!!');
   }
 }
 
@@ -784,6 +891,7 @@ class UpdateSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    mixPanelController.trackEvent(eventName: 'Asked to update', data: {});
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -830,6 +938,8 @@ class UpdateSheet extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 PackageInfo _packageInfo = PackageInfo();
+                mixPanelController
+                    .trackEvent(eventName: 'Tapped on update button', data: {});
 
                 // Get.close(1);
                 if (Platform.isAndroid) {
@@ -906,6 +1016,9 @@ class NotificationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+    mixPanelController
+        .trackEvent(eventName: 'Asked for notification permission', data: {});
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -950,6 +1063,8 @@ class NotificationSheet extends StatelessWidget {
               onPressed: () async {
                 await OneSignal.Notifications.requestPermission(true);
                 // await OneSignal.Notifications.
+                mixPanelController
+                    .trackEvent(eventName: 'Notification Allowed', data: {});
 
                 OneSignal.login(userController.userModel!.userId);
                 Get.close(1);
@@ -975,6 +1090,9 @@ class NotificationSheet extends StatelessWidget {
             ),
             InkWell(
               onTap: () {
+                mixPanelController
+                    .trackEvent(eventName: 'Maybe later', data: {});
+
                 Get.close(1);
               },
               child: Text(

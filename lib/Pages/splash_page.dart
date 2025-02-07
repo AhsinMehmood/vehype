@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:map_location_picker/map_location_picker.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -14,10 +17,13 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 
 import 'package:vehype/Pages/choose_account_type.dart';
+import 'package:vehype/Pages/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 
+import '../Controllers/mix_panel_controller.dart';
 import '../const.dart';
 import 'select_account_type_page.dart';
+import 'package:http/http.dart' as http;
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -27,6 +33,35 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  Future<void> getAddressFromLatLng(UserModel profileModel) async {
+    double latitude = profileModel.lat;
+    double longitude = profileModel.long;
+    if (profileModel.businessAddress.isEmpty) {
+      String apiKey =
+          'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E'; // Replace with your Google Maps API key
+      String url =
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+
+      try {
+        var response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          var json = jsonDecode(response.body);
+          if (json['status'] == 'OK' &&
+              json['results'] != null &&
+              json['results'].isNotEmpty) {
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(profileModel.userId)
+                .update({
+              'businessAddress': json['results'][0]['formatted_address'],
+            });
+          } else {}
+        } else {}
+      } catch (e) {}
+    } else {}
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,8 +76,12 @@ class _SplashPageState extends State<SplashPage> {
       OffersProvider offersProvider =
           Provider.of<OffersProvider>(context, listen: false);
       userController.getCustomMarkers();
+      // Get..
+      final mixPanelController = Get.find<MixPanelController>();
+
       if (userId == null) {
         // sharedPreferences.setBool('newUpdate', true);
+        mixPanelController.trackEvent(eventName: 'Open Login Page', data: {});
         Get.offAll(() => ChooseAccountTypePage());
       } else {
         // sharedPreferences.setBool('newUpdate', true);
@@ -57,11 +96,17 @@ class _SplashPageState extends State<SplashPage> {
 
         UserModel userModel = UserModel.fromJson(snapshot);
         if (userModel.accountType == '') {
+          mixPanelController
+              .trackEvent(eventName: 'Open Select Account Type Page', data: {});
+
           Get.offAll(() => SelectAccountType(
                 userModelAccount: userModel,
               ));
         } else {
           if (userModel.adminStatus == 'blocked') {
+            mixPanelController
+                .trackEvent(eventName: 'Open Disabled Page', data: {});
+
             Get.offAll(() => const DisabledWidget());
           } else {
             DocumentSnapshot<Map<String, dynamic>> accountTypeUserSnap =
@@ -69,6 +114,7 @@ class _SplashPageState extends State<SplashPage> {
                     .collection('users')
                     .doc(userId + userModel.accountType)
                     .get();
+            mixPanelController.identifyUser(userId + userModel.accountType);
             if (accountTypeUserSnap.exists) {
               OneSignal.login(userId + userModel.accountType);
 
@@ -85,10 +131,11 @@ class _SplashPageState extends State<SplashPage> {
                 userId + userModel.accountType,
                 onDataReceived: (userModel) {},
               );
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId + userModel.accountType)
-                  .get();
+              DocumentSnapshot<Map<String, dynamic>> userSnapss =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId + userModel.accountType)
+                      .get();
               if (userModel.accountType == 'provider') {
                 offersProvider
                     .startListening(UserModel.fromJson(accountTypeUserSnap));
@@ -99,8 +146,45 @@ class _SplashPageState extends State<SplashPage> {
                     UserModel.fromJson(accountTypeUserSnap).userId);
               }
               // await OneSignal.Notifications.requestPermission(true);
+              // log(userSnapss.data()!['lat'].toString());
 
-              Get.offAll(() => const TabsPage());
+              if (userSnapss.data()!['lat'] == null ||
+                  userSnapss.data()!['lat'] == 0.0) {
+                Future.delayed(const Duration(seconds: 0)).then((s) {
+                  mixPanelController.trackEvent(
+                      eventName: 'Asked For Location Permission', data: {});
+                  Get.bottomSheet(
+                    LocationPermissionSheet(
+                      userController: userController,
+                      isProvider: userModel.accountType == 'provider',
+                    ),
+                    backgroundColor:
+                        userController.isDark ? primaryColor : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(6),
+                        topRight: Radius.circular(6),
+                      ),
+                    ),
+                    isDismissible: false,
+                    // enableDrag: false,
+                  );
+                });
+              } else {
+                mixPanelController
+                    .trackEvent(eventName: 'Open Tabs Page', data: {});
+                getAddressFromLatLng(UserModel.fromJson(accountTypeUserSnap));
+                if (UserModel.fromJson(accountTypeUserSnap).accountType ==
+                    'provider') {
+                  if (UserModel.fromJson(accountTypeUserSnap).isBusinessSetup) {
+                    Get.offAll(() => const TabsPage());
+                  } else {
+                    Get.offAll(() => const SetupBusinessProvider());
+                  }
+                } else {
+                  Get.offAll(() => const TabsPage());
+                }
+              }
             } else {
               await FirebaseFirestore.instance
                   .collection('users')
@@ -116,6 +200,7 @@ class _SplashPageState extends State<SplashPage> {
               });
               // await Future.delayed(const Duration(seconds: 1));
               // OneSignal.login(userId + userModel.accountType);
+
               OneSignal.login(userId + userModel.accountType);
 
               // Position position = await Geolocator.getCurrentPosition();
@@ -131,10 +216,12 @@ class _SplashPageState extends State<SplashPage> {
               //   'geo': geoFirePoint.data,
               //   'long': position.longitude,
               // });
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId + userModel.accountType)
-                  .get();
+              DocumentSnapshot<Map<String, dynamic>> userSnapss =
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId + userModel.accountType)
+                      .get();
+              log(userSnapss.data()!['lat'].toString());
               userController.getUserStream(
                 userId + userModel.accountType,
                 onDataReceived: (userModel) {},
@@ -145,9 +232,37 @@ class _SplashPageState extends State<SplashPage> {
               } else {
                 offersProvider.startListeningOwnerOffers(userModel.userId);
               }
+              // await Future.delayed(Duration(milliseconds: 600));
               // await OneSignal.Notifications.requestPermission(true);
 
-              Get.offAll(() => const TabsPage());
+              if (userSnapss.data()!['lat'] == null ||
+                  userSnapss.data()!['lat'] == 0.0) {
+                Future.delayed(const Duration(seconds: 0)).then((s) {
+                  mixPanelController.trackEvent(
+                      eventName: 'Asked For Location Permission', data: {});
+                  Get.bottomSheet(
+                    LocationPermissionSheet(
+                      userController: userController,
+                      isProvider: userModel.accountType == 'provider',
+                    ),
+                    backgroundColor:
+                        userController.isDark ? primaryColor : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(6),
+                        topRight: Radius.circular(6),
+                      ),
+                    ),
+                    isDismissible: false,
+                    // enableDrag: false,
+                  );
+                });
+              } else {
+                mixPanelController
+                    .trackEvent(eventName: 'Open Tabs Page', data: {});
+
+                Get.offAll(() => const TabsPage());
+              }
             }
           }
         }

@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:manage_calendar_events/manage_calendar_events.dart';
+// import 'package:manage_calendar_events/manage_calendar_events.dart';
 import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
 import 'package:toastification/toastification.dart';
@@ -19,12 +21,16 @@ import 'package:vehype/Widgets/owner_to_service_rating_sheet.dart';
 
 import '../Controllers/notification_controller.dart';
 import '../Controllers/offers_controller.dart';
+import '../Controllers/pdf_generator.dart';
+import '../Models/product_service_model.dart';
 import '../Models/user_model.dart';
+import '../Pages/Invoice/review_share_invoice.dart';
 import '../Pages/full_image_view_page.dart';
 import '../Pages/second_user_profile.dart';
 import '../const.dart';
 import 'owner_cancel_offer_confirmation_sheet.dart';
 import 'owner_ignore_offer_confirmation_widget.dart';
+import 'owner_offer_received_new_widget.dart';
 import 'select_date_and_price.dart';
 
 class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
@@ -200,220 +206,309 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
-                      Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Price',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                '\$${offersReceivedModel.price}',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Start At',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                formatDateTime(DateTime.parse(
-                                    offersReceivedModel.startDate)),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (offersReceivedModel.status == 'Upcoming')
-                            InkWell(
-                              onTap: () async {
-                                final CalendarPlugin myPlugin =
-                                    CalendarPlugin();
+                      if (offersReceivedModel.products.isNotEmpty)
+                        ExpansionTile(
+                          tilePadding: const EdgeInsets.all(0),
+                          childrenPadding: const EdgeInsets.all(0),
+                          iconColor: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
 
-                                if (offersReceivedModel.ownerEventId == '') {
-                                  bool? hasPermissions =
-                                      await myPlugin.hasPermissions();
-
-                                  if (!hasPermissions!) {
-                                    // Request permissions
-                                    await myPlugin.requestPermissions();
-
-                                    // Recheck permissions after request
-                                    hasPermissions =
-                                        await myPlugin.hasPermissions();
-
-                                    if (!hasPermissions!) {
-                                      toastification.show(
-                                        context: context,
-                                        autoCloseDuration: Duration(seconds: 3),
-                                        title: Text(
-                                            'Permissions are required to access calendars.'),
-                                      );
-                                      return; // Exit early if permissions are not granted
-                                    }
-                                  }
-
-                                  // Fetch calendars after ensuring permissions are granted
-                                  List<Calendar> calendar =
-                                      await myPlugin.getCalendars() ?? [];
-
-                                  if (calendar.isEmpty) {
-                                    toastification.show(
-                                      context: context,
-                                      autoCloseDuration: Duration(seconds: 3),
-                                      title: Text('No calendar found.'),
-                                    );
-                                  } else {
-                                    Get.bottomSheet(
-                                      CalendersList(
-                                        calenders: calendar,
-                                        offersModel: offersModel,
-                                        offersReceivedModel:
-                                            offersReceivedModel,
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  myPlugin
-                                      .deleteEvent(
-                                          calendarId: offersReceivedModel
-                                              .ownerCalendarId,
-                                          eventId:
-                                              offersReceivedModel.ownerEventId)
-                                      .then((isDeleted) async {
-                                    await FirebaseFirestore.instance
-                                        .collection('offersReceived')
-                                        .doc(offersReceivedModel.id)
-                                        .update({
-                                      'ownerEventId': '',
-                                      'ownerCalendarId': '',
-                                    });
-                                    debugPrint('Is Event deleted: $isDeleted');
-                                  });
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6),
-                                    color: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                    border: Border.all(
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                    )),
-                                padding: const EdgeInsets.all(6),
-                                child: Text(
-                                  offersReceivedModel.ownerEventId == ''
-                                      ? 'Add to Calendar'
-                                      : 'Remove Event',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'End At',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                formatDateTime(DateTime.parse(
-                                    offersReceivedModel.endDate)),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  child: Text(
-                                    'Description',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  offersReceivedModel.comment == ''
-                                      ? 'No details provided'
-                                      : offersReceivedModel.comment,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                          initiallyExpanded:
+                              false, // You can set this to false if you want it collapsed by default
+                          title: Text(
+                            'Product or Service (${offersReceivedModel.products.length})',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
-                          )
-                        ],
+                          ),
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            if (offersReceivedModel.products.isNotEmpty)
+                              ListView.builder(
+                                itemCount: offersReceivedModel.products.length,
+                                physics: NeverScrollableScrollPhysics(),
+                                padding: const EdgeInsets.all(0),
+                                shrinkWrap: true,
+                                itemBuilder: (context, index) {
+                                  final ProductServiceModel product =
+                                      offersReceivedModel.products[index];
+
+                                  return Stack(
+                                    children: [
+                                      ListTile(
+                                        dense: true,
+                                        title: Text(
+                                          product.name,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (product.desc.isNotEmpty)
+                                              Text(
+                                                product
+                                                    .desc, // Show description
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(
+                                              getServiceDetail(
+                                                  product), // Show service details
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ],
+                                        ),
+                                        isThreeLine: true,
+                                        trailing: Text(
+                                            '\$${product.totalPrice}',
+                                            style: TextStyle(
+                                                color: userController.isDark
+                                                    ? Colors.white
+                                                    : primaryColor,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w700)),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                          ],
+                        ),
+                      const SizedBox(
+                        height: 20,
                       ),
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text('\$${offersReceivedModel.price}',
+                                style: TextStyle(
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : primaryColor,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800)),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   crossAxisAlignment: CrossAxisAlignment.center,
+                      //   children: [
+                      //     Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Text(
+                      //           'Start At',
+                      //           style: TextStyle(
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.w400,
+                      //           ),
+                      //         ),
+                      //         const SizedBox(
+                      //           height: 5,
+                      //         ),
+                      //         Text(
+                      //           formatDateTime(DateTime.parse(
+                      //               offersReceivedModel.startDate)),
+                      //           style: TextStyle(
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.w800,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     if (offersReceivedModel.status == 'Upcoming')
+                      //       InkWell(
+                      //         onTap: () async {
+                      //           final CalendarPlugin myPlugin =
+                      //               CalendarPlugin();
+
+                      //           if (offersReceivedModel.ownerEventId == '') {
+                      //             bool? hasPermissions =
+                      //                 await myPlugin.hasPermissions();
+
+                      //             if (!hasPermissions!) {
+                      //               // Request permissions
+                      //               await myPlugin.requestPermissions();
+
+                      //               // Recheck permissions after request
+                      //               hasPermissions =
+                      //                   await myPlugin.hasPermissions();
+
+                      //               if (!hasPermissions!) {
+                      //                 toastification.show(
+                      //                   context: context,
+                      //                   autoCloseDuration: Duration(seconds: 3),
+                      //                   title: Text(
+                      //                       'Permissions are required to access calendars.'),
+                      //                 );
+                      //                 return; // Exit early if permissions are not granted
+                      //               }
+                      //             }
+
+                      //             // Fetch calendars after ensuring permissions are granted
+                      //             List<Calendar> calendar =
+                      //                 await myPlugin.getCalendars() ?? [];
+
+                      //             if (calendar.isEmpty) {
+                      //               toastification.show(
+                      //                 context: context,
+                      //                 autoCloseDuration: Duration(seconds: 3),
+                      //                 title: Text('No calendar found.'),
+                      //               );
+                      //             } else {
+                      //               Get.bottomSheet(
+                      //                 CalendersList(
+                      //                   calenders: calendar,
+                      //                   offersModel: offersModel,
+                      //                   offersReceivedModel:
+                      //                       offersReceivedModel,
+                      //                 ),
+                      //               );
+                      //             }
+                      //           } else {
+                      //             myPlugin
+                      //                 .deleteEvent(
+                      //                     calendarId: offersReceivedModel
+                      //                         .ownerCalendarId,
+                      //                     eventId:
+                      //                         offersReceivedModel.ownerEventId)
+                      //                 .then((isDeleted) async {
+                      //               await FirebaseFirestore.instance
+                      //                   .collection('offersReceived')
+                      //                   .doc(offersReceivedModel.id)
+                      //                   .update({
+                      //                 'ownerEventId': '',
+                      //                 'ownerCalendarId': '',
+                      //               });
+                      //               debugPrint('Is Event deleted: $isDeleted');
+                      //             });
+                      //           }
+                      //         },
+                      //         child: Container(
+                      //           decoration: BoxDecoration(
+                      //               borderRadius: BorderRadius.circular(6),
+                      //               color: userController.isDark
+                      //                   ? primaryColor
+                      //                   : Colors.white,
+                      //               border: Border.all(
+                      //                 color: userController.isDark
+                      //                     ? Colors.white
+                      //                     : primaryColor,
+                      //               )),
+                      //           padding: const EdgeInsets.all(6),
+                      //           child: Text(
+                      //             offersReceivedModel.ownerEventId == ''
+                      //                 ? 'Add to Calendar'
+                      //                 : 'Remove Event',
+                      //             style: TextStyle(
+                      //               fontSize: 14,
+                      //               fontWeight: FontWeight.w700,
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       )
+                      //   ],
+                      // ),
+                      // const SizedBox(
+                      //   height: 15,
+                      // ),
+                      // if (offersReceivedModel.endDate != null)
+                      //   Row(
+                      //     children: [
+                      //       Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: [
+                      //           Text(
+                      //             'End At',
+                      //             style: TextStyle(
+                      //               fontSize: 16,
+                      //               fontWeight: FontWeight.w400,
+                      //             ),
+                      //           ),
+                      //           const SizedBox(
+                      //             height: 5,
+                      //           ),
+                      //           Text(
+                      //             formatDateTime(DateTime.parse(
+                      //                 offersReceivedModel.endDate!)),
+                      //             style: TextStyle(
+                      //               fontSize: 16,
+                      //               fontWeight: FontWeight.w800,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       )
+                      //     ],
+                      //   ),
+                      // if (offersReceivedModel.endDate != null)
+                      //   const SizedBox(
+                      //     height: 15,
+                      //   ),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: [
+                      //           InkWell(
+                      //             child: Text(
+                      //               'Description',
+                      //               style: TextStyle(
+                      //                 fontSize: 16,
+                      //                 fontWeight: FontWeight.w400,
+                      //               ),
+                      //             ),
+                      //           ),
+                      //           const SizedBox(
+                      //             height: 5,
+                      //           ),
+                      //           Text(
+                      //             offersReceivedModel.comment == ''
+                      //                 ? 'No details provided'
+                      //                 : offersReceivedModel.comment,
+                      //             style: TextStyle(
+                      //               fontSize: 16,
+                      //               fontWeight: FontWeight.w600,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     )
+                      //   ],
+                      // ),
                       if (offersReceivedModel.status == 'Cancelled')
                         const SizedBox(
                           height: 15,
@@ -868,119 +963,192 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                           ],
                         ),
                       if (offersReceivedModel.status == 'Upcoming')
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Column(
                           children: [
-                            InkWell(
-                              onTap: () async {
-                                Get.bottomSheet(
-                                    OwnerCancelOfferConfirmationSheet(
-                                        userController: userController,
-                                        offersModel: offersModel,
-                                        offersReceivedModel:
-                                            offersReceivedModel),
-                                    isScrollControlled: true);
-                              },
-                              child: Container(
-                                height: 50,
-                                width: chatId != null
-                                    ? Get.width * 0.43
-                                    : Get.width * 0.28,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'Cancel',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    Get.bottomSheet(
+                                        OwnerCancelOfferConfirmationSheet(
+                                            userController: userController,
+                                            offersModel: offersModel,
+                                            offersReceivedModel:
+                                                offersReceivedModel),
+                                        isScrollControlled: true);
+                                  },
+                                  child: Container(
+                                    height: 50,
+                                    width: chatId != null
+                                        ? Get.width * 0.43
+                                        : Get.width * 0.28,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            if (chatId == null)
-                              InkWell(
-                                onTap: () async {
-                                  DocumentSnapshot<Map<String, dynamic>>
-                                      offerByQuery = await FirebaseFirestore
-                                          .instance
-                                          .collection('users')
-                                          .doc(offersReceivedModel.offerBy)
-                                          .get();
-                                  // Get.close(1);
+                                if (chatId == null)
+                                  InkWell(
+                                    onTap: () async {
+                                      DocumentSnapshot<Map<String, dynamic>>
+                                          offerByQuery = await FirebaseFirestore
+                                              .instance
+                                              .collection('users')
+                                              .doc(offersReceivedModel.offerBy)
+                                              .get();
+                                      // Get.close(1);
 
-                                  await OffersController().chatWithOffer(
-                                      userModel,
-                                      UserModel.fromJson(offerByQuery),
-                                      offersModel,
-                                      offersReceivedModel,
-                                      garageModel);
-                                },
-                                child: Container(
-                                  height: 50,
-                                  width: Get.width * 0.28,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
+                                      await OffersController().chatWithOffer(
+                                          userModel,
+                                          UserModel.fromJson(offerByQuery),
+                                          offersModel,
+                                          offersReceivedModel,
+                                          garageModel);
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      width: Get.width * 0.28,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            'assets/messenger.png',
+                                            color: userController.isDark
+                                                ? Colors.white
+                                                : primaryColor,
+                                            height: 24,
+                                            width: 24,
+                                          ),
+                                          const SizedBox(
+                                            width: 6,
+                                          ),
+                                          Text(
+                                            'Chat',
+                                            style: TextStyle(
+                                              // color: userController.isDark ? Colors.white : Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                InkWell(
+                                  onTap: () async {
+                                    // Get.dialog(LoadingDialog(),
+                                    //     barrierDismissible: false);
+                                    // DocumentSnapshot<Map<String, dynamic>> offerByQuery =
+                                    //                                 await FirebaseFirestore.instance
+                                    //                                     .collection('users')
+                                    //                                     .doc(offersReceivedModel.offerBy)
+                                    //                                     .get();
+                                    //                                  Get.to(() => ReviewShareInvoice(
+                                    //                       secondUser: UserModel.fromJson(offerByQuery),
+                                    //                       offersModel: offersModel,
+                                    //                       offersReceivedId: offersReceivedModel.id));
+                                    // DocumentSnapshot<Map<String, dynamic>> offerByQuery =
+                                    //     await FirebaseFirestore.instance
+                                    //         .collection('users')
+                                    //         .doc(offersReceivedModel.offerBy)
+                                    //         .get();
+                                    Get.bottomSheet(
+                                        OwnerCompleteOfferConfirmationSheet(
+                                            offersReceivedModel:
+                                                offersReceivedModel,
+                                            offersModel: offersModel,
+                                            userModel: userModel,
+                                            chatId: chatId,
+                                            garageModel: garageModel,
+                                            userController: userController));
+                                  },
+                                  child: Container(
+                                    height: 50,
+                                    width: chatId != null
+                                        ? Get.width * 0.43
+                                        : Get.width * 0.29,
+                                    decoration: BoxDecoration(
                                       color: userController.isDark
                                           ? Colors.white
                                           : primaryColor,
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/messenger.png',
-                                        color: userController.isDark
-                                            ? Colors.white
-                                            : primaryColor,
-                                        height: 24,
-                                        width: 24,
-                                      ),
-                                      const SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(
-                                        'Chat',
+                                    child: Center(
+                                      child: Text(
+                                        'Complete',
                                         style: TextStyle(
-                                          // color: userController.isDark ? Colors.white : Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                            color: userController.isDark
+                                                ? primaryColor
+                                                : Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700),
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
                             InkWell(
                               onTap: () async {
-                                // Get.dialog(LoadingDialog(),
-                                //     barrierDismissible: false);
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
 
-                                // DocumentSnapshot<Map<String, dynamic>> offerByQuery =
-                                //     await FirebaseFirestore.instance
-                                //         .collection('users')
-                                //         .doc(offersReceivedModel.offerBy)
-                                //         .get();
-                                Get.bottomSheet(
-                                    OwnerCompleteOfferConfirmationSheet(
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    serviceSnap = await FirebaseFirestore
+                                        .instance
+                                        .collection('users')
+                                        .doc(offersReceivedModel.offerBy)
+                                        .get();
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    ownerSnap = await FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(offersReceivedModel.ownerId)
+                                        .get();
+                                File? file =
+                                    await PDFGenerator.createInvoicePDF(
                                         offersReceivedModel:
                                             offersReceivedModel,
                                         offersModel: offersModel,
-                                        userModel: userModel,
-                                        chatId: chatId,
-                                        garageModel: garageModel,
-                                        userController: userController));
+                                        onwerModel:
+                                            UserModel.fromJson(ownerSnap),
+                                        isEmail: true,
+                                        currentUserEmail: userModel.email,
+                                        serviceModel:
+                                            UserModel.fromJson(serviceSnap));
+                                Get.close(1);
+
+                                Get.to(() => ReviewShareInvoice(
+                                      pdfFile: file!,
+                                      invoiceNumber:
+                                          offersReceivedModel.randomId,
+                                    ));
                               },
                               child: Container(
                                 height: 50,
-                                width: chatId != null
-                                    ? Get.width * 0.43
-                                    : Get.width * 0.28,
+                                width: Get.width * 0.9,
                                 decoration: BoxDecoration(
                                   color: userController.isDark
                                       ? Colors.white
@@ -989,12 +1157,12 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Complete',
+                                    'View Invoice',
                                     style: TextStyle(
                                         color: userController.isDark
                                             ? primaryColor
                                             : Colors.white,
-                                        fontSize: 16,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w700),
                                   ),
                                 ),
@@ -1004,7 +1172,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                         )
                       else if (offersReceivedModel.status == 'Completed')
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             if (offersReceivedModel.ratingOne == 0.0)
                               InkWell(
@@ -1016,7 +1184,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                 },
                                 child: Container(
                                   height: 50,
-                                  width: Get.width * 0.8,
+                                  width: Get.width * 0.42,
                                   decoration: BoxDecoration(
                                     color: userController.isDark
                                         ? Colors.white
@@ -1025,7 +1193,7 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      'Submit Feedback',
+                                      'Feedback',
                                       style: TextStyle(
                                           color: userController.isDark
                                               ? primaryColor
@@ -1036,6 +1204,65 @@ class OwnerInactiveInprogressOfferWidget extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            InkWell(
+                              onTap: () async {
+                                Get.dialog(LoadingDialog(),
+                                    barrierDismissible: false);
+
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    serviceSnap = await FirebaseFirestore
+                                        .instance
+                                        .collection('users')
+                                        .doc(offersReceivedModel.offerBy)
+                                        .get();
+                                DocumentSnapshot<Map<String, dynamic>>
+                                    ownerSnap = await FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(offersReceivedModel.ownerId)
+                                        .get();
+                                File? file =
+                                    await PDFGenerator.createInvoicePDF(
+                                        offersReceivedModel:
+                                            offersReceivedModel,
+                                        offersModel: offersModel,
+                                        onwerModel:
+                                            UserModel.fromJson(ownerSnap),
+                                        isEmail: true,
+                                        currentUserEmail: userModel.email,
+                                        serviceModel:
+                                            UserModel.fromJson(serviceSnap));
+                                Get.close(1);
+
+                                Get.to(() => ReviewShareInvoice(
+                                      pdfFile: file!,
+                                      invoiceNumber:
+                                          offersReceivedModel.randomId,
+                                    ));
+                              },
+                              child: Container(
+                                height: 50,
+                                width: offersReceivedModel.ratingOne != 0.0
+                                    ? Get.width * 0.9
+                                    : Get.width * 0.42,
+                                decoration: BoxDecoration(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'View Invoice',
+                                    style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         )
                       else if (offersReceivedModel.status == 'Cancelled')

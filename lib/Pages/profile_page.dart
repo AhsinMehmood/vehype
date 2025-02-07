@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Pages/Invoice/all_product_and_services.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
 import 'package:vehype/Pages/manage_prefs.dart';
 import 'package:vehype/Pages/theme_page.dart';
@@ -241,24 +242,24 @@ class ProfilePage extends StatelessWidget {
                         height: 10,
                       ),
 
-                      if (userModel.accountType == 'provider')
-                        MenuCard(
-                          secondTitle: '',
-                          userController: userController,
-                          title: 'Manage Prefrences',
-                          icon: CupertinoIcons.slider_horizontal_3,
-                          onTap: () async {
-                            // if (userModel.isGuest) {
-                            //   Get.bottomSheet(LoginSheet());
-                            // } else {
-                            Get.to(() => ManagePrefs());
-                            // }
-                          },
-                        ),
-                      if (userModel.accountType == 'provider')
-                        const SizedBox(
-                          height: 10,
-                        ),
+                      // if (userModel.accountType == 'provider')
+                      //   MenuCard(
+                      //     secondTitle: '',
+                      //     userController: userController,
+                      //     title: 'Manage Prefrences',
+                      //     icon: CupertinoIcons.slider_horizontal_3,
+                      //     onTap: () async {
+                      //       // if (userModel.isGuest) {
+                      //       //   Get.bottomSheet(LoginSheet());
+                      //       // } else {
+                      //       Get.to(() => ManagePrefs());
+                      //       // }
+                      //     },
+                      //   ),
+                      // if (userModel.accountType == 'provider')
+                      //   const SizedBox(
+                      //     height: 10,
+                      //   ),
                       if (userController.isAdmin)
                         InkWell(
                           onTap: () {
@@ -283,7 +284,22 @@ class ProfilePage extends StatelessWidget {
                       // const SizedBox(
                       //   height: 10,
                       // ),
-
+                      if (userModel.accountType == 'provider')
+                        MenuCard(
+                          secondTitle: '',
+                          userController: userController,
+                          title: 'Manage Products & Services',
+                          icon: Icons.business,
+                          onTap: () async {
+                            Get.to(() => AllProductAndServices(
+                                  isFromMyProfile: true,
+                                ));
+                          },
+                        ),
+                      if (userModel.accountType == 'provider')
+                        const SizedBox(
+                          height: 10,
+                        ),
                       if (userModel.accountType == 'seeker')
                         MenuCard(
                           secondTitle: '',

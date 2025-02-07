@@ -3,67 +3,47 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:isar/isar.dart';
+
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-// import 'package:mixpanel_flutter/mixpanel_flutter.dart';
-// import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:vehype/Controllers/chat_controller.dart';
-import 'package:vehype/Controllers/garage_controller.dart';
-import 'package:vehype/Controllers/offers_provider.dart';
 
-import 'package:vehype/Controllers/user_controller.dart';
+import '/Controllers/chat_controller.dart';
+import '/Controllers/garage_controller.dart';
+import '/Controllers/mix_panel_controller.dart';
+import '/Controllers/offers_provider.dart';
 
-import 'package:vehype/Pages/splash_page.dart';
+import '/Controllers/user_controller.dart';
 
-import 'package:vehype/const.dart';
-import 'package:vehype/firebase_options.dart';
-import 'package:vehype/providers/audio_player_provider.dart';
+import '/Pages/splash_page.dart';
 
-// import 'package:json_theme/json_theme.dart';
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   // Handle background message
-//   print('Handling a background message: ${message.messageId}');
-//   if (message.data['type'] == 'chat') {
-//     // FlutterAppBadger.updateBadgeCount(1);
-//     // print(event.notification.additionalData);
-//     ChatController()
-//         .updateMessage(message.data['chatId'], message.data['messageId'], 1);
-//   }
-// }
+import '/const.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   @override
   void onInit() {
     super.onInit();
-    // Listen to auth state changes
     _auth.authStateChanges().listen((User? user) async {
       if (user == null) {
-        // User logged out
         await _handleLogout();
-      } else {
-        // User logged in
-        // Get.offAllNamed('/home');
-      }
+      } else {}
     });
   }
 
   Future<void> _handleLogout() async {
-    // Clear shared preferences
     await OneSignal.logout();
-    // await GoogleSignIn().disconnect();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -72,50 +52,40 @@ class AuthController extends GetxController {
     } catch (e) {
       print(e);
     }
-    // Navigate to the Splash Page
+
     Get.offAll(() => SplashPage());
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // if (Platform.isAndroid) {
-  //   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
-  // }
-  await Firebase.initializeApp(
-      // options: DefaultFirebaseOptions.currentPlatform,
-      );
-  // final themeStr = await rootBundle.loadString('assets/theme.json');
-  // final themeStrDark = await rootBundle.loadString('assets/dark_theme.json');
+
+  await Firebase.initializeApp();
+
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
   Get.put(AuthController());
-
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // NotificationController().listenOneSignalNotification();
-  // final themeJson = jsonDecode(themeStr);
-  // final darkThemeJson = jsonDecode(themeStrDark);
-
-  // final theme = ThemeDecoder.decodeThemeData(themeJson)!;
-  // final darkTheme = ThemeDecoder.decodeThemeData(darkThemeJson)!;
+  Get.put(MixPanelController());
+  // final appDir = await getApplicationDocumentsDirectory();
+  final dir = await getApplicationDocumentsDirectory();
+// final isar = await Isar.open(
+// [],
+//   directory: dir.path,
+// );
   OneSignal.Debug.setLogLevel(OSLogLevel.debug);
 
   OneSignal.initialize("d2e6efea-3e5f-42f9-85ab-9815924277a0");
+
   // deebug d2e6efea-3e5f-42f9-85ab-9815924277a0
   //prod e236663f-f5c0-4a40-a2df-81e62c7d411f
-  // await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
-  //     trackAutomaticEvents: true);
+
   await SentryFlutter.init((options) {
     options.dsn =
         'https://db34bb55769b55480e81f75aca7cf9d8@o4507883907186688.ingest.us.sentry.io/4507883909677056';
-    // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-    // We recommend adjusting this value in production.
+
     options.tracesSampleRate = 1.0;
 
-    // The sampling rate for profiling is relative to tracesSampleRate
-    // Setting to 1.0 will profile 100% of sampled transactions:
     options.profilesSampleRate = 1.0;
   },
       appRunner: () => runApp(
@@ -125,8 +95,6 @@ void main() async {
                   value: FirebaseAuth.instance.authStateChanges(),
                   initialData: null,
                 ),
-                ChangeNotifierProvider<AudioPlayerProvider>(
-                    create: (context) => AudioPlayerProvider()),
                 ChangeNotifierProvider<UserController>(
                     create: (context) => UserController()),
                 ChangeNotifierProvider<OffersProvider>(
@@ -136,17 +104,12 @@ void main() async {
                 ChangeNotifierProvider<ChatController>(
                     create: (context) => ChatController()),
               ],
-              child: MyApp(
-                  // theme: theme,
-                  // themeStrDark: darkTheme,
-                  ),
+              child: MyApp(),
             ),
           ));
 }
 
 class MyApp extends StatefulWidget {
-  // final ThemeData theme;
-  // final ThemeData themeStrDark;
   const MyApp({super.key});
 
   @override
@@ -165,8 +128,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     Future.delayed(const Duration(seconds: 0)).then((value) async {
       await userController.initTheme();
     });
-
-    // listenOneSignalNotification();
   }
 
   @override
@@ -233,13 +194,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VEHYPE',
-      navigatorKey: navigatorKey,
+      // navigatorKey: navigatorKey,
       themeMode: userController.isDark ? ThemeMode.dark : ThemeMode.light,
       darkTheme: ThemeData.dark().copyWith(
         textTheme: textTheme,
-        // primaryColor: primaryColor,
-        // colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
       ),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(1.0)),
+          child: child!,
+        );
+      },
       theme: ThemeData().copyWith(
         textTheme: textTheme,
         primaryColor: primaryColor,

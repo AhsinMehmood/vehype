@@ -130,7 +130,7 @@ class SelectServicesSheet extends StatelessWidget {
                       userController.clearSelectedVehicleeTypes();
                     } else {
                       // List services = [];
-                      for (VehicleType service in getVehicleType()) {
+                      for (VehicleType service in getVehicleTypeForPref()) {
                         // services.add(service.title);
                         userController.selectVehicleTypesFilter(service.title);
                       }
@@ -156,14 +156,13 @@ class SelectServicesSheet extends StatelessWidget {
               child: Column(
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 10, right: 12, top: 10),
+                    padding: const EdgeInsets.only(left: 10, right: 12, top: 5),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        for (VehicleType service in getVehicleType())
+                        for (VehicleType service in getVehicleTypeForPref())
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(4.0),
                             child: InkWell(
                               onTap: () {
                                 userController
@@ -183,6 +182,15 @@ class SelectServicesSheet extends StatelessWidget {
                                               value: userController
                                                   .selectedVehicleTypesFilter
                                                   .contains(service.title),
+                                              checkColor: userController.isDark
+                                                  ? primaryColor
+                                                  : Colors.white,
+                                              activeColor: userController.isDark
+                                                  ? Colors.white
+                                                  : primaryColor,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4)),
                                               onChanged: (ss) {
                                                 userController
                                                     .selectVehicleTypesFilter(

@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -15,7 +13,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/audio_page.dart';
+import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/short_prefs_widget.dart';
 
 import 'package:vehype/const.dart';
@@ -35,14 +33,6 @@ class OrdersHistoryProvider extends StatefulWidget {
 
 class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
   OverlayEntry? _overlayEntry;
-
-  void _togglePopup() {
-    if (_overlayEntry == null) {
-      _showPopup();
-    } else {
-      _hidePopup();
-    }
-  }
 
   void _showPopup() {
     final overlay = Overlay.of(context);
@@ -118,18 +108,43 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
     List<OffersModel> ignoredOffers = rawOffers
         .where((offer) => offer.ignoredBy.contains(userModel.userId))
         .toList();
-    // List<OffersModel> ignoredOffers = filterIgnoredOffers;
+    // List<VehicleType> serviceOwnersList = getVehicleTypeForPref();
+    // List<VehicleType> vehicleOwnersList = getVehicleType();
+    // String normalizeTitle(String title) {
+    //   return title.toLowerCase();
+    // }
+
+    // List<String> normalizedServiceTitles = serviceOwnersList
+    //     .map((serviceType) => normalizeTitle(serviceType.title))
+    //     .toList();
+
+    // List<String> normalizedVehicleTitles = vehicleOwnersList
+    //     .map((vehicleType) => normalizeTitle(vehicleType.title))
+    //     .toList();
+    // print(normalizedServiceTitles);
+    // print(normalizedVehicleTitles);
+
+    // Step 2: Find common normalized titles
+    // List<String> matchedVehicleTypes = normalizedServiceTitles
+    //     .where((serviceTitle) => normalizedVehicleTitles.contains(serviceTitle))
+    //     .toList();
+    // print(matchedVehicleTypes);
+
+    String mapTitle(String title) {
+      String normalized = title;
+      return titleMapping[normalized] ?? normalized;
+    }
+
     List<OffersModel> filteredOffers = rawOffers
         .where((offer) => !offer.offersReceived.contains(userModel.userId))
         .where((offer) => !offer.ignoredBy.contains(userModel.userId))
         .where((offer) => !userModel.blockedUsers.contains(offer.ownerId))
         .where((offer) => userModel.services.contains(offer.issue))
-        .where((offer) => userModel.vehicleTypes.contains(offer.vehicleType))
-        .toList();
-
-    for (var element in filteredOffers) {
-      log(element.vehicleType);
-    }
+        .where((offer) {
+      final vehicleTypes =
+          userModel.vehicleTypes.map((type) => mapTitle(type)).toList();
+      return vehicleTypes.contains(mapTitle(offer.vehicleType));
+    }).toList();
 
     List<OffersModel> newOffers = userModel.lat == 0.0
         ? filteredOffers
@@ -199,12 +214,18 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
           elevation: 0.0,
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           centerTitle: true,
-          title: Text(
-            'Requests',
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+          title: InkWell(
+            onTap: () async {
+              Get.bottomSheet(
+                  LocationPermissionSheet(userController: userController));
+            },
+            child: Text(
+              'Requests',
+              style: TextStyle(
+                color: userController.isDark ? Colors.white : primaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           actions: [

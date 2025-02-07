@@ -19,6 +19,7 @@ import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
 import 'choose_account_type.dart';
+import 'create_request_page.dart';
 // import 'select_service_crv.dart';
 
 class MyGarage extends StatelessWidget {
@@ -114,8 +115,6 @@ class MyGarage extends StatelessWidget {
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         GarageModel garageModel = vehicles[index];
-                        final PageController imagePageController =
-                            PageController();
 
                         return Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -148,18 +147,55 @@ class MyGarage extends StatelessWidget {
                                   SizedBox(
                                     width: Get.width,
                                     height: 220,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                        topRight: Radius.circular(6),
-                                      ),
-                                      child: CachedNetworkImage(
-                                        imageUrl: garageModel.imageUrl,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(6),
+                                            topRight: Radius.circular(6),
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl: garageModel.imageUrl,
 
-                                        fit: BoxFit.cover,
-
-                                        //cancelToken: cancellationToken,
-                                      ),
+                                            fit: BoxFit.cover,
+                                            width: Get.width,
+                                            height: 220,
+                                            //cancelToken: cancellationToken,
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: TextButton(
+                                              onPressed: () {
+                                                Get.to(() => CreateRequestPage(
+                                                      offersModel: null,
+                                                      garageModel: garageModel,
+                                                    ));
+                                              },
+                                              style: TextButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                backgroundColor:
+                                                    userController.isDark
+                                                        ? Colors.white
+                                                        : primaryColor,
+                                              ),
+                                              child: Text(
+                                                'Request Service',
+                                                style: TextStyle(
+                                                  color: userController.isDark
+                                                      ? primaryColor
+                                                      : Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
                                   const SizedBox(
@@ -213,19 +249,19 @@ class MyGarage extends StatelessWidget {
                                           ),
                                         Row(
                                           children: [
-                                            SvgPicture.asset(
-                                              getVehicleType()
-                                                  .firstWhere((dd) =>
-                                                      dd.title ==
-                                                      garageModel.bodyStyle)
-                                                  .icon,
-                                              color: userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                            ),
-                                            const SizedBox(
-                                              width: 8,
-                                            ),
+                                            // SvgPicture.asset(
+                                            //   getVehicleType()
+                                            //       .firstWhere((dd) =>
+                                            //           dd.title ==
+                                            //           garageModel.bodyStyle)
+                                            //       .icon,
+                                            //   color: userController.isDark
+                                            //       ? Colors.white
+                                            //       : primaryColor,
+                                            // ),
+                                            // const SizedBox(
+                                            //   width: 8,
+                                            // ),
                                             Text(
                                               garageModel.bodyStyle,
                                               style: TextStyle(
@@ -270,8 +306,8 @@ class MyGarage extends StatelessWidget {
                                               color: userController.isDark
                                                   ? primaryColor
                                                   : Colors.white,
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 16),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15),
                                         ),
                                       ),
                                       InkWell(
@@ -307,8 +343,8 @@ class MyGarage extends StatelessWidget {
                                             child: Text(
                                               'Manage Vehicle',
                                               style: TextStyle(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15,
                                                 color: userController.isDark
                                                     ? Colors.white
                                                     : primaryColor,

@@ -21,6 +21,7 @@ import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 
+import '../Controllers/mix_panel_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
@@ -28,6 +29,8 @@ import '../const.dart';
 import '../google_maps_place_picker.dart';
 import 'add_vehicle.dart';
 import 'full_image_view_page.dart';
+
+final mixPanelController = Get.find<MixPanelController>();
 
 class CreateRequestPage extends StatefulWidget {
   final OffersModel? offersModel;
@@ -69,6 +72,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
             widget.offersModel!.additionalService;
         _descriptionController.text = widget.offersModel!.description;
         garageController.garageId = widget.offersModel!.garageId;
+        mixPanelController
+            .trackEvent(eventName: 'Intialized Request to Update', data: {});
         setState(() {});
       } else {
         if (widget.garageModel != null) {
@@ -140,6 +145,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
+              mixPanelController.trackEvent(
+                  eventName: 'Closed Create Request Page', data: {});
               Get.back();
             },
             icon: Icon(
@@ -166,6 +173,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
             children: [
               InkWell(
                 onTap: () {
+                  mixPanelController.trackEvent(
+                      eventName: 'Tapped to select a vehicle', data: {});
                   showModalBottomSheet(
                       context: context,
                       shape: RoundedRectangleBorder(
@@ -290,6 +299,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                 children: [
                   InkWell(
                     onTap: () {
+                      mixPanelController.trackEvent(
+                          eventName: 'Tapped to select an issue', data: {});
                       showModalBottomSheet(
                           context: context,
                           shape: RoundedRectangleBorder(
@@ -370,6 +381,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                   ),
                   InkWell(
                     onTap: () {
+                      mixPanelController.trackEvent(
+                          eventName: 'Tapped on select additional service',
+                          data: {
+                            // 'selectedIssue': service.name,
+                            // 'selectedIssueIcon': service.image,
+                          });
                       showModalBottomSheet(
                           context: context,
                           shape: RoundedRectangleBorder(
@@ -521,6 +538,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               InkWell(
                 onTap: () {
 // ...
+                  mixPanelController.trackEvent(
+                      eventName: 'Tapped to select Location', data: {});
 
                   Navigator.push(
                     context,
@@ -528,14 +547,22 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       builder: (context) => PlacePicker(
                         apiKey: 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
                         selectText: 'Pick This Place',
+                        onTapBack: () {
+                          Get.close(1);
+                        },
                         onPlacePicked: (result) async {
-                          Get.dialog(LoadingDialog(),
-                              barrierDismissible: false);
-                          LatLng latLng =
-                              await getPlaceLatLng(result.placeId ?? '');
+                          LatLng latLng = LatLng(result.geometry!.location.lat,
+                              result.geometry!.location.lng);
                           lat = latLng.latitude;
                           long = latLng.longitude;
                           setState(() {});
+                          mixPanelController.trackEvent(
+                              eventName: 'Selected Location',
+                              data: {
+                                'place': result.adrAddress ?? '',
+                                'lat': latLng.latitude,
+                                'long': latLng.longitude,
+                              });
                           final GoogleMapController controller =
                               await mapController.future;
                           await controller.animateCamera(
@@ -543,10 +570,10 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             target: LatLng(lat, long),
                             zoom: 16.0,
                           )));
-                          Get.close(2);
+                          Get.close(1);
                         },
                         initialPosition: LatLng(lat, long),
-                        useCurrentLocation: true,
+                        // useCurrentLocation: true,
                         selectInitialPosition: true,
                         resizeToAvoidBottomInset:
                             false, // only works in page mode, less flickery, remove if wrong offsets
@@ -593,18 +620,30 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                                         'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
                                                     selectText:
                                                         'Pick This Place',
+                                                    onTapBack: () {
+                                                      Get.close(1);
+                                                    },
                                                     onPlacePicked:
                                                         (result) async {
-                                                      Get.dialog(
-                                                          LoadingDialog(),
-                                                          barrierDismissible:
-                                                              false);
-                                                      LatLng latLng =
-                                                          await getPlaceLatLng(
-                                                              result.placeId ??
-                                                                  '');
+                                                      LatLng latLng = LatLng(
+                                                          result.geometry!
+                                                              .location.lat,
+                                                          result.geometry!
+                                                              .location.lng);
                                                       lat = latLng.latitude;
                                                       long = latLng.longitude;
+                                                      mixPanelController.trackEvent(
+                                                          eventName:
+                                                              'Selected Location',
+                                                          data: {
+                                                            'place': result
+                                                                    .adrAddress ??
+                                                                '',
+                                                            'lat':
+                                                                latLng.latitude,
+                                                            'long': latLng
+                                                                .longitude,
+                                                          });
                                                       setState(() {});
                                                       final GoogleMapController
                                                           controller =
@@ -618,11 +657,11 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                                             LatLng(lat, long),
                                                         zoom: 16.0,
                                                       )));
-                                                      Get.close(2);
+                                                      Get.close(1);
                                                     },
                                                     initialPosition:
                                                         LatLng(lat, long),
-                                                    useCurrentLocation: true,
+                                                    // useCurrentLocation: true,
                                                     selectInitialPosition: true,
                                                     resizeToAvoidBottomInset:
                                                         false, // only works in page mode, less flickery, remove if wrong offsets
@@ -651,11 +690,21 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                             onPlacePicked: (result) async {
                                               Get.dialog(LoadingDialog(),
                                                   barrierDismissible: false);
-                                              LatLng latLng =
-                                                  await getPlaceLatLng(
-                                                      result.placeId ?? '');
+                                              LatLng latLng = LatLng(
+                                                  result.geometry!.location.lat,
+                                                  result
+                                                      .geometry!.location.lng);
                                               lat = latLng.latitude;
                                               long = latLng.longitude;
+                                              mixPanelController.trackEvent(
+                                                  eventName:
+                                                      'Selected Location',
+                                                  data: {
+                                                    'place':
+                                                        result.adrAddress ?? '',
+                                                    'lat': latLng.latitude,
+                                                    'long': latLng.longitude,
+                                                  });
                                               setState(() {});
                                               final GoogleMapController
                                                   controller =
@@ -730,7 +779,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         // backgroundColor:
                         //     userController.isDark ? Colors.white : primaryColor,
                         title: Text(
-                          'Please select a service a to create a request.',
+                          'Please select a service.',
                           style: TextStyle(
                               // color: userController.isDark
                               //     ? primaryColor
@@ -1524,6 +1573,8 @@ class SelectVehicle extends StatelessWidget {
           children: [
             InkWell(
               onTap: () {
+                mixPanelController.trackEvent(
+                    eventName: 'Tapped on Add New Vehicle', data: {});
                 Get.to(() => AddVehicle(
                       garageModel: null,
                       addService: true,
@@ -1575,6 +1626,14 @@ class SelectVehicle extends StatelessWidget {
                           for (GarageModel vehicle in vehicles)
                             InkWell(
                               onTap: () {
+                                mixPanelController.trackEvent(
+                                    eventName: 'Selected a Vehicle',
+                                    data: {
+                                      'vehicleTitle': vehicle.title,
+                                      'vehicleImage': vehicle.imageUrl,
+                                      'garageId': vehicle.garageId,
+                                      'vehicleBodyStyle': vehicle.bodyStyle,
+                                    });
                                 garageController.selectVehicle(
                                     vehicle.title,
                                     vehicle.imageUrl,
@@ -1693,6 +1752,19 @@ class SelectVehicle extends StatelessWidget {
                                             alignment: Alignment.center,
                                             child: ElevatedButton(
                                                 onPressed: () {
+                                                  mixPanelController.trackEvent(
+                                                      eventName:
+                                                          'Selected a Vehicle',
+                                                      data: {
+                                                        'vehicleTitle':
+                                                            vehicle.title,
+                                                        'vehicleImage':
+                                                            vehicle.imageUrl,
+                                                        'garageId':
+                                                            vehicle.garageId,
+                                                        'vehicleBodyStyle':
+                                                            vehicle.bodyStyle,
+                                                      });
                                                   garageController
                                                       .selectVehicle(
                                                           vehicle.title,
@@ -1773,6 +1845,12 @@ class AdditionalServicePicker extends StatelessWidget {
               for (AdditionalServiceModel service in getAdditionalService())
                 InkWell(
                   onTap: () {
+                    mixPanelController.trackEvent(
+                        eventName: 'Selected additional service',
+                        data: {
+                          'selectedAdditionalService': service.name,
+                          'selectedAdditionalServiceIcon': service.icon,
+                        });
                     garageController.selectAdditionalService(service.name);
                     Get.close(1);
                   },
@@ -1797,6 +1875,13 @@ class AdditionalServicePicker extends StatelessWidget {
                                   service.name,
                               onChanged: (s) {
                                 // appProvider.selectPrefs(pref);
+                                mixPanelController.trackEvent(
+                                    eventName: 'Selected additional service',
+                                    data: {
+                                      'selectedAdditionalService': service.name,
+                                      'selectedAdditionalServiceIcon':
+                                          service.icon,
+                                    });
                                 garageController
                                     .selectAdditionalService(service.name);
                                 Get.close(1);
@@ -1874,6 +1959,12 @@ class IssuesPicker extends StatelessWidget {
                           children: [
                             InkWell(
                               onTap: () {
+                                mixPanelController.trackEvent(
+                                    eventName: 'Selected an issue',
+                                    data: {
+                                      'selectedIssue': service.name,
+                                      'selectedIssueIcon': service.image,
+                                    });
                                 garageController.selectIssue(service.name);
                                 // appProvider.selectPrefs(pref);
                                 Get.close(1);
@@ -1898,6 +1989,13 @@ class IssuesPicker extends StatelessWidget {
                                             service.name,
                                         onChanged: (s) {
                                           // appProvider.selectPrefs(pref);
+                                          mixPanelController.trackEvent(
+                                              eventName: 'Selected an issue',
+                                              data: {
+                                                'selectedIssue': service.name,
+                                                'selectedIssueIcon':
+                                                    service.image,
+                                              });
                                           garageController
                                               .selectIssue(service.name);
                                           Get.close(1);

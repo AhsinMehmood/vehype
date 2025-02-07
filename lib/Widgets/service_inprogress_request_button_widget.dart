@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:manage_calendar_events/manage_calendar_events.dart';
+// import 'package:manage_calendar_events/manage_calendar_events.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
@@ -10,6 +10,7 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/service_request_details.dart';
 import 'package:vehype/Widgets/calenders_list.dart';
+import 'package:vehype/Widgets/select_date_and_price.dart';
 import 'package:vehype/Widgets/service_cancel_request_confirmation_sheet.dart';
 
 import '../Models/chat_model.dart';
@@ -35,7 +36,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-    final CalendarPlugin myPlugin = CalendarPlugin();
+    // final CalendarPlugin myPlugin = CalendarPlugin();/
 
     return Container(
       height: 80,
@@ -185,61 +186,20 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
             ),
           InkWell(
             onTap: () async {
-              if (offersReceivedModel.seekerEventId == '') {
-                bool? hasPermissions = await myPlugin.hasPermissions();
-
-                if (!hasPermissions!) {
-                  // Request permissions
-                  await myPlugin.requestPermissions();
-
-                  // Recheck permissions after request
-                  hasPermissions = await myPlugin.hasPermissions();
-
-                  if (!hasPermissions!) {
-                    toastification.show(
-                      context: context,
-                      autoCloseDuration: Duration(seconds: 3),
-                      title:
-                          Text('Permissions are required to access calendars.'),
-                    );
-                    return; // Exit early if permissions are not granted
-                  }
-                }
-
-                // Fetch calendars after ensuring permissions are granted
-                List<Calendar> calendar = await myPlugin.getCalendars() ?? [];
-
-                if (calendar.isEmpty) {
-                  toastification.show(
-                    context: context,
-                    autoCloseDuration: Duration(seconds: 3),
-                    title: Text('No calendar found.'),
-                  );
-                } else {
-                  Get.bottomSheet(
-                    CalendersList(
-                      calenders: calendar,
-                      offersModel: offersModel,
-                      offersReceivedModel: offersReceivedModel,
-                    ),
-                  );
-                }
-              } else {
-                myPlugin
-                    .deleteEvent(
-                        calendarId: offersReceivedModel.seekerCalendarId,
-                        eventId: offersReceivedModel.seekerEventId)
-                    .then((isDeleted) async {
+              Get.dialog(LoadingDialog(), barrierDismissible: false);
+              DocumentSnapshot<Map<String, dynamic>> snap =
                   await FirebaseFirestore.instance
-                      .collection('offersReceived')
-                      .doc(offersReceivedModel.id)
-                      .update({
-                    'seekerEventId': '',
-                    'seekerCalendarId': '',
-                  });
-                  debugPrint('Is Event deleted: $isDeleted');
-                });
-              }
+                      .collection('users')
+                      .doc(offersReceivedModel.ownerId)
+                      .get();
+              UserModel ownerDetails = UserModel.fromJson(snap);
+              Get.close(1);
+              Get.to(() => SelectDateAndPrice(
+                  isUpdateInvoice: true,
+                  offersModel: offersModel,
+                  garageModel: garageModel,
+                  ownerModel: ownerDetails,
+                  offersReceivedModel: offersReceivedModel));
             },
             child: Container(
               height: 50,
@@ -253,9 +213,7 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  offersReceivedModel.seekerEventId == ''
-                      ? 'Add to Calendar'
-                      : 'Remove Event',
+                  'Update Invoice',
                   style: TextStyle(
                     color: userController.isDark ? primaryColor : Colors.white,
                     fontSize: 14,

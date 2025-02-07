@@ -22,6 +22,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/manage_prefs.dart';
 import 'package:vehype/Pages/second_user_profile.dart';
 import 'package:vehype/Pages/splash_page.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
@@ -32,6 +33,7 @@ import '../Controllers/garage_controller.dart';
 import '../Controllers/offers_provider.dart';
 import '../Controllers/vehicle_data.dart';
 import '../google_maps_place_picker.dart';
+import 'new_offers_page.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -59,7 +61,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     long = userController.userModel!.long;
     UserModel userModel = userController.userModel!;
     return DefaultTabController(
-      length: userModel.accountType == 'provider' ? 3 : 2,
+      length: userModel.accountType == 'provider' ? 4 : 2,
       child: Scaffold(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         appBar: AppBar(
@@ -94,6 +96,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     Tab(
                       child: Text('Edit Profile'),
                     ),
+                    Tab(
+                      child: Text('Manage Prefrences'),
+                    ),
                     // Tab(
                     //   child: Text('My Services'),
                     // ),
@@ -118,6 +123,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
             children: userModel.accountType == 'provider'
                 ? [
                     EditProfileTab(),
+                    SelectYourServices(
+                      isPage: true,
+                    ),
+
                     // ServicesTab(),
                     Scaffold(
                       backgroundColor:
@@ -537,6 +546,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
     long = userController.userModel!.long;
     UserModel userModel = userController.userModel!;
     return SingleChildScrollView(
+      physics: ClampingScrollPhysics(),
       child: Padding(
           padding: const EdgeInsets.all(25.0),
           child: Column(
@@ -856,29 +866,34 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     InkWell(
                       borderRadius: BorderRadius.circular(200),
                       onTap: () async {
-                        UserModel userModel = userController.userModel!;
-                        Get.dialog(const LoadingDialog(),
-                            barrierDismissible: false);
-                        // User user = FirebaseAuth.instance.currentUser;
-                        SharedPreferences sharedPreferences =
-                            await SharedPreferences.getInstance();
-                        String realUserId =
-                            sharedPreferences.getString('userId') ?? '';
-                        OffersProvider offersProvider =
-                            Provider.of<OffersProvider>(context, listen: false);
-                        offersProvider.stopListening();
-                        OneSignal.logout();
-                        userController.changeTabIndex(0);
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(realUserId)
-                            .update({
-                          'accountType': 'provider',
-                        });
-                        userController.closeStream();
+                        try {
+                          UserModel userModel = userController.userModel!;
+                          Get.dialog(const LoadingDialog(),
+                              barrierDismissible: false);
+                          // User user = FirebaseAuth.instance.currentUser;
+                          SharedPreferences sharedPreferences =
+                              await SharedPreferences.getInstance();
+                          String realUserId =
+                              sharedPreferences.getString('userId') ?? '';
+                          OffersProvider offersProvider =
+                              Provider.of<OffersProvider>(context,
+                                  listen: false);
+                          offersProvider.stopListening();
+                          OneSignal.logout();
+                          userController.changeTabIndex(0);
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(realUserId)
+                              .update({
+                            'accountType': 'provider',
+                          });
+                          userController.closeStream();
 
-                        Get.close(1);
-                        Get.offAll(() => SplashPage());
+                          Get.close(1);
+                          Get.offAll(() => SplashPage());
+                        } catch (e) {
+                          Get.close(1);
+                        }
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
@@ -949,32 +964,37 @@ class _EditProfileTabState extends State<EditProfileTab> {
                     InkWell(
                       borderRadius: BorderRadius.circular(200),
                       onTap: () async {
-                        Get.dialog(const LoadingDialog(),
-                            barrierDismissible: false);
-                        // User user = FirebaseAuth.instance.currentUser;
-                        SharedPreferences sharedPreferences =
-                            await SharedPreferences.getInstance();
-                        String realUserId =
-                            sharedPreferences.getString('userId') ?? '';
-                        UserModel userModel = userController.userModel!;
-                        OneSignal.logout();
-                        OffersProvider offersProvider =
-                            Provider.of<OffersProvider>(context, listen: false);
-                        offersProvider.stopListening();
-                        // offersProvider.stopListening();
-                        // offersProvider.stopListening();
+                        try {
+                          Get.dialog(const LoadingDialog(),
+                              barrierDismissible: false);
+                          // User user = FirebaseAuth.instance.currentUser;
+                          SharedPreferences sharedPreferences =
+                              await SharedPreferences.getInstance();
+                          String realUserId =
+                              sharedPreferences.getString('userId') ?? '';
+                          UserModel userModel = userController.userModel!;
+                          OneSignal.logout();
+                          OffersProvider offersProvider =
+                              Provider.of<OffersProvider>(context,
+                                  listen: false);
+                          offersProvider.stopListening();
+                          // offersProvider.stopListening();
+                          // offersProvider.stopListening();
 
-                        userController.changeTabIndex(0);
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(realUserId)
-                            .update({
-                          'accountType': 'seeker',
-                        });
-                        userController.closeStream();
-                        // userController.getUserStream(userId)/
-                        Get.close(1);
-                        Get.offAll(() => SplashPage());
+                          userController.changeTabIndex(0);
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(realUserId)
+                              .update({
+                            'accountType': 'seeker',
+                          });
+                          userController.closeStream();
+                          // userController.getUserStream(userId)/
+                          Get.close(1);
+                          Get.offAll(() => SplashPage());
+                        } catch (e) {
+                          Get.close(1);
+                        }
                       },
                       child: Card(
                         shape: RoundedRectangleBorder(
@@ -1086,47 +1106,51 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                   Get.close(1);
                                                 },
                                                 onPlacePicked: (result) async {
-                                                  Get.dialog(LoadingDialog(),
-                                                      barrierDismissible:
-                                                          false);
-                                                  LatLng latLng =
-                                                      await getPlaceLatLng(
-                                                          result.placeId ?? '');
-                                                  lat = latLng.latitude;
-                                                  long = latLng.longitude;
-                                                  print('dddsd');
-                                                  userController
-                                                      .changeLocation(latLng);
-                                                  // setState(() {});
+                                                  try {
+                                                    LatLng latLng = LatLng(
+                                                        result.geometry!
+                                                            .location.lat,
+                                                        result.geometry!
+                                                            .location.lng);
+                                                    lat = latLng.latitude;
+                                                    long = latLng.longitude;
+                                                    print('dddsd');
+                                                    userController
+                                                        .changeLocation(latLng);
+                                                    // setState(() {});
 
-                                                  final GeoFirePoint
-                                                      geoFirePoint =
-                                                      GeoFirePoint(
-                                                          GeoPoint(lat, long));
+                                                    final GeoFirePoint
+                                                        geoFirePoint =
+                                                        GeoFirePoint(GeoPoint(
+                                                            lat, long));
 
-                                                  await FirebaseFirestore
-                                                      .instance
-                                                      .collection('users')
-                                                      .doc(userController
-                                                          .userModel!.userId)
-                                                      .update({
-                                                    'lat': lat,
-                                                    'geo': geoFirePoint.data,
-                                                    'long': long,
-                                                  });
-                                                  final GoogleMapController
-                                                      controller =
-                                                      await _controller.future;
-                                                  await controller.animateCamera(
-                                                      CameraUpdate
-                                                          .newCameraPosition(
-                                                              CameraPosition(
-                                                    target: LatLng(lat, long),
-                                                    zoom: 16.0,
-                                                  )));
+                                                    FirebaseFirestore.instance
+                                                        .collection('users')
+                                                        .doc(userController
+                                                            .userModel!.userId)
+                                                        .update({
+                                                      'lat': lat,
+                                                      'geo': geoFirePoint.data,
+                                                      'long': long,
+                                                    });
+                                                    final GoogleMapController
+                                                        controller =
+                                                        await _controller
+                                                            .future;
+                                                    await controller.animateCamera(
+                                                        CameraUpdate
+                                                            .newCameraPosition(
+                                                                CameraPosition(
+                                                      target: LatLng(lat, long),
+                                                      zoom: 16.0,
+                                                    )));
 
-                                                  Get.close(2);
+                                                    Get.close(1);
+                                                  } catch (e) {
+                                                    // Get.close(1);
+                                                  }
                                                 },
+
                                                 initialPosition:
                                                     LatLng(lat, long),
                                                 // useCurrentLocation: true,
@@ -1170,12 +1194,15 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                           apiKey:
                                               'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
                                           selectText: 'Pick This Place',
+                                          onTapBack: () {
+                                            Get.close(1);
+                                          },
                                           onPlacePicked: (result) async {
-                                            Get.dialog(LoadingDialog(),
-                                                barrierDismissible: false);
-                                            LatLng latLng =
-                                                await getPlaceLatLng(
-                                                    result.placeId ?? '');
+                                            // Get.dialog(LoadingDialog(),
+                                            //     barrierDismissible: false);
+                                            LatLng latLng = LatLng(
+                                                result.geometry!.location.lat,
+                                                result.geometry!.location.lng);
                                             lat = latLng.latitude;
                                             long = latLng.longitude;
                                             userController
@@ -1186,7 +1213,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                 GeoFirePoint(
                                                     GeoPoint(lat, long));
 
-                                            await FirebaseFirestore.instance
+                                            FirebaseFirestore.instance
                                                 .collection('users')
                                                 .doc(userController
                                                     .userModel!.userId)
@@ -1204,7 +1231,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                               target: LatLng(lat, long),
                                               zoom: 16.0,
                                             )));
-                                            Get.close(2);
+                                            Get.close(1);
                                           },
                                           initialPosition: LatLng(lat, long),
                                           // useCurrentLocation: true,

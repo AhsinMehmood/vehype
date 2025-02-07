@@ -4,8 +4,8 @@ description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
-# version: 3.0.7+108 
-version: 1.0.0+6
+# version: 3.0.9+119
+version: 1.0.0+14
 
 
 environment:
@@ -26,8 +26,8 @@ dependencies:
 
       # ref: main  # Optional: specify the branch, tag, or commit hash
   cupertino_icons: ^1.0.6
-  voice_message_package: ^2.2.1
-  logger: ^2.4.0
+  # voice_message_package: ^2.2.1
+  # logger: ^2.4.0
   firebase_core: ^3.8.1
   cloud_firestore: ^5.5.1
   cloud_functions: 
@@ -51,7 +51,7 @@ dependencies:
   # extended_image: ^8.2.1
   map_location_picker: 
   # media_picker_widget: ^1.0.7
-  # mixpanel_flutter: ^2.3.1
+  mixpanel_flutter: ^2.3.3
   flutter_rating_bar: ^4.0.1
   firebase_database: ^11.2.0
   # interactive_slider: ^0.4.0
@@ -87,7 +87,7 @@ dependencies:
   fuzzy: ^0.5.1
   toastification: ^2.0.0
   # omni_datetime_picker: ^2.0.4
-  manage_calendar_events: ^2.0.3
+  # manage_calendar_events: ^2.0.3
   # google_fonts:
   onesignal_flutter: ^5.2.5
 
@@ -124,10 +124,25 @@ dependencies:
   # stability_image_generation: ^0.0.4
   # firebase_vertexai: ^1.0.4
   together_ai_sdk: ^2.0.2
+  # hive_ce: ^2.9.0
+  # hive_flutter: ^1.1.0
+
+  sqflite: ^2.4.1
+  flutter_swipe_action_cell: ^3.1.5
+  pdf: ^3.11.2
+  open_file: ^3.5.10
+  mailer: ^6.4.1
+  flutter_pdfview: ^1.4.0
+  place_picker_google: ^0.0.14
+  country_code_picker: ^3.2.0
+  flutter_multi_formatter: ^2.13.0
+
   # flutter_flavorizr: ^2.2.3
   # widget_to_marker: ^1.0.6
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
+  # isar_generator: ^3.1.0+1
+  # build_runner: ^2.4.13
 
   # package_rename: ^1.5.3
   flutter_test:
@@ -155,7 +170,7 @@ flutter:
 # flutter_launcher_icons:
 #   android: "launcher_icon"
 #   ios: true
-#   image_path: "assets/icon.png"
+#   image_path: "assets/beta_icon.jpeg"
   # min_sdk_android: 23// # android min sdk min:16, default 21
   # To add assets to your application, add an assets section, like this:
   
@@ -179,6 +194,8 @@ flutter:
     - assets/
     - assets/images/
     - assets/fonts/
+    # - assets/fonts/Roboto-Regular.ttf
+    # - assets/fonts/Roboto-Bold.ttf   
     
     # - assets/theme.json
     # - assets/dark_theme.json    
@@ -200,3 +217,4 @@ flutter:
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf
           weight: 500
+       

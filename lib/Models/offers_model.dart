@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vehype/Models/product_service_model.dart';
 
 // import 'package:vehype/Pages/offers_received_details.dart';/s
 class OffersNotification {
@@ -119,11 +122,11 @@ class OffersReceivedModel {
   final String offerAt;
   final List<OffersNotification> checkByList;
 
-  final double price;
-  final String startDate;
+  final String price;
+  // final String startDate;
   final String ownerId;
   final String offerId;
-  final String endDate;
+  // final String? endDate;
   final double ratingOne;
   final double ratingTwo;
   final String id;
@@ -141,6 +144,10 @@ class OffersReceivedModel {
   final String seekerEventId;
   final String seekerCalendarId;
   final String createdAt;
+  // final List ids;
+  final String randomId;
+  final List<ProductServiceModel> products;
+
   OffersReceivedModel({
     required this.offerBy,
     required this.cancelReason,
@@ -156,8 +163,11 @@ class OffersReceivedModel {
     required this.id,
     required this.offerId,
     required this.price,
-    required this.startDate,
-    required this.endDate,
+    // required this.ids,
+    required this.products,
+    required this.randomId,
+    // required this.startDate,
+    // required this.endDate,
     required this.isDone,
     required this.ratingOneImage,
     required this.ratingTwoImage,
@@ -179,20 +189,28 @@ class OffersReceivedModel {
     }
     // print(data.toString());
     // String id = snap.id;
+    // log(id);
+
     return OffersReceivedModel(
         createdAt: data['createdAt'] ?? '',
+        // ids: data['productIds'] ?? [],
         ratingOne: data['ratingOne'] ?? 0.0,
+        products: (data['products'] as List<dynamic>?)
+                ?.map((item) => ProductServiceModel.fromJsonMap(item))
+                .toList() ??
+            [],
+        randomId: data['randomId'] ?? '11',
         ratingTwo: data['ratingTwo'] ?? 0.0,
         offerBy: data['offerBy'] ?? 'null',
         comment: data['comment'] ?? '',
         cancelReason: data['cancelReason'] ?? '',
         offerAt: data['offerAt'] ?? DateTime.now().toLocal().toIso8601String(),
-        price: data['price'] ?? 0.0,
+        price: data['price'].toString(),
         id: snap.id,
         cancelBy: data['cancelBy'] ?? '',
-        startDate:
-            data['startDate'] ?? DateTime.now().toLocal().toIso8601String(),
-        endDate: data['endDate'] ?? DateTime.now().toLocal().toIso8601String(),
+        // startDate:
+        //     data['startDate'] ?? DateTime.now().toLocal().toIso8601String(),
+        // endDate: data['endDate'],
         checkByList: offersNotifications,
         status: data['status'] ?? '',
         ratingOneImage: data['ratingOneImage'] ?? '',

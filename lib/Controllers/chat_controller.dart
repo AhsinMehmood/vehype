@@ -61,7 +61,7 @@ class ChatController with ChangeNotifier {
       'members': [
         currentUser.userId,
         secondUser.userId,
-      ],
+    ],
       'lastOpen': {
         currentUser.userId: DateTime.now().toUtc().toIso8601String(),
         secondUser.userId: DateTime.now().toUtc().toIso8601String()
@@ -83,15 +83,7 @@ class ChatController with ChangeNotifier {
       'chatId': currentUser.userId + secondUser.userId + offersModel.offerId,
       'state': 0,
     });
-//TODO Send New Chat Notification
-    // sendNotification(
-    //     secondUser.userId,
-    //     currentUser.name,
-    //     'New Message',
-    //     '${currentUser.name}, Sent you a message',
-    //     reference.id,
-    //     'Message',
-    //     'systemMessage');
+
     return reference.id;
   }
 
@@ -161,7 +153,7 @@ class ChatController with ChangeNotifier {
       final List<MessageModel> messages = [];
 
       messageData.forEach((key, data) {
-        print(data);
+        // print(data);
 
         final message = MessageModel(
           isSystemMessage: data['isSystemMessage'] ?? false,
@@ -180,7 +172,7 @@ class ChatController with ChangeNotifier {
           state: data['state'] ?? 1,
         );
         messages.add(message);
-        print(message);
+        // print(message);
       });
       messages.sort((a, b) => b.sentAt.compareTo(a.sentAt));
 

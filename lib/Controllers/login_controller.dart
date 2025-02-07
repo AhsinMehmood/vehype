@@ -16,10 +16,12 @@ import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/select_account_type_page.dart';
+import 'package:vehype/Pages/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 
 import '../Pages/splash_page.dart';
+import '../const.dart';
 
 class LoginController {
   static Future signInWithGoogle(BuildContext context) async {
@@ -129,12 +131,48 @@ class LoginController {
                   offersProvider.startListeningOwnerOffers(
                       UserModel.fromJson(usersnap).userId);
                 }
-                Get.close(1);
+                // Get.close(1);/
 
                 // await OneSignal.Notifications.requestPermission(true);
                 OneSignal.login(userId + userModel.accountType);
+                DocumentSnapshot<Map<String, dynamic>> userSnapss =
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userId + userModel.accountType)
+                        .get();
+                Get.close(1);
+                // log(userSnapss.)
 
-                Get.offAll(() => const TabsPage());
+                // Get.offAll(() => const TabsPage());
+                if (userSnapss.data()!['lat'] == null ||
+                    userSnapss.data()!['lat'] == 0.0) {
+                  Future.delayed(const Duration(seconds: 0)).then((s) {
+                    Get.bottomSheet(
+                      LocationPermissionSheet(
+                        userController: userController,
+                        isProvider:
+                            userId + userModel.accountType == 'provider',
+                      ),
+                      backgroundColor:
+                          userController.isDark ? primaryColor : Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(6),
+                          topRight: Radius.circular(6),
+                        ),
+                      ),
+                      isDismissible: false,
+                      // enableDrag: false,
+                    );
+                  });
+                } else {
+                  if (userSnapss.data()!['isBusinessSetup'] == null ||
+                      userSnapss.data()!['isBusinessSetup'] == false) {
+                    Get.offAll(() => SetupBusinessProvider());
+                  } else {
+                    Get.offAll(() => const TabsPage());
+                  }
+                }
               }
             }
           }
@@ -227,17 +265,55 @@ class LoginController {
                 .get();
         UserModel userModel = UserModel.fromJson(snapshot);
 
-        Get.close(1);
-
         if (userModel.accountType == '') {
+          Get.close(1);
+
           Get.offAll(() => SelectAccountType(userModelAccount: userModel));
         } else {
           if (userModel.adminStatus == 'blocked') {
+            Get.close(1);
+
             Get.offAll(() => const DisabledWidget());
           } else {
             userController.getUserStream(userId + userModel.accountType);
             OneSignal.login(userId + userModel.accountType);
-            Get.offAll(() => const TabsPage());
+
+            DocumentSnapshot<Map<String, dynamic>> userSnapss =
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId + userModel.accountType)
+                    .get();
+            Get.close(1);
+
+            if (userSnapss.data()!['lat'] == null ||
+                userSnapss.data()!['lat'] == 0.0) {
+              Future.delayed(const Duration(seconds: 0)).then((s) {
+                Get.bottomSheet(
+                  LocationPermissionSheet(
+                    userController: userController,
+                    isProvider: userId + userModel.accountType == 'provider',
+                  ),
+
+                  backgroundColor:
+                      userController.isDark ? primaryColor : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(6),
+                      topRight: Radius.circular(6),
+                    ),
+                  ),
+                  isDismissible: false,
+                  // enableDrag: false,
+                );
+              });
+            } else {
+              if (userSnapss.data()!['isBusinessSetup'] == null ||
+                  userSnapss.data()!['isBusinessSetup'] == false) {
+                Get.offAll(() => SetupBusinessProvider());
+              } else {
+                Get.offAll(() => const TabsPage());
+              }
+            }
           }
         }
       }

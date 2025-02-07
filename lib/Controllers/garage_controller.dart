@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 // import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
@@ -21,6 +22,7 @@ import 'package:vehype/Models/garage_model.dart';
 // import 'package:image_select/image_selector.dart';
 // import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Models/product_service_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Models/vehicle_model.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
@@ -29,29 +31,59 @@ import 'package:vehype/const.dart';
 
 import 'package:together_ai_sdk/together_ai_sdk.dart';
 
-Future<LatLng> getPlaceLatLng(String placeId) async {
-  // Use Google Maps Geocoding API to get lat/lng from place ID
-  // You can use any HTTP client like http package or Dio
-  // Example using http package:
-  String apiKey = 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E';
-  String url =
-      'https://maps.googleapis.com/maps/api/geocode/json?place_id=$placeId&key=$apiKey';
+import '../Pages/tabs_page.dart';
 
-  // Make the HTTP request
-  var response = await http.get(Uri.parse(url));
-  if (response.statusCode == 200) {
-    // Parse the JSON response
-    var json = jsonDecode(response.body);
-    var location = json['results'][0]['geometry']['location'];
-    double lat = location['lat'];
-    double lng = location['lng'];
-    return LatLng(lat, lng);
-  } else {
-    throw Exception('Failed to load place details');
-  }
-}
+// Future<LatLng> getPlaceLatLng(String placeId) async {
+//   // Use Google Maps Geocoding API to get lat/lng from place ID
+//   // You can use any HTTP client like http package or Dio
+//   // Example using http package:
+//   String apiKey = 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E';
+//   String url =
+//       'https://maps.googleapis.com/maps/api/geocode/json?place_id=$placeId&key=$apiKey';
+
+//   // Make the HTTP request
+//   var response = await http.get(Uri.parse(url));
+//   if (response.statusCode == 200) {
+//     // Parse the JSON response
+//     var json = jsonDecode(response.body);
+//     print(json.toString());
+//     var location = json['results'][0]['geometry']['location'];
+//     double lat = location['lat'];
+//     double lng = location['lng'];
+//     return LatLng(lat, lng);
+//   } else {
+//     throw Exception('Failed to load place details');
+//   }
+// }
 
 class GarageController with ChangeNotifier {
+  select(ProductServiceModel service) {
+    int index = selected
+        .indexWhere((selectedService) => selectedService.id == service.id);
+    if (index != -1) {
+      selected.removeAt(index); // Remove using index
+    } else {
+      selected.add(service);
+    }
+    notifyListeners();
+  }
+
+  List<ProductServiceModel> selected = [];
+
+  // Method to update a product and its selection status
+  void updateProductAndSelection(ProductServiceModel prodcut, String id) {
+    int index = selected.indexWhere((item) => item.id == id);
+    if (index != -1) {}
+    selected.removeAt(index);
+    // Remove using index
+    // ProductServiceModel service = ProductServiceModel;
+    selected.add(prodcut);
+
+    log('message');
+
+    notifyListeners();
+  }
+
   final togetherAI = TogetherAISdk(togetherAIKey);
 
   Stream<List<GarageModel>> myVehicles(String userId) {
@@ -110,33 +142,8 @@ class GarageController with ChangeNotifier {
     jwtToken = await getJwtToken();
 
     vehiclesMakesByVehicleType =
-        await getVehicleMake(vehicleType!.title, jwtToken);
+        await getVehicleMake(selectedVehicleType!.title, jwtToken);
     notifyListeners();
-  }
-
-  Future<void> callGetAndSaveDataToFirestore() async {
-    try {
-      // The URL for the region where your Cloud Function is deployed.
-      final url = Uri.parse(
-          'https://us-central1-vehype-386313.cloudfunctions.net/getAndSaveDataToFirestore');
-
-      // Since this is an onCall function, we need to send a POST request
-      final http.Response response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(
-            {}), // Sending an empty payload, as no data is required for this function
-      );
-
-      // Check the response
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        if (responseData['success'] == true) {
-        } else {}
-      } else {}
-    } catch (e) {}
   }
 
   selectModel(VehicleModel newBodyStyle, bool isCustom) async {
@@ -144,14 +151,18 @@ class GarageController with ChangeNotifier {
     selectedSubModel = null;
     isCustomModel = isCustom;
     notifyListeners();
-    if (!isCustom) {
-      vehicleSubModels = await getTrims(
-          selectedVehicleMake!.title,
-          selectedYear,
-          selectedVehicleType!.title,
-          newBodyStyle.title,
-          jwtToken);
-      notifyListeners();
+    if (!isCustomModel) {
+      try {
+        vehicleSubModels = await getTrims(
+            selectedVehicleMake!.title,
+            selectedYear,
+            selectedVehicleType!.title,
+            selectedVehicleModel!.title,
+            jwtToken);
+        notifyListeners();
+      } catch (e) {
+        print(e.toString() + ' HERE 135');
+      }
     }
 
     // selectedVehicleMake = null;
@@ -176,7 +187,7 @@ class GarageController with ChangeNotifier {
     notifyListeners();
 
     vehicleYearsByMake =
-        await getVehicleYear(newBodyStyle.title, jwtToken, isCustom);
+        await getVehicleYear(selectedVehicleMake!.title, jwtToken, isCustom);
 
     notifyListeners();
   }
@@ -389,9 +400,11 @@ class GarageController with ChangeNotifier {
       return false;
     }
 
-    if (selectedVehicleType!.title == 'Passenger vehicle' &&
+    if ((titleMapping[selectedVehicleType!.title] == 'Passenger vehicle' ||
+            titleMapping[selectedVehicleType!.title] == 'Pickup Trucks') &&
         !isCustomModel &&
-        !isCustomMake) {
+        !isCustomMake &&
+        vehicleSubModels.isNotEmpty) {
       return selectedSubModel != null;
     }
 
@@ -421,11 +434,11 @@ class GarageController with ChangeNotifier {
           'updatedAt': DateTime.now().toUtc().toIso8601String(),
         });
       } else {
-        if (imageOneUrl == '') {
-          await generateImages(
-              'Vehicle type: ${selectedVehicleType!.title} Vehicle Make: ${selectedVehicleMake!.title} Vehicle Model Year: $selectedYear Vehicle Model: ${selectedVehicleModel!.title} Vehicle Trims: ${selectedSubModel == null ? '' : selectedSubModel!.title}',
-              userModel.userId);
-        }
+        // if (imageOneUrl == '') {
+        //   await generateImages(
+        //       'An image of a Vehicle, Vehicle type: ${selectedVehicleType!.title}, Vehicle Make: ${selectedVehicleMake!.title}, Vehicle Model Year: $selectedYear, Vehicle Model: ${selectedVehicleModel!.title}, Vehicle Trims: ${selectedSubModel == null ? '' : selectedSubModel!.title}.',
+        //       userModel.userId);
+        // }
         await FirebaseFirestore.instance.collection('garages').add({
           'ownerId': userModel.userId,
           'bodyStyle': selectedVehicleType!.title,
@@ -542,36 +555,60 @@ class GarageController with ChangeNotifier {
   }
 
   initVehicle(GarageModel garageModel) async {
-    await selectVehicleType(
-        VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
-    // await sele(VehicleType(id: 0, title: garageModel.bodyStyle, icon: ''));
-
-    await selectMake(
-        VehicleMake(
-            id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0),
-        garageModel.isCustomMake);
-    await selectYear(garageModel.year);
-
-    await selectModel(
-        VehicleModel(
-            id: 1,
-            title: garageModel.model,
-            icon: 'icon',
-            vehicleMakeId: 0,
-            vehicleTypeId: 0),
-        garageModel.isCustomModel);
-    if (garageModel.bodyStyle == 'Passenger vehicle') {
-      if (!garageModel.isCustomMake && !garageModel.isCustomModel) {
-        await selectSubModel(
-          VehicleModel(
-            id: 1,
-            title: garageModel.submodel,
-            icon: 'icon',
-            vehicleMakeId: 0,
-            vehicleTypeId: 0,
-          ),
-        );
+    try {
+      try {
+        await selectVehicleType(
+            VehicleType(title: garageModel.bodyStyle, icon: ''));
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Type');
       }
+
+      try {
+        await selectMake(
+            VehicleMake(
+                id: 1, title: garageModel.make, icon: 'icon', vehicleTypeId: 0),
+            garageModel.isCustomMake);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Make');
+      }
+      try {
+        await selectYear(garageModel.year);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Year');
+      }
+
+      try {
+        await selectModel(
+            VehicleModel(
+                id: 1,
+                title: garageModel.model,
+                icon: 'icon',
+                vehicleMakeId: 0,
+                vehicleTypeId: 0),
+            garageModel.isCustomModel);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Model');
+      }
+      try {
+        if (titleMapping[garageModel.bodyStyle] == 'Passenger vehicle' ||
+            titleMapping[garageModel.bodyStyle] == 'Pickup Trucks') {
+          if (!garageModel.isCustomMake && !garageModel.isCustomModel) {
+            await selectSubModel(
+              VehicleModel(
+                id: 1,
+                title: garageModel.submodel,
+                icon: 'icon',
+                vehicleMakeId: 0,
+                vehicleTypeId: 0,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Submodel');
+      }
+    } catch (e) {
+      print(e.toString() + ' Initializ vehicle');
     }
 
     imageOneUrl = garageModel.imageUrl;
@@ -585,8 +622,7 @@ class GarageController with ChangeNotifier {
     selectedVehicleMake = null;
     selectedVehicleModel = null;
     selectedSubModel = null;
-    endDate = null;
-    startDate = null;
+    selected = [];
     imageOneUrl = '';
     isCustomMake = false;
     isCustomModel = false;
@@ -763,6 +799,9 @@ class GarageController with ChangeNotifier {
           'additionalService': additionalService,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
+        mixPanelController.trackEvent(eventName: 'Updated The Request', data: {
+          'requestId': requestId,
+        });
       } else {
         DocumentReference<Map<String, dynamic>> reference =
             await FirebaseFirestore.instance.collection('offers').add({
@@ -783,6 +822,10 @@ class GarageController with ChangeNotifier {
           'createdAt': DateTime.now().toUtc().toIso8601String(),
         });
         requestId = reference.id;
+        mixPanelController
+            .trackEvent(eventName: 'Created a new request', data: {
+          'requestId': requestId,
+        });
       }
 
       disposeController();
@@ -793,8 +836,6 @@ class GarageController with ChangeNotifier {
     }
   }
 
-  DateTime? startDate;
-  DateTime? endDate;
   double price = 0.0;
   bool agreement = false;
   changeAgree() {
@@ -807,28 +848,12 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  selectStartDate(DateTime? startDat) {
-    startDate = startDat;
-    notifyListeners();
-  }
-
-  selectEndDate(DateTime? endDat) {
-    endDate = endDat;
-    notifyListeners();
-  }
-
   init(OffersReceivedModel offersReceivedModel) {
-    endDate = DateTime.parse(offersReceivedModel.endDate).toLocal();
-    startDate = DateTime.parse(offersReceivedModel.endDate).toLocal();
-    price = offersReceivedModel.price;
-    notifyListeners();
-  }
-
-  closeOfferSubmit() {
-    endDate = null;
-    startDate = null;
-    price = 0.0;
-    agreement = false;
+    // endDate = offersReceivedModel.endDate != null
+    //     ? DateTime.parse(offersReceivedModel.endDate!).toLocal()
+    //     : null;
+    // startDate = DateTime.parse(offersReceivedModel.startDate).toLocal();
+    price = double.parse(offersReceivedModel.price);
     notifyListeners();
   }
 }

@@ -69,16 +69,6 @@ class OwnerAcceptOfferConfirmation extends StatelessWidget {
                               .collection('users')
                               .doc(offersReceivedModel.offerBy)
                               .get();
-                      if (DateTime.parse(offersReceivedModel.startDate)
-                          .toUtc()
-                          .isBefore(DateTime.now().toUtc())) {
-                        toastification.show(
-                            context: context,
-                            autoCloseDuration: Duration(seconds: 3),
-                            title: Text(
-                                'Offer Time Expired: You can ask ${UserModel.fromJson(offerByQuery).name} to update the offer.'));
-                        return;
-                      }
                       Get.close(1);
 
                       Get.dialog(LoadingDialog(), barrierDismissible: false);

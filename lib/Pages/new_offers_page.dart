@@ -113,28 +113,29 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                 SizedBox(
                     // height: Get.height * 0.06,
                     ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      // left: 10,
-                      top: 20,
-                      bottom: 20,
-                      // right: 10,
-                    ),
-                    child: Text(
-                      'Set your Prefrences',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          // fontFamily: 'Avenir',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor),
+                if (!widget.isPage)
+                  Align(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        // left: 10,
+                        top: 20,
+                        bottom: 20,
+                        // right: 10,
+                      ),
+                      child: Text(
+                        'Set your Prefrences',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            // fontFamily: 'Avenir',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: userController.isDark
+                                ? Colors.white
+                                : primaryColor),
+                      ),
                     ),
                   ),
-                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -178,41 +179,8 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                     'radius': userController.radiusMiles.toInt(),
                     'vehicleTypes': userController.selectedVehicleTypesFilter,
                   });
-                  userController.selectedServices = [];
-                  userController.selectedAdditionalServices = [];
-                  if (widget.isPage) {
-                    Get.close(1);
-                  } else {
-                    // await FirebaseFirestore.instance.collection('users')
-                    List<UserModel> providers = [];
 
-                    QuerySnapshot<Map<String, dynamic>> snapshot =
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .where('accountType', isEqualTo: 'seeker')
-                            // .where('services', arrayContains: issue)
-                            // .where('status', isEqualTo: 'active')
-                            .get();
-
-                    for (QueryDocumentSnapshot<Map<String, dynamic>> element
-                        in snapshot.docs) {
-                      providers.add(UserModel.fromJson(element));
-                    }
-                    List<UserModel> filterProviders =
-                        userController.filterProviders(providers, userModel.lat,
-                            userModel.long, userController.radiusMiles);
-                    List<String> userIds = [];
-                    for (var element in filterProviders) {
-                      userIds.add(element.userId);
-                    }
-                    NotificationController().sendNotificationNewProvider(
-                        userIds: userIds,
-                        providerId: userModel.userId,
-                        requestId: '',
-                        title: 'New Service 👨🏻‍🔧',
-                        subtitle:
-                            'Hi, new service just registered in your area. Check it out!!!');
-                  }
+                  // await FirebaseFirestore.instance.collection('users')
 
                   Get.close(1);
                 },

@@ -212,51 +212,67 @@ class ChooseAccountTypePage extends StatelessWidget {
                               ),
                             InkWell(
                               onTap: () async {
-                                Get.dialog(const LoadingDialog(),
-                                    barrierDismissible: false);
+                                try {
+                                  Get.dialog(const LoadingDialog(),
+                                      barrierDismissible: false);
 
-                                // UserCredential userCredential =
-                                //     await FirebaseAuth.instance
-                                //         .signInWithEmailAndPassword(
-                                //             email: 'chilcevscaiaoxana@yahoo.it',
-                                //             password: 'vehypeOxana9');
+                                  // UserCredential userCredential =
+                                  //     await FirebaseAuth.instance
+                                  //         .signInWithEmailAndPassword(
+                                  //             email: 'chilcevscaiaoxana@yahoo.it',
+                                  //             password: 'vehypeOxana9');
 
-                                // Get.close(1);
-                                await FirebaseAuth.instance.signInAnonymously();
+                                  // Get.close(1);
+                                  await FirebaseAuth.instance
+                                      .signInAnonymously();
 
-                                User? user = FirebaseAuth.instance.currentUser;
-                                SharedPreferences sharedpref =
-                                    await SharedPreferences.getInstance();
-                                sharedpref.setString('userId', user!.uid);
-                                await FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(user.uid)
-                                    .set({
-                                  'name': 'Guest User',
-                                  // 'accountType': 'owner',
-                                  'profileUrl':
-                                      'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/ic_guest.png?alt=media&token=e19d36fd-59b1-4f6e-899b-d98a1ef2ce6e',
-                                  'id': user.uid,
-                                  'email': 'No email set',
-                                });
-                                UserController userController =
-                                    Provider.of<UserController>(context,
-                                        listen: false);
-                                userController.changeTabIndex(0);
-                                // userController.getUserStream(user.uid);
+                                  User? user =
+                                      FirebaseAuth.instance.currentUser;
+                                  SharedPreferences sharedpref =
+                                      await SharedPreferences.getInstance();
+                                  sharedpref.setString('userId', user!.uid);
+                                  await FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(user.uid)
+                                      .set({
+                                    'name': 'Guest User',
+                                    // 'accountType': 'owner',
+                                    'profileUrl':
+                                        'https://firebasestorage.googleapis.com/v0/b/vehype-386313.appspot.com/o/ic_guest.png?alt=media&token=e19d36fd-59b1-4f6e-899b-d98a1ef2ce6e',
+                                    'id': user.uid,
+                                    'email': 'No email set',
+                                  });
+                                  UserController userController =
+                                      Provider.of<UserController>(context,
+                                          listen: false);
+                                  userController.changeTabIndex(0);
+                                  // userController.getUserStream(user.uid);
 
-                                DocumentSnapshot<Map<String, dynamic>>
-                                    snapshot = await FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(user.uid)
-                                        .get();
-                                UserModel userModel =
-                                    UserModel.fromJson(snapshot);
+                                  DocumentSnapshot<Map<String, dynamic>>
+                                      snapshot = await FirebaseFirestore
+                                          .instance
+                                          .collection('users')
+                                          .doc(user.uid)
+                                          .get();
+                                  UserModel userModel =
+                                      UserModel.fromJson(snapshot);
 
-                                Get.close(1);
-                                Get.offAll(() => SelectAccountType(
-                                      userModelAccount: userModel,
-                                    ));
+                                  Get.close(1);
+                                  Get.offAll(() => SelectAccountType(
+                                        userModelAccount: userModel,
+                                      ));
+                                } catch (e) {
+                                  Get.close(1);
+                                  print(e);
+                                  Get.showSnackbar(
+                                    GetSnackBar(
+                                      message:
+                                          'Something went wrong, please try again!',
+                                      duration: Duration(seconds: 3),
+                                      snackPosition: SnackPosition.TOP,
+                                    ),
+                                  );
+                                }
                               },
                               child: Container(
                                 height: 50,

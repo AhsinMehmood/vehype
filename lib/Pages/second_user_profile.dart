@@ -421,36 +421,46 @@ class _OverviewTabState extends State<OverviewTab> {
   Future<void> getAddressFromLatLng() async {
     latitude = widget.profileModel.lat;
     longitude = widget.profileModel.long;
-    String apiKey =
-        'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E'; // Replace with your Google Maps API key
-    String url =
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+    if (widget.profileModel.businessAddress.isEmpty) {
+      String apiKey =
+          'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E'; // Replace with your Google Maps API key
+      String url =
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
 
-    try {
-      var response = await http.get(Uri.parse(url));
+      try {
+        var response = await http.get(Uri.parse(url));
 
-      if (response.statusCode == 200) {
-        var json = jsonDecode(response.body);
-        if (json['status'] == 'OK' &&
-            json['results'] != null &&
-            json['results'].isNotEmpty) {
-          setState(() {
-            address = json['results'][0]['formatted_address'];
-          });
+        if (response.statusCode == 200) {
+          var json = jsonDecode(response.body);
+          if (json['status'] == 'OK' &&
+              json['results'] != null &&
+              json['results'].isNotEmpty) {
+            setState(() {
+              address = json['results'][0]['formatted_address'];
+            });
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.profileModel.userId)
+                .update({
+              'businessAddress': address,
+            });
+          } else {
+            setState(() {
+              address = 'Address not found';
+            });
+          }
         } else {
           setState(() {
-            address = 'Address not found';
+            address = 'Error retrieving address';
           });
         }
-      } else {
+      } catch (e) {
         setState(() {
-          address = 'Error retrieving address';
+          address = 'Failed to fetch address';
         });
       }
-    } catch (e) {
-      setState(() {
-        address = 'Failed to fetch address';
-      });
+    } else {
+      address = widget.profileModel.businessAddress;
     }
   }
 

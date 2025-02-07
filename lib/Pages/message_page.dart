@@ -1,11 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-
+//Sometimes we can't say everything, but we thought a lot,
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
+
 import 'package:firebase_storage/firebase_storage.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,40 +22,46 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image_select/image_selector.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
 // import 'package:record/record.dart';
 import 'package:toastification/toastification.dart';
 
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vehype/Controllers/chat_controller.dart';
-import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Controllers/vehicle_data.dart';
-import 'package:vehype/Models/chat_model.dart';
-import 'package:vehype/Models/garage_model.dart';
+import '/Controllers/chat_controller.dart';
+import '/Controllers/user_controller.dart';
+import '/Controllers/vehicle_data.dart';
+import '/Models/chat_model.dart';
+import '/Models/garage_model.dart';
 
-import 'package:vehype/Models/message_model.dart';
-import 'package:vehype/Models/offers_model.dart';
-import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/full_image_view_page.dart';
-import 'package:vehype/Pages/owner_active_request_details.dart';
-import 'package:vehype/Pages/owner_request_details_inprogress_inactive_page.dart';
-import 'package:vehype/Pages/service_request_details.dart';
+import '/Models/message_model.dart';
+import '/Models/offers_model.dart';
+import '/Models/user_model.dart';
+import '/Pages/full_image_view_page.dart';
+import '/Pages/owner_active_request_details.dart';
+import '/Pages/owner_request_details_inprogress_inactive_page.dart';
+import '/Pages/service_request_details.dart';
+/*م سب سے بہترین ہو۔ میں بار بار تمہیں تنگ کرتا ہوں، لیکن تم ہر بار صبر اور محبت سے میرا ساتھ دیتی ہو۔ کبھی میں بچے جیسا بن جاتا ہوں جو ہر وقت تمہاری توجہ چاہتا ہے، کبھی میں سمجھدار بننے کی کوشش کرتا ہوں، اور کبھی اتنی بےوقوفی کر بیٹھتا ہوں کہ خود ہنسی آ جاتی ہے۔۔۔
+کبھی میں دل گرفتہ ہو جاتا ہوں، کبھی خود پر اعتماد کھو دیتا ہوں، کبھی میری سوچیں منفی ہو جاتی ہیں، لیکن تم ہر حال میں میرے ساتھ کھڑی رہتی ہو اور مجھے سہارا دیتی ہو۔ تمہارا میری زندگی میں ہونا میرے لیے سب سے بڑی نعمت ہے۔ 🌸
 
-import 'package:vehype/Pages/second_user_profile.dart';
-import 'package:vehype/Pages/shared_location_page.dart';
-import 'package:vehype/Widgets/audio_message.dart';
-import 'package:vehype/Widgets/delete_chat_confirmation_sheet.dart';
+
+
+
+
+*/
+import '/Pages/second_user_profile.dart';
+import '/Pages/shared_location_page.dart';
+import '/Widgets/delete_chat_confirmation_sheet.dart';
+import '/Widgets/loading_dialog.dart';
 // import 'package:vehype/Widgets/offer_request_details.dart';
 
-import 'package:vehype/Widgets/video_player.dart';
+import '/Widgets/video_player.dart';
 
 import 'package:vehype/const.dart';
 
+import '../Controllers/garage_controller.dart';
 import '../Widgets/report_confirmation_sheet.dart';
-import 'share_location_page.dart';
+import '../src/place_picker.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatModel chatModel;
@@ -128,8 +135,7 @@ class _MessagePageState extends State<MessagePage> {
     final ChatController chatController = Provider.of<ChatController>(context);
     // String offerId =
     //     ;
-    final messageQuery =
-        ChatController().getSingleChatStream(widget.chatModel.id);
+
     UserModel userModel = userController.userModel!;
 
     return WillPopScope(
@@ -170,7 +176,7 @@ class _MessagePageState extends State<MessagePage> {
                       builder: (context, snapshot) {
                         OffersModel offersModel =
                             snapshot.data ?? widget.offersModel;
-                        String vehicleId = offersModel.vehicleId;
+
                         return StreamBuilder<OffersReceivedModel>(
                             // s
                             stream: FirebaseFirestore.instance
@@ -906,16 +912,78 @@ class _MessagePageState extends State<MessagePage> {
                                                                   .shrinkWrap, // Adjust tap target size
                                                         ),
                                                         onPressed: () async {
-                                                          Get.to(() =>
-                                                              ShareLocationPage(
-                                                                chatModel: widget
-                                                                    .chatModel,
-                                                                secondUserModel:
+                                                          Get.to(
+                                                            () => PlacePicker(
+                                                              apiKey:
+                                                                  'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                                              selectText:
+                                                                  'Share this location',
+                                                              onTapBack: () {
+                                                                Get.close(1);
+                                                              },
+                                                              onPlacePicked:
+                                                                  (result) async {
+                                                                // Get.dialog(
+                                                                //     LoadingDialog(),
+                                                                //     barrierDismissible:
+                                                                //         false);
+
+                                                                LatLng latLng = LatLng(
+                                                                    result
+                                                                        .geometry!
+                                                                        .location
+                                                                        .lat,
+                                                                    result
+                                                                        .geometry!
+                                                                        .location
+                                                                        .lng);
+
+                                                                chatController.sendMessage(
+                                                                    userController
+                                                                        .userModel!,
+                                                                    widget
+                                                                        .chatModel,
+                                                                    'Location',
                                                                     widget
                                                                         .secondUser,
-                                                                offersModel: widget
-                                                                    .offersModel,
-                                                              ));
+                                                                    '',
+                                                                    '',
+                                                                    false,
+                                                                    widget
+                                                                        .offersModel,
+                                                                    false,
+                                                                    '',
+                                                                    isLocation:
+                                                                        true,
+                                                                    latlng:
+                                                                        latLng);
+
+                                                                Get.close(1);
+                                                                // Get.close(1);
+                                                              },
+                                                              initialPosition:
+                                                                  LatLng(
+                                                                      userModel
+                                                                          .lat,
+                                                                      userModel
+                                                                          .long),
+                                                              // useCurrentLocation: true,
+                                                              selectInitialPosition:
+                                                                  true,
+                                                              resizeToAvoidBottomInset:
+                                                                  false, // only works in page mode, less flickery, remove if wrong offsets
+                                                            ),
+                                                          );
+                                                          // Get.to(() =>
+                                                          //     ShareLocationPage(
+                                                          //       chatModel: widget
+                                                          //           .chatModel,
+                                                          //       secondUserModel:
+                                                          //           widget
+                                                          //               .secondUser,
+                                                          //       offersModel: widget
+                                                          //           .offersModel,
+                                                          //     ));
                                                         },
                                                         icon: Icon(Icons
                                                             .location_on_outlined)),
@@ -1419,25 +1487,58 @@ class _MessagePageState extends State<MessagePage> {
                         child: Container(
                           height: 140,
                           width: Get.width * 0.6,
-                          child: GoogleMap(
-                              onTap: (LatLng l) {
-                                Get.to(() => SharedLocationPage(
-                                    latLng: LatLng(message.lat, message.long)));
-                              },
-                              markers: {
-                                Marker(
-                                    markerId: MarkerId(message.id),
-                                    position: LatLng(message.lat, message.long))
-                              },
-                              zoomControlsEnabled: false,
-                              zoomGesturesEnabled: false,
-                              mapToolbarEnabled: false,
-                              myLocationButtonEnabled: false,
-                              myLocationEnabled: false,
-                              initialCameraPosition: CameraPosition(
+                          child: Stack(
+                            children: [
+                              GoogleMap(
+                                onTap: (LatLng l) {
+                                  Get.to(() => SharedLocationPage(
+                                      latLng:
+                                          LatLng(message.lat, message.long)));
+                                },
+                                zoomControlsEnabled: false,
+                                zoomGesturesEnabled: false,
+                                mapToolbarEnabled: false,
+                                myLocationButtonEnabled: false,
+                                myLocationEnabled: false,
+                                initialCameraPosition: CameraPosition(
                                   zoom: 18,
-                                  target: LatLng(message.lat, message.long))),
-                        ))
+                                  target: LatLng(message.lat, message.long),
+                                ),
+                              ),
+                              Center(
+                                child: SizedBox(
+                                  height: 35,
+                                  width: 35,
+                                  child: Stack(
+                                    children: [
+                                      Image.asset(
+                                        'assets/user.png',
+                                        height: 35,
+                                        width: 35,
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          height: 30,
+                                          width: 30,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(200),
+                                            child: CachedNetworkImage(
+                                              imageUrl: secondUser.profileUrl,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     : SecondUserMessageWidget(
                         textSpans: textSpans,
                         message: message,
@@ -2261,7 +2362,7 @@ class TopBarMessage extends StatelessWidget {
   }
 }
 
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends StatefulWidget {
   const MessageWidget({
     super.key,
     required this.textSpans,
@@ -2272,40 +2373,84 @@ class MessageWidget extends StatelessWidget {
   final MessageModel message;
 
   @override
+  State<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget> {
+  final Completer<GoogleMapController> mapController =
+      Completer<GoogleMapController>();
+
+  @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     return Column(
       children: [
-        if (message.isLocation)
+        if (widget.message.isLocation)
           InkWell(
             onTap: () {
               Get.to(() => SharedLocationPage(
-                  latLng: LatLng(message.lat, message.long)));
+                  latLng: LatLng(widget.message.lat, widget.message.long)));
             },
             child: SizedBox(
               height: 140,
               width: Get.width * 0.6,
-              child: GoogleMap(
-                  onTap: (LatLng l) {
-                    Get.to(() => SharedLocationPage(
-                        latLng: LatLng(message.lat, message.long)));
-                  },
-                  markers: {
-                    Marker(
-                        markerId: MarkerId(message.id),
-                        position: LatLng(message.lat, message.long))
-                  },
-                  zoomControlsEnabled: false,
-                  zoomGesturesEnabled: false,
-                  mapToolbarEnabled: false,
-                  myLocationButtonEnabled: false,
-                  myLocationEnabled: false,
-                  initialCameraPosition: CameraPosition(
-                      zoom: 18, target: LatLng(message.lat, message.long))),
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    onTap: (LatLng l) {
+                      Get.to(() => SharedLocationPage(
+                          latLng:
+                              LatLng(widget.message.lat, widget.message.long)));
+                    },
+                    zoomControlsEnabled: false,
+                    zoomGesturesEnabled: false,
+                    mapToolbarEnabled: false,
+                    myLocationButtonEnabled: false,
+                    myLocationEnabled: false,
+                    onMapCreated: (controller) async {
+                      mapController.complete(controller);
+                    },
+                    initialCameraPosition: CameraPosition(
+                      zoom: 18,
+                      target: LatLng(widget.message.lat, widget.message.long),
+                    ),
+                  ),
+                  Center(
+                    child: SizedBox(
+                      height: 35,
+                      width: 35,
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/user.png',
+                            height: 35,
+                            width: 35,
+                          ),
+                          Align(
+                            alignment: Alignment.topCenter,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              height: 30,
+                              width: 30,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(200),
+                                child: CachedNetworkImage(
+                                  imageUrl:
+                                      userController.userModel!.profileUrl,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         else
-          message.mediaUrl == ''
+          widget.message.mediaUrl == ''
               ? Container(
                   // margin: const EdgeInsets.all(7),
 
@@ -2318,7 +2463,7 @@ class MessageWidget extends StatelessWidget {
                   ),
                   child: RichText(
                     text: TextSpan(
-                      children: textSpans,
+                      children: widget.textSpans,
                       style: TextStyle(
                         // fontFamily: 'Avenir',
                         color: Colors.white,
@@ -2332,11 +2477,11 @@ class MessageWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (message.isVideo)
+                    if (widget.message.isVideo)
                       InkWell(
                         onTap: () {
-                          Get.to(
-                              () => VideoPlayerNetwork(url: message.mediaUrl));
+                          Get.to(() =>
+                              VideoPlayerNetwork(url: widget.message.mediaUrl));
                         },
                         child: SizedBox(
                           height: 200,
@@ -2346,7 +2491,7 @@ class MessageWidget extends StatelessWidget {
                             children: [
                               SizedBox(
                                 child: ClipRRect(
-                                  borderRadius: message.text != ''
+                                  borderRadius: widget.message.text != ''
                                       ? BorderRadius.only(
                                           topLeft: Radius.circular(6),
                                           topRight: Radius.circular(6),
@@ -2360,7 +2505,7 @@ class MessageWidget extends StatelessWidget {
                                     },
                                     errorWidget: (context, url, error) =>
                                         const SizedBox.shrink(),
-                                    imageUrl: message.thumbnailUrl,
+                                    imageUrl: widget.message.thumbnailUrl,
                                     fit: BoxFit.cover,
                                     height: 200,
                                     width: Get.width * 0.75,
@@ -2393,11 +2538,11 @@ class MessageWidget extends StatelessWidget {
                     else
                       InkWell(
                         onTap: () {
-                          Get.to(() =>
-                              FullImagePageView(urls: [message.mediaUrl]));
+                          Get.to(() => FullImagePageView(
+                              urls: [widget.message.mediaUrl]));
                         },
                         child: ClipRRect(
-                          borderRadius: message.text != ''
+                          borderRadius: widget.message.text != ''
                               ? BorderRadius.only(
                                   topLeft: Radius.circular(6),
                                   topRight: Radius.circular(6),
@@ -2411,7 +2556,7 @@ class MessageWidget extends StatelessWidget {
                             },
                             errorWidget: (context, url, error) =>
                                 const SizedBox.shrink(),
-                            imageUrl: message.mediaUrl,
+                            imageUrl: widget.message.mediaUrl,
                             fit: BoxFit.cover,
                             height: 200,
                             width: Get.width * 0.75,
@@ -2421,7 +2566,7 @@ class MessageWidget extends StatelessWidget {
                     // const SizedBox(
                     //   height: 8,
                     // ),
-                    if (message.text != '')
+                    if (widget.message.text != '')
                       Container(
                         // margin: const EdgeInsets.all(7),
                         padding: const EdgeInsets.all(12),
@@ -2438,7 +2583,7 @@ class MessageWidget extends StatelessWidget {
                         ),
                         child: RichText(
                           text: TextSpan(
-                            children: textSpans,
+                            children: widget.textSpans,
                             style: TextStyle(
                               // fontFamily: 'Avenir',
                               color: Colors.white,

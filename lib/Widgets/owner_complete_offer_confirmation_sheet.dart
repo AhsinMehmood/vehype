@@ -1,16 +1,22 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
+import '../Controllers/pdf_generator.dart';
 import '../Controllers/user_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/garage_model.dart';
 import '../Models/offers_model.dart';
+import '../Pages/Invoice/review_share_invoice.dart';
+import 'loading_dialog.dart';
 
 class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
   const OwnerCompleteOfferConfirmationSheet({
@@ -52,11 +58,22 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                     height: 10,
                   ),
                   Text(
-                    'Are You Sure You Want to Complete This Request?',
+                    'Are you sure you want to complete this request?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    '\n\n\nPs. The service cannot make further changes.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(
@@ -71,14 +88,9 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                       OffersController().completeOffer(
                         offersReceivedModel,
                       );
-                      DocumentSnapshot<Map<String, dynamic>> ownerSnap =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(offersReceivedModel.offerBy)
-                              .get();
 
                       NotificationController().sendNotification(
-                          userIds: [UserModel.fromJson(ownerSnap).userId],
+                          userIds: [offersReceivedModel.offerBy],
                           offerId: offersModel.offerId,
                           requestId: offersReceivedModel.id,
                           title: 'Request Completed Successfully',
@@ -100,7 +112,7 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                           offersModel.offerId);
                       if (chatModel != null) {
                         ChatController().updateChatToClose(chatModel.id,
-                            '${userController.userModel!.name} has marked the request as complete.');
+                            '${userController.userModel!.name} has marked the request as completed.');
                       }
                     },
                     style: ElevatedButton.styleFrom(

@@ -53,8 +53,8 @@ class NotificationDialog extends StatelessWidget {
                           'Location Permission.',
                           style: TextStyle(
                             color: Colors.black,
-                            fontFamily: 'Avenir',
-                            fontSize: Get.width * 0.07,
+                            // fontFamily: 'Avenir',
+                            // fontSize: Get.width * 0.07,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -66,7 +66,7 @@ class NotificationDialog extends StatelessWidget {
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             color: Colors.black,
-                            fontFamily: 'Avenir',
+                            // fontFamily: 'Avenir',
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
                           ),
@@ -125,9 +125,9 @@ class NotificationDialog extends StatelessWidget {
                   'Continue',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    // fontSize: 22,
                     // height: Get.height * 0.1,
-                    fontFamily: 'Avenir',
+                    // fontFamily: 'Avenir',
                     fontWeight: FontWeight.w800,
                   ),
                 )),

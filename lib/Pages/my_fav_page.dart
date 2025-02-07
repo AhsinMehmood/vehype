@@ -48,13 +48,6 @@ class MyFavPage extends StatelessWidget {
               .snapshots(),
           builder: (context,
               AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                ),
-              );
-            }
             if (!snap.hasData) {
               return Center(
                 child: Text(
@@ -156,6 +149,8 @@ class _ProviderShortWidget extends State<ProviderShortWidget> {
                                   userId: widget.profile.userId));
                             },
                             child: CachedNetworkImage(
+                                width: 200,
+                                fit: BoxFit.cover,
                                 placeholder: (context, url) {
                                   return Center(
                                     child: CircularProgressIndicator(),

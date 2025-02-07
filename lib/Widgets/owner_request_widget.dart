@@ -226,24 +226,24 @@ class OwnerRequestWidget extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          SvgPicture.asset(
-                            getVehicleType()
-                                .firstWhere((test) =>
-                                    test.title ==
-                                    garageModel.bodyStyle
-                                        .split(',')
-                                        .first
-                                        .trim())
-                                .icon,
-                            height: 20,
-                            width: 20,
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ),
+                          // SvgPicture.asset(
+                          //   getVehicleType()
+                          //       .firstWhere((test) =>
+                          //           test.title ==
+                          //           garageModel.bodyStyle
+                          //               .split(',')
+                          //               .first
+                          //               .trim())
+                          //       .icon,
+                          //   height: 20,
+                          //   width: 20,
+                          //   color: userController.isDark
+                          //       ? Colors.white
+                          //       : primaryColor,
+                          // ),
+                          // const SizedBox(
+                          //   width: 8,
+                          // ),
                           Text(
                             garageModel.bodyStyle,
                             style: TextStyle(
@@ -327,28 +327,28 @@ class OwnerRequestWidget extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Start at: ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                Text(
-                                  formatDateTime(
-                                    DateTime.parse(
-                                      offersReceivedModel!.startDate,
-                                    ).toLocal(),
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            // Row(
+                            //   children: [
+                            //     Text(
+                            //       'Start at: ',
+                            //       style: TextStyle(
+                            //         fontSize: 16,
+                            //         fontWeight: FontWeight.w400,
+                            //       ),
+                            //     ),
+                            //     Text(
+                            //       formatDateTime(
+                            //         DateTime.parse(
+                            //           offersReceivedModel!.startDate,
+                            //         ).toLocal(),
+                            //       ),
+                            //       style: TextStyle(
+                            //         fontSize: 16,
+                            //         fontWeight: FontWeight.w700,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
 
                             // const SizedBox(
                             //   height: 15,

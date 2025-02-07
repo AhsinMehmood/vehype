@@ -6,14 +6,14 @@
     "configurations": [
 
 
-        // {
-        //   "name": "Ahsin iPhone Wireless",
-        //   "request": "launch",
-        //   "type": "dart",
-        //   "program": "lib/main.dart",
-        //   // "toolArgs": ["--flavor", "prod"],
-        //   // "deviceId": "00008030-0012286E3AD0402E"
-        // },
+        {
+          "name": "Android Emulator",
+          "request": "launch",
+          "type": "dart",
+          "program": "lib/main.dart",
+          // "toolArgs": ["--flavor", "prod"],
+          "deviceId": "emulator-5554"
+        },
         // {
         //   "name": "Flutter on Device 2",
         //   "request": "launch",

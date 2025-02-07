@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+/// There we go again with your mixed signals and my overthinking.
 // import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,7 +22,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:just_audio/just_audio.dart';
+// import 'package:just_audio/just_audio.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 // import 'package:image_select/image_selector.dart';
@@ -51,11 +52,11 @@ enum AccountType {
 
 class UserController with ChangeNotifier {
   // EventBus eventBus = EventBus();
-  AudioPlayer? currentPlayer;
-  setCurrentPlayer(AudioPlayer? event) {
-    currentPlayer = event;
-    notifyListeners();
-  }
+  // AudioPlayer? currentPlayer;
+  // setCurrentPlayer(AudioPlayer? event) {
+  //   currentPlayer = event;
+  //   notifyListeners();
+  // }
 
   final Completer<GoogleMapController> mapController =
       Completer<GoogleMapController>();
@@ -304,7 +305,7 @@ class UserController with ChangeNotifier {
     // Get.dialog(const LoadingDialog(), barrierDismissible: false);
     // await updateToken(userModel.userId, '');
     await OneSignal.logout();
-
+    mixPanelController.trackEvent(eventName: 'Logout ', data: {});
     streamSubscription?.cancel();
     OffersProvider offersProvider =
         Provider.of<OffersProvider>(buildContext, listen: false);

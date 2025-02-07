@@ -289,7 +289,7 @@ class _PlacePickerState extends State<PlacePicker> {
     return WillPopScope(
         onWillPop: () {
           searchBarController.clearOverlay();
-          return Future.value(true);
+          return Future.value(widget.onTapBack == null ? false : true);
         },
         child: Scaffold(
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -367,20 +367,21 @@ class _PlacePickerState extends State<PlacePicker> {
     return Row(
       children: <Widget>[
         SizedBox(width: 15),
-        IconButton(
-            onPressed: () {
-              provider?.debounceTimer?.cancel();
-              if (widget.onTapBack != null) {
-                widget.onTapBack!();
-                return;
-              }
-              Navigator.maybePop(context);
-            },
-            icon: Icon(
-              Icons.arrow_back_ios,
-            ),
-            color: userController.isDark ? Colors.white : primaryColor,
-            padding: EdgeInsets.zero),
+        if (widget.onTapBack != null)
+          IconButton(
+              onPressed: () {
+                provider?.debounceTimer?.cancel();
+                if (widget.onTapBack != null) {
+                  widget.onTapBack!();
+                  return;
+                }
+                Navigator.maybePop(context);
+              },
+              icon: Icon(
+                Icons.arrow_back_ios,
+              ),
+              color: userController.isDark ? Colors.white : primaryColor,
+              padding: EdgeInsets.zero),
         Expanded(
           child: AutoCompleteSearch(
               appBarKey: appBarKey,

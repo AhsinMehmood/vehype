@@ -6,13 +6,20 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
+
+import '../Models/user_model.dart';
+import '../Pages/select_account_type_page.dart';
+import '../Pages/splash_page.dart';
+import '../Pages/tabs_page.dart';
 
 class LoginSheet extends StatelessWidget {
   final Function onSuccess;
@@ -73,7 +80,6 @@ class LoginSheet extends StatelessWidget {
               onTap: () async {
                 final GoogleSignIn _googleSignIn = GoogleSignIn();
                 try {
-                  Get.dialog(LoadingDialog(), barrierDismissible: false);
                   // Trigger Google Sign-In flow
                   final GoogleSignInAccount? googleUser =
                       await _googleSignIn.signIn();
@@ -81,11 +87,11 @@ class LoginSheet extends StatelessWidget {
                   if (googleUser == null) {
                     // Get.close(1);
 
-                    // return null; // The user canceled the sign-in
+                    return; // The user canceled the sign-in
                   }
 
                   final GoogleSignInAuthentication googleAuth =
-                      await googleUser!.authentication;
+                      await googleUser.authentication;
 
                   // Create a new credential
                   final AuthCredential credential =
@@ -97,11 +103,13 @@ class LoginSheet extends StatelessWidget {
                   // Link Google account with anonymous user
 
                   try {
+                    Get.dialog(LoadingDialog(), barrierDismissible: false);
+
                     // Example: Link Google credential to an anonymous user
                     UserCredential userCredential = await FirebaseAuth
                         .instance.currentUser!
                         .linkWithCredential(credential);
-                    print("Successfully linked: ${userCredential.user!.uid}");
+                    // print("Successfully linked: ${userCredential.user!.uid}");
                     toastification.show(
                       context: context,
                       title: Text('Successfully linked'),
@@ -128,20 +136,125 @@ class LoginSheet extends StatelessWidget {
                     onSuccess();
                   } on FirebaseAuthException catch (e) {
                     Get.close(1);
-                    GoogleSignIn().signOut();
-                    GoogleSignIn().disconnect();
 
                     if (e.code == 'credential-already-in-use') {
-                      toastification.show(
-                        context: context,
-                        title: Text(
-                            'The account is already linked with another account.'),
-                        style: ToastificationStyle.minimal,
-                        type: ToastificationType.error,
-                        autoCloseDuration: const Duration(seconds: 4),
-                      );
+                      Get.dialog(Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        // insetPadding: const EdgeInsets.all(12),
+                        backgroundColor:
+                            userController.isDark ? primaryColor : Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Account Linked to Another User',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'The selected account is already linked to another user. You can either use a different account or proceed.\nNote: Proceeding will overwrite any added vehicles or other data associated with this session.',
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: userController.isDark
+                                        ? Colors.white70
+                                        : Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        GoogleSignIn().signOut();
+                                        GoogleSignIn().disconnect();
+                                        Get.close(1);
+                                      },
+                                      child: Text(
+                                        'Use Different Account',
+                                        style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Get.dialog(LoadingDialog(),
+                                            barrierDismissible: false);
+                                        SharedPreferences sharedPreferences =
+                                            await SharedPreferences
+                                                .getInstance();
+                                        // Sign in with the credential instead of linking
+                                        UserCredential userCredential =
+                                            await FirebaseAuth.instance
+                                                .signInWithCredential(
+                                                    credential);
+                                        String userId =
+                                            userCredential.user!.uid;
+                                        sharedPreferences.setString(
+                                            'userId', userId);
+
+                                        toastification.show(
+                                          context: context,
+                                          title: Text(
+                                              'Logged in with existing account'),
+                                          style: ToastificationStyle.minimal,
+                                          type: ToastificationType.success,
+                                          autoCloseDuration:
+                                              const Duration(seconds: 4),
+                                        );
+                                        userController.changeTabIndex(0);
+                                        Get.offAll(() => SplashPage());
+
+                                        // Handle "Proceed"
+                                      },
+                                      style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          backgroundColor:
+                                              Colors.green.withOpacity(0.4)),
+                                      child: Text(
+                                        'Proceed',
+                                        style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ));
                     } else if (e.code ==
                         'account-exists-with-different-credential') {
+                      GoogleSignIn().signOut();
+                      GoogleSignIn().disconnect();
                       toastification.show(
                         context: context,
                         title: Text(
@@ -152,6 +265,8 @@ class LoginSheet extends StatelessWidget {
                       );
                       // You can fetch available sign-in methods here:
                     } else if (e.code == 'requires-recent-login') {
+                      GoogleSignIn().signOut();
+                      GoogleSignIn().disconnect();
                       toastification.show(
                         context: context,
                         title: Text(
@@ -161,6 +276,8 @@ class LoginSheet extends StatelessWidget {
                         autoCloseDuration: const Duration(seconds: 4),
                       );
                     } else {
+                      GoogleSignIn().signOut();
+                      GoogleSignIn().disconnect();
                       print('Error occurred: ${e.message}');
                     }
                   }
@@ -238,23 +355,22 @@ class LoginSheet extends StatelessWidget {
               InkWell(
                 borderRadius: BorderRadius.circular(6),
                 onTap: () async {
+                  final appleCredential =
+                      await SignInWithApple.getAppleIDCredential(
+                    scopes: [
+                      AppleIDAuthorizationScopes.email,
+                      AppleIDAuthorizationScopes.fullName,
+                    ],
+                  );
+
+                  // Create OAuth credential for Firebase
+                  final oauthCredential = OAuthProvider("apple.com").credential(
+                    idToken: appleCredential.identityToken,
+                    accessToken: appleCredential.authorizationCode,
+                  );
                   try {
                     Get.dialog(LoadingDialog(), barrierDismissible: false);
                     // Perform Apple Sign-In
-                    final appleCredential =
-                        await SignInWithApple.getAppleIDCredential(
-                      scopes: [
-                        AppleIDAuthorizationScopes.email,
-                        AppleIDAuthorizationScopes.fullName,
-                      ],
-                    );
-
-                    // Create OAuth credential for Firebase
-                    final oauthCredential =
-                        OAuthProvider("apple.com").credential(
-                      idToken: appleCredential.identityToken,
-                      accessToken: appleCredential.authorizationCode,
-                    );
 
                     // Sign in the user or link with the Apple account
                     User user = FirebaseAuth.instance.currentUser!;
@@ -280,18 +396,124 @@ class LoginSheet extends StatelessWidget {
                     onSuccess();
                   } on FirebaseAuthException catch (e) {
                     Get.close(1);
-
                     if (e.code == 'credential-already-in-use') {
-                      toastification.show(
-                        context: context,
-                        title: Text(
-                            'Apple credential already in use by another account.'),
-                        style: ToastificationStyle.minimal,
-                        type: ToastificationType.error,
-                        autoCloseDuration: const Duration(seconds: 4),
-                      );
+                      Get.dialog(Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        // insetPadding: const EdgeInsets.all(12),
+                        backgroundColor:
+                            userController.isDark ? primaryColor : Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Account Linked to Another User',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: userController.isDark
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'The selected account is already linked to another user. You can either use a different account or proceed.\nNote: Proceeding will overwrite any added vehicles or other data associated with this session.',
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: userController.isDark
+                                        ? Colors.white70
+                                        : Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        GoogleSignIn().signOut();
+                                        GoogleSignIn().disconnect();
+                                        Get.close(1);
+                                      },
+                                      child: Text(
+                                        'Use Different Account',
+                                        style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Get.dialog(LoadingDialog(),
+                                            barrierDismissible: false);
+                                        UserCredential userCredential =
+                                            await FirebaseAuth.instance
+                                                .signInWithCredential(
+                                                    oauthCredential);
+                                        SharedPreferences sharedPreferences =
+                                            await SharedPreferences
+                                                .getInstance();
+
+                                        String userId =
+                                            userCredential.user!.uid;
+                                        sharedPreferences.setString(
+                                            'userId', userId);
+
+                                        toastification.show(
+                                          context: context,
+                                          title: Text(
+                                              'Logged in with existing account'),
+                                          style: ToastificationStyle.minimal,
+                                          type: ToastificationType.success,
+                                          autoCloseDuration:
+                                              const Duration(seconds: 4),
+                                        );
+                                        userController.changeTabIndex(0);
+                                        Get.offAll(() => SplashPage());
+
+                                        // Handle "Proceed"
+                                      },
+                                      style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          backgroundColor:
+                                              Colors.green.withOpacity(0.4)),
+                                      child: Text(
+                                        'Proceed',
+                                        style: TextStyle(
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ));
                     } else if (e.code ==
                         'account-exists-with-different-credential') {
+                      // Get.close(1);
+
                       toastification.show(
                         context: context,
                         title: Text(
@@ -301,6 +523,8 @@ class LoginSheet extends StatelessWidget {
                         autoCloseDuration: const Duration(seconds: 4),
                       );
                     } else if (e.code == 'requires-recent-login') {
+                      // Get.close(1);
+
                       toastification.show(
                         context: context,
                         title: Text(
@@ -310,7 +534,7 @@ class LoginSheet extends StatelessWidget {
                         autoCloseDuration: const Duration(seconds: 4),
                       );
                     } else {
-                      Get.close(1);
+                      // Get.close(1);
 
                       print('Error occurred: ${e.message}');
                     }

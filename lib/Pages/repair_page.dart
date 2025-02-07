@@ -17,9 +17,12 @@ import 'package:vehype/Widgets/owner_inactive_offers_page_widget.dart';
 import 'package:vehype/Widgets/owner_inprogress_page_widget.dart';
 import 'package:vehype/const.dart';
 
+import '../Controllers/mix_panel_controller.dart';
 import 'choose_account_type.dart';
 
 import 'owner_notifications_page.dart';
+
+final mixPanelController = Get.find<MixPanelController>();
 
 class RepairPage extends StatelessWidget {
   const RepairPage({super.key});
@@ -52,7 +55,8 @@ class RepairPage extends StatelessWidget {
               // OneSignal.login(userModel.userId);
               // await sendNotification(userModel.userId, userModel.name);
               // print(dd);
-
+              mixPanelController.trackEvent(
+                  eventName: 'Opened Create New Request Page', data: {});
               Get.to(() => CreateRequestPage(
                     offersModel: null,
                   ));
@@ -89,6 +93,8 @@ class RepairPage extends StatelessWidget {
                     //     subtitle: 'subtitle',
                     //     userTokens: [userModel.pushToken]);
                     // log(userModel.pushToken);
+                        mixPanelController.trackEvent(
+                  eventName: 'Opened Owner Notifications Page', data: {});
                     Get.to(() => OwnerNotificationsPage(
                           offers: ownerOffersNeedsToCheck,
                         ));

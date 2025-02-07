@@ -281,6 +281,7 @@ class _ExplorePageState extends State<ExplorePage> {
                       mapType: isSatLite ? MapType.satellite : MapType.normal,
                       zoomControlsEnabled: false,
                       zoomGesturesEnabled: true,
+                      minMaxZoomPreference: MinMaxZoomPreference(5, 20),
                       myLocationButtonEnabled: false,
                       onCameraMove: (position) {
                         lat = position.target.latitude;

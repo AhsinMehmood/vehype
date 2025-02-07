@@ -153,7 +153,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                     }
                     OffersReceivedModel? offersReceivedModel;
 
-                    if (offersReceivedSnap.data!.exists) {
+                    if (offersReceivedSnap.data != null && offersReceivedSnap.data!.exists) {
                       // print('object');
                       offersReceivedModel = OffersReceivedModel.fromJson(
                           offersReceivedSnap.data!);
@@ -1295,20 +1295,46 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                                               ),
                                               child: Row(
                                                 children: [
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        Get.back();
-                                                      },
-                                                      icon: Icon(
-                                                        Icons
-                                                            .arrow_back_ios_new,
+                                                  Container(
+                                                    margin:
+                                                        const EdgeInsets.all(4),
+                                                    padding:
+                                                        const EdgeInsets.all(5),
+                                                    decoration: BoxDecoration(
                                                         color: opacity < 0.5
-                                                            ? Colors.white
+                                                            ? userController
+                                                                    .isDark
+                                                                ? primaryColor
+                                                                : Colors.white
                                                             : userController
                                                                     .isDark
-                                                                ? Colors.white
-                                                                : primaryColor,
-                                                      )),
+                                                                ? primaryColor
+                                                                : Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8)),
+                                                    child: Center(
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          Get.back();
+                                                        },
+                                                        child: Icon(
+                                                          // size: 18,
+                                                          Icons
+                                                              .arrow_back_ios_new,
+                                                          color: opacity < 0.5
+                                                              ? userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                  : primaryColor
+                                                              : userController
+                                                                      .isDark
+                                                                  ? Colors.white
+                                                                  : primaryColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                   Opacity(
                                                     opacity: opacity,
                                                     child: Column(

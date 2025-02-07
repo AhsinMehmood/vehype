@@ -52,78 +52,94 @@ class SelectAccountType extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(6),
                     onTap: () async {
-                      // if (2 == 2) {
-                      //   await FirebaseAuth.instance.signOut();
+                      try {
+                        Get.dialog(const LoadingDialog(),
+                            barrierDismissible: false);
 
-                      //   return;
-                      // }
-                      Get.dialog(const LoadingDialog(),
-                          barrierDismissible: false);
-
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userModelAccount.userId)
-                          .update({
-                        'accountType': 'provider',
-                      });
-                      LatLng latLng = await UserController().getLocations();
-
-                      final GeoFirePoint geoFirePoint = GeoFirePoint(
-                          GeoPoint(latLng.latitude, latLng.longitude));
-                      DocumentSnapshot<Map<String, dynamic>> userSNap =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc('${userModelAccount.userId}provider')
-                              .get();
-                      if (userSNap.exists) {
                         await FirebaseFirestore.instance
                             .collection('users')
-                            .doc(userSNap.id)
+                            .doc(userModelAccount.userId)
                             .update({
-                          'isDelete': false,
                           'accountType': 'provider',
-                          'name': userModelAccount.name,
                         });
-                      } else {
-                        await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc('${userModelAccount.userId}provider')
-                            .set({
-                          'accountType': 'provider',
-                          'name': userModelAccount.name,
-                          // 'accountType': 'owner',
-                          'profileUrl': userModelAccount.profileUrl,
-                          'id': '${userModelAccount.userId}provider',
-                          'email': userModelAccount.email,
-                          'status': 'active',
-                          'lat': latLng.latitude,
-                          'long': latLng.longitude,
-                          'geo': geoFirePoint.data,
-                        });
-                      }
 
-                      OneSignal.login('${userModelAccount.userId}provider');
-
-                      userController.getUserStream(
-                        '${userModelAccount.userId}provider',
-                      );
-                      DocumentSnapshot<Map<String, dynamic>> usersnap =
+                        DocumentSnapshot<Map<String, dynamic>> userSNap =
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc('${userModelAccount.userId}provider')
+                                .get();
+                        if (userSNap.exists) {
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(userSNap.id)
+                              .update({
+                            'isDelete': false,
+                            'accountType': 'provider',
+                            'name': userModelAccount.name,
+                          });
+                        } else {
                           await FirebaseFirestore.instance
                               .collection('users')
                               .doc('${userModelAccount.userId}provider')
-                              .get();
-                      OffersProvider offersProvider =
-                          Provider.of<OffersProvider>(context, listen: false);
-                      offersProvider
-                          .startListening(UserModel.fromJson(usersnap));
-                      offersProvider.startListeningOffers(
-                          UserModel.fromJson(usersnap).userId);
+                              .set({
+                            'accountType': 'provider',
+                            'name': userModelAccount.name,
+                            // 'accountType': 'owner',
+                            'profileUrl': userModelAccount.profileUrl,
+                            'id': '${userModelAccount.userId}provider',
+                            'email': userModelAccount.email,
+                            'status': 'active',
+                          });
+                        }
 
-                      // await OneSignal.Notifications.requestPermission(true);
+                        OneSignal.login('${userModelAccount.userId}provider');
 
-                      Get.close(1);
+                        userController.getUserStream(
+                          '${userModelAccount.userId}provider',
+                        );
+                        DocumentSnapshot<Map<String, dynamic>> usersnap =
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc('${userModelAccount.userId}provider')
+                                .get();
+                        OffersProvider offersProvider =
+                            Provider.of<OffersProvider>(context, listen: false);
+                        offersProvider
+                            .startListening(UserModel.fromJson(usersnap));
+                        offersProvider.startListeningOffers(
+                            UserModel.fromJson(usersnap).userId);
 
-                      Get.offAll(() => const TabsPage());
+                        // await OneSignal.Notifications.requestPermission(true);
+
+                        Get.close(1);
+
+                        Get.bottomSheet(
+                          LocationPermissionSheet(
+                            userController: userController,
+                            isProvider: true,
+                          ),
+                          backgroundColor: userController.isDark
+                              ? primaryColor
+                              : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(6),
+                              topRight: Radius.circular(6),
+                            ),
+                          ),
+                          isDismissible: false,
+                          // enableDrag: false,
+                        );
+                      } catch (e) {
+                        Get.close(1);
+                        Get.showSnackbar(GetSnackBar(
+                          message:
+                              'Something went wrong please try again later!',
+                          snackPosition: SnackPosition.TOP,
+                          duration: Duration(seconds: 3),
+                        ));
+                        print(e);
+                      }
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -150,7 +166,7 @@ class SelectAccountType extends StatelessWidget {
                             Text(
                               'I\'m Service Owner',
                               style: TextStyle(
-                                fontFamily: 'Avenir',
+                                // fontFamily: 'Avenir',
                                 fontWeight: FontWeight.w600,
                                 fontSize: 17,
                                 color: Colors.black.withOpacity(0.8),
@@ -178,10 +194,10 @@ class SelectAccountType extends StatelessWidget {
                       });
                       OneSignal.login('${userModelAccount.userId}seeker');
 
-                      LatLng latLng = await UserController().getLocations();
+                      // LatLng latLng = await UserController().getLocations();
 
-                      final GeoFirePoint geoFirePoint = GeoFirePoint(
-                          GeoPoint(latLng.latitude, latLng.longitude));
+                      // final GeoFirePoint geoFirePoint = GeoFirePoint(
+                      //     GeoPoint(latLng.latitude, latLng.longitude));
                       DocumentSnapshot<Map<String, dynamic>> userSNap =
                           await FirebaseFirestore.instance
                               .collection('users')
@@ -208,9 +224,9 @@ class SelectAccountType extends StatelessWidget {
                           'id': '${userModelAccount.userId}seeker',
                           'email': userModelAccount.email,
                           'status': 'active',
-                          'lat': latLng.latitude,
-                          'long': latLng.longitude,
-                          'geo': geoFirePoint.data,
+                          // 'lat': latLng.latitude,
+                          // 'long': latLng.longitude,
+                          // 'geo': geoFirePoint.data,
                         });
                       }
                       userController
@@ -231,7 +247,19 @@ class SelectAccountType extends StatelessWidget {
 
                       Get.close(1);
 
-                      Get.offAll(() => const TabsPage());
+                      Get.bottomSheet(
+                        LocationPermissionSheet(userController: userController),
+                        backgroundColor:
+                            userController.isDark ? primaryColor : Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(6),
+                            topRight: Radius.circular(6),
+                          ),
+                        ),
+                        isDismissible: false,
+                        // enableDrag: false,
+                      );
                       // await OneSignal.Notifications.requestPermission(true);
                     },
                     child: Card(

@@ -51,6 +51,8 @@ class OffersProvider extends ChangeNotifier {
 
   void startListeningOffers(String userId) {
     try {
+      // log(2.toString());
+
       _offersReceivedSubscription = FirebaseFirestore.instance
           .collection('offersReceived')
           .where('offerBy', isEqualTo: userId)
@@ -66,8 +68,11 @@ class OffersProvider extends ChangeNotifier {
 
         notifyListeners();
       });
+      log(2.toString());
     } catch (e) {
-      print(e);
+      // log(2.toString());
+
+      log(e.toString());
     }
   }
 

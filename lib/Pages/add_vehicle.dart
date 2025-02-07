@@ -583,10 +583,15 @@ class _AddVehicleState extends State<AddVehicle> {
                   height: 20,
                 ),
                 if (garageController.selectedVehicleType != null &&
-                    garageController.selectedVehicleType!.title ==
-                        'Passenger vehicle' &&
+                    (titleMapping[
+                                garageController.selectedVehicleType!.title] ==
+                            'Passenger vehicle' ||
+                        titleMapping[
+                                garageController.selectedVehicleType!.title] ==
+                            'Pickup Trucks') &&
                     !garageController.isCustomModel &&
-                    !garageController.isCustomMake)
+                    !garageController.isCustomMake &&
+                    garageController.vehicleSubModels.isNotEmpty)
                   InkWell(
                     onTap: () async {
                       if (garageController.selectedVehicleModel != null) {
@@ -680,8 +685,12 @@ class _AddVehicleState extends State<AddVehicle> {
                     ),
                   ),
                 if (garageController.selectedVehicleType != null &&
-                    garageController.selectedVehicleType!.title ==
-                        'Passenger vehicle' &&
+                    (titleMapping[
+                                garageController.selectedVehicleType!.title] ==
+                            'Passenger vehicle' ||
+                        titleMapping[
+                                garageController.selectedVehicleType!.title] ==
+                            'Pickup Trucks') &&
                     !garageController.isCustomModel)
                   const SizedBox(
                     height: 20,
@@ -790,7 +799,9 @@ class _AddVehicleState extends State<AddVehicle> {
                           borderRadius: BorderRadius.circular(6),
                         )),
                     child: Text(
-                      'Save Vehicle',
+                      widget.garageModel == null
+                          ? 'Save Vehicle'
+                          : 'Update Vehicle',
                       style: TextStyle(
                         color:
                             userController.isDark ? primaryColor : Colors.white,
@@ -922,6 +933,25 @@ class _MakePickerState extends State<MakePicker> {
                                           vehicleTypeId: 0),
                                       true);
                                   Get.close(1);
+                                  showModalBottomSheet(
+                                      context: context,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15),
+                                      )),
+                                      constraints: BoxConstraints(
+                                        minHeight: Get.height * 0.7,
+                                        maxHeight: Get.height * 0.7,
+                                      ),
+                                      // isScrollControlled: true,
+                                      // showDragHandle: true,
+                                      builder: (context) {
+                                        return YearPicker();
+                                      }).then((value) {
+                                    // editProfileProvider
+                                    //     .upadeteUpcomingDestinations(userModel);
+                                  });
                                 },
                                 child: Container(
                                   height: 50,
@@ -1000,6 +1030,25 @@ class _MakePickerState extends State<MakePicker> {
                             onTap: () {
                               garageController.selectMake(bodyStyle, false);
                               Get.close(1);
+                              showModalBottomSheet(
+                                  context: context,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  )),
+                                  constraints: BoxConstraints(
+                                    minHeight: Get.height * 0.7,
+                                    maxHeight: Get.height * 0.7,
+                                  ),
+                                  // isScrollControlled: true,
+                                  // showDragHandle: true,
+                                  builder: (context) {
+                                    return YearPicker();
+                                  }).then((value) {
+                                // editProfileProvider
+                                //     .upadeteUpcomingDestinations(userModel);
+                              });
                             },
                             child: Column(
                               children: [
@@ -1081,6 +1130,25 @@ class _MakePickerState extends State<MakePicker> {
                             onTap: () {
                               garageController.selectMake(bodyStyle, false);
                               Get.close(1);
+                              showModalBottomSheet(
+                                  context: context,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  )),
+                                  constraints: BoxConstraints(
+                                    minHeight: Get.height * 0.7,
+                                    maxHeight: Get.height * 0.7,
+                                  ),
+                                  // isScrollControlled: true,
+                                  // showDragHandle: true,
+                                  builder: (context) {
+                                    return YearPicker();
+                                  }).then((value) {
+                                // editProfileProvider
+                                //     .upadeteUpcomingDestinations(userModel);
+                              });
                             },
                             child: Column(
                               children: [
@@ -1196,6 +1264,27 @@ class YearPicker extends StatelessWidget {
                           onTap: () {
                             garageController.selectYear(year.toString());
                             Get.close(1);
+                            showModalBottomSheet(
+                                context: context,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                )),
+                                // constraints: BoxConstraints(
+                                //   minHeight: Get.height * 0.7,
+                                //   maxHeight: Get.height * 0.7,
+                                // ),
+                                isScrollControlled: true,
+                                // showDragHandle: true,
+                                builder: (context) {
+                                  return ModelPicker(
+                                      // listOfModels: vehicleMakeList,
+                                      );
+                                }).then((value) {
+                              // editProfileProvider
+                              //     .upadeteUpcomingDestinations(userModel);
+                            });
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -1263,9 +1352,31 @@ class BodyStylePicker extends StatelessWidget {
               for (VehicleType bodyStyle in getVehicleType())
                 InkWell(
                   onTap: () {
+                    // VehicleType vehicleType = VehicleType(
+                    //     title: titleMapping[bodyStyle.title]!,
+                    //     icon: bodyStyle.icon);
                     garageController.selectVehicleType(bodyStyle);
 
                     Get.close(1);
+                    showModalBottomSheet(
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15),
+                        )),
+                        // constraints: BoxConstraints(
+                        //   minHeight: Get.height * 0.7,
+                        //   maxHeight: Get.height * 0.7,
+                        // ),
+                        isScrollControlled: true,
+                        // showDragHandle: true,
+                        builder: (context) {
+                          return MakePicker();
+                        }).then((value) {
+                      // editProfileProvider
+                      //     .upadeteUpcomingDestinations(userModel);
+                    });
                   },
                   child: Column(
                     children: [
@@ -1309,8 +1420,9 @@ class BodyStylePicker extends StatelessWidget {
                               ),
                             ),
                             if (garageController.selectedVehicleType != null &&
-                                garageController.selectedVehicleType!.id ==
-                                    bodyStyle.id)
+                                garageController.selectedVehicleType!.title
+                                        .toLowerCase() ==
+                                    bodyStyle.title.toLowerCase())
                               Container(
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
@@ -1530,6 +1642,34 @@ class _ModelPickerState extends State<ModelPicker> {
                           onTap: () {
                             garageController.selectModel(bodyStyle, false);
                             Get.close(1);
+                            if (titleMapping[garageController
+                                        .selectedVehicleType!.title] ==
+                                    'Passenger vehicle' ||
+                                titleMapping[garageController
+                                        .selectedVehicleType!.title] ==
+                                    'Pickup Trucks') {
+                              showModalBottomSheet(
+                                  context: context,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  )),
+                                  // constraints: BoxConstraints(
+                                  //   minHeight: Get.height * 0.7,
+                                  //   maxHeight: Get.height * 0.7,
+                                  // ),
+                                  isScrollControlled: true,
+                                  // showDragHandle: true,
+                                  builder: (context) {
+                                    return SubModelPicker(
+                                        // listOfModels: vehicleMakeList,
+                                        );
+                                  }).then((value) {
+                                // editProfileProvider
+                                //     .upadeteUpcomingDestinations(userModel);
+                              });
+                            }
                           },
                           child: Column(
                             children: [
@@ -1600,6 +1740,34 @@ class _ModelPickerState extends State<ModelPicker> {
                           onTap: () {
                             garageController.selectModel(bodyStyle, false);
                             Get.close(1);
+                            if (titleMapping[garageController
+                                        .selectedVehicleType!.title] ==
+                                    'Passenger vehicle' ||
+                                titleMapping[garageController
+                                        .selectedVehicleType!.title] ==
+                                    'Pickup Trucks') {
+                              showModalBottomSheet(
+                                  context: context,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  )),
+                                  // constraints: BoxConstraints(
+                                  //   minHeight: Get.height * 0.7,
+                                  //   maxHeight: Get.height * 0.7,
+                                  // ),
+                                  isScrollControlled: true,
+                                  // showDragHandle: true,
+                                  builder: (context) {
+                                    return SubModelPicker(
+                                        // listOfModels: vehicleMakeList,
+                                        );
+                                  }).then((value) {
+                                // editProfileProvider
+                                //     .upadeteUpcomingDestinations(userModel);
+                              });
+                            }
                           },
                           child: Column(
                             children: [

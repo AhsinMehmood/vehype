@@ -9,8 +9,8 @@ class MasonryView extends StatelessWidget {
   const MasonryView({
     super.key,
     required this.listOfItem,
-    this.itemPadding = 4.0,
-    this.itemRadius = 20,
+    this.itemPadding = 2.0,
+    this.itemRadius = 10,
     required this.itemBuilder,
   });
 
