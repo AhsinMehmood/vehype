@@ -230,9 +230,44 @@ TextStyle textButtonStyle() {
       color: Colors.black54);
 }
 
+String apiKey = 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E';
+Future<String> getCountryFromLatLng(double latitude, double longitude) async {
+// Replace with your Google Maps API key
+  String url =
+      'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
+
+  try {
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var json = jsonDecode(response.body);
+      if (json['status'] == 'OK' &&
+          json['results'] != null &&
+          json['results'].isNotEmpty) {
+        // print(json['results'][0].toString());
+        for (var result in json['results']) {
+          for (var component in result['address_components']) {
+            if (component['types'].contains('country')) {
+              return component[
+                  'short_name']; // Returns country code (e.g., "US", "PK")
+            }
+          }
+        }
+        return '';
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  } catch (e) {
+    print(e);
+    return '';
+  }
+}
+
 Future<String> getAddressFromLatLng(double latitude, double longitude) async {
-  String apiKey =
-      'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E'; // Replace with your Google Maps API key
+  // Replace with your Google Maps API key
   String url =
       'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey';
 

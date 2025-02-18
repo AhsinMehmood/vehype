@@ -2,6 +2,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/user_controller.dart';
+import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Pages/Invoice/all_product_and_services.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
 import 'package:vehype/Pages/manage_prefs.dart';
@@ -466,10 +468,19 @@ class ProfilePage extends StatelessWidget {
                                 if (snapshot.data == null) {
                                   return SizedBox.shrink();
                                 }
+                                // https://www.facebook.com/share/v/1AvwZ3V829/
                                 return Column(
                                   children: [
                                     InkWell(
-                                      onTap: () async {},
+                                      onTap: () async {
+                                        // await FirebaseFirestore.instance
+                                        //     .collection('users')
+                                        //     .doc(userModel.userId)
+                                        //     .update({
+                                        //   'contactInfo': '',
+                                        //   'isBusinessSetup': false,
+                                        // });
+                                      },
                                       child: Text(
                                         'App Version: ${snapshot.data!.version}+${snapshot.data!.buildNumber}',
                                         style: TextStyle(

@@ -32,7 +32,7 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 0.0,
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         title: Text(
-          'Messages',
+          'Chats',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 18,

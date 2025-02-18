@@ -460,7 +460,7 @@ class _TabsPageState extends State<TabsPage> {
                   }),
             ],
           ),
-          label: 'Messages'),
+          label: 'Chats'),
       BottomNavigationBarItem(
         icon: Image.asset(
           'assets/profile.png',
@@ -623,7 +623,7 @@ class _TabsPageState extends State<TabsPage> {
                   }),
             ],
           ),
-          label: 'Messages'),
+          label: 'Chats'),
       BottomNavigationBarItem(
         icon: Image.asset(
           'assets/profile.png',
@@ -781,10 +781,14 @@ class LocationPermissionSheet extends StatelessWidget {
                             });
 
                             Get.close(1);
-                            if (userController.userModel!.isBusinessSetup) {
+                            if (userController.userModel!.isGuest) {
                               Get.offAll(() => TabsPage());
                             } else {
-                              Get.offAll(() => SetupBusinessProvider());
+                              if (userController.userModel!.isBusinessSetup) {
+                                Get.offAll(() => TabsPage());
+                              } else {
+                                Get.offAll(() => SetupBusinessProvider());
+                              }
                             }
                           },
                           initialPosition:

@@ -63,6 +63,73 @@ class _OwnerRequestDetailsInprogressInactivePageState
               fontWeight: FontWeight.w700,
             ),
           ),
+          actions: [
+            // IconButton(
+            //   onPressed: () {
+            //     Get.dialog(Dialog(
+            //       backgroundColor:
+            //           userController.isDark ? primaryColor : Colors.white,
+            //       shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(6)),
+            //       child: Padding(
+            //         padding: const EdgeInsets.all(12.0),
+            //         child: SingleChildScrollView(
+            //           child: Column(
+            //             children: [
+            //               const SizedBox(
+            //                 height: 20,
+            //               ),
+            //               Row(
+            //                 children: [
+            //                   Icon(
+            //                     Icons.feedback_rounded,
+            //                   ),
+            //                   const SizedBox(
+            //                     width: 10,
+            //                   ),
+            //                   Text(
+            //                     'Private Feedback',
+            //                     style: TextStyle(
+            //                       fontSize: 16,
+            //                       fontWeight: FontWeight.w600,
+            //                     ),
+            //                   ),
+            //                 ],
+            //               ),
+            //               const SizedBox(
+            //                 height: 20,
+            //               ),
+            //               Row(
+            //                 children: [
+            //                   Icon(
+            //                     Icons.contact_support,
+            //                   ),
+            //                   const SizedBox(
+            //                     width: 10,
+            //                   ),
+            //                   Text(
+            //                     'Get Support',
+            //                     style: TextStyle(
+            //                       fontSize: 16,
+            //                       fontWeight: FontWeight.w600,
+            //                     ),
+            //                   ),
+            //                 ],
+            //               ),
+            //               const SizedBox(
+            //                 height: 20,
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     ));
+            //   },
+            //   icon: Icon(
+            //     Icons.help,
+            //   ),
+            // ),
+          ],
         ),
         body: Column(
           children: [

@@ -745,6 +745,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       onTapOutside: (s) {
                         FocusScope.of(context).requestFocus(FocusNode());
                       },
+                      enabled: false,
                       // controller: _vinController,
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -757,8 +758,8 @@ class _EditProfileTabState extends State<EditProfileTab> {
                         // counter: const SizedBox.shrink(),
                       ),
                       initialValue: userController.userModel!.contactInfo,
-                      onChanged: (String value) => userController.updateTexts(
-                          userController.userModel!, 'contactInfo', value),
+                      // onChanged: (String value) => userController.updateTexts(
+                      //     userController.userModel!, 'contactInfo', value),
                       textCapitalization: TextCapitalization.none,
                       keyboardType: TextInputType.phone,
                       style: TextStyle(

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
+import 'package:vehype/Pages/otp_page.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Models/user_model.dart';
@@ -37,9 +39,38 @@ class _ProviderEditProfileTabPageState
   double lat = 0.0;
   double long = 0.0;
   bool loading = false;
+  String selectedCountry = '';
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController businessDescriptionController = TextEditingController();
+  TextEditingController websiteController = TextEditingController();
+  TextEditingController phoneNumber = TextEditingController();
   @override
   void initState() {
     super.initState();
+    getSelectedCountry();
+  }
+
+  getSelectedCountry() async {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+
+    UserModel userModel = userController.userModel!;
+    nameController = TextEditingController(text: userModel.name);
+    businessDescriptionController =
+        TextEditingController(text: userModel.businessInfo);
+    phoneNumber = TextEditingController(text: userModel.contactInfo);
+    websiteController = TextEditingController(text: userModel.website);
+    String country = await getCountryFromLatLng(userModel.lat, userModel.long);
+    getDialCode(country);
+  }
+
+  void getDialCode(String countryCode) {
+    CountryCode code = CountryCode.fromCountryCode(countryCode);
+    selectedCountry = code.dialCode!;
+    setState(() {});
+
+    // print("Dial Code: ${code.dialCode}"); // Example: +92 for PK
   }
 
   final Completer<GoogleMapController> _controller =
@@ -50,6 +81,7 @@ class _ProviderEditProfileTabPageState
     final UserController userController = Provider.of<UserController>(context);
     lat = userController.userModel!.lat;
     long = userController.userModel!.long;
+
     UserModel userModel = userController.userModel!;
     return SingleChildScrollView(
       physics: ClampingScrollPhysics(),
@@ -136,7 +168,7 @@ class _ProviderEditProfileTabPageState
                     onTapOutside: (s) {
                       FocusScope.of(context).requestFocus(FocusNode());
                     },
-                    // controller: _vinController,
+                    controller: nameController,
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -147,12 +179,10 @@ class _ProviderEditProfileTabPageState
                         )
                         // counter: const SizedBox.shrink(),
                         ),
-                    initialValue: userController.userModel!.name,
-                    onChanged: (String value) => userController.updateTexts(
-                        userController.userModel!, 'name', value),
+
                     textCapitalization: TextCapitalization.words,
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       // color: changeColor(color: '7B7B7B'),
                       fontSize: 16,
                     ),
@@ -191,10 +221,21 @@ class _ProviderEditProfileTabPageState
                     onTapOutside: (s) {
                       FocusScope.of(context).requestFocus(FocusNode());
                     },
-                    // controller: _vinController,
+                    controller: businessDescriptionController,
+                    maxLines: 4,
                     decoration: InputDecoration(
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.3)
+                                  : primaryColor.withOpacity(0.3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.3)
+                                  : primaryColor.withOpacity(0.3)),
+                        ),
                         hintText:
                             'Describe your services, pricing, and availability',
                         hintStyle: TextStyle(
@@ -203,12 +244,10 @@ class _ProviderEditProfileTabPageState
                         )
                         // counter: const SizedBox.shrink(),
                         ),
-                    initialValue: userController.userModel!.businessInfo,
-                    onChanged: (String value) => userController.updateTexts(
-                        userController.userModel!, 'businessInfo', value),
+
                     // textCapitalization: TextCapitalization.words,
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       // color: changeColor(color: '7B7B7B'),
                       fontSize: 16,
                     ),
@@ -220,11 +259,6 @@ class _ProviderEditProfileTabPageState
               ),
               const SizedBox(
                 height: 5,
-              ),
-              Container(
-                height: 1,
-                width: Get.width,
-                color: changeColor(color: 'D9D9D9'),
               ),
               const SizedBox(
                 height: 15,
@@ -245,54 +279,44 @@ class _ProviderEditProfileTabPageState
                   ),
                   Row(
                     children: [
-                      CountryCodePicker(
-                        onChanged: print,
-                        // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
-                        initialSelection: 'US',
-                        backgroundColor:
-                            userController.isDark ? primaryColor : Colors.white,
-                        dialogBackgroundColor:
-                            userController.isDark ? primaryColor : Colors.white,
-                        favorite: ['+1', 'PK'],
-                        // optional. Shows only country name and flag
-                        showCountryOnly: false,
-                        // optional. Shows only country name and flag when popup is closed.
-                        showOnlyCountryWhenClosed: false,
-                        showFlag: true,
-                        // optional. aligns the flag and the Text left
-                        alignLeft: false,
+                      Text(
+                        selectedCountry,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          // color: changeColor(color: '7B7B7B'),
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
                       ),
                       Expanded(
                         child: TextFormField(
                           onTapOutside: (s) {
                             FocusScope.of(context).requestFocus(FocusNode());
                           },
-                          // controller: _vinController,
+                          controller: phoneNumber,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintStyle: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
+                              fontWeight: FontWeight.w300,
+                              fontSize: 16,
                             ),
                             focusedBorder: InputBorder.none,
-                            hintText: ' (555) 123-4567',
+                            hintText: '(555) 123-4567',
                             // counter: const SizedBox.shrink(),
                           ),
-                          initialValue: userController.userModel!.contactInfo,
-                          onChanged: (String value) =>
-                              userController.updateTexts(
-                                  userController.userModel!,
-                                  'contactInfo',
-                                  value),
+
                           textCapitalization: TextCapitalization.none,
                           keyboardType: TextInputType.phone,
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             // color: changeColor(color: '7B7B7B'),
                             fontSize: 16,
                           ),
                           inputFormatters: [
-                            PhoneInputFormatter(defaultCountryCode: "US")
+                            PhoneInputFormatter(defaultCountryCode: "US"),
+                            LengthLimitingTextInputFormatter(14),
                           ],
                           // maxLength: 25,
                           // onChanged: (String value) => editProfileProvider
@@ -332,7 +356,7 @@ class _ProviderEditProfileTabPageState
                     onTapOutside: (s) {
                       FocusScope.of(context).requestFocus(FocusNode());
                     },
-                    // controller: _vinController,
+                    controller: websiteController,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -344,12 +368,15 @@ class _ProviderEditProfileTabPageState
                       ),
                       // counter: const SizedBox.shrink(),
                     ),
-                    initialValue: userController.userModel!.website,
-                    onChanged: (String value) => userController.updateTexts(
-                        userController.userModel!, 'website', value),
-                    textCapitalization: TextCapitalization.words,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-Z0-9./:_-]')), // Allows URL characters
+                      LengthLimitingTextInputFormatter(
+                          100), // Limits input to 100 characters
+                    ],
+                    keyboardType: TextInputType.url,
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       // color: changeColor(color: '7B7B7B'),
                       fontSize: 16,
                     ),
@@ -370,7 +397,7 @@ class _ProviderEditProfileTabPageState
               const SizedBox(
                 height: 20,
               ),
-              if (widget.isNew)
+              if (!widget.isNew)
                 Align(
                   child: Column(
                     children: [
@@ -547,7 +574,7 @@ class _ProviderEditProfileTabPageState
                                                             .location.lng);
                                                     lat = latLng.latitude;
                                                     long = latLng.longitude;
-                                                    print('dddsd');
+
                                                     userController
                                                         .changeLocation(latLng);
                                                     // setState(() {});
@@ -618,7 +645,7 @@ class _ProviderEditProfileTabPageState
                             //     'provider')
                             Align(
                               alignment: Alignment.center,
-                              child: ElevatedButton(
+                              child: OutlinedButton(
                                   onPressed: () {
                                     Navigator.push(
                                       context,
@@ -676,8 +703,8 @@ class _ProviderEditProfileTabPageState
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
+                                        ? primaryColor
+                                        : Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(6),
                                     ),
@@ -686,9 +713,9 @@ class _ProviderEditProfileTabPageState
                                   child: Text(
                                     'Change Location',
                                     style: TextStyle(
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white,
+                                      // color: userController.isDark
+                                      //     ? primaryColor
+                                      //     : Colors.white,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -712,7 +739,77 @@ class _ProviderEditProfileTabPageState
                       ),
                     ),
                     const SizedBox(
-                      height: 90,
+                      height: 40,
+                    ),
+                    if (widget.isNew)
+                      ElevatedButton(
+                          onPressed: () async {
+                            if (nameController.text.isEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message: 'Business name is required!',
+                                duration: Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
+                            }
+                            if (businessDescriptionController.text.isEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message: 'Business details is required!',
+                                duration: Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
+                            }
+                            if (phoneNumber.text.isEmpty) {
+                              Get.showSnackbar(GetSnackBar(
+                                message: 'Contact phone number is required!',
+                                duration: Duration(seconds: 3),
+                                snackPosition: SnackPosition.TOP,
+                              ));
+                              return;
+                            }
+                            Get.dialog(LoadingDialog(),
+                                barrierDismissible: false);
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userModel.userId)
+                                .update({
+                              // 'isBusinessSetup': true,
+                              'businessInfo':
+                                  businessDescriptionController.text.trim(),
+                              'website': websiteController.text.trim(),
+                              'name': nameController.text.trim(),
+                            });
+                            Get.close(1);
+                            Get.to(() => OtpPage(
+                                  phoneNumber: selectedCountry +
+                                      phoneNumber.text
+                                          .replaceAll(RegExp(r'\D'), '')
+                                          .trim(),
+                                ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: userController.isDark
+                                ? Colors.white
+                                : primaryColor,
+                            minimumSize: Size(Get.width * 0.9, 55),
+                            maximumSize: Size(Get.width * 0.9, 55),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          child: Text(
+                            'Continue',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: userController.isDark
+                                  ? primaryColor
+                                  : Colors.white,
+                            ),
+                          )),
+                    const SizedBox(
+                      height: 40,
                     ),
                   ],
                 ),

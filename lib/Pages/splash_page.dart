@@ -282,14 +282,30 @@ class _SplashPageState extends State<SplashPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(
-            child: Text(
-              'VEHYPE',
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 28,
-                fontFamily: poppinsBold,
-                fontWeight: FontWeight.w800,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  'VEHYPE',
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 28,
+                    fontFamily: poppinsBold,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                // const SizedBox(
+                //   height: 10,
+                // ),
+                // Text(
+                //   'HYPE YOUR VEHICLE',
+                //   style: TextStyle(
+                //     color: userController.isDark ? Colors.white : primaryColor,
+                //     fontSize: 16,
+                //     // fontFamily: poppinsBold,
+                //     fontWeight: FontWeight.w400,
+                //   ),
+                // ),
+              ],
             ),
           )
         ],

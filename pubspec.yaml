@@ -5,7 +5,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
 # version: 3.0.9+119
-version: 1.0.0+14
+version: 1.0.0+18
 
 
 environment:
@@ -136,6 +136,7 @@ dependencies:
   place_picker_google: ^0.0.14
   country_code_picker: ^3.2.0
   flutter_multi_formatter: ^2.13.0
+  pin_code_fields: ^8.0.1
 
   # flutter_flavorizr: ^2.2.3
   # widget_to_marker: ^1.0.6

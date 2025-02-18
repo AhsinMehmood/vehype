@@ -44,54 +44,8 @@ class _SetupBusinessProviderState extends State<SetupBusinessProvider> {
           ),
         ),
       ),
-      floatingActionButton: ElevatedButton(
-          onPressed: () async {
-            Get.dialog(LoadingDialog(), barrierDismissible: false);
-            DocumentSnapshot<Map<String, dynamic>> snap =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userModel.userId)
-                    .get();
-            UserModel newUser = UserModel.fromJson(snap);
-            if (newUser.name.isNotEmpty &&
-                newUser.contactInfo.isNotEmpty &&
-                newUser.businessInfo.isNotEmpty) {
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userModel.userId)
-                  .update({
-                'isBusinessSetup': true,
-              });
-              Get.offAll(() => TabsPage());
-            } else {
-              print(newUser.phoneNumber);
-              Get.close(1);
-              Get.showSnackbar(GetSnackBar(
-                message: 'All the fields are required',
-                duration: Duration(seconds: 3),
-                snackPosition: SnackPosition.TOP,
-              ));
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                userController.isDark ? Colors.white : primaryColor,
-            minimumSize: Size(Get.width * 0.9, 55),
-            maximumSize: Size(Get.width * 0.9, 55),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          child: Text(
-            'Continue',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: userController.isDark ? primaryColor : Colors.white,
-            ),
-          )),
       body: ProviderEditProfileTabPage(
-        isNew: false,
+        isNew: true,
       ),
     );
   }
