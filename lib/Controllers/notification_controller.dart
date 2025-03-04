@@ -187,69 +187,69 @@ class NotificationController {
     }
   }
 
-  void showNotificationToast(String title, String message, BuildContext context,
-      Map<String, dynamic> data, UserController userController) {
-    // BuildContext? context = navigatorKey.currentContext;
-    Get.showSnackbar(GetSnackBar(
-      titleText: Text(
-        title,
-        style: TextStyle(
-          color: userController.isDark ? Colors.white : primaryColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      messageText: Column(
-        children: [
-          Text(
-            message,
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: userController.isDark
-                      ? Colors.white.withOpacity(0.5)
-                      : primaryColor.withOpacity(0.5),
-                )),
-            height: 45,
-            width: 140,
-            child: Center(
-              child: Text(
-                'Tap to See',
-                style: TextStyle(
-                  color: userController.isDark ? Colors.white : primaryColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      // message: message,
-      snackPosition: SnackPosition.TOP,
+  // void showNotificationToast(String title, String message, BuildContext context,
+  //     Map<String, dynamic> data, UserController userController) {
+  //   // BuildContext? context = navigatorKey.currentContext;
+  //   Get.showSnackbar(GetSnackBar(
+  //     titleText: Text(
+  //       title,
+  //       style: TextStyle(
+  //         color: userController.isDark ? Colors.white : primaryColor,
+  //         fontSize: 16,
+  //         fontWeight: FontWeight.w700,
+  //       ),
+  //     ),
+  //     messageText: Column(
+  //       children: [
+  //         Text(
+  //           message,
+  //           style: TextStyle(
+  //             color: userController.isDark ? Colors.white : primaryColor,
+  //             fontSize: 16,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //         ),
+  //         const SizedBox(
+  //           height: 10,
+  //         ),
+  //         Container(
+  //           decoration: BoxDecoration(
+  //               borderRadius: BorderRadius.circular(6),
+  //               border: Border.all(
+  //                 color: userController.isDark
+  //                     ? Colors.white.withOpacity(0.5)
+  //                     : primaryColor.withOpacity(0.5),
+  //               )),
+  //           height: 45,
+  //           width: 140,
+  //           child: Center(
+  //             child: Text(
+  //               'Tap to See',
+  //               style: TextStyle(
+  //                 color: userController.isDark ? Colors.white : primaryColor,
+  //                 fontSize: 16,
+  //                 fontWeight: FontWeight.w700,
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //     // message: message,
+  //     snackPosition: SnackPosition.TOP,
 
-      duration: Duration(seconds: 4),
-      onTap: (snack) {
-        Get.closeCurrentSnackbar();
+  //     duration: Duration(seconds: 4),
+  //     onTap: (snack) {
+  //       Get.closeCurrentSnackbar();
 
-        navigateOwner(data);
-      },
-      backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      borderColor: userController.isDark
-          ? Colors.white.withOpacity(0.5)
-          : primaryColor.withOpacity(0.5),
-    ));
-  }
+  //       navigateOwner(data);
+  //     },
+  //     backgroundColor: userController.isDark ? primaryColor : Colors.white,
+  //     borderColor: userController.isDark
+  //         ? Colors.white.withOpacity(0.5)
+  //         : primaryColor.withOpacity(0.5),
+  //   ));
+  // }
 
   // listenOneSignalNotification(RemoteMessage message) {}
   Future<void> sendNotificationNewProvider({

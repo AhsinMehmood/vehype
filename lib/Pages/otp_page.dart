@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -25,7 +26,7 @@ class _OtpPageState extends State<OtpPage> {
   String verificationId = '';
   TextEditingController otpController = TextEditingController();
   bool isResendAvailable = false;
-  int resendCountdown = 30;
+  int resendCountdown = 60;
   Timer? _timer;
   bool isLoading = false;
 
@@ -39,7 +40,7 @@ class _OtpPageState extends State<OtpPage> {
   Future<void> sendOtp(String phoneNumber) async {
     setState(() {
       isResendAvailable = false;
-      resendCountdown = 30;
+      resendCountdown = 60;
     });
     startResendTimer();
 
@@ -82,6 +83,7 @@ class _OtpPageState extends State<OtpPage> {
     } catch (e) {
       Get.snackbar("Verification Failed", "Invalid OTP. Try again",
           backgroundColor: Colors.red, colorText: Colors.white);
+      // otpController.clear();
       setState(() {
         isLoading = false;
       });
@@ -123,6 +125,11 @@ class _OtpPageState extends State<OtpPage> {
           e.code == 'credential-already-in-use') {
         // ✅ Phone number is already linked to the same user → Simply login
         await _auth.signInWithCredential(credential);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userController.userModel!.userId)
+            .update(
+                {'isBusinessSetup': true, 'contactInfo': widget.phoneNumber});
 
         Get.offAll(() => TabsPage());
         Get.snackbar("Success", "Logged in successfully",
@@ -153,9 +160,11 @@ class _OtpPageState extends State<OtpPage> {
 
       Get.snackbar("Error", errorMessage,
           backgroundColor: Colors.red, colorText: Colors.white);
+      // otpController.clear();
     } catch (e) {
       Get.snackbar("Error", "An unexpected error occurred. Please try again.",
           backgroundColor: Colors.red, colorText: Colors.white);
+      // otpController.clear();
     } finally {
       setState(() => isLoading = false);
     }
@@ -193,7 +202,7 @@ class _OtpPageState extends State<OtpPage> {
       appBar: AppBar(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         leading: IconButton(
-            onPressed: () => Get.back(),
+            onPressed: isLoading ? null : () => Get.back(),
             icon: Icon(
               Icons.arrow_back_ios_new,
             )),
@@ -226,12 +235,19 @@ class _OtpPageState extends State<OtpPage> {
               PinCodeTextField(
                 appContext: context,
                 length: 6,
+                onChanged: (d) {
+                  if (d.length == 6) {
+                    verifyOtp();
+                    // print(otpController.text);
+                  }
+                },
                 controller: otpController,
                 keyboardType: TextInputType.number,
                 obscureText: false,
-                animationType: AnimationType.fade,
+                enabled: !isLoading,
+                animationType: AnimationType.scale,
                 pinTheme: PinTheme(
-                  shape: PinCodeFieldShape.box,
+                  shape: PinCodeFieldShape.underline,
                   borderRadius: BorderRadius.circular(8),
                   fieldHeight: 50,
                   fieldWidth: 40,
@@ -258,13 +274,15 @@ class _OtpPageState extends State<OtpPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
                     )),
-                child: Text('Verify',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: userController.isDark
-                            ? primaryColor
-                            : Colors.white)),
+                child: isLoading
+                    ? CupertinoActivityIndicator()
+                    : Text('Verify',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: userController.isDark
+                                ? primaryColor
+                                : Colors.white)),
               ),
               const SizedBox(height: 20),
               isResendAvailable

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -9,6 +10,7 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Pages/owner_active_request_details.dart';
+import 'package:vehype/Widgets/private_feedback_owner.dart';
 
 import 'package:vehype/const.dart';
 
@@ -64,66 +66,40 @@ class _OwnerRequestDetailsInprogressInactivePageState
             ),
           ),
           actions: [
+            StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('privateFeedback')
+                    .where('offerReceivedId',
+                        isEqualTo: widget.offersReceivedModel.id)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return SizedBox.shrink();
+                  }
+                  List data = snapshot.data!.docs;
+                  if (data.isNotEmpty) {
+                    return SizedBox.shrink();
+                  }
+                  return IconButton(
+                    iconSize: 26,
+                    onPressed: () {
+                      // Get.close(1);
+                      Get.to(() => PrivateFeedbackOwner(
+                            // serviceProfile: ,
+                            offersModel: widget.offersModel,
+                            offersReceivedModel: widget.offersReceivedModel,
+                          ));
+                    },
+                    icon: Icon(
+                      Icons.contact_support,
+                      // size: 26,
+                    ),
+                  );
+                }),
+
             // IconButton(
             //   onPressed: () {
-            //     Get.dialog(Dialog(
-            //       backgroundColor:
-            //           userController.isDark ? primaryColor : Colors.white,
-            //       shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(6)),
-            //       child: Padding(
-            //         padding: const EdgeInsets.all(12.0),
-            //         child: SingleChildScrollView(
-            //           child: Column(
-            //             children: [
-            //               const SizedBox(
-            //                 height: 20,
-            //               ),
-            //               Row(
-            //                 children: [
-            //                   Icon(
-            //                     Icons.feedback_rounded,
-            //                   ),
-            //                   const SizedBox(
-            //                     width: 10,
-            //                   ),
-            //                   Text(
-            //                     'Private Feedback',
-            //                     style: TextStyle(
-            //                       fontSize: 16,
-            //                       fontWeight: FontWeight.w600,
-            //                     ),
-            //                   ),
-            //                 ],
-            //               ),
-            //               const SizedBox(
-            //                 height: 20,
-            //               ),
-            //               Row(
-            //                 children: [
-            //                   Icon(
-            //                     Icons.contact_support,
-            //                   ),
-            //                   const SizedBox(
-            //                     width: 10,
-            //                   ),
-            //                   Text(
-            //                     'Get Support',
-            //                     style: TextStyle(
-            //                       fontSize: 16,
-            //                       fontWeight: FontWeight.w600,
-            //                     ),
-            //                   ),
-            //                 ],
-            //               ),
-            //               const SizedBox(
-            //                 height: 20,
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //       ),
-            //     ));
+
             //   },
             //   icon: Icon(
             //     Icons.help,

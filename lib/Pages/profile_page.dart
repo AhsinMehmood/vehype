@@ -263,21 +263,28 @@ class ProfilePage extends StatelessWidget {
                       //     height: 10,
                       //   ),
                       if (userController.isAdmin)
-                        InkWell(
-                          onTap: () {
+                        MenuCard(
+                          secondTitle: '',
+                          userController: userController,
+                          title: 'Manage Users',
+                          icon: Icons.admin_panel_settings,
+                          onTap: () async {
                             Get.to(() => AdminHomePage());
                           },
-                          child: Text(
-                            'Manage Users',
-                            style: TextStyle(
-                              color: userController.isDark
-                                  ? Colors.white
-                                  : primaryColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 17,
-                            ),
-                          ),
                         ),
+                      // InkWell(
+                      //   onTap: () {},
+                      //   child: Text(
+                      //     'Manage Users',
+                      //     style: TextStyle(
+                      //       color: userController.isDark
+                      //           ? Colors.white
+                      //           : primaryColor,
+                      //       fontWeight: FontWeight.w700,
+                      //       fontSize: 17,
+                      //     ),
+                      //   ),
+                      // ),
                       if (userController.isAdmin)
                         const SizedBox(
                           height: 10,
@@ -468,7 +475,6 @@ class ProfilePage extends StatelessWidget {
                                 if (snapshot.data == null) {
                                   return SizedBox.shrink();
                                 }
-                                // https://www.facebook.com/share/v/1AvwZ3V829/
                                 return Column(
                                   children: [
                                     InkWell(

@@ -224,18 +224,24 @@ class _ProviderEditProfileTabPageState
                     controller: businessDescriptionController,
                     maxLines: 4,
                     decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.3)
-                                  : primaryColor.withOpacity(0.3)),
-                        ),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : primaryColor.withOpacity(0.2))),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: userController.isDark
-                                  ? Colors.white.withOpacity(0.3)
-                                  : primaryColor.withOpacity(0.3)),
-                        ),
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : primaryColor.withOpacity(0.2))),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                                color: userController.isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : primaryColor.withOpacity(0.2))),
                         hintText:
                             'Describe your services, pricing, and availability',
                         hintStyle: TextStyle(

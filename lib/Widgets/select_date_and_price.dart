@@ -10,9 +10,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
@@ -56,12 +58,23 @@ class SelectDateAndPrice extends StatefulWidget {
   State<SelectDateAndPrice> createState() => _SelectDateAndPriceState();
 }
 
-class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
+class _SelectDateAndPriceState extends State<SelectDateAndPrice>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
   TextEditingController comment = TextEditingController();
   TextEditingController priceController = TextEditingController();
+  late Animation<double> _fadeAnimation;
+  bool isFirstTime = false;
+  late SwipeActionController swipeActionController;
+
   @override
   void initState() {
     super.initState();
+    // Initialize the animation controller
+    openCell();
+    swipeActionController = SwipeActionController();
+
     if (widget.offersReceivedModel != null) {
       final GarageController garageController =
           Provider.of<GarageController>(context, listen: false);
@@ -80,7 +93,25 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
     } else {
       randomId = generateFourDigitId();
     }
+
     setState(() {});
+  }
+
+  openCell() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    isFirstTime = sharedPreferences.getBool('firstTimeUpdate') ?? false;
+    if (!isFirstTime) {
+      Future.delayed(Duration(seconds: 1)).then((s) {
+        swipeActionController.openCellAt(index: 0, trailing: true);
+      });
+      Future.delayed(Duration(seconds: 3)).then((s) {
+        sharedPreferences.setBool('firstTimeUpdate', true);
+
+        if (!isFirstTime) {
+          swipeActionController.closeAllOpenCell();
+        }
+      });
+    }
   }
 
   bool showPriceWarning = false;
@@ -89,6 +120,12 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
   String generateFourDigitId() {
     Random random = Random();
     return List.generate(4, (_) => random.nextInt(10)).join();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Clean up the controller
+    super.dispose();
   }
 
   @override
@@ -307,102 +344,108 @@ class _SelectDateAndPriceState extends State<SelectDateAndPrice> {
                                     bool isSelected =
                                         prodcuts.contains(product);
 
-                                    return Stack(
-                                      children: [
-                                        Dismissible(
-                                          key: Key(product.id),
-                                          onDismissed: (direction) {
-                                            garageController.select(product);
-                                          },
-                                          secondaryBackground: Container(
-                                            color: Colors.red,
-                                            padding: const EdgeInsets.all(10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  'Remove',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          background: Container(
-                                            color: Colors.red,
-                                            padding: const EdgeInsets.all(8),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Remove',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          child: ListTile(
-                                            title: Text(
-                                              product.name,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
+                                    return Card(
+                                      elevation: 0.5,
+                                      color: userController.isDark
+                                          ? primaryColor
+                                          : Colors.white,
+                                      child: SwipeActionCell(
+                                        key: ObjectKey(product.id),
+                                        controller: swipeActionController,
+                                        backgroundColor: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        trailingActions: <SwipeAction>[
+                                          SwipeAction(
+                                              icon: Icon(
+                                                Icons.edit,
+                                                color: Colors.white,
                                               ),
+                                              onTap: (CompletionHandler
+                                                  handler) async {
+                                                setState(() {});
+                                                Get.to(() =>
+                                                    AddProductNdService(
+                                                        productServiceModel:
+                                                            product));
+                                              },
+                                              color: Colors.green,
+                                              backgroundRadius: 4.0),
+                                          SwipeAction(
+                                              icon: Icon(
+                                                Icons.delete_forever,
+                                                color: Colors.white,
+                                              ),
+                                              onTap: (CompletionHandler
+                                                  handler) async {
+                                                garageController
+                                                    .select(product);
+
+                                                // Get.close(1);
+                                              },
+                                              color: Colors.red,
+                                              backgroundRadius: 4.0),
+                                        ],
+                                        index: index,
+                                        child: ListTile(
+                                          title: Text(
+                                            product.name,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
                                             ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                if (product.desc.isNotEmpty)
-                                                  Text(
-                                                    product
-                                                        .desc, // Show description
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.grey),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                const SizedBox(
-                                                  height: 5,
-                                                ),
-                                                Text(
-                                                  getServiceDetail(
-                                                      product), // Show service details
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                              ],
-                                            ),
-                                            isThreeLine: true,
-                                            trailing: Text(
-                                                '\$${product.totalPrice}',
-                                                style: TextStyle(
-                                                    color: userController.isDark
-                                                        ? Colors.white
-                                                        : primaryColor,
-                                                    fontSize: 17,
-                                                    fontWeight:
-                                                        FontWeight.w700)),
-                                            onTap: () {
-                                              Get.to(() => AddProductNdService(
-                                                  productServiceModel:
-                                                      product));
-                                            },
                                           ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (product.desc.isNotEmpty)
+                                                Text(
+                                                  product
+                                                      .desc, // Show description
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                getServiceDetail(
+                                                    product), // Show service details
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                            ],
+                                          ),
+                                          isThreeLine: true,
+                                          trailing: Column(
+                                            children: [
+                                              Text('\$${product.totalPrice}',
+                                                  style: TextStyle(
+                                                      color:
+                                                          userController.isDark
+                                                              ? Colors.white
+                                                              : primaryColor,
+                                                      fontSize: 17,
+                                                      fontWeight:
+                                                          FontWeight.w700)),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                            ],
+                                          ),
+                                          onTap: () {
+                                            swipeActionController.openCellAt(
+                                                index: index, trailing: true);
+                                          },
                                         ),
-                                      ],
+                                      ),
                                     );
                                   },
                                 ),

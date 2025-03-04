@@ -11,6 +11,7 @@ import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
+import 'package:vehype/Pages/Repair%20History/vehicle_based_repair_history_page.dart';
 import 'package:vehype/Pages/add_vehicle.dart';
 import 'package:vehype/Pages/vehicle_request_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
@@ -185,7 +186,7 @@ class MyGarage extends StatelessWidget {
                                                         : primaryColor,
                                               ),
                                               child: Text(
-                                                'Request Service',
+                                                'Request a Service',
                                                 style: TextStyle(
                                                   color: userController.isDark
                                                       ? primaryColor
@@ -312,18 +313,9 @@ class MyGarage extends StatelessWidget {
                                       ),
                                       InkWell(
                                         onTap: () async {
-                                          final GarageController
-                                              garageController =
-                                              Provider.of<GarageController>(
-                                                  context,
-                                                  listen: false);
-                                          Get.dialog(LoadingDialog(),
-                                              barrierDismissible: false);
-                                          await garageController
-                                              .initVehicle(garageModel);
-                                          Get.close(1);
-                                          Get.to(() => AddVehicle(
-                                              garageModel: garageModel));
+                                          Get.to(() =>
+                                              VehicleBasedRepairHistoryPage(
+                                                  garageModel: garageModel));
                                         },
                                         child: Container(
                                           height: 45,
@@ -336,12 +328,13 @@ class MyGarage extends StatelessWidget {
                                                   : Colors.white,
                                               border: Border.all(
                                                 color: userController.isDark
+                                                
                                                     ? Colors.white
                                                     : primaryColor,
                                               )),
                                           child: Center(
                                             child: Text(
-                                              'Manage Vehicle',
+                                              'Repair History',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 15,

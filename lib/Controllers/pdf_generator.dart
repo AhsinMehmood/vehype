@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:get/get.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
@@ -14,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
 
@@ -327,6 +330,81 @@ class PDFGenerator {
         duration: Duration(seconds: 3),
         snackPosition: SnackPosition.TOP,
       ));
+      // print("❌ Failed to send email:");
+    }
+  }
+
+  static Future<void> sendEmailForReport(
+    UserModel reportedBy,
+    UserModel reportTo,
+    OffersReceivedModel offersReceivedModel,
+    OffersModel offersModel,
+    String feedbackId,
+    UserController userController,
+    String feedback,
+    String rating,
+  ) async {
+    // final functions = FirebaseFunctions.instance;
+    try {
+      String username = 'developera574@gmail.com';
+      String password = 'ozcriypjmnmmslox';
+      final smtpServer = gmail(username, password);
+      PackageInfo appInfo = await PackageManager.getPackageInfo();
+      final equivalentMessage = Message()
+        ..from = Address(username, 'VEHYPE (Beta)')
+        ..recipients.addAll(
+          userController.adminsEmails.map((email) => Address(email)),
+        )
+        ..subject = 'Private Feedback – ${reportedBy.name}'
+        ..text = '''
+${reportedBy.name} submitted a report.
+
+**Feedback:**
+
+$feedback
+
+
+**Rating:**
+
+$rating
+
+**Report ID:**
+
+$feedbackId
+
+
+
+You can manage reports by going to:
+VEHYPE app > Profile > Manage Reports
+
+Best regards,
+VEHYPE Support Team
+
+
+**App Info:**
+${const JsonEncoder.withIndent('  ').convert(appInfo.toJson())}
+
+
+
+*This is an automated message from the VEHYPE beta system*
+''';
+      await send(equivalentMessage, smtpServer);
+      // sendReport2.
+      // await connection.close();
+      // print("✅ Email sent successfully!");
+      Get.showSnackbar(GetSnackBar(
+        message: '✅ Feedback submitted successfully!',
+        duration: Duration(seconds: 3),
+        snackPosition: SnackPosition.TOP,
+      ));
+    } catch (e) {
+      Sentry.captureMessage(e.toString());
+      // print("🔥 Error calling sendPDFEmail: $e");
+      // Get.showSnackbar(GetSnackBar(
+      //   message: '❌ Failed to send email',
+      //   duration: Duration(seconds: 3),
+      //   snackPosition: SnackPosition.TOP,
+      // ));
       // print("❌ Failed to send email:");
     }
   }

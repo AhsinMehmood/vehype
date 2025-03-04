@@ -473,16 +473,20 @@ class _OverviewTabState extends State<OverviewTab> {
           const SizedBox(
             height: 10,
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(
-              widget.profileModel.businessInfo,
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  widget.profileModel.businessInfo,
+                  style: TextStyle(
+                    color: userController.isDark ? Colors.white : primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           const SizedBox(
             height: 15,

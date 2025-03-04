@@ -65,7 +65,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 0)).then((value) async {
+    Future.delayed(const Duration(milliseconds: 500)).then((value) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
 
@@ -87,7 +87,6 @@ class _SplashPageState extends State<SplashPage> {
         // sharedPreferences.setBool('newUpdate', true);
 
         // OneSignal.Notifications.requestPermission(true);
-
         DocumentSnapshot<Map<String, dynamic>> snapshot =
             await FirebaseFirestore.instance
                 .collection('users')
@@ -95,6 +94,8 @@ class _SplashPageState extends State<SplashPage> {
                 .get();
 
         UserModel userModel = UserModel.fromJson(snapshot);
+        userController.checkIsAdmin(userModel.email);
+
         if (userModel.accountType == '') {
           mixPanelController
               .trackEvent(eventName: 'Open Select Account Type Page', data: {});

@@ -10,10 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-// import 'package:isar/isar.dart';
 
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -49,9 +47,7 @@ class AuthController extends GetxController {
     await prefs.clear();
     try {
       await GoogleSignIn().disconnect();
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
 
     Get.offAll(() => SplashPage());
   }
@@ -67,12 +63,7 @@ void main() async {
   FirebaseDatabase.instance.setPersistenceEnabled(true);
   Get.put(AuthController());
   Get.put(MixPanelController());
-  // final appDir = await getApplicationDocumentsDirectory();
-  final dir = await getApplicationDocumentsDirectory();
-// final isar = await Isar.open(
-// [],
-//   directory: dir.path,
-// );
+
   OneSignal.Debug.setLogLevel(OSLogLevel.debug);
 
   OneSignal.initialize("d2e6efea-3e5f-42f9-85ab-9815924277a0");

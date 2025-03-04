@@ -794,11 +794,13 @@ class UserController with ChangeNotifier {
     }
   }
 
+  List adminsEmails = [];
   checkIsAdmin(String email) async {
     DocumentSnapshot<Map<String, dynamic>> snap =
         await FirebaseFirestore.instance.collection('admin').doc('app').get();
     if (snap.exists) {
       List admins = snap.data()!['admins'] ?? [];
+      adminsEmails = admins;
       if (admins.contains(email)) {
         isAdmin = true;
         notifyListeners();
