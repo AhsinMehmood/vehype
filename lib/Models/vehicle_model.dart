@@ -1,7 +1,4 @@
-
-
 // part 'vehicle_model.g.dart';
-
 
 class VehicleType {
   final String title;
@@ -9,7 +6,6 @@ class VehicleType {
 
   VehicleType({required this.title, required this.icon});
 }
-
 
 class VehicleMake {
   final int id;
@@ -70,6 +66,7 @@ class VehicleModel {
     );
   }
 
+  String getString() => 'Id: $id, SubModel: $title';
   Map<dynamic, dynamic> toJson() {
     return {
       'id': id,

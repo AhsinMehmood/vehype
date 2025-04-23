@@ -409,3 +409,4 @@ ${const JsonEncoder.withIndent('  ').convert(appInfo.toJson())}
     }
   }
 }
+

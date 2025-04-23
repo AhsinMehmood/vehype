@@ -110,6 +110,16 @@ class OwnerCompleteOfferConfirmationSheet extends StatelessWidget {
                           userController.userModel!.userId,
                           offersModel.ownerId,
                           offersModel.offerId);
+                      ChatController().sendMessageForRequestUpdates(
+                          offersModel,
+                          offersReceivedModel,
+                          'Offer Completed',
+                          userModel,
+                          offersReceivedModel.offerBy,
+                          chatModel?.id ?? '',
+                          garageModel.garageId,
+                          'Completed',
+                          '');
                       if (chatModel != null) {
                         ChatController().updateChatToClose(chatModel.id,
                             '${userController.userModel!.name} has marked the request as completed.');

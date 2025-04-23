@@ -26,6 +26,7 @@ class OwnerNotificationsPage extends StatefulWidget {
   final List<OffersModel> offers;
   const OwnerNotificationsPage({super.key, required this.offers});
 
+
   @override
   State<OwnerNotificationsPage> createState() => _OwnerNotificationsPageState();
 }

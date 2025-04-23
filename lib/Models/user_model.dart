@@ -42,6 +42,8 @@ class UserModel {
   final int radius;
   final List vehicleTypes;
   final bool isBusinessSetup;
+  final bool isSetOpeningHours;
+  final Map<String, dynamic> workingHours;
 
   UserModel(
     this.id,
@@ -82,6 +84,8 @@ class UserModel {
     this.radius,
     this.vehicleTypes,
     this.isBusinessSetup,
+    this.isSetOpeningHours,
+    this.workingHours,
   );
 
   factory UserModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -145,6 +149,8 @@ class UserModel {
       data['radius'] ?? 100,
       data['vehicleTypes'] ?? [],
       data['isBusinessSetup'] ?? false,
+      data['isSetOpeningHours'] ?? false,
+      data['workingHours'] ?? {},
     );
   }
 
@@ -167,5 +173,6 @@ class UserModel {
     };
   }
 
+  String toSearchString() => '$name $businessAddress, $contactInfo $userId';
   String get searchKey => '$name $services'.toLowerCase();
 }

@@ -6,20 +6,20 @@
     "configurations": [
 
 
-        {
-          "name": "Android Emulator",
-          "request": "launch",
-          "type": "dart",
-          "program": "lib/main.dart",
-          // "toolArgs": ["--flavor", "prod"],
-          "deviceId": "emulator-5554"
-        },
         // {
-        //   "name": "Flutter on Device 2",
+        //   "name": "IOS Simulator",
         //   "request": "launch",
         //   "type": "dart",
         //   "program": "lib/main.dart",
-        //   "deviceId": "00008110-000129AE0286801E"
+        //   // "toolArgs": ["--flavor", "prod"],
+        //   "deviceId": "A43E4F02-224B-453F-9A09-5EB8A3E9B785"
+        // },
+        // {
+        //   "name": "Android XIAOI",
+        //   "request": "launch",
+        //   "type": "dart",
+        //   "program": "lib/main.dart",
+        //   "deviceId": "917eed00"
         // }
       ]
 }

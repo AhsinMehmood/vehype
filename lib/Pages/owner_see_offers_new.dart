@@ -207,6 +207,7 @@ class OwnerSeeOffersNew extends StatelessWidget {
                                     offersModel: offersModel,
                                     garageModel: garageModel,
                                     offersReceivedModel: offersReceivedModel);
+                  
                               });
                     }))
           ],

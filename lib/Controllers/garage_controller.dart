@@ -29,7 +29,7 @@ import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:vehype/const.dart';
 
-import 'package:together_ai_sdk/together_ai_sdk.dart';
+// import 'package:together_ai_sdk/together_ai_sdk.dart';
 
 import '../Pages/tabs_page.dart';
 
@@ -84,7 +84,7 @@ class GarageController with ChangeNotifier {
     notifyListeners();
   }
 
-  final togetherAI = TogetherAISdk(togetherAIKey);
+  // final togetherAI = TogetherAISdk(togetherAIKey);
 
   Stream<List<GarageModel>> myVehicles(String userId) {
     return FirebaseFirestore.instance
@@ -101,6 +101,11 @@ class GarageController with ChangeNotifier {
   File? selectedImageOne;
   File? selectedImageTwo;
   String imageOneUrl = '';
+  setimageOneUrl(String url) {
+    imageOneUrl = url;
+    notifyListeners();
+  }
+
   String imageTwoUrl = '';
   // List imagesUrls = [];
 
@@ -137,6 +142,7 @@ class GarageController with ChangeNotifier {
     vehiclesMakesByVehicleType = [];
     selectedSubModel = null;
     isCustomModel = false;
+    isCustomMake = false;
     selectedVehicleType = vehicleType;
     notifyListeners();
     jwtToken = await getJwtToken();
@@ -178,6 +184,7 @@ class GarageController with ChangeNotifier {
   Future selectMake(VehicleMake newBodyStyle, bool isCustom) async {
     selectedVehicleMake = newBodyStyle;
     isCustomMake = isCustom;
+    isCustomModel = false;
 
     selectedYear = '';
     selectedVehicleModel = null;
@@ -198,6 +205,7 @@ class GarageController with ChangeNotifier {
     selectedVehicleModel = null;
     vehiclesModelsByYear = [];
     selectedSubModel = null;
+    isCustomModel = false;
 
     // notifyListeners();
     loadingModel = true;
@@ -220,22 +228,23 @@ class GarageController with ChangeNotifier {
 
   final ImagePicker picker = ImagePicker();
   bool isRequestImageLoading = false;
-  selectRequestImageUpdateSingleImage(
-      ImageSource imageSource, String userId, int index) async {
-    final XFile? image = await picker.pickImage(source: imageSource);
-    if (image != null) {
-      // requestImages.removeAt(index);
+
+  void selectRequestImageUpdateSingleImage(
+      RequestImageModel requestIageodel, int index) {
+    // Check if index exists, then replace it; otherwise, insert it
+    if (index < requestImages.length) {
+      // Replace existing image
+
+      requestImages[index] = requestIageodel;
+    } else {
+      // Insert new image if index is out of range
       requestImages.insert(
-          index,
-          RequestImageModel(
-              imageUrl: '',
-              isLoading: true,
-              progress: 0.4,
-              imageFile: File(image.path)));
-      isRequestImageLoading = true;
-      notifyListeners();
-      uploadRequestImage(requestImages[index], userId);
+        index,
+        requestIageodel,
+      );
     }
+
+    notifyListeners();
   }
 
   Future<File> writeToFile(ByteData data, String name) async {
@@ -413,7 +422,7 @@ class GarageController with ChangeNotifier {
 
   GarageModel? editGarage;
 
-  saveVehicle(UserModel userModel, String vin, bool isCreateRequest) async {
+  saveVehicle(UserModel userModel, String vin) async {
     Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
     try {
@@ -434,11 +443,6 @@ class GarageController with ChangeNotifier {
           'updatedAt': DateTime.now().toUtc().toIso8601String(),
         });
       } else {
-        // if (imageOneUrl == '') {
-        //   await generateImages(
-        //       'An image of a Vehicle, Vehicle type: ${selectedVehicleType!.title}, Vehicle Make: ${selectedVehicleMake!.title}, Vehicle Model Year: $selectedYear, Vehicle Model: ${selectedVehicleModel!.title}, Vehicle Trims: ${selectedSubModel == null ? '' : selectedSubModel!.title}.',
-        //       userModel.userId);
-        // }
         await FirebaseFirestore.instance.collection('garages').add({
           'ownerId': userModel.userId,
           'bodyStyle': selectedVehicleType!.title,
@@ -455,15 +459,12 @@ class GarageController with ChangeNotifier {
         });
       }
 
-      //     String url = await generateVehicleImage(
-      //         '${selectedVehicleType!.title} ${selectedVehicleMake!.title} $selectedYear ${selectedVehicleModel!.title} ${selectedSubModel == null ? '' : selectedSubModel!.title}');
       Get.close(2);
-      // imageOneUrl = url;
+
       notifyListeners();
-      // print(url);
+
       disposeController();
     } catch (e) {
-      // print(e);
       Get.close(1);
     }
   }
@@ -499,47 +500,6 @@ class GarageController with ChangeNotifier {
     }
   }
 
-  generateImages(String datas, String userId) async {
-    const url = "https://api.together.xyz/v1/images/generations";
-    String apiKey = togetherAIKey; // Replace with your API key.
-
-    final headers = {
-      "Authorization": "Bearer $apiKey",
-      "Content-Type": "application/json",
-    };
-
-    final body = jsonEncode({
-      "model": "black-forest-labs/FLUX.1-dev",
-      "prompt": datas,
-      "steps": 10,
-      "n": 1,
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        print("Response: ${response.body}");
-        // Parse the response if needed:
-        final data = jsonDecode(response.body);
-        String imageUrl = data['data'][0]['url'];
-        await uploadImageFromUrl(imageUrl, userId);
-        notifyListeners();
-        log(data['data'][0]['url']
-            .toString()); // Process or save the image data here.
-      } else {
-        print("Failed to generate images. Status Code: ${response.statusCode}");
-        print("Error: ${response.body}");
-      }
-    } catch (e) {
-      print("An error occurred: $e");
-    }
-  }
-
   // TaskSnapshot? uploadTaskOne;
 
   Future<String> uploadImage(File file, String userId) async {
@@ -555,6 +515,11 @@ class GarageController with ChangeNotifier {
   }
 
   initVehicle(GarageModel garageModel) async {
+    imageOneUrl = garageModel.imageUrl;
+    // selectedYear = ;
+    editGarage = garageModel;
+    notifyListeners();
+
     try {
       try {
         await selectVehicleType(
@@ -611,9 +576,67 @@ class GarageController with ChangeNotifier {
       print(e.toString() + ' Initializ vehicle');
     }
 
-    imageOneUrl = garageModel.imageUrl;
-    // selectedYear = ;
-    editGarage = garageModel;
+    notifyListeners();
+  }
+
+  initVehicleForVin(
+      {required String bodyStyle,
+      required String make,
+      required String model,
+      required List<dynamic> submodel,
+      required String year}) async {
+    try {
+      try {
+        await selectVehicleType(VehicleType(title: bodyStyle, icon: ''));
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Type');
+      }
+
+      try {
+        await selectMake(
+            VehicleMake(id: 1, title: make, icon: 'icon', vehicleTypeId: 0),
+            false);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Make');
+      }
+      try {
+        await selectYear(year);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Year');
+      }
+
+      try {
+        await selectModel(
+            VehicleModel(
+                id: 1,
+                title: model,
+                icon: 'icon',
+                vehicleMakeId: 0,
+                vehicleTypeId: 0),
+            false);
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Model');
+      }
+      try {
+        // vehicleSubModels = ;
+        for (var element in submodel) {
+          vehicleSubModels.add(
+            VehicleModel(
+              id: 1,
+              title: element,
+              icon: 'icon',
+              vehicleMakeId: 0,
+              vehicleTypeId: 0,
+            ),
+          );
+        }
+      } catch (e) {
+        print(e.toString() + ' Select Vehicle Submodel');
+      }
+    } catch (e) {
+      print(e.toString() + ' Initializ vehicle');
+    }
+
     notifyListeners();
   }
 
@@ -630,7 +653,7 @@ class GarageController with ChangeNotifier {
     selectedYear = '';
     editGarage = null;
     requestImages = [];
-    // selectedIssue = '';
+    // service = '';
     selectedVehicle = '';
     additionalService = '';
     notifyListeners();
@@ -765,7 +788,7 @@ class GarageController with ChangeNotifier {
   }
 
   Future<String> saveRequest(String desc, LatLng latLng, String userId,
-      String? offerId, String garageId) async {
+      String? offerId, String garageId, String service) async {
     try {
       String requestId = '';
       String address =
@@ -788,7 +811,7 @@ class GarageController with ChangeNotifier {
           'vehicleType': vehicleType,
           'address': address,
           'geo': geoFirePoint.data,
-          'issue': selectedIssue,
+          'issue': service,
           'garageId': garageId,
           'status': 'active',
           'lat': latLng.latitude,
@@ -807,7 +830,7 @@ class GarageController with ChangeNotifier {
             await FirebaseFirestore.instance.collection('offers').add({
           'ownerId': userId,
           'vehicleName': selectedVehicle,
-          'issue': selectedIssue,
+          'issue': service,
           'vehicleType': vehicleType,
           'lat': latLng.latitude,
           'garageId': garageId,

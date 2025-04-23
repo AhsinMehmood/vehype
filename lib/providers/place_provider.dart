@@ -23,6 +23,7 @@ class PlaceProvider extends ChangeNotifier {
       apiKey: apiKey,
       baseUrl: proxyBaseUrl,
       httpClient: httpClient,
+   
       apiHeaders: apiHeaders as Map<String, String>?,
     );
     geocoding = GoogleMapsGeocoding(

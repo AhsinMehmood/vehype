@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animated_progress/flutter_animated_progress.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
@@ -33,6 +34,8 @@ import '../Controllers/garage_controller.dart';
 import '../Controllers/offers_provider.dart';
 import '../Controllers/vehicle_data.dart';
 import '../google_maps_place_picker.dart';
+import '../providers/firebase_storage_provider.dart';
+import 'crop_image_page.dart';
 import 'new_offers_page.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -538,13 +541,15 @@ class _EditProfileTabState extends State<EditProfileTab> {
 
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-
+  bool isUploading = false;
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
     lat = userController.userModel!.lat;
     long = userController.userModel!.long;
     UserModel userModel = userController.userModel!;
+    final FirebaseStorageProvider firebaseStorageProvider =
+        Provider.of<FirebaseStorageProvider>(context);
     return SingleChildScrollView(
       physics: ClampingScrollPhysics(),
       child: Padding(
@@ -555,59 +560,115 @@ class _EditProfileTabState extends State<EditProfileTab> {
                 height: 20,
               ),
               InkWell(
-                onTap: () {
-                  UserController().selectAndUploadImage(
-                      context, userController.userModel!, 0);
-                },
-                child: SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(200),
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          },
-                          errorWidget: (context, url, error) =>
-                              const SizedBox.shrink(),
-                          imageUrl: userController.userModel!.profileUrl,
-                          width: 125,
-                          height: 125,
-                          fit: BoxFit.fill,
+                onTap: () async {
+                  XFile? selectedFile = await ImagePicker()
+                      .pickImage(source: ImageSource.gallery);
+                  if (selectedFile != null) {
+                    File file = File(selectedFile.path);
+                    Get.to(() => CropImagePage(
+                        imageData: file,
+                        imageField: '',
+                        onCropped: (p0) async {
+                          File fromBytes = await file.writeAsBytes(p0);
 
-                          //cancelToken: cancellationToken,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(200),
-                            color: userController.isDark
-                                ? Colors.white
-                                : primaryColor,
-                          ),
-                          padding: const EdgeInsets.all(2),
-                          height: 24,
-                          width: 24,
-                          child: Center(
-                            child: Icon(
-                              Icons.edit,
-                              color: userController.isDark
-                                  ? primaryColor
-                                  : Colors.white,
-                              size: 20,
+                          setState(() => isUploading = true);
+                          String? fileUrl = await firebaseStorageProvider
+                              .uploadMedia(fromBytes, true);
+                          if (fileUrl != null) {
+                            // garageController.setimageOneUrl(fileUrl);
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userModel.userId)
+                                .update({'profileUrl': fileUrl});
+                          }
+                          setState(() {
+                            // imageUrl = fileUrl;
+                            isUploading = false;
+                          });
+                          firebaseStorageProvider.resetUploadState();
+                        }));
+                  }
+                },
+                child: isUploading
+                    ? Center(
+                        child: Stack(
+                          alignment: Alignment
+                              .center, // Ensures everything inside is centered
+                          children: [
+                            SizedBox(
+                              height: 90,
+                              width: 90,
+                              child: AnimatedCircularProgressIndicator(
+                                value: firebaseStorageProvider.uploadProgress ==
+                                        0.0
+                                    ? 0.02
+                                    : firebaseStorageProvider.uploadProgress,
+                                strokeWidth: 6,
+                                backgroundColor: Colors.green.withOpacity(0.2),
+                                color: const Color.fromARGB(255, 57, 167, 61),
+                                animationDuration: Duration(
+                                  milliseconds: 400,
+                                ),
+                                // label: 'Dart',
+                              ),
                             ),
-                          ),
+                            Text(
+                              '${(firebaseStorageProvider.uploadProgress * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      )
+                    : SizedBox(
+                        width: 90,
+                        height: 90,
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(200),
+                              child: CachedNetworkImage(
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox.shrink(),
+                                imageUrl: userController.userModel!.profileUrl,
+                                width: 125,
+                                height: 125,
+                                fit: BoxFit.fill,
+
+                                //cancelToken: cancellationToken,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(200),
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                ),
+                                padding: const EdgeInsets.all(2),
+                                height: 24,
+                                width: 24,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: userController.isDark
+                                        ? primaryColor
+                                        : Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
               ),
               const SizedBox(
                 height: 40,
@@ -1113,6 +1174,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                                             .location.lat,
                                                         result.geometry!
                                                             .location.lng);
+
                                                     lat = latLng.latitude;
                                                     long = latLng.longitude;
                                                     print('dddsd');

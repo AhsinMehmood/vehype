@@ -17,9 +17,9 @@ class _LoadingDialogState extends State<LoadingDialog> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 8)).then((s) {
+    Future.delayed(Duration(seconds: 10)).then((s) {
       showWait = true;
-      setState(() {});
+      // setState(() {});
     });
   }
 

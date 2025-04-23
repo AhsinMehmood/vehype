@@ -6,6 +6,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:get/get.dart';
@@ -14,20 +15,24 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
-import 'package:vehype/Pages/otp_page.dart';
+import 'package:vehype/Database/fetchAndUploadVehicleData.dart';
+import 'package:vehype/Pages/Auth/verify_otp_page.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import '../const.dart';
 import '../google_maps_place_picker.dart';
+import 'service_set_opening_hours.dart';
 import 'splash_page.dart';
 
 String apiKey = 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E';
 
 class ProviderEditProfileTabPage extends StatefulWidget {
   final bool isNew;
-  const ProviderEditProfileTabPage({super.key, required this.isNew});
+  final PlaceDetails? placeDetails;
+  const ProviderEditProfileTabPage(
+      {super.key, required this.isNew, required this.placeDetails});
 
   @override
   State<ProviderEditProfileTabPage> createState() =>
@@ -48,7 +53,17 @@ class _ProviderEditProfileTabPageState
   @override
   void initState() {
     super.initState();
-    getSelectedCountry();
+    if (widget.placeDetails != null) {
+      phoneNumber = TextEditingController(
+          text: widget.placeDetails!.internationalPhoneNumber);
+      nameController = TextEditingController(text: widget.placeDetails!.name);
+      websiteController =
+          TextEditingController(text: widget.placeDetails!.website);
+      lat = widget.placeDetails!.geometry!.location.lat;
+      long = widget.placeDetails!.geometry!.location.lng;
+    } else {
+      getSelectedCountry();
+    }
   }
 
   getSelectedCountry() async {
@@ -79,8 +94,6 @@ class _ProviderEditProfileTabPageState
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-    lat = userController.userModel!.lat;
-    long = userController.userModel!.long;
 
     UserModel userModel = userController.userModel!;
     return SingleChildScrollView(
@@ -112,7 +125,8 @@ class _ProviderEditProfileTabPageState
                           },
                           errorWidget: (context, url, error) =>
                               const SizedBox.shrink(),
-                          imageUrl: userController.userModel!.profileUrl,
+                          imageUrl:
+                              widget.placeDetails!.icon ?? userModel.profileUrl,
                           width: 125,
                           height: 125,
                           fit: BoxFit.fill,
@@ -561,84 +575,81 @@ class _ProviderEditProfileTabPageState
                                         onMapCreated: (contr) {
                                           _controller.complete(contr);
                                         },
-                                        onTap: (s) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => PlacePicker(
-                                                apiKey: apiKey,
-                                                selectText: 'Pick This Place',
-                                                onTapBack: () {
-                                                  Get.close(1);
-                                                },
-                                                onPlacePicked: (result) async {
-                                                  try {
-                                                    LatLng latLng = LatLng(
-                                                        result.geometry!
-                                                            .location.lat,
-                                                        result.geometry!
-                                                            .location.lng);
-                                                    lat = latLng.latitude;
-                                                    long = latLng.longitude;
+                                        // onTap: (s) {
+                                        //   Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //       builder: (context) => PlacePicker(
+                                        //         apiKey: apiKey,
+                                        //         selectText: 'Pick This Place',
+                                        //         onTapBack: () {
+                                        //           Get.close(1);
+                                        //         },
+                                        //         onPlacePicked: (result) async {
+                                        //           try {
+                                        //             LatLng latLng = LatLng(
+                                        //                 result.geometry!
+                                        //                     .location.lat,
+                                        //                 result.geometry!
+                                        //                     .location.lng);
+                                        //             lat = latLng.latitude;
+                                        //             long = latLng.longitude;
 
-                                                    userController
-                                                        .changeLocation(latLng);
-                                                    // setState(() {});
+                                        //             userController
+                                        //                 .changeLocation(latLng);
+                                        //             // setState(() {});
 
-                                                    final GeoFirePoint
-                                                        geoFirePoint =
-                                                        GeoFirePoint(GeoPoint(
-                                                            lat, long));
+                                        //             final GeoFirePoint
+                                        //                 geoFirePoint =
+                                        //                 GeoFirePoint(GeoPoint(
+                                        //                     lat, long));
 
-                                                    FirebaseFirestore.instance
-                                                        .collection('users')
-                                                        .doc(userController
-                                                            .userModel!.userId)
-                                                        .update({
-                                                      'lat': lat,
-                                                      'geo': geoFirePoint.data,
-                                                      'long': long,
-                                                    });
-                                                    final GoogleMapController
-                                                        controller =
-                                                        await _controller
-                                                            .future;
-                                                    await controller.animateCamera(
-                                                        CameraUpdate
-                                                            .newCameraPosition(
-                                                                CameraPosition(
-                                                      target: LatLng(lat, long),
-                                                      zoom: 16.0,
-                                                    )));
+                                        //             FirebaseFirestore.instance
+                                        //                 .collection('users')
+                                        //                 .doc(userController
+                                        //                     .userModel!.userId)
+                                        //                 .update({
+                                        //               'lat': lat,
+                                        //               'geo': geoFirePoint.data,
+                                        //               'long': long,
+                                        //             });
+                                        //             final GoogleMapController
+                                        //                 controller =
+                                        //                 await _controller
+                                        //                     .future;
+                                        //             await controller.animateCamera(
+                                        //                 CameraUpdate
+                                        //                     .newCameraPosition(
+                                        //                         CameraPosition(
+                                        //               target: LatLng(lat, long),
+                                        //               zoom: 16.0,
+                                        //             )));
 
-                                                    Get.close(1);
-                                                  } catch (e) {
-                                                    // Get.close(1);
-                                                  }
-                                                },
+                                        //             Get.close(1);
+                                        //           } catch (e) {
+                                        //             // Get.close(1);
+                                        //           }
+                                        //         },
 
-                                                initialPosition:
-                                                    LatLng(lat, long),
-                                                // useCurrentLocation: true,
-                                                selectInitialPosition: true,
-                                                resizeToAvoidBottomInset:
-                                                    false, // only works in page mode, less flickery, remove if wrong offsets
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        //         initialPosition:
+                                        //             LatLng(lat, long),
+                                        //         // useCurrentLocation: true,
+                                        //         selectInitialPosition: true,
+                                        //         resizeToAvoidBottomInset:
+                                        //             false, // only works in page mode, less flickery, remove if wrong offsets
+                                        //       ),
+                                        //     ),
+                                        //   );
+                                        // },
+
                                         markers: {
                                           Marker(
                                             markerId: MarkerId('current'),
-                                            position: LatLng(
-                                                userController.userModel!.lat,
-                                                userController.userModel!.long),
+                                            position: LatLng(lat, long),
                                           ),
                                         },
                                         initialCameraPosition: CameraPosition(
-                                          target: LatLng(
-                                              userController.userModel!.lat,
-                                              userController.userModel!.long),
+                                          target: LatLng(lat, long),
                                           zoom: 16.0,
                                         ),
                                       ),
@@ -649,84 +660,85 @@ class _ProviderEditProfileTabPageState
                             ),
                             // if (userController.userModel!.accountType ==
                             //     'provider')
-                            Align(
-                              alignment: Alignment.center,
-                              child: OutlinedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PlacePicker(
-                                          apiKey: apiKey,
-                                          selectText: 'Pick This Place',
-                                          onTapBack: () {
-                                            Get.close(1);
-                                          },
-                                          onPlacePicked: (result) async {
-                                            // Get.dialog(LoadingDialog(),
-                                            //     barrierDismissible: false);
-                                            LatLng latLng = LatLng(
-                                                result.geometry!.location.lat,
-                                                result.geometry!.location.lng);
-                                            lat = latLng.latitude;
-                                            long = latLng.longitude;
-                                            userController
-                                                .changeLocation(latLng);
-                                            setState(() {});
+                            // Align(
+                            //   alignment: Alignment.center,
+                            //   child: OutlinedButton(
+                            //       onPressed: () {
+                            //         Navigator.push(
+                            //           context,
+                            //           MaterialPageRoute(
+                            //             builder: (context) => PlacePicker(
+                            //               apiKey: apiKey,
+                            //               selectText: 'Pick This Place',
+                            //               onTapBack: () {
+                            //                 Get.close(1);
+                            //               },
+                            //               onPlacePicked: (result) async {
+                            //                 // Get.dialog(LoadingDialog(),
+                            //                 //     barrierDismissible: false);
+                            //                 LatLng latLng = LatLng(
+                            //                     result.geometry!.location.lat,
+                            //                     result.geometry!.location.lng);
+                            //                 lat = latLng.latitude;
+                            //                 long = latLng.longitude;
+                            //                 userController
+                            //                     .changeLocation(latLng);
+                            //                 setState(() {});
 
-                                            final GeoFirePoint geoFirePoint =
-                                                GeoFirePoint(
-                                                    GeoPoint(lat, long));
+                            //                 final GeoFirePoint geoFirePoint =
+                            //                     GeoFirePoint(
+                            //                         GeoPoint(lat, long));
 
-                                            FirebaseFirestore.instance
-                                                .collection('users')
-                                                .doc(userController
-                                                    .userModel!.userId)
-                                                .update({
-                                              'lat': lat,
-                                              'geo': geoFirePoint.data,
-                                              'long': long,
-                                            });
-                                            final GoogleMapController
-                                                controller =
-                                                await _controller.future;
-                                            await controller.animateCamera(
-                                                CameraUpdate.newCameraPosition(
-                                                    CameraPosition(
-                                              target: LatLng(lat, long),
-                                              zoom: 16.0,
-                                            )));
-                                            Get.close(1);
-                                          },
-                                          initialPosition: LatLng(lat, long),
-                                          // useCurrentLocation: true,
-                                          selectInitialPosition: true,
-                                          resizeToAvoidBottomInset:
-                                              false, // only works in page mode, less flickery, remove if wrong offsets
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: userController.isDark
-                                        ? primaryColor
-                                        : Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    minimumSize: Size(Get.width * 0.9, 50),
-                                  ),
-                                  child: Text(
-                                    'Change Location',
-                                    style: TextStyle(
-                                      // color: userController.isDark
-                                      //     ? primaryColor
-                                      //     : Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  )),
-                            ),
+                            //                 FirebaseFirestore.instance
+                            //                     .collection('users')
+                            //                     .doc(userController
+                            //                         .userModel!.userId)
+                            //                     .update({
+                            //                   'lat': lat,
+                            //                   'geo': geoFirePoint.data,
+                            //                   'long': long,
+                            //                 });
+                            //                 final GoogleMapController
+                            //                     controller =
+                            //                     await _controller.future;
+                            //                 await controller.animateCamera(
+                            //                     CameraUpdate.newCameraPosition(
+                            //                         CameraPosition(
+                            //                   target: LatLng(lat, long),
+                            //                   zoom: 16.0,
+                            //                 )));
+                            //                 Get.close(1);
+                            //               },
+                            //               initialPosition: LatLng(lat, long),
+                            //               // useCurrentLocation: true,
+                            //               selectInitialPosition: true,
+                            //               resizeToAvoidBottomInset:
+                            //                   false, // only works in page mode, less flickery, remove if wrong offsets
+                            //             ),
+                            //           ),
+                            //         );
+                            //       },
+                            //       style: ElevatedButton.styleFrom(
+                            //         backgroundColor: userController.isDark
+                            //             ? primaryColor
+                            //             : Colors.white,
+                            //         shape: RoundedRectangleBorder(
+                            //           borderRadius: BorderRadius.circular(6),
+                            //         ),
+                            //         minimumSize: Size(Get.width * 0.9, 50),
+                            //       ),
+                            //       child: Text(
+                            //         'Change Location',
+                            //         style: TextStyle(
+                            //           // color: userController.isDark
+                            //           //     ? primaryColor
+                            //           //     : Colors.white,
+                            //           fontSize: 16,
+                            //           fontWeight: FontWeight.w700,
+                            //         ),
+                            //       )),
+                            // ),
+
                             // if (userController.userModel!.accountType ==
                             //     'provider')
                             const SizedBox(
@@ -750,6 +762,7 @@ class _ProviderEditProfileTabPageState
                     if (widget.isNew)
                       ElevatedButton(
                           onPressed: () async {
+                            // fetchAndUploadVehicleData();
                             if (nameController.text.isEmpty) {
                               Get.showSnackbar(GetSnackBar(
                                 message: 'Business name is required!',
@@ -785,10 +798,18 @@ class _ProviderEditProfileTabPageState
                                   businessDescriptionController.text.trim(),
                               'website': websiteController.text.trim(),
                               'name': nameController.text.trim(),
+                              // 'isBusinessSetup': true,
+                              // 'contactInfo': selectedCountry +
+                              //     phoneNumber.text
+                              //         .replaceAll(RegExp(r'\D'), '')
+                              //         .trim(),
                             });
                             Get.close(1);
+
+                            // Get.offAll(
+                            //     () => ServiceSetOpeningHours(shopHours: {}));
                             Get.to(() => OtpPage(
-                                  phoneNumber: selectedCountry +
+                                  phoneNumber: '+' +
                                       phoneNumber.text
                                           .replaceAll(RegExp(r'\D'), '')
                                           .trim(),

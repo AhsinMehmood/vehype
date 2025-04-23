@@ -26,6 +26,7 @@ class IgnoredOffers extends StatelessWidget {
     if (ignoredOffers.isEmpty) {
       return Center(
         child: Text(
+       
           'No Ignored Offers Yet!',
           style: TextStyle(
             color: userController.isDark ? Colors.white : primaryColor,

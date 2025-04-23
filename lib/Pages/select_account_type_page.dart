@@ -126,6 +126,7 @@ class SelectAccountType extends StatelessWidget {
                               topLeft: Radius.circular(6),
                               topRight: Radius.circular(6),
                             ),
+     
                           ),
                           isDismissible: false,
                           // enableDrag: false,

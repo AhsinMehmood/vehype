@@ -140,14 +140,9 @@ class _MessagePageState extends State<MessagePage> {
 
     return WillPopScope(
       onWillPop: () async {
-        chatController.cleanController();
+        ChatController().updateChatTime(userModel, widget.chatModel);
 
-        // FirebaseFirestore.instance
-        //     .collection('users')
-        //     .doc(userModel.userId)
-        //     .update({
-        //   'unread': false,
-        // });
+        chatController.cleanController();
 
         return true;
       },
@@ -163,7 +158,6 @@ class _MessagePageState extends State<MessagePage> {
                 );
               }
               ChatModel chatModel = chatSnap.data ?? widget.chatModel;
-              ChatController().updateChatTime(userModel, widget.chatModel);
 
               return SafeArea(
                   child: StreamBuilder<OffersModel>(
@@ -953,6 +947,8 @@ class _MessagePageState extends State<MessagePage> {
                                                                         .offersModel,
                                                                     false,
                                                                     '',
+                                                                    widget
+                                                                        .garageModel,
                                                                     isLocation:
                                                                         true,
                                                                     latlng:
@@ -1053,7 +1049,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                   false,
                                                                   offersModel,
                                                                   false,
-                                                                  '');
+                                                                  '',
+                                                                  widget
+                                                                      .garageModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -1084,7 +1082,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                       .isVideo,
                                                                   offersModel,
                                                                   false,
-                                                                  '');
+                                                                  '',
+                                                                  widget
+                                                                      .garageModel);
                                                               messageScrollController
                                                                   .jumpTo(0);
                                                               chatController
@@ -1185,62 +1185,6 @@ class _MessagePageState extends State<MessagePage> {
                                                   else
                                                     InkWell(
                                                         onTap: () {
-                                                          // if (userController
-                                                          //         .currentPlayer !=
-                                                          //     null) {
-                                                          //   userController
-                                                          //       .currentPlayer!
-                                                          //       .stop();
-                                                          // }
-
-                                                          //  startRecording();
-                                                          // Future.delayed(
-                                                          //         Duration(
-                                                          //             seconds:
-                                                          //                 10))
-                                                          //     .then((s) async {
-                                                          //   try {
-                                                          //     final path =
-                                                          //         await _recorder
-                                                          //             .stop();
-                                                          //     filePath = path ??
-                                                          //         'null';
-                                                          //     log('Recording stopped. File path: $filePath');
-                                                          //     final file = File(
-                                                          //         filePath);
-                                                          //     if (!await file
-                                                          //         .exists()) {
-                                                          //       log('File does not exist at the specified path.');
-                                                          //       return;
-                                                          //     }
-
-                                                          //     String url =
-                                                          //         await uploadImage(
-                                                          //             file,
-                                                          //             'user');
-                                                          //     log('Audio URL: $url');
-                                                          //     chatController.sendMessage(
-                                                          //         userModel,
-                                                          //         widget
-                                                          //             .chatModel,
-                                                          //         textMessageController
-                                                          //             .text
-                                                          //             .trim(),
-                                                          //         widget
-                                                          //             .secondUser,
-                                                          //         '',
-                                                          //         '',
-                                                          //         false,
-                                                          //         offersModel,
-                                                          //         true,
-                                                          //         url);
-
-                                                          //     log('Audio uploaded successfully: ');
-                                                          //   } catch (e) {
-                                                          //     log(e.toString());
-                                                          //   }
-                                                          // });
-
                                                           if (chatController
                                                               .pickedMedia
                                                               .isEmpty) {
@@ -1261,7 +1205,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                   false,
                                                                   offersModel,
                                                                   false,
-                                                                  '');
+                                                                  '',
+                                                                  widget
+                                                                      .garageModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);
@@ -1300,7 +1246,9 @@ class _MessagePageState extends State<MessagePage> {
                                                                       .isVideo,
                                                                   offersModel,
                                                                   false,
-                                                                  '');
+                                                                  '',
+                                                                  widget
+                                                                      .garageModel);
 
                                                               messageScrollController
                                                                   .jumpTo(0);

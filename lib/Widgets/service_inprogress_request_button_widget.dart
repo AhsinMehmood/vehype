@@ -125,7 +125,8 @@ class ServiceInprogressRequestPageButtonWidget extends StatelessWidget {
                       offersModel,
                       'New Message',
                       '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                      'chat');
+                      'chat',
+                      garageModel);
                   ChatModel? newchat = await ChatController().getChat(
                       userController.userModel!.userId,
                       ownerDetails.userId,
@@ -341,7 +342,8 @@ class ServiceInprogressRequestButtonWidget extends StatelessWidget {
                       offersModel,
                       'New Message',
                       '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                      'chat');
+                      'chat',
+                      garageModel);
                   ChatModel? newchat = await ChatController().getChat(
                       userController.userModel!.userId,
                       ownerDetails.userId,

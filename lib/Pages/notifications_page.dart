@@ -22,6 +22,7 @@ import 'service_request_details.dart';
 
 // import 'requests_received_provider_details.dart';
 
+
 class NotificationsPage extends StatefulWidget {
   final List<OffersModel> offers;
   final List<OffersReceivedModel> offersReceivedModelList;

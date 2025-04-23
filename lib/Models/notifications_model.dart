@@ -19,6 +19,7 @@ class NotificationsModel {
   final String objectId;
   final String id;
 
+
   NotificationsModel(
       {required this.title,
       required this.subTitle,

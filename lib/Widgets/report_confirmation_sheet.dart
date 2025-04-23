@@ -19,6 +19,7 @@ class ReportConfirmationSheet extends StatelessWidget {
   final String reason;
   final MessagePage widget;
 
+
   @override
   Widget build(BuildContext context) {
     return Container(

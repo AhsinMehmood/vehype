@@ -146,10 +146,21 @@ class OffersController {
             offersModel,
             'Offer Accepted',
             '${userModel.name} accepted your offer for ${offersModel.vehicleId}',
-            'chat');
+            'chat',
+            garageModel);
 
         ChatModel? newchat = await ChatController().getChat(
             userModel.userId, postedByDetails.userId, offersModel.offerId);
+        ChatController().sendMessageForRequestUpdates(
+            offersModel,
+            offersReceivedModel,
+            'Offer Accepted',
+            userModel,
+            postedByDetails.userId,
+            newchat?.id ?? '',
+            garageModel.garageId,
+            'Accepted',
+            '');
         Get.close(2);
         Get.to(() => MessagePage(
               chatModel: newchat!,
@@ -160,6 +171,16 @@ class OffersController {
       } else {
         await ChatController()
             .updateChatRequestId(chatModel.id, offersReceivedModel.id);
+        ChatController().sendMessageForRequestUpdates(
+            offersModel,
+            offersReceivedModel,
+            'Offer Accepted',
+            userModel,
+            postedByDetails.userId,
+            chatModel.id,
+            garageModel.garageId,
+            'Accepted',
+            '');
         Get.close(2);
 
         // Get.to(() => MessagePage(
@@ -189,7 +210,8 @@ class OffersController {
           offersModel,
           'New Message',
           '${userModel.name} started a chat for ${offersModel.vehicleId}',
-          'Message');
+          'Message',
+          garageModel);
       ChatModel? newchat = await ChatController().getChat(
           userModel.userId, postedByDetails.userId, offersModel.offerId);
       Get.close(1);
@@ -242,12 +264,14 @@ class OffersController {
         .doc(offersReceivedModel.id)
         .update({
       'status': 'Completed',
+      'completedAt': DateTime.now().toUtc().toIso8601String(),
     });
     await FirebaseFirestore.instance
         .collection('offers')
         .doc(offersReceivedModel.offerId)
         .update({
       'status': 'inactive',
+      'completedAt': DateTime.now().toUtc().toIso8601String(),
     });
   }
 

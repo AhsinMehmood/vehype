@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:toastification/toastification.dart';
+import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/offers_controller.dart';
 import 'package:vehype/Models/user_model.dart';

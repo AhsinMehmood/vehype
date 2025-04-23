@@ -16,11 +16,16 @@ import 'package:vehype/Widgets/owner_active_offers.dart';
 import 'package:vehype/Widgets/owner_inactive_offers_page_widget.dart';
 import 'package:vehype/Widgets/owner_inprogress_page_widget.dart';
 import 'package:vehype/const.dart';
+import 'package:vehype/providers/assistance_guide_ai_service.dart';
+import 'package:vehype/providers/copy_vehicle_data.dart';
 
 import '../Controllers/mix_panel_controller.dart';
-import 'choose_account_type.dart';
+import 'Personal Assistance /assistance_guide_ui.dart';
+import 'Personal Assistance /assitance_chat_ui.dart';
+// import 'choose_account_type.dart';
 
 import 'owner_notifications_page.dart';
+import 'service_set_opening_hours.dart';
 
 final mixPanelController = Get.find<MixPanelController>();
 
@@ -93,8 +98,8 @@ class RepairPage extends StatelessWidget {
                     //     subtitle: 'subtitle',
                     //     userTokens: [userModel.pushToken]);
                     // log(userModel.pushToken);
-                        mixPanelController.trackEvent(
-                  eventName: 'Opened Owner Notifications Page', data: {});
+                    mixPanelController.trackEvent(
+                        eventName: 'Opened Owner Notifications Page', data: {});
                     Get.to(() => OwnerNotificationsPage(
                           offers: ownerOffersNeedsToCheck,
                         ));

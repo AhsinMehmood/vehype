@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>VEHYPE Beta</string>
+	<string>VEHYPE</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>com.nomadllc.vehype.beta</string>
+	<string>com.nomadllc.vehype</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,12 +29,12 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.595427669329-rjmcj7quh0ct1jps6nl0kms706ffndlc</string>
+				<string>com.googleusercontent.apps.832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.nomadllc.vehype.beta</string>
+			<string>com.nomadllc.vehype</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -44,7 +44,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>GIDClientID</key>
-	<string>595427669329-rjmcj7quh0ct1jps6nl0kms706ffndlc.apps.googleusercontent.com</string>
+	<string>832920203889-ssnm89qn4rq0j8lof7qkpsm2dkumlcsc.apps.googleusercontent.com</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
@@ -85,6 +85,12 @@
 	<string>To enhance your experience, this app requires access to your microphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To enhance your experience, this app requires access to your photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+<string>This app requires access to your microphone to record and send voice messages.</string>
+
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>This app uses speech recognition to convert your voice into text for sending voice messages.</string>
+
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

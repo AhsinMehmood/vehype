@@ -65,6 +65,7 @@ class ProductServiceModel {
     );
   }
 
+
   /// Convert ProductServiceModel to a JSON map (for saving to Firestore)
   Map<String, dynamic> toJson() {
     return {

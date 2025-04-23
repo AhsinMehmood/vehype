@@ -10,6 +10,7 @@ import 'dart:io';
 اور صرف تمہاری پہلو میں آ کے خود کو فنا کر لوں ! 
  */
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:floating_chat_button/floating_chat_button.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -43,6 +44,8 @@ import '../Controllers/notification_controller.dart';
 import '../Models/offers_model.dart';
 import '../Widgets/loading_dialog.dart';
 import '../google_maps_place_picker.dart';
+import 'Personal Assistance /assitance_chat_ui.dart';
+import 'service_set_opening_hours.dart';
 import 'setup_business_provider.dart';
 
 class TabsPage extends StatefulWidget {
@@ -52,11 +55,12 @@ class TabsPage extends StatefulWidget {
   State<TabsPage> createState() => _TabsPageState();
 }
 
-class _TabsPageState extends State<TabsPage> {
+class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
   final List<Widget> _body = [
     RepairPage(),
     MyGarage(),
     ExplorePage(),
+    // Container(),p
     ChatPage(),
     ProfilePage(),
   ];
@@ -121,10 +125,27 @@ class _TabsPageState extends State<TabsPage> {
         }
       }
     });
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+
+    WidgetsBinding.instance.addObserver(this);
 
     Future.delayed(const Duration(seconds: 0)).then((s) {
       getNotificationSetting();
+      userController.initTheme();
     });
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    if (!mounted) {
+      WidgetsBinding.instance.addObserver(this);
+
+      final UserController userController =
+          Provider.of<UserController>(context, listen: false);
+      userController.initTheme();
+    }
   }
 
   getNotificationSetting() async {
@@ -135,98 +156,98 @@ class _TabsPageState extends State<TabsPage> {
 
     // VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
     //     packageInfo: _packageInfo, regionCode: "US");
-    DocumentSnapshot<Map<String, dynamic>> updateInfo = await FirebaseFirestore
-        .instance
-        .collection('versionInfo')
-        .doc('appVersion')
-        .get();
-    print(_packageInfo.buildNumber);
-    mixPanelController.trackEvent(eventName: 'Checked for update', data: {});
+    // DocumentSnapshot<Map<String, dynamic>> updateInfo = await FirebaseFirestore
+    //     .instance
+    //     .collection('versionInfo')
+    //     .doc('appVersion')
+    //     .get();
+    // // print(_packageInfo.buildNumber);
+    // mixPanelController.trackEvent(eventName: 'Checked for update', data: {});
 
-    if (int.parse(_packageInfo.buildNumber) < updateInfo['buildNumber']) {
-      showModalBottomSheet(
-          context: context,
-          backgroundColor: userController.isDark ? primaryColor : Colors.white,
-          // enableDrag: false,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(6),
-              topRight: Radius.circular(6),
-            ),
-          ),
-          isDismissible: false,
-          enableDrag: false,
-          builder: (context) {
-            return UpdateSheet(
-              userController: userController,
-              manager: null,
-            );
-          });
-    }
-    // if (Platform.isAndroid) {
-    //   InAppUpdateManager manager = InAppUpdateManager();
-    //   AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
-    //   if (appUpdateInfo == null) return;
-    //   if (appUpdateInfo.updateAvailability ==
-    //       UpdateAvailability.developerTriggeredUpdateInProgress) {
-    //     //If an in-app update is already running, resume the update.
-    //     String? message =
-    //         await manager.startAnUpdate(type: AppUpdateType.immediate);
-    //   } else if (appUpdateInfo.updateAvailability ==
-    //       UpdateAvailability.updateAvailable) {
-    //     showModalBottomSheet(
-    //         context: context,
-    //         backgroundColor:
-    //             userController.isDark ? primaryColor : Colors.white,
-    //         // enableDrag: false,
-    //         shape: RoundedRectangleBorder(
-    //           borderRadius: BorderRadius.only(
-    //             topLeft: Radius.circular(6),
-    //             topRight: Radius.circular(6),
-    //           ),
+    // if (int.parse(_packageInfo.buildNumber) < updateInfo['buildNumber']) {
+    //   showModalBottomSheet(
+    //       context: context,
+    //       backgroundColor: userController.isDark ? primaryColor : Colors.white,
+    //       // enableDrag: false,
+    //       shape: RoundedRectangleBorder(
+    //         borderRadius: BorderRadius.only(
+    //           topLeft: Radius.circular(6),
+    //           topRight: Radius.circular(6),
     //         ),
-    //         isDismissible: false,
-    //         enableDrag: false,
-    //         builder: (context) {
-    //           return UpdateSheet(
-    //             userController: userController,
-    //             manager: manager,
-    //           );
-    //         });
-    //   }
-    // } else {
-    //   _packageInfo = await PackageManager.getPackageInfo();
-
-    //   VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
-    //       packageInfo: _packageInfo, regionCode: "US");
-
-    //   if (double.tryParse(_versionInfo.localVersion)! <
-    //       double.tryParse(_versionInfo.storeVersion)!) {
-    // showModalBottomSheet(
-    //     context: context,
-    //     backgroundColor:
-    //         userController.isDark ? primaryColor : Colors.white,
-    //     // enableDrag: false,
-    //     shape: RoundedRectangleBorder(
-    //       borderRadius: BorderRadius.only(
-    //         topLeft: Radius.circular(6),
-    //         topRight: Radius.circular(6),
     //       ),
-    //     ),
-    //     isDismissible: false,
-    //     enableDrag: false,
-    //     builder: (context) {
-    //       return UpdateSheet(
-    //         userController: userController,
-    //         manager: null,
-    //       );
-    //     });
+    //       isDismissible: false,
+    //       enableDrag: false,
+    //       constraints: BoxConstraints(
+    //         minWidth: Get.width,
+    //         maxWidth: Get.width,
+    //       ),
+    //       builder: (context) {
+    //         return UpdateSheet(
+    //           userController: userController,
+    //           manager: null,
+    //         );
+    //       });
     // }
-    // }
+    if (Platform.isAndroid) {
+      InAppUpdateManager manager = InAppUpdateManager();
+      AppUpdateInfo? appUpdateInfo = await manager.checkForUpdate();
+      if (appUpdateInfo == null) return;
+      if (appUpdateInfo.updateAvailability ==
+          UpdateAvailability.developerTriggeredUpdateInProgress) {
+        //If an in-app update is already running, resume the update.
+        String? message =
+            await manager.startAnUpdate(type: AppUpdateType.immediate);
+      } else if (appUpdateInfo.updateAvailability ==
+          UpdateAvailability.updateAvailable) {
+        showModalBottomSheet(
+            context: context,
+            backgroundColor:
+                userController.isDark ? primaryColor : Colors.white,
+            // enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+            isDismissible: false,
+            enableDrag: false,
+            builder: (context) {
+              return UpdateSheet(
+                userController: userController,
+                manager: manager,
+              );
+            });
+      }
+    } else {
+      _packageInfo = await PackageManager.getPackageInfo();
 
-    // else {
-    userController.pushTokenUpdate(userController.userModel!.userId);
-    // }
+      VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
+          packageInfo: _packageInfo, regionCode: "US");
+
+      if (double.tryParse(_versionInfo.localVersion)! <
+          double.tryParse(_versionInfo.storeVersion)!) {
+        showModalBottomSheet(
+            context: context,
+            backgroundColor:
+                userController.isDark ? primaryColor : Colors.white,
+            // enableDrag: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+            isDismissible: false,
+            enableDrag: false,
+            builder: (context) {
+              return UpdateSheet(
+                userController: userController,
+                manager: null,
+              );
+            });
+      }
+    }
   }
 
   @override
@@ -244,17 +265,83 @@ class _TabsPageState extends State<TabsPage> {
     final UserModel userModel = userController.userModel!;
     // print(userModel.pushToken);
     // AppController controller = Get.put(AppController());
-    return Scaffold(
-        body: IndexedStack(
-          index: userModel.accountType == 'seeker'
-              ? userController.tabIndex
-              : userController.tabIndex,
-          children: userModel.accountType == 'seeker' ? _body : _body2,
-        ),
-        backgroundColor: userController.isDark ? primaryColor : Colors.white,
-        bottomNavigationBar: userModel.accountType == 'seeker'
-            ? bottomNavigationBarSeeker()
-            : bottomNavigationBarProvider());
+    return userModel.accountType != 'seeker'
+        ? Scaffold(
+            body: IndexedStack(
+              index: userModel.accountType == 'seeker'
+                  ? userController.tabIndex
+                  : userController.tabIndex,
+              children: userModel.accountType == 'seeker' ? _body : _body2,
+            ),
+            backgroundColor:
+                userController.isDark ? primaryColor : Colors.white,
+            bottomNavigationBar: userModel.accountType == 'seeker'
+                ? bottomNavigationBarSeeker()
+                : bottomNavigationBarProvider())
+        : userModel.isGuest
+            ? Scaffold(
+                body: IndexedStack(
+                  index: userModel.accountType == 'seeker'
+                      ? userController.tabIndex
+                      : userController.tabIndex,
+                  children: userModel.accountType == 'seeker' ? _body : _body2,
+                ),
+                backgroundColor:
+                    userController.isDark ? primaryColor : Colors.white,
+                bottomNavigationBar: userModel.accountType == 'seeker'
+                    ? bottomNavigationBarSeeker()
+                    : bottomNavigationBarProvider())
+            : FloatingChatButton(
+                onTap: (s) {
+                  // Get.bottomSheet(
+                  //     BottomSheet(
+                  //         onClosing: () {},
+                  //         constraints: BoxConstraints(
+                  //           maxHeight: Get.height * 0.95,
+                  //           minHeight: Get.height * 0.95,
+                  //         ),
+                  //         builder: (co) {
+                  //           return AssistanceChatUI(
+                  //               // shopHours: {},
+                  //               );
+                  //         }),
+                  //     isScrollControlled: true);
+                  Get.to(() => AssistanceChatUI(
+                      // shopHours: {},
+                      ));
+                },
+                chatIconHorizontalOffset: 30,
+                chatIconVerticalOffset: 80,
+                messageText: "AI Assistant",
+                shouldPutWidgetInCircle: true,
+                // chatIconSize: 24,
+                // chatIconWidgetHeight: 45,
+                // chatIconBorderWidth: 45,
+                chatIconBackgroundColor:
+                    userController.isDark ? Colors.white : primaryColor,
+                chatIconColor:
+                    userController.isDark ? primaryColor : Colors.white,
+                messageTextStyle: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: userController.isDark ? primaryColor : Colors.white,
+                ),
+                messageBackgroundColor:
+                    userController.isDark ? Colors.white : primaryColor,
+                background: Scaffold(
+                    body: IndexedStack(
+                      index: userModel.accountType == 'seeker'
+                          ? userController.tabIndex
+                          : userController.tabIndex,
+                      children:
+                          userModel.accountType == 'seeker' ? _body : _body2,
+                    ),
+                    backgroundColor:
+                        userController.isDark ? primaryColor : Colors.white,
+                    bottomNavigationBar: userModel.accountType == 'seeker'
+                        ? bottomNavigationBarSeeker()
+                        : bottomNavigationBarProvider()),
+              );
   }
 
   BottomNavigationBar bottomNavigationBarProvider() {
@@ -785,9 +872,19 @@ class LocationPermissionSheet extends StatelessWidget {
                               Get.offAll(() => TabsPage());
                             } else {
                               if (userController.userModel!.isBusinessSetup) {
-                                Get.offAll(() => TabsPage());
+                                if (userController
+                                        .userModel!.isSetOpeningHours ==
+                                    false) {
+                                  Get.offAll(() => ServiceSetOpeningHours(
+                                        shopHours: {},
+                                      ));
+                                } else {
+                                  Get.offAll(() => TabsPage());
+                                }
                               } else {
-                                Get.offAll(() => SetupBusinessProvider());
+                                Get.offAll(() => SetupBusinessProvider(
+                                      placeDetails: null,
+                                    ));
                               }
                             }
                           },
@@ -975,11 +1072,11 @@ class UpdateSheet extends StatelessWidget {
                 } else {
                   _packageInfo = await PackageManager.getPackageInfo();
 
-                  VersionInfo? _versionInfo =
+                  VersionInfo? versionInfo =
                       await UpgradeVersion.getiOSStoreVersion(
                           packageInfo: _packageInfo, regionCode: "US");
-                  debugPrint(_versionInfo.toJson().toString());
-                  launchUrl(Uri.parse(_versionInfo.appStoreLink));
+                  debugPrint(versionInfo.toJson().toString());
+                  launchUrl(Uri.parse(versionInfo.appStoreLink));
                   // Get.close(1);
                 }
               },

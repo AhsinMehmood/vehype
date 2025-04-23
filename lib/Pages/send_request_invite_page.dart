@@ -56,18 +56,6 @@ class SendRequestInvitePage extends StatelessWidget {
         child: StreamBuilder<List<OffersModel>>(
             stream: GarageController().getRepairOffersPosted(userModel.userId),
             builder: (context, AsyncSnapshot<List<OffersModel>> snap) {
-              if (!snap.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: userController.isDark ? Colors.white : primaryColor,
-                  ),
-                );
-              }
-              if (snap.hasError) {
-                return Center(
-                  child: Text(snap.error.toString()),
-                );
-              }
               List<OffersModel> offersPosted = snap.data ?? [];
 
               if (offersPosted.isEmpty) {
@@ -86,9 +74,10 @@ class SendRequestInvitePage extends StatelessWidget {
               }
               return ListView.builder(
                   itemCount: offersPosted.length,
-                  padding: const EdgeInsets.only(
-                    bottom: 60,
-                  ),
+                  physics: ClampingScrollPhysics(),
+                  // padding: const EdgeInsets.only(
+                  //   bottom: 60,
+                  // ),
                   itemBuilder: (context, index) {
                     OffersModel offersModel = offersPosted[index];
                     DateTime createdAt = DateTime.parse(offersModel.createdAt);
@@ -265,7 +254,8 @@ class SendRequestInvitePage extends StatelessWidget {
                                           offersModel,
                                           'New Message',
                                           '${userModel.name} sent an inquiry for ${offersModel.vehicleId}',
-                                          'Message');
+                                          'Message',
+                                          garageModels);
                                       ChatModel? newchat =
                                           await ChatController().getChat(
                                               userModel.userId,

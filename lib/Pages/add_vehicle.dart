@@ -4,13 +4,20 @@
 
 // import 'package:extended_image/extended_image.dart';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_vertexai/firebase_vertexai.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animated_progress/flutter_animated_progress.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 // import 'package:package_rename/package_rename.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -21,30 +28,48 @@ import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/delete_vehicle_confirmation.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
+import 'package:vehype/providers/firebase_storage_provider.dart';
+import 'package:vehype/providers/garage_provider.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Controllers/vehicle_data.dart';
 import '../Models/vehicle_model.dart';
+import '../Widgets/loading_dialog.dart';
+import '../providers/generate_photo_provider.dart';
 
 class AddVehicle extends StatefulWidget {
   final GarageModel? garageModel;
-  final bool addService;
+  // final bool addService;
+  final String vin;
+  final String query;
+
   const AddVehicle(
-      {super.key, required this.garageModel, this.addService = false});
+      {super.key,
+      required this.garageModel,
+      // this.addService = false,
+      this.query = '',
+      this.vin = ''});
 
   @override
   State<AddVehicle> createState() => _AddVehicleState();
 }
 
 class _AddVehicleState extends State<AddVehicle> {
+  String? imageUrl;
+  bool isUploading = false;
   TextEditingController _vinController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 0)).then((value) {
-      if (widget.garageModel != null) {
+      if (widget.vin.isNotEmpty) {
+        _vinController.text = widget.vin;
+        setState(() {});
+      } else if (widget.garageModel != null) {
         _vinController.text = widget.garageModel!.vin;
+
+        setState(() {});
       }
     });
     final GarageController garageController =
@@ -54,7 +79,39 @@ class _AddVehicleState extends State<AddVehicle> {
           text: garageController.selectedVehicleModel!.title);
       customModel = garageController.selectedVehicleModel!.title;
     }
+    vehicleImage();
     setState(() {});
+  }
+
+  List<ImagenInlineImage> photos = [];
+
+  vehicleImage() async {
+    final GarageController garageController =
+        Provider.of<GarageController>(context, listen: false);
+    final FirebaseStorageProvider firebaseStorageProvider =
+        Provider.of<FirebaseStorageProvider>(context, listen: false);
+    if (widget.query.isNotEmpty) {
+      setState(() {
+        isUploading = true;
+      });
+      photos = await GeneratePhotoProvider().generateImage(widget.query);
+      File imageFile = await convertUint8ListToFile(
+          photos.first.bytesBase64Encoded, 'vehicle_image.png');
+      String? url = await firebaseStorageProvider.uploadMedia(imageFile, false);
+      garageController.setimageOneUrl(url ?? '');
+
+      setState(() {
+        isUploading = false;
+      });
+    }
+  }
+
+  Future<File> convertUint8ListToFile(
+      Uint8List uint8List, String fileName) async {
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/$fileName');
+    await file.writeAsBytes(uint8List);
+    return file;
   }
 
   String customModel = '';
@@ -62,14 +119,19 @@ class _AddVehicleState extends State<AddVehicle> {
 
   @override
   Widget build(BuildContext context) {
+    final FirebaseStorageProvider firebaseStorageProvider =
+        Provider.of<FirebaseStorageProvider>(context);
+    final UserController userController = Provider.of<UserController>(context);
+    final UserModel userModel = userController.userModel!;
+    final GarageProvider garageProvider = Provider.of<GarageProvider>(context);
     final GarageController garageController =
         Provider.of<GarageController>(context);
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
-    final UserController userController = Provider.of<UserController>(context);
 
     return WillPopScope(
       onWillPop: () async {
         garageController.disposeController();
+        firebaseStorageProvider.resetUploadState();
+
         return true;
       },
       child: Scaffold(
@@ -79,15 +141,17 @@ class _AddVehicleState extends State<AddVehicle> {
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           centerTitle: true,
           leading: IconButton(
-              onPressed: () {
-                garageController.disposeController();
+            onPressed: () {
+              firebaseStorageProvider.resetUploadState();
+              garageController.disposeController();
 
-                Get.back();
-              },
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: userController.isDark ? Colors.white : primaryColor,
-              )),
+              Get.back();
+            },
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              color: userController.isDark ? Colors.white : primaryColor,
+            ),
+          ),
           title: Text(
             widget.garageModel == null ? 'Add Vehicle' : 'Update Vehicle',
             style: TextStyle(
@@ -113,40 +177,94 @@ class _AddVehicleState extends State<AddVehicle> {
             padding: const EdgeInsets.all(15.0),
             child: Column(
               children: [
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 InkWell(
-                  onTap: () {
-                    // completeProfileProvider.selectImages(0, context);
-                    Get.bottomSheet(ChooseGalleryCamera(onTapCamera: () {
-                      garageController.selectImage(
-                          context, userModel, 0, ImageSource.camera);
+                  onTap: () async {
+                    Get.bottomSheet(ChooseGalleryCamera(onTapCamera: () async {
                       Get.close(1);
-                    }, onTapGallery: () {
-                      garageController.selectImage(
-                          context, userModel, 0, ImageSource.gallery);
+
+                      XFile? xFile = await ImagePicker()
+                          .pickImage(source: ImageSource.camera);
+                      if (xFile != null) {
+                        setState(() => isUploading = true);
+                        String? fileUrl = await firebaseStorageProvider
+                            .uploadMedia(File(xFile.path), false);
+                        if (fileUrl != null) {
+                          garageController.setimageOneUrl(fileUrl);
+                          setState(() {
+                            isUploading = false;
+                          });
+                        }
+                      }
+                    }, onTapGallery: () async {
                       Get.close(1);
+
+                      XFile? xFile = await ImagePicker()
+                          .pickImage(source: ImageSource.gallery);
+                      if (xFile != null) {
+                        setState(() => isUploading = true);
+                        String? fileUrl = await firebaseStorageProvider
+                            .uploadMedia(File(xFile.path), false);
+                        if (fileUrl != null) {
+                          garageController.setimageOneUrl(fileUrl);
+
+                          setState(() {
+                            isUploading = false;
+                          });
+                        }
+                      }
                     }));
                   },
                   child: Container(
                     height: 240,
                     width: Get.width * 0.9,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: garageController.imageOneUrl == ''
-                            ? Border.all(
-                                color: userController.isDark
-                                    ? Colors.white.withOpacity(0.4)
-                                    : primaryColor.withOpacity(0.4),
-                              )
-                            : null),
-                    child: garageController.imageOneLoading
-                        ? SizedBox(
-                            height: 40,
-                            width: 40,
-                            child: CupertinoActivityIndicator())
-                        : (garageController.imageOneUrl == ''
+                      borderRadius: BorderRadius.circular(5),
+                      border: garageController.imageOneUrl.isEmpty
+                          ? Border.all(
+                              color: userController.isDark
+                                  ? Colors.white.withOpacity(0.4)
+                                  : primaryColor.withOpacity(0.4),
+                            )
+                          : null,
+                    ),
+                    child: isUploading
+                        ? Center(
+                            child: Stack(
+                              alignment: Alignment
+                                  .center, // Ensures everything inside is centered
+                              children: [
+                                SizedBox(
+                                  height: 150,
+                                  width: 150,
+                                  child: AnimatedCircularProgressIndicator(
+                                    value: firebaseStorageProvider
+                                                .uploadProgress ==
+                                            0.0
+                                        ? 0.02
+                                        : firebaseStorageProvider
+                                            .uploadProgress,
+                                    strokeWidth: 6,
+                                    backgroundColor:
+                                        Colors.green.withOpacity(0.2),
+                                    color:
+                                        const Color.fromARGB(255, 57, 167, 61),
+                                    animationDuration: Duration(
+                                      milliseconds: 400,
+                                    ),
+                                    // label: 'Dart',
+                                  ),
+                                ),
+                                Text(
+                                  '${(firebaseStorageProvider.uploadProgress * 100).toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            ),
+                          )
+                        : garageController.imageOneUrl.isEmpty
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -157,9 +275,7 @@ class _AddVehicleState extends State<AddVehicle> {
                                         ? Colors.white
                                         : primaryColor,
                                   ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
+                                  const SizedBox(height: 15),
                                   Container(
                                     width: 150,
                                     decoration: BoxDecoration(
@@ -186,20 +302,37 @@ class _AddVehicleState extends State<AddVehicle> {
                                   )
                                 ],
                               )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: CachedNetworkImage(
-                                  placeholder: (context, url) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  },
-                                  errorWidget: (context, url, error) =>
-                                      const SizedBox.shrink(),
-                                  imageUrl: garageController.imageOneUrl,
-                                  fit: BoxFit.cover,
-                                ),
-                              )),
+                            : Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: CachedNetworkImage(
+                                      placeholder: (context, url) => Center(
+                                          child: CircularProgressIndicator()),
+                                      errorWidget: (context, url, error) =>
+                                          const SizedBox.shrink(),
+                                      imageUrl: garageController.imageOneUrl,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    child: IconButton(
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: primaryColor,
+                                      ),
+                                      onPressed: () {
+                                        garageController.setimageOneUrl('');
+                                      },
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                   ),
                 ),
                 const SizedBox(
@@ -512,16 +645,20 @@ class _AddVehicleState extends State<AddVehicle> {
                       Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
-                            border: garageController.isCustomMake
+                            border: garageController.isCustomMake ||
+                                    garageController.isCustomModel
                                 ? null
                                 : Border.all(
                                     color: userController.isDark
                                         ? Colors.white.withOpacity(0.4)
                                         : primaryColor.withOpacity(0.4),
                                   )),
-                        padding: EdgeInsets.all(
-                            garageController.isCustomMake ? 0 : 12),
-                        child: garageController.isCustomMake
+                        padding: EdgeInsets.all(garageController.isCustomMake ||
+                                garageController.isCustomModel
+                            ? 0
+                            : 12),
+                        child: garageController.isCustomMake ||
+                                garageController.isCustomModel
                             ? TextFormField(
                                 onChanged: (String text) {
                                   setState(() {
@@ -715,6 +852,7 @@ class _AddVehicleState extends State<AddVehicle> {
                         FocusScope.of(context).requestFocus(FocusNode());
                       },
                       controller: _vinController,
+                      // enabled: widget.vin.isEmpty,
                       cursorColor:
                           userController.isDark ? Colors.white : primaryColor,
                       decoration: InputDecoration(
@@ -764,22 +902,50 @@ class _AddVehicleState extends State<AddVehicle> {
                 ElevatedButton(
                     onPressed: () async {
                       if (garageController.saveButtonValidation()) {
-                        // toastification.show(
-                        //   context: context,
-                        //   title: Text('Everything is fine'),
-                        //   autoCloseDuration: Duration(seconds: 3),
-                        //   type: ToastificationType.error,
-                        // );
-                        // if (userModel.isGuest) {
-                        //   Get.bottomSheet(LoginSheet(onSuccess: () async {
-                        //     garageController.saveVehicle(userModel,
-                        //         _vinController.text, widget.addService);
-                        //   }));
-                        // } else {
+                        if (isUploading) {
+                          toastification.show(
+                            context: context,
+                            title: Text('The image is processing please wait!'),
+                            autoCloseDuration: Duration(seconds: 3),
+                            type: ToastificationType.error,
+                          );
+                          return;
+                        }
+                        Get.dialog(const LoadingDialog(),
+                            barrierDismissible: false);
 
-                        // }
-                        garageController.saveVehicle(
-                            userModel, _vinController.text, widget.addService);
+                        GarageModel garageModel = GarageModel(
+                            ownerId: userModel.userId,
+                            createdAt: widget.garageModel?.createdAt ??
+                                DateTime.now().toIso8601String(),
+                            isCustomModel: garageController.isCustomModel,
+                            isCustomMake: garageController.isCustomMake,
+                            submodel:
+                                garageController.selectedSubModel?.title ?? '',
+                            title: '',
+                            imageUrl: garageController.imageOneUrl,
+                            bodyStyle:
+                                garageController.selectedVehicleType?.title ??
+                                    '',
+                            make: garageController.selectedVehicleMake?.title ??
+                                '',
+                            year: garageController.selectedYear,
+                            model:
+                                garageController.selectedVehicleModel?.title ??
+                                    '',
+                            vin: _vinController.text.trim(),
+                            garageId: widget.garageModel?.garageId ?? '');
+                        garageController.disposeController();
+
+                        if (widget.garageModel == null) {
+                          await garageProvider.addGarage(
+                              garageModel, userModel.userId);
+                          Get.close(2);
+                        } else {
+                          await garageProvider.updateGarage(userModel.userId,
+                              garageModel, widget.garageModel!.garageId);
+                          Get.close(2);
+                        }
                       } else {
                         toastification.show(
                           context: context,
@@ -894,9 +1060,6 @@ class _MakePickerState extends State<MakePicker> {
                   if (addCustom)
                     Column(
                       children: [
-                        // const SizedBox(
-                        //   height: 10,
-                        // ),
                         Row(
                           children: [
                             Expanded(
@@ -905,7 +1068,6 @@ class _MakePickerState extends State<MakePicker> {
                                   setState(() {
                                     customModel = text;
                                   });
-                                  // _filterSearchResults(text, vehicleModels);
                                 },
                                 keyboardType: TextInputType.text,
                                 controller: modelController,
@@ -1346,116 +1508,121 @@ class BodyStylePicker extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              for (VehicleType bodyStyle in getVehicleType())
-                InkWell(
-                  onTap: () {
-                    // VehicleType vehicleType = VehicleType(
-                    //     title: titleMapping[bodyStyle.title]!,
-                    //     icon: bodyStyle.icon);
-                    garageController.selectVehicleType(bodyStyle);
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(
+              children: [
+                for (VehicleType bodyStyle in getVehicleType())
+                  InkWell(
+                    onTap: () {
+                      VehicleType vehicleType = VehicleType(
+                          title: titleMapping[bodyStyle.title]!,
+                          icon: bodyStyle.icon);
+                      garageController.selectVehicleType(bodyStyle);
 
-                    Get.close(1);
-                    showModalBottomSheet(
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                        )),
-                        // constraints: BoxConstraints(
-                        //   minHeight: Get.height * 0.7,
-                        //   maxHeight: Get.height * 0.7,
-                        // ),
-                        isScrollControlled: true,
-                        // showDragHandle: true,
-                        builder: (context) {
-                          return MakePicker();
-                        }).then((value) {
-                      // editProfileProvider
-                      //     .upadeteUpcomingDestinations(userModel);
-                    });
-                  },
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    height: 25,
-                                    width: 40,
-                                    child: SvgPicture.asset(
-                                      bodyStyle.icon,
+                      Get.close(1);
+                      showModalBottomSheet(
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15),
+                          )),
+                          // constraints: BoxConstraints(
+                          //   minHeight: Get.height * 0.7,
+                          //   maxHeight: Get.height * 0.7,
+                          // ),
+                          isScrollControlled: true,
+                          // showDragHandle: true,
+                          builder: (context) {
+                            return MakePicker();
+                          }).then((value) {
+                        // editProfileProvider
+                        //     .upadeteUpcomingDestinations(userModel);
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    SizedBox(
                                       height: 25,
-                                      width: 25,
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      bodyStyle.title,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
+                                      width: 40,
+                                      child: SvgPicture.asset(
+                                        bodyStyle.icon,
+                                        height: 25,
+                                        width: 25,
                                         color: userController.isDark
                                             ? Colors.white
                                             : primaryColor,
-                                        fontSize: 16,
                                       ),
                                     ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        bodyStyle.title,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: userController.isDark
+                                              ? Colors.white
+                                              : primaryColor,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (garageController.selectedVehicleType !=
+                                      null &&
+                                  garageController.selectedVehicleType!.title
+                                          .toLowerCase() ==
+                                      bodyStyle.title.toLowerCase())
+                                Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(200),
+                                    color: Colors.green,
                                   ),
-                                ],
-                              ),
-                            ),
-                            if (garageController.selectedVehicleType != null &&
-                                garageController.selectedVehicleType!.title
-                                        .toLowerCase() ==
-                                    bodyStyle.title.toLowerCase())
-                              Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  color: Colors.green,
+                                  child: Icon(
+                                    Icons.done,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.done,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Container(
-                        height: 1,
-                        width: Get.width * 0.9,
-                        color: userController.isDark
-                            ? Colors.white.withOpacity(0.3)
-                            : primaryColor.withOpacity(0.3),
-                      ),
-                    ],
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          height: 1,
+                          width: Get.width * 0.9,
+                          color: userController.isDark
+                              ? Colors.white.withOpacity(0.3)
+                              : primaryColor.withOpacity(0.3),
+                        ),
+                      ],
+                    ),
                   ),
+                const SizedBox(
+                  height: 10,
                 ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-          ),
+              ],
+            ),
+            // TextFormField(),
+          ],
         ),
       ),
     );

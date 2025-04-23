@@ -15,7 +15,7 @@
     android:name="android.permission.READ_EXTERNAL_STORAGE"
     android:maxSdkVersion="34" />
     <application
-        android:label="VEHYPE Beta"
+        android:label="VEHYPE"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/launcher_icon">

@@ -126,6 +126,7 @@ class NotificationDialog extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white,
                     // fontSize: 22,
+          
                     // height: Get.height * 0.1,
                     // fontFamily: 'Avenir',
                     fontWeight: FontWeight.w800,

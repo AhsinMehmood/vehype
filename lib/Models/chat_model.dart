@@ -13,6 +13,8 @@ class ChatModel {
   final Map userRoles;
   final bool isClosed;
   final String closeReason;
+  final String garageId;
+  final String serviceName;
 
   ChatModel(
       {required this.id,
@@ -24,8 +26,10 @@ class ChatModel {
       required this.isClosed,
       required this.offerId,
       required this.offerRequestId,
-       required this.userRoles,
-      required this.text});
+      required this.userRoles,
+      required this.text,
+      required this.garageId,
+      required this.serviceName});
 
   factory ChatModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     Map<String, dynamic> data = snapshot.data() ?? {};
@@ -42,6 +46,8 @@ class ChatModel {
         lastMessageMe: data['lastMessageMe'] ?? '',
         lastMessageAt:
             data['lastMessageAt'] ?? DateTime.now().toLocal().toIso8601String(),
-        text: data['text'] ?? '');
+        text: data['text'] ?? '',
+        garageId: data['vehicleId'] ?? '',
+        serviceName: data['serviceName'] ?? '');
   }
 }

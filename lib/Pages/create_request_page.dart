@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_animated_progress/flutter_animated_progress.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
@@ -18,6 +20,7 @@ import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
+import 'package:vehype/Pages/add_vehicle_new.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 
@@ -27,6 +30,7 @@ import '../Models/user_model.dart';
 import '../Widgets/loading_dialog.dart';
 import '../const.dart';
 import '../google_maps_place_picker.dart';
+import '../providers/firebase_storage_provider.dart';
 import 'add_vehicle.dart';
 import 'full_image_view_page.dart';
 
@@ -54,9 +58,17 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           Provider.of<GarageController>(context, listen: false);
 
       if (widget.offersModel != null) {
-        garageController.selectedVehicle = widget.offersModel!.vehicleId;
+        if (widget.garageModel != null) {
+          garageController.selectVehicle(
+              widget.garageModel!.title,
+              widget.garageModel!.imageUrl,
+              widget.garageModel!.garageId,
+              widget.garageModel!.bodyStyle);
+          garageController.imageOneUrl = widget.garageModel!.imageUrl;
+
+          // garageController.garageId = widget.garageModel!.garageId;
+        }
         garageController.selectedIssue = widget.offersModel!.issue;
-        garageController.imageOneUrl = widget.offersModel!.imageOne;
         lat = widget.offersModel!.lat;
         long = widget.offersModel!.long;
         List<RequestImageModel> images = [];
@@ -620,6 +632,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                                         'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
                                                     selectText:
                                                         'Pick This Place',
+
                                                     onTapBack: () {
                                                       Get.close(1);
                                                     },
@@ -800,7 +813,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         // backgroundColor:
                         //     userController.isDark ? Colors.white : primaryColor,
                         title: Text(
-                          'Images are processing please wait...',
+                          'Images are uploading please wait...',
                           style: TextStyle(
                               // color: userController.isDark
                               //     ? primaryColor
@@ -825,7 +838,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                               LatLng(lat, long),
                               userModel.userId,
                               widget.offersModel!.offerId,
-                              garageController.garageId);
+                              garageController.garageId,
+                              garageController.selectedFuelType);
                           await sendNotificationOnRequestUpdate(
                               widget.offersModel!.offerId,
                               garageController.selectedIssue,
@@ -889,7 +903,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                                     LatLng(lat, long),
                                     userModel.userId,
                                     null,
-                                    garageController.garageId);
+                                    garageController.garageId,
+                                    garageController.selectedIssue);
                             await getUserProviders(requestId,
                                 garageController.selectedIssue, userModel);
                             Get.back();
@@ -908,7 +923,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             LatLng(lat, long),
                             userModel.userId,
                             widget.offersModel!.offerId,
-                            garageController.garageId);
+                            garageController.garageId,
+                            garageController.selectedIssue);
                         await sendNotificationOnRequestUpdate(
                             widget.offersModel!.offerId,
                             garageController.selectedIssue,
@@ -970,7 +986,8 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                               LatLng(lat, long),
                               userModel.userId,
                               null,
-                              garageController.garageId);
+                              garageController.garageId,
+                              garageController.selectedIssue);
                           await getUserProviders(requestId,
                               garageController.selectedIssue, userModel);
                           Get.back();
@@ -1013,13 +1030,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       String requestId, String issue, UserModel userModel) async {
     List<UserModel> providers = [];
 
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .where('accountType', isEqualTo: 'provider')
-            .where('services', arrayContains: issue)
-            // .where('status', isEqualTo: 'active')
-            .get();
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .where('accountType', isEqualTo: 'provider')
+        .where('services', arrayContains: issue)
+        .get();
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
       providers.add(UserModel.fromJson(element));
@@ -1036,11 +1052,47 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .toList();
     List<UserModel> filterProviders = userController.filterProviders(
         filterIgnore, userModel.lat, userModel.long, 100);
-    List addNotifications = [];
+
+    // Check opening hours
+    DateTime now = DateTime.now();
+    String currentDay = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ][now.weekday % 7]; // Ensure Sunday is at index 0
+
+    TimeOfDay currentTime = TimeOfDay.fromDateTime(now);
+
     List<String> userIds = [];
-    for (var element in filterProviders) {
-      userIds.add(element.userId);
+    List addNotifications = [];
+
+    for (var provider in filterProviders) {
+      if (provider.workingHours != {} &&
+          provider.workingHours.containsKey(currentDay)) {
+        String hours = provider.workingHours[currentDay];
+
+        if (hours == '24 Hours') {
+          // Add directly if open 24/7
+          userIds.add(provider.userId);
+        } else {
+          // Parse opening and closing times
+          List<String> times = hours.split(' - ');
+          TimeOfDay openingTime = _parseTime(times[0]);
+          TimeOfDay closingTime = _parseTime(times[1]);
+
+          // Check if current time is within the working hours
+          if (_isWithinWorkingHours(currentTime, openingTime, closingTime)) {
+            userIds.add(provider.userId);
+          }
+        }
+      }
     }
+
+    // Send notifications only to providers who are currently open
     NotificationController().sendNotification(
         userIds: userIds,
         offerId: requestId,
@@ -1048,9 +1100,10 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         title: 'Request Changes Notification',
         subtitle:
             '${userModel.name} has updated his request. Click to see the latest changes.');
-    for (UserModel provider in filterProviders) {
+
+    for (String userId in userIds) {
       addNotifications.add({
-        'checkById': provider.userId,
+        'checkById': userId,
         'isRead': false,
         'title': '${userModel.name} has updated his request.',
         'subtitle':
@@ -1059,6 +1112,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         'senderId': userModel.userId,
       });
     }
+
     await FirebaseFirestore.instance
         .collection('offers')
         .doc(requestId)
@@ -1071,13 +1125,12 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       String requestId, String issue, UserModel userModel) async {
     List<UserModel> providers = [];
 
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .where('accountType', isEqualTo: 'provider')
-            .where('services', arrayContains: issue)
-            // .where('status', isEqualTo: 'active')
-            .get();
+    QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .where('accountType', isEqualTo: 'provider')
+        .where('services', arrayContains: issue)
+        .get();
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
       providers.add(UserModel.fromJson(element));
@@ -1091,11 +1144,47 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         .toList();
     List<UserModel> filterProviders = userController.filterProviders(
         blockedUsers, userModel.lat, userModel.long, 100);
+
+    // Check opening hours
+    DateTime now = DateTime.now();
+    String currentDay = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ][now.weekday % 7]; // Ensure Sunday is at index 0
+
+    TimeOfDay currentTime = TimeOfDay.fromDateTime(now);
+
     List<String> userIds = [];
-    for (var element in filterProviders) {
-      userIds.add(element.userId);
-    }
     List addNotifications = [];
+
+    for (var provider in filterProviders) {
+      if (provider.workingHours != {} &&
+          provider.workingHours.containsKey(currentDay)) {
+        String hours = provider.workingHours[currentDay];
+
+        if (hours == '24 Hours') {
+          // Add directly if open 24/7
+          userIds.add(provider.userId);
+        } else {
+          // Parse opening and closing times
+          List<String> times = hours.split(' - ');
+          TimeOfDay openingTime = _parseTime(times[0]);
+          TimeOfDay closingTime = _parseTime(times[1]);
+
+          // Check if current time is within the working hours
+          if (_isWithinWorkingHours(currentTime, openingTime, closingTime)) {
+            userIds.add(provider.userId);
+          }
+        }
+      }
+    }
+
+    // Send notifications only to providers who are currently open
     NotificationController().sendNotification(
         offerId: requestId,
         userIds: userIds,
@@ -1103,9 +1192,10 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         title: 'Opportunity Alert: New Request',
         subtitle:
             'A nearby vehicle owner has submitted a new request. Click here to see more and respond quickly.');
-    for (UserModel provider in filterProviders) {
+
+    for (String userId in userIds) {
       addNotifications.add({
-        'checkById': provider.userId,
+        'checkById': userId,
         'isRead': false,
         'title': 'Opportunity Alert: New Request',
         'subtitle':
@@ -1114,12 +1204,43 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
         'senderId': userModel.userId,
       });
     }
+
     await FirebaseFirestore.instance
         .collection('offers')
         .doc(requestId)
         .update({
       'checkByList': addNotifications,
     });
+  }
+
+// Helper function to parse TimeOfDay from string
+  TimeOfDay _parseTime(String timeString) {
+    final parts = timeString.split(':');
+    int hour = int.parse(parts[0]);
+    int minute = int.parse(parts[1].split(' ')[0]);
+    String period = parts[1].split(' ')[1].toLowerCase();
+
+    if (period == 'pm' && hour != 12) hour += 12;
+    if (period == 'am' && hour == 12) hour = 0;
+
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+// Helper function to check if current time is within working hours
+  bool _isWithinWorkingHours(
+      TimeOfDay current, TimeOfDay opening, TimeOfDay closing) {
+    int currentMinutes = current.hour * 60 + current.minute;
+    int openingMinutes = opening.hour * 60 + opening.minute;
+    int closingMinutes = closing.hour * 60 + closing.minute;
+
+    if (closingMinutes < openingMinutes) {
+      // Handles overnight shifts (e.g., 10 PM - 6 AM)
+      return currentMinutes >= openingMinutes ||
+          currentMinutes <= closingMinutes;
+    } else {
+      return currentMinutes >= openingMinutes &&
+          currentMinutes <= closingMinutes;
+    }
   }
 }
 
@@ -1169,389 +1290,421 @@ class CreateRequestImageAddWidget extends StatelessWidget {
   final GarageController garageController;
   final UserModel userModel;
   final UserController userController;
+  Future<void> _selectImage(
+      BuildContext context, int index, ImageSource source) async {
+    Get.close(1);
+
+    final pickedFile = await ImagePicker().pickImage(source: source);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final storageProvider =
+          Provider.of<FirebaseStorageProvider>(context, listen: false);
+
+      // Check if index is valid, otherwise append to the list
+      if (index < 0 || index >= garageController.requestImages.length) {
+        index = garageController.requestImages.length;
+      }
+
+      // Add placeholder while uploading
+      garageController.selectRequestImageUpdateSingleImage(
+        RequestImageModel(
+          imageUrl: '',
+          isLoading: true,
+          progress: 0.4,
+          imageFile: file,
+        ),
+        index,
+      );
+
+      // Upload the image
+      final downloadUrl = await storageProvider.uploadImage(
+        file,
+        userModel.userId,
+        index,
+      );
+
+      if (downloadUrl != null) {
+        // Replace the placeholder with the uploaded image
+        garageController.selectRequestImageUpdateSingleImage(
+          RequestImageModel(
+            imageUrl: downloadUrl,
+            isLoading: false,
+            progress: 1.0,
+            imageFile: file,
+          ),
+          index,
+        );
+      } else {
+        // Remove the placeholder if upload fails
+        garageController.removeRequestImage(index);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final storageProvider = Provider.of<FirebaseStorageProvider>(context);
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          height: 15,
-        ),
-        Align(
-          alignment: Alignment.topLeft,
-          child: Text(
-            'Add Photos',
-            style: TextStyle(
-              color: userController.isDark ? Colors.white : primaryColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+        const SizedBox(height: 15),
+        Text(
+          'Add Photos',
+          style: TextStyle(
+            color: userController.isDark ? Colors.white : primaryColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              onTap: () {
-                Get.bottomSheet(
-                  ChooseGalleryCamera(
-                    onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 0);
-                      Get.close(1);
-                    },
-                    onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 0);
-                      Get.close(1);
-                    },
-                  ),
-                  backgroundColor:
-                      userController.isDark ? primaryColor : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                height: Get.width * 0.25,
-                width: Get.width * 0.25,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(
-                      color:
-                          userController.isDark ? Colors.white : primaryColor,
-                    )),
-                child: garageController.requestImages.isEmpty
-                    ? Center(
-                        child: Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: Get.width * 0.15,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(13),
-                        child: garageController.requestImages[0].imageFile ==
-                                null
-                            ? CachedNetworkImage(
-                                placeholder: (context, url) {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                errorWidget: (context, url, error) =>
-                                    const SizedBox.shrink(),
-                                imageUrl:
-                                    garageController.requestImages[0].imageUrl,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                garageController.requestImages[0].imageFile!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                Get.bottomSheet(
-                  ChooseGalleryCamera(
-                    onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 1);
-                      Get.close(1);
-                    },
-                    onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 1);
-                      Get.close(1);
-                    },
-                  ),
-                  backgroundColor:
-                      userController.isDark ? primaryColor : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                height: Get.width * 0.25,
-                width: Get.width * 0.25,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(
-                      color:
-                          userController.isDark ? Colors.white : primaryColor,
-                    )),
-                child: garageController.requestImages.elementAtOrNull(1) == null
-                    ? Center(
-                        child: Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: Get.width * 0.15,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(13),
-                        child: garageController.requestImages[1].imageFile ==
-                                null
-                            ? CachedNetworkImage(
-                                placeholder: (context, url) {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                errorWidget: (context, url, error) =>
-                                    const SizedBox.shrink(),
-                                imageUrl:
-                                    garageController.requestImages[1].imageUrl,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                garageController.requestImages[1].imageFile!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                Get.bottomSheet(
-                  ChooseGalleryCamera(
-                    onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 2);
-                      Get.close(1);
-                    },
-                    onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 2);
-                      Get.close(1);
-                    },
-                  ),
-                  backgroundColor:
-                      userController.isDark ? primaryColor : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                height: Get.width * 0.25,
-                width: Get.width * 0.25,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(
-                      color:
-                          userController.isDark ? Colors.white : primaryColor,
-                    )),
-                child: garageController.requestImages.elementAtOrNull(2) == null
-                    ? Center(
-                        child: Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: Get.width * 0.15,
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(13),
-                        child: garageController.requestImages[2].imageFile ==
-                                null
-                            ? CachedNetworkImage(
-                                placeholder: (context, url) {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                },
-                                errorWidget: (context, url, error) =>
-                                    const SizedBox.shrink(),
-                                imageUrl:
-                                    garageController.requestImages[2].imageUrl,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.file(
-                                garageController.requestImages[2].imageFile!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-              ),
-            ),
-          ],
+          children: List.generate(
+            3,
+            (index) => _buildImageBox(context, index, storageProvider),
+          ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
-        // InkWell(
-        //   child: Container(
-        //       width: Get.width,
-        //       height: Get.width * 0.45,
-        //       decoration: BoxDecoration(
-        //         borderRadius: BorderRadius.circular(4),
-        //         // color: Colors.grey.shade400.withOpacity(0.7),
-        //       ),
-        //       child: garageController.requestImages.isEmpty
-        //           ? InkWell(
-        //               onTap: () {
-        //                 Get.bottomSheet(
-        //                   ChooseGalleryCamera(
-        //                     onTapCamera: () {
-        //                       garageController.selectRequestImage(
-        //                           ImageSource.camera, userModel.userId);
-        //                       Get.close(1);
-        //                     },
-        //                     onTapGallery: () {
-        //                       garageController.selectRequestImage(
-        //                           ImageSource.gallery, userModel.userId);
-        //                       Get.close(1);
-        //                     },
-        //                   ),
-        //                   backgroundColor: userController.isDark
-        //                       ? primaryColor
-        //                       : Colors.white,
-        //                   shape: RoundedRectangleBorder(
-        //                     borderRadius: BorderRadius.only(
-        //                       topLeft: Radius.circular(20),
-        //                       topRight: Radius.circular(20),
-        //                     ),
-        //                   ),
-        //                 );
-        //               },
-        //               child: Card(
-        //                 color:
-        //                     userController.isDark ? primaryColor : Colors.white,
-        //                 child: Icon(
-        //                   Icons.add_a_photo_rounded,
-        //                   size: 70,
-        //                   color: userController.isDark
-        //                       ? Colors.white
-        //                       : primaryColor,
-        //                 ),
-        //               ),
-        //             )
-        //           : PageView.builder(
-        //               scrollDirection: Axis.horizontal,
-        //               itemCount: garageController.requestImages.length,
-        //               controller: PageController(viewportFraction: 0.50),
-        //               itemBuilder: (context, index) {
-        //                 RequestImageModel requestImageModel =
-        //                     garageController.requestImages[index];
-        //                 return InkWell(
-        //                   onTap: () {
-        //                     Get.bottomSheet(
-        //                       ChooseGalleryCamera(
-        //                         onTapCamera: () {
-        //                           garageController
-        //                               .selectRequestImageUpdateSingleImage(
-        //                                   ImageSource.camera,
-        //                                   userModel.userId,
-        //                                   index);
-        //                           Get.close(1);
-        //                         },
-        //                         onTapGallery: () {
-        //                           garageController
-        //                               .selectRequestImageUpdateSingleImage(
-        //                                   ImageSource.gallery,
-        //                                   userModel.userId,
-        //                                   index);
-        //                           Get.close(1);
-        //                         },
-        //                       ),
-        //                       backgroundColor: userController.isDark
-        //                           ? primaryColor
-        //                           : Colors.white,
-        //                       shape: RoundedRectangleBorder(
-        //                         borderRadius: BorderRadius.only(
-        //                           topLeft: Radius.circular(20),
-        //                           topRight: Radius.circular(20),
-        //                         ),
-        //                       ),
-        //                     );
-        //                   },
-        //                   child: CreateRequestImageWidget(
-        //                     requestImageModel: requestImageModel,
-        //                     index: index,
-        //                   ),
-        //                 );
-        //               })),
-        // ),
-
-        // const SizedBox(
-        //   height: 10,
-        // ),
-        // Align(
-        //   alignment: Alignment.center,
-        //   child: ElevatedButton(
-        //       onPressed: garageController.requestImages.length == 3
-        //           ? null
-        //           : () {
-        //               Get.bottomSheet(
-        //                 ChooseGalleryCamera(
-        //                   onTapCamera: () {
-        //                     garageController.selectRequestImage(
-        //                         ImageSource.camera, userModel.userId);
-        //                     Get.close(1);
-        //                   },
-        //                   onTapGallery: () {
-        //                     garageController.selectRequestImage(
-        //                         ImageSource.gallery, userModel.userId);
-        //                     Get.close(1);
-        //                   },
-        //                 ),
-        //                 backgroundColor:
-        //                     userController.isDark ? primaryColor : Colors.white,
-        //                 shape: RoundedRectangleBorder(
-        //                   borderRadius: BorderRadius.only(
-        //                     topLeft: Radius.circular(20),
-        //                     topRight: Radius.circular(20),
-        //                   ),
-        //                 ),
-        //               );
-        //             },
-        //       style: TextButton.styleFrom(
-        //         backgroundColor:
-        //             userController.isDark ? primaryColor : Colors.white,
-        //         maximumSize: Size(Get.width * 0.6, 50),
-        //         minimumSize: Size(Get.width * 0.6, 50),
-        //         shape: RoundedRectangleBorder(
-        //           borderRadius: BorderRadius.circular(7),
-        //         ),
-        //       ),
-        //       child: Text(
-        //         'Select Media ${garageController.requestImages.length}/3',
-        //         style: TextStyle(
-        //           color: userController.isDark ? Colors.white : primaryColor,
-        //           fontSize: 16,
-        //           fontFamily: 'Avenir',
-        //           fontWeight: FontWeight.w800,
-        //         ),
-        //       )),
-        // ),
-        // const SizedBox(
-        //   height: 10,
-        // ),
       ],
     );
   }
+
+  Widget _buildImageBox(BuildContext context, int index,
+      FirebaseStorageProvider storageProvider) {
+    if (index < 0 || index >= garageController.requestImages.length) {
+      index = garageController.requestImages.length;
+    }
+    final image = garageController.requestImages.elementAtOrNull(index);
+    final uploadProgress = storageProvider.uploadProgressmulti[index];
+
+    return InkWell(
+      onTap: () => Get.bottomSheet(
+        ChooseGalleryCamera(
+          onTapCamera: () => _selectImage(context, index, ImageSource.camera),
+          onTapGallery: () => _selectImage(context, index, ImageSource.gallery),
+        ),
+        backgroundColor: userController.isDark ? primaryColor : Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+      ),
+      child: Container(
+        height: Get.width * 0.25,
+        width: Get.width * 0.25,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: userController.isDark ? Colors.white : primaryColor,
+          ),
+        ),
+        child: image == null
+            ? _buildEmptyBox()
+            : Stack(
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: image.imageFile == null
+                        ? CachedNetworkImage(
+                            imageUrl: image.imageUrl,
+                            fit: BoxFit.cover,
+                            height: Get.width * 0.25,
+                            width: Get.width * 0.25,
+                            placeholder: (_, __) => const Center(
+                                child: CircularProgressIndicator()),
+                            errorWidget: (_, __, ___) =>
+                                const Icon(Icons.error),
+                          )
+                        : Image.file(
+                            image.imageFile!,
+                            fit: BoxFit.cover,
+                            height: Get.width * 0.25,
+                            width: Get.width * 0.25,
+                          ),
+                  ),
+                  if (uploadProgress != null)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Stack(
+                          alignment: Alignment
+                              .center, // Ensures everything inside is centered
+                          children: [
+                            SizedBox(
+                              height: 55,
+                              width: 55,
+                              child: AnimatedCircularProgressIndicator(
+                                value: uploadProgress == 0.0
+                                    ? 0.02
+                                    : uploadProgress,
+                                strokeWidth: 6,
+                                backgroundColor: Colors.green.withOpacity(0.2),
+                                color: const Color.fromARGB(255, 57, 167, 61),
+                                animationDuration: Duration(
+                                  milliseconds: 400,
+                                ),
+                                // label: 'Dart',
+                              ),
+                            ),
+                            Text(
+                              '${(uploadProgress * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyBox() {
+    return Center(
+      child: Icon(
+        Icons.add_photo_alternate_outlined,
+        size: Get.width * 0.15,
+        color: userController.isDark ? Colors.white : primaryColor,
+      ),
+    );
+  }
 }
+
+// class CreateRequestImageAddWidget extends StatelessWidget {
+//   const CreateRequestImageAddWidget({
+//     super.key,
+//     required this.garageController,
+//     required this.userModel,
+//     required this.userController,
+//   });
+
+//   final GarageController garageController;
+//   final UserModel userModel;
+//   final UserController userController;
+
+//   @override
+//   Widget build(BuildContext context) {
+//         final storageProvider = Provider.of<FirebaseStorageProvider>(context);
+
+//     return Column(
+//       children: [
+//         const SizedBox(
+//           height: 15,
+//         ),
+//         Align(
+//           alignment: Alignment.topLeft,
+//           child: Text(
+//             'Add Photos',
+//             style: TextStyle(
+//               color: userController.isDark ? Colors.white : primaryColor,
+//               fontSize: 16,
+//               fontWeight: FontWeight.w700,
+//             ),
+//           ),
+//         ),
+//         const SizedBox(
+//           height: 20,
+//         ),
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//           children: [
+//             InkWell(
+//               onTap: () {
+//                 Get.bottomSheet(
+//                   ChooseGalleryCamera(
+//                     onTapCamera: () {
+//                       garageController.selectRequestImageUpdateSingleImage(
+//                           ImageSource.camera, userModel.userId, 0);
+//                       Get.close(1);
+//                     },
+//                     onTapGallery: () {
+//                       garageController.selectRequestImageUpdateSingleImage(
+//                           ImageSource.gallery, userModel.userId, 0);
+//                       Get.close(1);
+//                     },
+//                   ),
+//                   backgroundColor:
+//                       userController.isDark ? primaryColor : Colors.white,
+//                   shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.only(
+//                       topLeft: Radius.circular(20),
+//                       topRight: Radius.circular(20),
+//                     ),
+//                   ),
+//                 );
+//               },
+//               child: Container(
+//                 height: Get.width * 0.25,
+//                 width: Get.width * 0.25,
+//                 decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(13),
+//                     border: Border.all(
+//                       color:
+//                           userController.isDark ? Colors.white : primaryColor,
+//                     )),
+//                 child: garageController.requestImages.isEmpty
+//                     ? Center(
+//                         child: Icon(
+//                           Icons.add_photo_alternate_outlined,
+//                           size: Get.width * 0.15,
+//                           color: userController.isDark
+//                               ? Colors.white
+//                               : primaryColor,
+//                         ),
+//                       )
+//                     : ClipRRect(
+//                         borderRadius: BorderRadius.circular(13),
+//                         child: garageController.requestImages[0].imageFile ==
+//                                 null
+//                             ? CachedNetworkImage(
+//                                 placeholder: (context, url) {
+//                                   return Center(
+//                                     child: CircularProgressIndicator(),
+//                                   );
+//                                 },
+//                                 errorWidget: (context, url, error) =>
+//                                     const SizedBox.shrink(),
+//                                 imageUrl:
+//                                     garageController.requestImages[0].imageUrl,
+//                                 fit: BoxFit.cover,
+//                               )
+//                             : Image.file(
+//                                 garageController.requestImages[0].imageFile!,
+//                                 fit: BoxFit.cover,
+//                               ),
+//                       ),
+//               ),
+//             ),
+//             InkWell(
+//               onTap: () {
+
+//               },
+//               child: Container(
+//                 height: Get.width * 0.25,
+//                 width: Get.width * 0.25,
+//                 decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(13),
+//                     border: Border.all(
+//                       color:
+//                           userController.isDark ? Colors.white : primaryColor,
+//                     )),
+//                 child: garageController.requestImages.elementAtOrNull(1) == null
+//                     ? Center(
+//                         child: Icon(
+//                           Icons.add_photo_alternate_outlined,
+//                           size: Get.width * 0.15,
+//                           color: userController.isDark
+//                               ? Colors.white
+//                               : primaryColor,
+//                         ),
+//                       )
+//                     : ClipRRect(
+//                         borderRadius: BorderRadius.circular(13),
+//                         child: garageController.requestImages[1].imageFile ==
+//                                 null
+//                             ? CachedNetworkImage(
+//                                 placeholder: (context, url) {
+//                                   return Center(
+//                                     child: CircularProgressIndicator(),
+//                                   );
+//                                 },
+//                                 errorWidget: (context, url, error) =>
+//                                     const SizedBox.shrink(),
+//                                 imageUrl:
+//                                     garageController.requestImages[1].imageUrl,
+//                                 fit: BoxFit.cover,
+//                               )
+//                             : Image.file(
+//                                 garageController.requestImages[1].imageFile!,
+//                                 fit: BoxFit.cover,
+//                               ),
+//                       ),
+//               ),
+//             ),
+//             InkWell(
+//               onTap: () {
+//                 Get.bottomSheet(
+//                   ChooseGalleryCamera(
+//                     onTapCamera: () {
+//                       garageController.selectRequestImageUpdateSingleImage(
+//                           ImageSource.camera, userModel.userId, 2);
+//                       Get.close(1);
+//                     },
+//                     onTapGallery: () {
+//                       garageController.selectRequestImageUpdateSingleImage(
+//                           ImageSource.gallery, userModel.userId, 2);
+//                       Get.close(1);
+//                     },
+//                   ),
+//                   backgroundColor:
+//                       userController.isDark ? primaryColor : Colors.white,
+//                   shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.only(
+//                       topLeft: Radius.circular(20),
+//                       topRight: Radius.circular(20),
+//                     ),
+//                   ),
+//                 );
+//               },
+//               child: Container(
+//                 height: Get.width * 0.25,
+//                 width: Get.width * 0.25,
+//                 decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(13),
+//                     border: Border.all(
+//                       color:
+//                           userController.isDark ? Colors.white : primaryColor,
+//                     )),
+//                 child: garageController.requestImages.elementAtOrNull(2) == null
+//                     ? Center(
+//                         child: Icon(
+//                           Icons.add_photo_alternate_outlined,
+//                           size: Get.width * 0.15,
+//                           color: userController.isDark
+//                               ? Colors.white
+//                               : primaryColor,
+//                         ),
+//                       )
+//                     : ClipRRect(
+//                         borderRadius: BorderRadius.circular(13),
+//                         child: garageController.requestImages[2].imageFile ==
+//                                 null
+//                             ? CachedNetworkImage(
+//                                 placeholder: (context, url) {
+//                                   return Center(
+//                                     child: CircularProgressIndicator(),
+//                                   );
+//                                 },
+//                                 errorWidget: (context, url, error) =>
+//                                     const SizedBox.shrink(),
+//                                 imageUrl:
+//                                     garageController.requestImages[2].imageUrl,
+//                                 fit: BoxFit.cover,
+//                               )
+//                             : Image.file(
+//                                 garageController.requestImages[2].imageFile!,
+//                                 fit: BoxFit.cover,
+//                               ),
+//                       ),
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(
+//           height: 20,
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class SelectVehicle extends StatelessWidget {
   const SelectVehicle({super.key});
@@ -1577,7 +1730,7 @@ class SelectVehicle extends StatelessWidget {
                     eventName: 'Tapped on Add New Vehicle', data: {});
                 Get.to(() => AddVehicle(
                       garageModel: null,
-                      addService: true,
+                      // addService: true,
                     ));
               },
               child: Align(

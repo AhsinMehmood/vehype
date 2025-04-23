@@ -15,6 +15,7 @@ class MessageModel {
   final double long;
 
   MessageModel(
+    
       {required this.id,
       required this.isSystemMessage,
       required this.isAudio,

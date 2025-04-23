@@ -1,0 +1,79 @@
+[
+    {
+      "user_input": "I want to park my Toyota Corolla",
+      "intent": "park_vehicle",
+      "entities": {
+        "make": "Toyota",
+        "model": "Corolla"
+      }
+    },
+    {
+      "user_input": "Delete the Honda Civic from my garage",
+      "intent": "delete_vehicle",
+      "entities": {
+        "make": "Honda",
+        "model": "Civic"
+      }
+    },
+    {
+      "user_input": "Schedule a service for my 2019 Ford Mustang",
+      "intent": "create_service_request",
+      "entities": {
+        "make": "Ford",
+        "model": "Mustang",
+        "year": "2019"
+      }
+    },
+  
+    {
+      "user_input": "Find mechanics near me for engine repair",
+      "intent": "find_service_providers",
+      "entities": {
+        "service_type": "engine repair"
+      }
+    },
+    {
+      "user_input": "Add a new car to my garage",
+      "intent": "add_vehicle",
+      "entities": {}
+    },
+    {
+      "user_input": "Remove the BMW from my list",
+      "intent": "delete_vehicle",
+      "entities": {
+        "make": "BMW"
+      }
+    },
+    {
+      "user_input": "I need help diagnosing a brake issue on my 2020 Tesla Model 3",
+      "intent": "diagnose_issue",
+      "entities": {
+        "make": "Tesla",
+        "model": "Model 3",
+        "year": "2020",
+        "issue": "brake"
+      }
+    },
+    {
+      "user_input": "Show me the vehicles in my garage",
+      "intent": "view_garage",
+      "entities": {}
+    },
+    {
+      "user_input": "Book an appointment for tire rotation",
+      "intent": "create_service_request",
+      "entities": {
+        "service_type": "tire rotation"
+      }
+    },
+    {
+      "user_input": "What services are available for my 2021 Kia Sportage?",
+      "intent": "view_available_services",
+      "entities": {
+        "make": "Kia",
+        "model": "Sportage",
+        "year": "2021"
+      }
+    }
+  ]
+  

@@ -1,10 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:clipboard/clipboard.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 // import 'package:extended_image/extended_image.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
@@ -14,10 +13,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Pages/Invoice/all_product_and_services.dart';
+import 'package:vehype/Pages/Provider%20Verification/become_a_provider.dart';
 import 'package:vehype/Pages/edit_profile_page.dart';
-import 'package:vehype/Pages/manage_prefs.dart';
 import 'package:vehype/Pages/theme_page.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 import 'package:vehype/const.dart';
@@ -237,6 +235,26 @@ class ProfilePage extends StatelessWidget {
                             ));
                           } else {
                             Get.to(() => EditProfilePage());
+                          }
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      MenuCard(
+                        secondTitle: '',
+                        userController: userController,
+                        title: 'Earn with VEHYPE',
+                        icon: Icons.person,
+                        onTap: () async {
+                          if (userModel.isGuest) {
+                            Get.bottomSheet(LoginSheet(
+                              onSuccess: () {
+                                Get.to(() => BecomeAProvider());
+                              },
+                            ));
+                          } else {
+                            Get.to(() => BecomeAProvider());
                           }
                         },
                       ),
@@ -482,6 +500,7 @@ class ProfilePage extends StatelessWidget {
                                         // await FirebaseFirestore.instance
                                         //     .collection('users')
                                         //     .doc(userModel.userId)
+
                                         //     .update({
                                         //   'contactInfo': '',
                                         //   'isBusinessSetup': false,

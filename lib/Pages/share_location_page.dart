@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/const.dart';
@@ -16,11 +17,13 @@ class ShareLocationPage extends StatefulWidget {
   final ChatModel chatModel;
   final UserModel secondUserModel;
   final OffersModel offersModel;
+  final GarageModel garageModel;
   const ShareLocationPage({
     super.key,
     required this.chatModel,
     required this.secondUserModel,
     required this.offersModel,
+    required this.garageModel,
   });
 
   @override
@@ -90,6 +93,7 @@ class _ShareLocationPageState extends State<ShareLocationPage> {
                     widget.offersModel,
                     false,
                     '',
+                    widget.garageModel,
                     isLocation: true,
                     latlng: latLng);
                 Get.back();

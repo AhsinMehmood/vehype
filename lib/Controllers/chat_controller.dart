@@ -12,19 +12,22 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Models/chat_model.dart';
+import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/message_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 // import 'package:vehype/Pages/offers_received_details.dart';
 import 'package:path/path.dart' as p;
 import 'package:vehype/Widgets/loading_dialog.dart';
+import 'package:vehype/providers/firebase_storage_provider.dart';
 import 'package:video_compress/video_compress.dart';
 // import 'package:';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:dio/dio.dart';
 
 import 'user_controller.dart';
@@ -42,10 +45,10 @@ class ChatController with ChangeNotifier {
     String chatId,
     String closeReason,
   ) async {
-    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
-      'isClosed': true,
-      'closeReason': closeReason,
-    });
+    // await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+    //   'isClosed': true,
+    //   'closeReason': closeReason,
+    // });
   }
 
   Future<String> createChat(
@@ -55,18 +58,21 @@ class ChatController with ChangeNotifier {
       OffersModel offersModel,
       String notificationTitle,
       String notificationSubtitle,
-      String type) async {
+      String type,
+      GarageModel garageModel) async {
     DocumentReference<Map<String, dynamic>> reference =
         await FirebaseFirestore.instance.collection('chats').add({
       'members': [
         currentUser.userId,
         secondUser.userId,
-    ],
+      ],
       'lastOpen': {
         currentUser.userId: DateTime.now().toUtc().toIso8601String(),
         secondUser.userId: DateTime.now().toUtc().toIso8601String()
       },
       'offerId': offersModel.offerId,
+      'vehicleId': garageModel.garageId,
+      'serviceName': offersModel.issue,
       'offerRequestId': offerRequestId,
       'lastMessageMe': currentUser.userId,
       'lastMessageAt': DateTime.now().toUtc().toIso8601String(),
@@ -308,8 +314,14 @@ class ChatController with ChangeNotifier {
 
           notifyListeners();
         } else {
-          String url =
-              await uploadMedia(File(mediaModel.file.path), userModel.userId);
+          // final tempDir = await getTemporaryDirectory();
+          // final extension = path.extension(mediaModel.file.path);
+
+          // final targetPath = path.join(
+          //     tempDir.path, 'compressed_${mediaModel.file.path}$extension');
+          // File file = await FirebaseStorageProvider()
+          //     .compressAndGetFile(mediaModel.file, targetPath);
+          String url = await uploadMedia(mediaModel.file, userModel.userId);
           pickedMedia.removeAt(i);
           pickedMedia.insert(
               i,
@@ -369,6 +381,7 @@ class ChatController with ChangeNotifier {
       OffersModel offersModel,
       bool isAudio,
       String audioUrl,
+      GarageModel garageModel,
       {LatLng? latlng,
       bool isLocation = false}) async {
     DatabaseReference reference = _messagesRef.child(chatModel.id).push();
@@ -389,7 +402,7 @@ class ChatController with ChangeNotifier {
       'lat': latlng != null ? latlng.latitude : 0.2,
       'long': latlng != null ? latlng.longitude : 0.2,
     });
-
+    // updateChatTime(currentUser, chatModel);
     NotificationController().sendMessageNotification(
         senderUser: secondUser,
         receiverUser: currentUser,
@@ -403,6 +416,50 @@ class ChatController with ChangeNotifier {
       'lastMessageAt': DateTime.now().toUtc().toIso8601String(),
       'text': message,
       'lastMessageMe': currentUser.userId,
+      'lastOpen.${currentUser.userId}':
+          DateTime.now().toUtc().toIso8601String(),
+      'vehicleId': garageModel.garageId,
+      'serviceName': offersModel.issue,
+    });
+  }
+
+  sendMessageForRequestUpdates(
+      OffersModel offersModel,
+      OffersReceivedModel offersReceivedModel,
+      String message,
+      UserModel currentUser,
+      String secondUser,
+      String chatId,
+      String vehicleId,
+      String status,
+      String invoiceUrl) async {
+    DatabaseReference reference = _messagesRef.child(chatId).push();
+    await reference.set({
+      'isOfferUpdate': true,
+      'invoiceUrl': invoiceUrl,
+      'status': status,
+      'sentAt': DateTime.now().toUtc().toIso8601String(),
+      'sentById': currentUser.userId,
+      'isAudio': false,
+      'audioUrl': '',
+      'text': message,
+      'mediaUrl': [],
+      'isVideo': false,
+      'thumbnailUrl': '',
+      'senderName': currentUser.name,
+      'pushToken': '',
+      'chatId': chatId,
+      'state': 0,
+      'isLocation': false,
+      'lat': 0.2,
+      'long': 0.2,
+    });
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'lastMessageAt': DateTime.now().toUtc().toIso8601String(),
+      'text': message,
+      'lastMessageMe': currentUser.userId,
+      'vehicleId': vehicleId,
+      'serviceName': offersModel.issue,
     });
   }
 

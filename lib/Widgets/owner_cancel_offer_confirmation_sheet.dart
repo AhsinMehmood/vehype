@@ -22,6 +22,7 @@ class OwnerCancelOfferConfirmationSheet extends StatefulWidget {
     required this.offersReceivedModel,
   });
 
+
   final UserController userController;
   final OffersModel offersModel;
   final OffersReceivedModel offersReceivedModel;

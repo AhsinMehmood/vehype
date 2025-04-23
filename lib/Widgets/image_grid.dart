@@ -25,6 +25,7 @@ class MasonryView extends StatelessWidget {
             _buildItem(index * 2),
             SizedBox(width: itemPadding), // Add spacing between items
             _buildItem(index * 2 + 1),
+     
           ],
         );
       },

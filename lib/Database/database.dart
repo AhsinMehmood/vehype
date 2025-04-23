@@ -41,6 +41,7 @@ class DatabaseHelper {
     );
   }
 
+
   // Get JSON data
   Future<Map<String, dynamic>?> getJsonData(String cacheKey) async {
     final db = await database;

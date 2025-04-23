@@ -25,6 +25,7 @@ class _ReportConfirmationState extends State<ReportConfirmation> {
         padding: const EdgeInsets.all(15),
         child: SafeArea(
           child: Column(
+   
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(

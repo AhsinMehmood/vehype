@@ -20,198 +20,268 @@ import 'package:vehype/Pages/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 
+import '../Pages/service_set_opening_hours.dart';
+
 import '../Pages/splash_page.dart';
 import '../const.dart';
+import '../providers/garage_provider.dart';
 
 class LoginController {
-  static Future signInWithGoogle(BuildContext context) async {
+  static Future<void> resetPassword(String email) async {
     try {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+      print('Password reset email sent');
+      Get.close(2);
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-
-      // Create a new credential
-
-      if (googleAuth != null) {
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        String emailSeeker = 'seeker@gmail.com';
-        String emailProvider = 'provider@gmail.com';
-        try {
-          Get.dialog(const LoadingDialog(), barrierDismissible: false);
-
-          UserCredential userCredential =
-              await FirebaseAuth.instance.signInWithCredential(credential);
-          String userId = userCredential.user!.uid;
-          String? email = userCredential.user!.email;
-          String? name = userCredential.user!.displayName;
-
-          // Mixpanel mixpanel = await Mixpanel.init(
-          //     'c40aeb8e3a8f1030b811314d56973f5a',
-          //     trackAutomaticEvents: true);
-          // mixpanel.identify(userId);
-
-          // mixpanel.getPeople().set('\$name', name ?? '');
-          sharedPreferences.setString('userId', userId);
-          if (userCredential.additionalUserInfo!.isNewUser) {
-            String? name = userCredential.user!.displayName;
-            String? urlAvatar = userCredential.user!.photoURL;
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .set({
-              'name': name,
-              // 'accountType': 'owner',
-              'profileUrl': urlAvatar,
-              'id': userId,
-              'email': email,
-            });
-
-            DocumentSnapshot<Map<String, dynamic>> snapshot =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userId)
-                    .get();
-            UserModel userModel = UserModel.fromJson(snapshot);
-
-            Get.close(1);
-
-            Get.offAll(() => SelectAccountType(
-                  userModelAccount: userModel,
-                ));
-          } else {
-            UserController userController =
-                Provider.of<UserController>(context, listen: false);
-            // userController.getUserStream(userId);
-
-            // if(){}
-            DocumentSnapshot<Map<String, dynamic>> snapshot =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userId)
-                    .get();
-            UserModel userModel = UserModel.fromJson(snapshot);
-
-            if (userModel.accountType == '') {
-              Get.close(1);
-
-              Get.offAll(() => SelectAccountType(
-                    userModelAccount: userModel,
-                  ));
-            } else {
-              if (userModel.adminStatus == 'blocked') {
-                Get.close(1);
-
-                Get.offAll(() => const DisabledWidget());
-              } else {
-                OffersProvider offersProvider =
-                    Provider.of<OffersProvider>(context, listen: false);
-                userController.getUserStream(
-                  userId + userModel.accountType,
-                  onDataReceived: (userModel) {},
-                );
-                DocumentSnapshot<Map<String, dynamic>> usersnap =
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userId + userModel.accountType)
-                        .get();
-                if (userModel.accountType == 'provider') {
-                  offersProvider.startListening(UserModel.fromJson(usersnap));
-                  offersProvider.startListeningOffers(
-                      UserModel.fromJson(usersnap).userId);
-                } else {
-                  offersProvider.startListeningOwnerOffers(
-                      UserModel.fromJson(usersnap).userId);
-                }
-                // Get.close(1);/
-
-                // await OneSignal.Notifications.requestPermission(true);
-                OneSignal.login(userId + userModel.accountType);
-                DocumentSnapshot<Map<String, dynamic>> userSnapss =
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userId + userModel.accountType)
-                        .get();
-                Get.close(1);
-                // log(userSnapss.)
-
-                // Get.offAll(() => const TabsPage());
-                if (userSnapss.data()!['lat'] == null ||
-                    userSnapss.data()!['lat'] == 0.0) {
-                  Future.delayed(const Duration(seconds: 0)).then((s) {
-                    Get.bottomSheet(
-                      LocationPermissionSheet(
-                        userController: userController,
-                        isProvider:
-                            userId + userModel.accountType == 'provider',
-                      ),
-                      backgroundColor:
-                          userController.isDark ? primaryColor : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(6),
-                          topRight: Radius.circular(6),
-                        ),
-                      ),
-                      isDismissible: false,
-                      // enableDrag: false,
-                    );
-                  });
-                } else {
-                  if (userSnapss.data()!['isBusinessSetup'] == null ||
-                      userSnapss.data()!['isBusinessSetup'] == false) {
-                    Get.offAll(() => SetupBusinessProvider());
-                  } else {
-                    Get.offAll(() => const TabsPage());
-                  }
-                }
-              }
-            }
-          }
-        } catch (e) {
-          Get.close(1);
-          Get.showSnackbar(GetSnackBar(
-            message: 'Cancelled by user',
-            duration: const Duration(seconds: 2),
-          ));
-        }
-      } else {
-        // Get.close(1);
-        Get.showSnackbar(GetSnackBar(
-          message: 'Cancelled by user',
-          duration: const Duration(seconds: 2),
-        ));
-      }
+      Get.snackbar(
+        'Password Reset',
+        'A password reset link has been sent to your email.',
+        snackPosition: SnackPosition.TOP,
+        duration: Duration(seconds: 4),
+      );
     } on FirebaseAuthException catch (e) {
-      // Get.close(1);
-      Get.showSnackbar(GetSnackBar(
-        message: e.message,
-        duration: const Duration(seconds: 3),
-      ));
+      Get.close(1);
+      print('Error: ${e.message}');
+      _showSnackbar('Error: ${e.message}');
+
+      // Handle specific error cases if needed
     }
   }
 
-  loginWithApple(BuildContext context) async {
+  static Future<void> signUpWithEmail({
+    required BuildContext context,
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
     try {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-      // Check if Sign in with Apple is available
-      bool isAvail = await SignInWithApple.isAvailable();
-      if (!isAvail) {
-        throw Exception('Sign in with Apple is not available on this device.');
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Update display name
+      // await userCredential.user?.updateDisplayName(fullName);
+
+      // Create user data in Firestore and navigate
+      await createAccountGotoNextPage(userCredential, context,
+          fullName: fullName);
+    } on FirebaseAuthException catch (e) {
+      Get.close(1);
+      _showSnackbar(e.message ?? 'Signup failed');
+    } catch (e) {
+      Get.close(1);
+      _showSnackbar('Unexpected error: $e');
+    }
+  }
+
+  static Future<void> loginWithEmail({
+    required BuildContext context,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
+
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      await createAccountGotoNextPage(userCredential, context);
+    } on FirebaseAuthException catch (e) {
+      Get.close(1);
+      debugPrint(e.message);
+      _showSnackbar(e.message ?? 'Login failed');
+    } catch (e) {
+      Get.close(1);
+      _showSnackbar('Unexpected error: $e');
+    }
+  }
+
+  static Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        _showSnackbar('Cancelled by user');
+        return;
       }
 
-      // Log for debugging purposes
-      // Get.dialog(const LoadingDialog(), barrierDismissible: false);
+      final googleAuth = await googleUser.authentication;
+
+      if (googleAuth == null) {
+        _showSnackbar('Authentication failed');
+        return;
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      Get.dialog(const LoadingDialog(), barrierDismissible: false);
+
+      try {
+        final userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+
+        await createAccountGotoNextPage(userCredential, context);
+      } catch (e) {
+        _showSnackbar('Something went wrong during sign in.');
+        Get.close(1);
+      }
+    } on FirebaseAuthException catch (e) {
+      _showSnackbar(e.message ?? 'Firebase error occurred.');
+    } catch (e) {
+      _showSnackbar('Unexpected error: $e');
+    }
+  }
+
+  static void _showSnackbar(String message) {
+    Get.showSnackbar(GetSnackBar(
+      message: message,
+      duration: const Duration(seconds: 3),
+    ));
+  }
+
+  static Future<void> createAccountGotoNextPage(
+      UserCredential userCredential, BuildContext context,
+      {String fullName = ''}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = userCredential.user!;
+    final String userId = user.uid;
+
+    prefs.setString('userId', userId);
+
+    final isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+
+    // Only call this ONCE to close loading
+
+    if (isNewUser) {
+      // print('is New User');
+      await _handleNewUser(user, fullName: fullName);
+      // print('is New User after handle user');
+
+      final userModel = await _getUserModel(userId);
+      // print('is New User after get user model');
+
+      // Get.close(1);
+
+      _navigateToSelectAccountType(userModel);
+    } else {
+      final userModel = await _getUserModel(userId);
+
+      await _handleExistingUser(context, userModel, userId);
+    }
+  }
+
+  static Future<void> _handleNewUser(User user,
+      {required String fullName}) async {
+    final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    await docRef.set({
+      'name': fullName.isEmpty ? user.displayName : fullName,
+      'profileUrl': user.photoURL,
+      'id': user.uid,
+      'email': user.email,
+    });
+  }
+
+  static Future<UserModel> _getUserModel(String userId) async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    return UserModel.fromJson(snapshot);
+  }
+
+  static void _navigateToSelectAccountType(UserModel userModel) {
+    Get.close(1);
+    Get.offAll(() => SelectAccountType(userModelAccount: userModel));
+  }
+
+  static Future<void> _handleExistingUser(
+      BuildContext context, UserModel userModel, String userId) async {
+    final userController = Provider.of<UserController>(context, listen: false);
+
+    if (userModel.accountType.isEmpty) {
+      _navigateToSelectAccountType(userModel);
+      return;
+    }
+
+    if (userModel.adminStatus == 'blocked') {
+      // Get.close(1);
+      Get.offAll(() => const DisabledWidget());
+      return;
+    }
+
+    final accountId = userId + userModel.accountType;
+    final userSnap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(accountId)
+        .get();
+
+    final fullUserModel = UserModel.fromJson(userSnap);
+
+    userController.getUserStream(accountId, onDataReceived: (_) {});
+    OneSignal.login(accountId);
+
+    final offersProvider = Provider.of<OffersProvider>(context, listen: false);
+    final garageProvider = Provider.of<GarageProvider>(context, listen: false);
+
+    if (userModel.accountType == 'provider') {
+      offersProvider.startListening(fullUserModel);
+      offersProvider.startListeningOffers(fullUserModel.userId);
+    } else {
+      garageProvider.fetchGarages(fullUserModel.userId);
+      offersProvider.startListeningOwnerOffers(fullUserModel.userId);
+    }
+
+    Get.close(1);
+    await navigateBasedOnProfile(
+        userSnap, userModel.accountType, userController);
+  }
+
+  static Future<void> navigateBasedOnProfile(
+      DocumentSnapshot<Map<String, dynamic>> userSnap,
+      String accountType,
+      UserController userController) async {
+    final data = userSnap.data()!;
+    final userModel = UserModel.fromJson(userSnap);
+
+    if (data['lat'] == null || data['lat'] == 0.0) {
+      Future.delayed(Duration.zero).then((_) {
+        Get.bottomSheet(
+          LocationPermissionSheet(
+            userController: userController,
+            isProvider: accountType == 'provider',
+          ),
+          backgroundColor: userController.isDark ? primaryColor : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
+          ),
+          isDismissible: false,
+        );
+      });
+    } else if ((data['isBusinessSetup'] == null ||
+            data['isBusinessSetup'] == false) &&
+        accountType == 'provider') {
+      Get.offAll(() => SetupBusinessProvider(
+            placeDetails: null,
+          ));
+    } else if (!userModel.isSetOpeningHours && accountType == 'provider') {
+      Get.offAll(() => ServiceSetOpeningHours(shopHours: {}));
+    } else {
+      Get.offAll(() => TabsPage());
+    }
+  }
+
+  Future<void> loginWithApple(BuildContext context) async {
+    try {
+      final isAvailable = await SignInWithApple.isAvailable();
+
+      if (!isAvailable) {
+        _showSnackbar('Sign in with Apple is not available on this device.');
+        return;
+      }
 
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -220,117 +290,30 @@ class LoginController {
         ],
       );
 
-      // Create an OAuth credential using the received token
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
+
       Get.dialog(const LoadingDialog(), barrierDismissible: false);
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      try {
+        final userCredential =
+            await FirebaseAuth.instance.signInWithCredential(oauthCredential);
 
-      String userId = userCredential.user!.uid;
-      String? email = userCredential.user!.email;
-      String? name = userCredential.user!.displayName;
-
-      sharedPreferences.setString('userId', userId);
-
-      if (userCredential.additionalUserInfo!.isNewUser) {
-        String? urlAvatar = userCredential.user!.photoURL;
-        await FirebaseFirestore.instance.collection('users').doc(userId).set({
-          'name': name,
-          'profileUrl': urlAvatar,
-          'id': userId,
-          'email': email,
-        });
-
-        DocumentSnapshot<Map<String, dynamic>> snapshot =
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .get();
-        UserModel userModel = UserModel.fromJson(snapshot);
-
+        await createAccountGotoNextPage(userCredential, context);
+      } catch (e) {
         Get.close(1);
-        Get.offAll(() => SelectAccountType(userModelAccount: userModel));
-      } else {
-        UserController userController =
-            Provider.of<UserController>(context, listen: false);
-
-        DocumentSnapshot<Map<String, dynamic>> snapshot =
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .get();
-        UserModel userModel = UserModel.fromJson(snapshot);
-
-        if (userModel.accountType == '') {
-          Get.close(1);
-
-          Get.offAll(() => SelectAccountType(userModelAccount: userModel));
-        } else {
-          if (userModel.adminStatus == 'blocked') {
-            Get.close(1);
-
-            Get.offAll(() => const DisabledWidget());
-          } else {
-            userController.getUserStream(userId + userModel.accountType);
-            OneSignal.login(userId + userModel.accountType);
-
-            DocumentSnapshot<Map<String, dynamic>> userSnapss =
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userId + userModel.accountType)
-                    .get();
-            Get.close(1);
-
-            if (userSnapss.data()!['lat'] == null ||
-                userSnapss.data()!['lat'] == 0.0) {
-              Future.delayed(const Duration(seconds: 0)).then((s) {
-                Get.bottomSheet(
-                  LocationPermissionSheet(
-                    userController: userController,
-                    isProvider: userId + userModel.accountType == 'provider',
-                  ),
-
-                  backgroundColor:
-                      userController.isDark ? primaryColor : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(6),
-                      topRight: Radius.circular(6),
-                    ),
-                  ),
-                  isDismissible: false,
-                  // enableDrag: false,
-                );
-              });
-            } else {
-              if (userSnapss.data()!['isBusinessSetup'] == null ||
-                  userSnapss.data()!['isBusinessSetup'] == false) {
-                Get.offAll(() => SetupBusinessProvider());
-              } else {
-                Get.offAll(() => const TabsPage());
-              }
-            }
-          }
-        }
+        _showSnackbar('Apple login failed. Please try again.');
+        debugPrint('Credential Sign-In Error: $e');
       }
     } on FirebaseAuthException catch (e) {
       Get.close(1);
-      Get.showSnackbar(GetSnackBar(
-        message: 'Firebase Auth Error: ${e.message}',
-        duration: const Duration(seconds: 3),
-      ));
-      print('Firebase Auth Exception: $e');
+      _showSnackbar('Firebase Auth Error: ${e.message}');
+      debugPrint('Firebase Auth Exception: $e');
     } catch (e) {
-      // Get.close(1);
-      Get.showSnackbar(GetSnackBar(
-        message: 'Error: $e',
-        duration: const Duration(seconds: 2),
-      ));
-      print('Exception: $e');
+      _showSnackbar('Unexpected error: $e');
+      debugPrint('General Exception: $e');
     }
   }
 }

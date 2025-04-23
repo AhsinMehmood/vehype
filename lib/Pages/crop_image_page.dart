@@ -3,9 +3,10 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crop_your_image/crop_your_image.dart';
+import 'package:custom_image_crop/custom_image_crop.dart';
 
 import 'package:flutter/material.dart';
- 
+
 import 'package:get/get.dart';
 // import 'package:image_compression_flutter/image_compression_flutter.dart';
 import 'package:provider/provider.dart';
@@ -19,16 +20,31 @@ import '../const.dart';
 class CropImagePage extends StatefulWidget {
   final File imageData;
   final String imageField;
+  final Function(Uint8List) onCropped; // Function type
 
   const CropImagePage(
-      {super.key, required this.imageData, required this.imageField});
+      {super.key,
+      required this.imageData,
+      required this.imageField,
+      required this.onCropped});
 
   @override
   State<CropImagePage> createState() => _CropImagePageState();
 }
 
 class _CropImagePageState extends State<CropImagePage> {
-  final _controller = CropController();
+  late CustomImageCropController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = CustomImageCropController();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,43 +76,29 @@ class _CropImagePageState extends State<CropImagePage> {
       body: Column(
         children: [
           Expanded(
-            child: Crop(
-                baseColor: Colors.black,
-                initialSize: 1,
-                image: widget.imageData.readAsBytesSync(),
-                radius: 0,
-                aspectRatio: 1,
-                controller: _controller,
-                withCircleUi: true,
-                onCropped: (image) async {
-                  File fromBytes = await widget.imageData.writeAsBytes(image);
-
-                  String imageUrl = await UserController()
-                      .uploadImage(fromBytes, userModel.userId);
-                  Get.close(1);
-
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userModel.userId)
-                      .update({'profileUrl': imageUrl});
-                  // await EditProfileProvider().saveImage(
-                  //     compressedFile.readAsBytesSync(),
-                  //     widget.imageField,
-                  //     userModel);
-
-                  // do something with
-                  // image data
-                }),
+            child: CustomImageCrop(
+              imageFit: CustomImageFit.fillVisibleHeight,
+              cropController: controller,
+              image: FileImage(widget.imageData,
+                  scale:
+                      1), // Any Imageprovider will work, try with a NetworkImage for example...
+            ),
           ),
           const SizedBox(
             height: 20,
           ),
           ElevatedButton(
-            onPressed: () {
-              Get.back();
+            onPressed: () async {
               Get.dialog(LoadingDialog(), barrierDismissible: false);
+              // File file = File(widget.imageData.path);
 
-              _controller.crop();
+              final MemoryImage? image = await controller.onCropImage();
+              //  File fromBytes = await file.writeAsBytes(image!.bytes);
+
+              widget.onCropped(image!.bytes);
+
+              Get.close(1);
+              Get.back();
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor:

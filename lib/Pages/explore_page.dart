@@ -22,9 +22,9 @@ import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Pages/my_fav_page.dart';
 import 'package:vehype/Widgets/widget_to_icon.dart';
 import 'package:vehype/const.dart';
-import 'package:http/http.dart' as http;
-import 'package:widget_marker_google_map/widget_marker_google_map.dart';
-import 'dart:ui' as ui;
+// import 'package:widget_marker_google_map/widget_marker_google_map.dart';
+import 'package:widget_marker_google_maps_flutter/widget_marker_google_maps_flutter.dart';
+// import 'package:widget_marker_google_maps_flutter/widget_marker_google_maps_flutter.dart';
 
 import '../Controllers/user_controller.dart';
 import '../Models/user_model.dart';
@@ -51,16 +51,16 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-  String _darkMapStyle = '';
+  // String _darkMapStyle = '';
   @override
   void initState() {
     super.initState();
-    _loadMapStyles();
+    // _loadMapStyles();
   }
 
-  Future _loadMapStyles() async {
-    _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
-  }
+  // Future _loadMapStyles() async {
+  //   _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
+  // }
 
   FocusNode searchnode = FocusNode();
 
@@ -79,80 +79,68 @@ class _ExplorePageState extends State<ExplorePage> {
       FirebaseFirestore.instance.collection('users');
 
   UserModel? selectedMarker;
-
-  List<WidgetMarker> addMarkers(
+  Map<MarkerId, WidgetMarker> addMarkers(
       List<UserModel> nearbyProviders, UserController userController) {
-    // final UserController userController =
-    //     Provider.of<UserController>(context, listen: false);
     final UserModel userModel = userController.userModel!;
     lat = userModel.lat;
     long = userModel.long;
-    List<WidgetMarker> markers = [];
+    Map<MarkerId, WidgetMarker> markers = {};
+
     for (UserModel element in nearbyProviders) {
-      if (element.email == 'No email set') {
-      } else {
-        if (element.userId != userController.userModel!.userId) {
-          markers.add(WidgetMarker(
-              markerId: element.userId,
-              position: LatLng(element.lat, element.long),
-              onTap: () async {
-                GoogleMapController mapController =
-                    await userController.mapController.future;
-                mapController.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: LatLng(element.lat, element.long),
-                      zoom: 15,
+      if (element.email != 'No email set' &&
+          element.userId != userController.userModel!.userId) {
+        final markerId = MarkerId(element.userId);
+        markers[markerId] = WidgetMarker(
+          markerId: markerId.value,
+          position: LatLng(element.lat, element.long),
+          onTap: () async {
+            GoogleMapController mapController =
+                await userController.mapController.future;
+            mapController.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: LatLng(element.lat, element.long),
+                  zoom: 15,
+                ),
+              ),
+            );
+            setState(() {
+              selectedMarker = element;
+            });
+          },
+          widget: SizedBox(
+            height: 45,
+            width: 45,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/user.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    margin: const EdgeInsets.only(top: 1),
+                    height: 32,
+                    width: 32,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: CachedNetworkImage(
+                        imageUrl: element.profileUrl,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                );
-                setState(() {
-                  selectedMarker = element;
-                });
-              },
-              widget: SizedBox(
-                height: 45,
-                width: 45,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Image.asset(
-                        'assets/user.png',
-                        height: 50,
-                        width: 50,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        margin: const EdgeInsets.only(
-                          top: 1,
-                        ),
-                        height: 32,
-                        width: 32,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(200),
-                          child: CachedNetworkImage(
-                            imageUrl: element.profileUrl,
-                            // height: 20,
-                            // width: 20,
-                            // fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
-              )));
-        }
+              ],
+            ),
+          ),
+        );
       }
     }
-
     return markers;
   }
 
@@ -160,14 +148,14 @@ class _ExplorePageState extends State<ExplorePage> {
   String searchText = '';
   List<UserModel> searchedUsers = [];
   // Function to search users
-  // void searchUsers(String query, List<UserModel> nearbyProvidersStream) {
-  //   // searchedUsers.clear(); // Clear previous search results
+  void searchUsers(String query, List<UserModel> nearbyProvidersStream) {
+    // searchedUsers.clear(); // Clear previous search results
 
-  //   // Iterate through nearbyProvidersStream to find matching users
-  //   for (var element in nearbyProvidersStream) {
-  //     final fuse = Fuzzy(element.services);
-  //   }
-  // }
+    // Iterate through nearbyProvidersStream to find matching users
+    for (var element in nearbyProvidersStream) {
+      final fuse = Fuzzy(element.services);
+    }
+  }
 
   TextEditingController text = TextEditingController();
   // List services = [];
@@ -254,27 +242,20 @@ class _ExplorePageState extends State<ExplorePage> {
                         : filterProvidersByServices(nearbyProvidersStream,
                             userController.selectedServicesFilter);
 
-                List<WidgetMarker> markers =
+                Map<MarkerId, WidgetMarker> markers =
                     addMarkers(filterByService, userController);
-                markers.add(
-                  WidgetMarker(
-                    markerId: 'current',
-                    widget: ClipRRect(
-                      borderRadius: BorderRadius.circular(200),
-                      child: CachedNetworkImage(
-                        imageUrl: userModel.profileUrl,
-                        height: 40,
-                        width: 40,
-                      ),
-                    ),
-                    position: LatLng(userModel.lat, userModel.long),
-                  ),
-                );
+
                 return Stack(
                   children: [
                     WidgetMarkerGoogleMap(
-                      // markers: markers.toSet(),
-                      widgetMarkers: markers,
+                      markers: <MarkerId, Marker>{
+                        const MarkerId('default_marker'): Marker(
+                          position: LatLng(userModel.lat, userModel.long),
+                          infoWindow: InfoWindow(title: 'Your Location'),
+                          markerId: const MarkerId('default_marker'),
+                        ),
+                      },
+                      // widgetMarkers: markers,
                       liteModeEnabled: false,
                       compassEnabled: false,
                       myLocationEnabled: false,
@@ -298,13 +279,12 @@ class _ExplorePageState extends State<ExplorePage> {
                           setState(() {});
                         }
                       },
-
                       onMapCreated: (controller) {
                         if (!userController.mapController.isCompleted) {
                           userController.mapController.complete(controller);
                         }
                         if (userController.isDark) {
-                          controller.setMapStyle(_darkMapStyle);
+                          // controller.setMapStyle(_darkMapStyle);
                         }
                         setState(() {});
                       },

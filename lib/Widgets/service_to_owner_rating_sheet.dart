@@ -400,6 +400,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                                   'id': userModel.userId,
                                   'rating': rating,
                                   'comment': commentController.text.trim(),
+                                  'service': widget.offersModel.issue,
                                   // 'images': url,
                                   'at':
                                       DateTime.now().toUtc().toIso8601String(),
@@ -417,6 +418,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                               // 'status': 'finish',
                               'ratingTwo': rating,
                               'commentTwo': commentController.text.trim(),
+
                               'ratingTwoImage': url,
                             });
 
@@ -429,6 +431,7 @@ class _ServiceToOwnerRatingSheetState extends State<ServiceToOwnerRatingSheet> {
                                   'id': userModel.userId,
                                   'rating': rating,
                                   'comment': commentController.text.trim(),
+                                  'service': widget.offersModel.issue,
                                   'images': url,
                                   'at':
                                       DateTime.now().toUtc().toIso8601String(),

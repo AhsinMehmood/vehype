@@ -24,6 +24,7 @@ class SharedLocationPage extends StatefulWidget {
   State<SharedLocationPage> createState() => _SharedLocationPageState();
 }
 
+
 class _SharedLocationPageState extends State<SharedLocationPage> {
   @override
   Widget build(BuildContext context) {

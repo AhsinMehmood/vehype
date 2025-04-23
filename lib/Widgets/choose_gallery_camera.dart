@@ -21,6 +21,7 @@ class ChooseGalleryCamera extends StatelessWidget {
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
+     
         ),
         onClosing: () {},
         builder: (context) {

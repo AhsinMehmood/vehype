@@ -25,6 +25,7 @@ class MyGalleryPage extends StatelessWidget {
     UserModel userModel = userController.userModel!;
     return Scaffold(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
+    
       appBar: AppBar(
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
         elevation: 0.0,

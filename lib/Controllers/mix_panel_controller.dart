@@ -21,8 +21,8 @@ class MixPanelController extends GetxController {
     _mixpanel = await Mixpanel.init('c40aeb8e3a8f1030b811314d56973f5a',
         trackAutomaticEvents: true);
     // enable debug logs post-init
-    _mixpanel.setLoggingEnabled(true);
-    log('sksjkdl');
+    _mixpanel.setLoggingEnabled(false);
+    // log('sksjkdl');
     _mixpanel.track('initialize mix panel');
     _mixpanel.flush();
   }

@@ -27,6 +27,7 @@ class DeleteRequestConfirmationWidget extends StatelessWidget {
         builder: (s) {
           return Container(
             width: Get.width,
+        
             decoration: BoxDecoration(
               color: userController.isDark ? primaryColor : Colors.white,
               borderRadius: BorderRadius.circular(10),

@@ -18,11 +18,12 @@ import 'package:vehype/Widgets/select_services_widget.dart';
 import 'package:vehype/Widgets/service_radius_widget.dart';
 
 import 'package:vehype/Widgets/service_request_widget.dart';
+import 'package:vehype/Widgets/working_hours_widget.dart';
 import 'package:vehype/const.dart';
 
 import '../Widgets/loading_dialog.dart';
 import '../Widgets/select_vehicle_type.dart';
-import 'choose_account_type.dart';
+// import 'choose_account_type.dart';x
 
 class NewOffers extends StatelessWidget {
   const NewOffers({
@@ -152,6 +153,15 @@ class _SelectYourServicesState extends State<SelectYourServices> {
                     ),
                     SelectAdditionalServices(),
                     ServiceRadiusWidget(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    WorkingHoursWidget(
+                      workingHours: userModel.workingHours,
+                    ),
+                    const SizedBox(
+                      height: 80,
+                    ),
                   ],
                 )
               ],

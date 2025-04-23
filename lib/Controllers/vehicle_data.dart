@@ -107,7 +107,7 @@ Future<List<VehicleModel>> getVehicleModel(
     }
 
     // Adding extra models for "Bobcat" make
-    if (make == 'Bobcat') {
+    if (make.toLowerCase() == 'Bobcat'.toLowerCase()) {
       vehicleMakeList.addAll([
         VehicleModel(
             id: 0,
@@ -292,7 +292,7 @@ Future<List<VehicleModel>> getTrims(String make, String year, String typess,
           model.toLowerCase()) {
         for (var trim in element['trims']) {
           pickupModels.add(VehicleModel(
-              id: 0,
+              id: trim['id'] ?? 0,
               title: trim['trimName'],
               icon: '',
               vehicleMakeId: 0,
@@ -306,17 +306,24 @@ Future<List<VehicleModel>> getTrims(String make, String year, String typess,
     print(cachedData);
 
     if (cachedData != null) {
+      List<VehicleModel> vehicleMakeList = [];
+
       List<dynamic> cachedList = cachedData['data'];
       print(cachedList);
-      return cachedList
-          .map((e) => VehicleModel(
-                id: 0,
-                title: e['description'] ?? '',
-                icon: '',
-                vehicleTypeId: 0,
-                vehicleMakeId: 0,
-              ))
-          .toList();
+
+      for (int i = 0; i < cachedList.length; i++) {
+        var element = cachedList[i];
+        String input = element['description'];
+        String result = input.split('(')[0].trim();
+        vehicleMakeList.add(VehicleModel(
+          id: i + 1,
+          title: result,
+          icon: '',
+          vehicleTypeId: 0,
+          vehicleMakeId: 0,
+        ));
+      }
+      return vehicleMakeList;
     }
 
     List<VehicleModel> vehicleMakeList = [];
@@ -330,13 +337,16 @@ Future<List<VehicleModel>> getTrims(String make, String year, String typess,
       });
 
       final data = jsonDecode(response.body);
-      // print(data);
       List listOfData = data['data'] as List;
+      for (int i = 0; i < listOfData.length; i++) {
+        var element = listOfData[i];
+        print(element);
+        String input = element['description'];
+        String result = input.split('(')[0].trim();
 
-      for (var element in listOfData) {
         vehicleMakeList.add(VehicleModel(
-            id: 0,
-            title: element['description'] ?? '',
+            id: i + 1,
+            title: result,
             icon: '',
             vehicleTypeId: 0,
             vehicleMakeId: 0));
@@ -462,7 +472,7 @@ Future<List<VehicleMake>> getVehicleMake(String type, String jwtToken) async {
 
       return vehicleMakeList;
     } catch (e) {
-      print(e.toString() + ' Get Vehicle make error');
+      print('$e Get Vehicle make error');
 
       return [];
     }

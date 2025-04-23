@@ -314,13 +314,13 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                 Get.bottomSheet(
                   ChooseGalleryCamera(
                     onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 0);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.camera, userModel.userId, 0);
                       Get.close(1);
                     },
                     onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 0);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.gallery, userModel.userId, 0);
                       Get.close(1);
                     },
                   ),
@@ -381,14 +381,14 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                 Get.bottomSheet(
                   ChooseGalleryCamera(
                     onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 1);
-                      Get.close(1);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.camera, userModel.userId, 1);
+                      // Get.close(1);
                     },
                     onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 1);
-                      Get.close(1);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.gallery, userModel.userId, 1);
+                      // Get.close(1);
                     },
                   ),
                   backgroundColor:
@@ -448,14 +448,14 @@ class CreateRequestImageAddWidget extends StatelessWidget {
                 Get.bottomSheet(
                   ChooseGalleryCamera(
                     onTapCamera: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.camera, userModel.userId, 2);
-                      Get.close(1);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.camera, userModel.userId, 2);
+                      // Get.close(1);
                     },
                     onTapGallery: () {
-                      garageController.selectRequestImageUpdateSingleImage(
-                          ImageSource.gallery, userModel.userId, 2);
-                      Get.close(1);
+                      // garageController.selectRequestImageUpdateSingleImage(
+                      //     ImageSource.gallery, userModel.userId, 2);
+                      // Get.close(1);
                     },
                   ),
                   backgroundColor:

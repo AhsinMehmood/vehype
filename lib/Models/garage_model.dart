@@ -15,6 +15,7 @@ class GarageModel {
   final String imageUrl;
 
   final String garageId;
+  final String createdAt;
 
   factory GarageModel.fromJson(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -23,6 +24,7 @@ class GarageModel {
 
     String id = snapshot.id;
     return GarageModel(
+      createdAt: data['createdAt'] ?? DateTime.now().toIso8601String(),
       ownerId: data['ownerId'] ?? '',
       isCustomMake: data['isCustomMake'] ?? false,
       isCustomModel: data['isCustomModel'] ?? false,
@@ -40,6 +42,10 @@ class GarageModel {
     );
   }
 
+  String getString() {
+    return 'Garage ID: $garageId, Make: $make, Model: $model, Year: $year, SubModel: $submodel';
+  }
+
   GarageModel(
       {required this.ownerId,
       required this.isCustomModel,
@@ -52,5 +58,55 @@ class GarageModel {
       required this.year,
       required this.model,
       required this.vin,
-      required this.garageId});
+      required this.garageId,
+      required this.createdAt});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ownerId': ownerId,
+      'isCustomMake': isCustomMake,
+      'isCustomModel': isCustomModel,
+      'subModel': submodel,
+      'title': title,
+      'imageOne': imageUrl,
+      'bodyStyle': bodyStyle,
+      'make': make,
+      'year': year,
+      'model': model,
+      'vin': vin,
+      'createdAt': createdAt,
+    };
+  }
+
+  GarageModel copyWith({
+    String? garageId,
+    String? ownerId,
+    String? bodyStyle,
+    String? make,
+    String? year,
+    String? model,
+    String? submodel,
+    String? title,
+    String? vin,
+    bool? isCustomModel,
+    bool? isCustomMake,
+    String? imageUrl,
+    String? createdAt,
+  }) {
+    return GarageModel(
+      garageId: garageId ?? this.garageId,
+      ownerId: ownerId ?? this.ownerId,
+      bodyStyle: bodyStyle ?? this.bodyStyle,
+      make: make ?? this.make,
+      year: year ?? this.year,
+      model: model ?? this.model,
+      submodel: submodel ?? this.submodel,
+      title: title ?? this.title,
+      vin: vin ?? this.vin,
+      createdAt: createdAt ?? this.createdAt,
+      isCustomModel: isCustomModel ?? this.isCustomModel,
+      isCustomMake: isCustomMake ?? this.isCustomMake,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
 }

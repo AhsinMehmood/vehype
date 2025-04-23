@@ -109,6 +109,8 @@ class OffersModel {
       vehicleType: data['vehicleType'] ?? '',
     );
   }
+  String getString() =>
+      'OfferId: $offerId, garageId: $garageId, service: $issue';
 }
 
 //  'offerBy': userModel.userId,
@@ -147,6 +149,7 @@ class OffersReceivedModel {
   // final List ids;
   final String randomId;
   final List<ProductServiceModel> products;
+  final String completedAt;
 
   OffersReceivedModel({
     required this.offerBy,
@@ -177,6 +180,7 @@ class OffersReceivedModel {
     required this.seekerEventId,
     required this.seekerCalendarId,
     required this.createdAt,
+    required this.completedAt,
   });
 
   factory OffersReceivedModel.fromJson(
@@ -223,6 +227,7 @@ class OffersReceivedModel {
         seekerCalendarId: data['seekerCalendarId'] ?? '',
         seekerEventId: data['seekerEventId'] ?? '',
         commentTwo: data['commentTwo'] ?? '',
+        completedAt: data['completedAt'] ?? DateTime.now().toIso8601String(),
         offerId: data['offerId'] ?? 'null');
   }
 }

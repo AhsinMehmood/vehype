@@ -14,6 +14,7 @@ import 'package:vehype/const.dart';
 
 import '../Controllers/chat_controller.dart';
 import '../Controllers/notification_controller.dart';
+import '../providers/garage_provider.dart';
 
 class DeleteVehicleConfirmation extends StatefulWidget {
   final String chatId;
@@ -29,6 +30,8 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
   @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
+    final GarageProvider garageProvider = Provider.of<GarageProvider>(context);
+
     return Container(
       padding: const EdgeInsets.all(15),
       width: Get.width,
@@ -243,7 +246,8 @@ class _DeleteVehicleConfirmationState extends State<DeleteVehicleConfirmation> {
                   'ownerId': '',
                   'deleteId': userController.userModel!.userId,
                 });
-
+                await garageProvider
+                    .fetchGarages(userController.userModel!.userId);
                 Get.close(2);
               },
               style: ElevatedButton.styleFrom(

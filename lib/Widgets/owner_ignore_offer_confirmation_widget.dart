@@ -21,6 +21,7 @@ class OwnerIgnoreOfferConfirmationWidget extends StatelessWidget {
     required this.offersReceivedModel,
   });
 
+
   final UserController userController;
   final OffersReceivedModel offersReceivedModel;
   final OffersModel offersModel;

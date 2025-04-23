@@ -291,13 +291,6 @@ class UserController with ChangeNotifier {
 
   selectAndUploadImage(
       BuildContext context, UserModel userModel, int index) async {
-    XFile? selectedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (selectedFile != null) {
-      File file = File(selectedFile.path);
-      Get.to(() => CropImagePage(imageData: file, imageField: ''));
-    }
-
     // notifyListeners();
   }
 
@@ -811,22 +804,6 @@ class UserController with ChangeNotifier {
     }
   }
 
-  String currentVersion = '3.0.3.12';
-
-  Future<bool> checkVersion() async {
-    DocumentSnapshot<Map<String, dynamic>> snap =
-        await FirebaseFirestore.instance.collection('admin').doc('app').get();
-    if (!snap.exists) {
-      return false;
-    }
-    AppModel appModel = AppModel.fromJson(snap.data()!);
-    if (appModel.versionNumber != currentVersion) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   blockAndReport(String chatId, String currentUserId, String secondUserId,
       UserModel secondUserModel, String reason) async {
     FirebaseFirestore.instance.collection('users').doc(secondUserId).update({
@@ -879,14 +856,5 @@ class UserController with ChangeNotifier {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
-  }
-}
-
-class AppModel {
-  final String versionNumber;
-
-  AppModel({required this.versionNumber});
-  factory AppModel.fromJson(Map<String, dynamic> json) {
-    return AppModel(versionNumber: json['version'] ?? '3.0.3.67');
   }
 }

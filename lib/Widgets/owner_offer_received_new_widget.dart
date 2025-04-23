@@ -10,6 +10,7 @@ import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/owner_accept_offer_confirmation.dart';
 import 'package:vehype/Widgets/owner_ignore_offer_confirmation_widget.dart';
+import 'package:vehype/Widgets/user_rating_short_widget.dart';
 
 import '../Controllers/offers_controller.dart';
 import '../Models/product_service_model.dart';
@@ -70,83 +71,7 @@ class OwnerOfferReceivedNewWidget extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   UserModel secondUser = snapshot.data!;
-                  return InkWell(
-                    onTap: () {
-                      Get.to(
-                          () => SecondUserProfile(userId: secondUser.userId));
-                    },
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(200),
-                          child: CachedNetworkImage(
-                            placeholder: (context, url) {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            },
-                            errorWidget: (context, url, error) =>
-                                const SizedBox.shrink(),
-                            imageUrl: secondUser.profileUrl,
-                            height: 65,
-                            width: 65,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              secondUser.name,
-                              style: TextStyle(
-                                // color: Colors.black,
-
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            RatingBarIndicator(
-                              rating: secondUser.rating,
-                              itemBuilder: (context, index) => const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                              ),
-                              itemCount: 5,
-                              itemSize: 20.0,
-                              direction: Axis.horizontal,
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'See Profile ',
-                                  style: TextStyle(
-                                    // color: Colors.black,
-
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.arrow_forward_ios_outlined,
-                                  size: 16,
-                                  weight: 900.0,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
+                  return UserRatingShortWidget(secondUser: secondUser);
                 }
                 return const SizedBox.shrink();
               }),

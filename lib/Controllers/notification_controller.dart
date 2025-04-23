@@ -22,8 +22,9 @@ import 'user_controller.dart';
 import 'package:http/http.dart' as http;
 
 class NotificationController {
-  String appId = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
-  String restApiKey = 'NmZiZWJhZDktZGQ5Yi00MjBhLTk2MGQtMmQ5MWI1NjEzOWVi';
+  String restApiKey = isDebug
+      ? 'os_v2_app_2lto72r6l5bptbnltakzeqtxud447d7cq7sucpnp2jgn4s3nhe2s2mvqpjrhow24lyhssu5gpegukap26fumivh5pcnhnae3eadvqfa'
+      : 'os_v2_app_4i3gmp7vybfebiw7qhtcy7kbd5vubwfgsu4ehiuhnaeibm7ekwc5rremx2uakzsi6eioruwuaexb2p4fzhpq24j3wu6ni5x3qevr5pi';
   navigateChat(Map<String, dynamic> data) async {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
     ChatModel? chatModel = await ChatController().getSingleChat(data['chatId']);
@@ -261,7 +262,7 @@ class NotificationController {
   }) async {
     try {
       final message = {
-        'app_id': appId,
+        'app_id': isDebug ? debugOneSignalApiKey : prodOneSignalApiKey,
         'headings': {'en': title},
         'contents': {'en': subtitle},
         'include_external_user_ids': userIds,
@@ -299,7 +300,7 @@ class NotificationController {
   }) async {
     try {
       final message = {
-        'app_id': appId,
+        'app_id': isDebug ? debugOneSignalApiKey : prodOneSignalApiKey,
         'headings': {'en': title},
         'contents': {'en': subtitle},
         'include_external_user_ids': userIds,
@@ -336,7 +337,7 @@ class NotificationController {
     required String messageId,
   }) async {
     final message = {
-      'app_id': appId,
+      'app_id': isDebug ? debugOneSignalApiKey : prodOneSignalApiKey,
       'headings': {'en': 'New Message: ${offersModel.issue}'},
       'contents': {'en': '${receiverUser.name} sent you a message'},
       'include_external_user_ids': [senderUser.userId],

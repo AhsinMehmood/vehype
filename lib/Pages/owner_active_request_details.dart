@@ -94,6 +94,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
             GarageModel garageModel = snapshot.data ??
                 GarageModel(
                     ownerId: 'ownerId',
+                    createdAt: DateTime.now().toIso8601String(),
                     submodel: '',
                     title: '',
                     imageUrl: offersModel.imageOne,
@@ -742,7 +743,7 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                                         alignment: Alignment.centerLeft,
                                         child: Text(
                                           offersModel.description == ''
-                                              ? 'Details will be provided on chat'
+                                              ? 'No description has been added to this request.'
                                               : offersModel.description,
                                           style: TextStyle(
                                             fontSize: 16,
@@ -1019,8 +1020,10 @@ class _OwnerActiveRequestDetailsState extends State<OwnerActiveRequestDetails> {
                   ? null
                   : InkWell(
                       onTap: () {
-                        Get.to(
-                            () => CreateRequestPage(offersModel: offersModel));
+                        Get.to(() => CreateRequestPage(
+                              offersModel: offersModel,
+                              garageModel: garageModel,
+                            ));
                       },
                       child: Container(
                         height: 50,

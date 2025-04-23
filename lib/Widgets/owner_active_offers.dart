@@ -62,6 +62,7 @@ class OwnerActiveOffers extends StatelessWidget {
                     offersModel: offersPosted[index],
                     garageModel: GarageModel(
                         ownerId: 'ownerId',
+                        createdAt: DateTime.now().toIso8601String(),
                         isCustomMake: false,
                         submodel: 'submodel',
                         title: 'title',

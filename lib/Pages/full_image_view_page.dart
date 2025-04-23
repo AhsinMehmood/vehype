@@ -24,6 +24,7 @@ class FullImagePageView extends StatelessWidget {
           controller: pageController,
           itemBuilder: (context, index) {
             return Stack(
+       
               children: [
                 Center(
                   child: CachedNetworkImage(

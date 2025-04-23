@@ -66,6 +66,7 @@ class OwnerInprogressPageWidget extends StatelessWidget {
                           offersModel: inProgressOffers[index],
                           garageModel: GarageModel(
                               ownerId: 'ownerId',
+                              createdAt: DateTime.now().toIso8601String(),
                               submodel: 'submodel',
                               title: 'title',
                               isCustomMake: false,

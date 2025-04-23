@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/full_image_view_page.dart';
 import 'package:vehype/Widgets/image_grid.dart';
+import 'package:vehype/Widgets/working_hours_widget.dart';
 // import 'package:vehype/Widgets/image_grid.dart';
 import 'package:vehype/const.dart';
 import 'package:http/http.dart' as http;
@@ -496,6 +497,17 @@ class _OverviewTabState extends State<OverviewTab> {
             width: Get.width * 0.9,
             color: changeColor(color: 'D9D9D9'),
           ),
+          if (widget.profileModel.workingHours.isNotEmpty)
+            WorkingHoursWidget(
+              workingHours: widget.profileModel.workingHours,
+              isOwner: true,
+            ),
+          if (widget.profileModel.workingHours.isNotEmpty)
+            Container(
+              height: 1,
+              width: Get.width * 0.9,
+              color: changeColor(color: 'D9D9D9'),
+            ),
           InkWell(
             onTap: () {
               MapsLauncher.launchCoordinates(
@@ -768,48 +780,205 @@ class ServicesTab extends StatelessWidget {
   }
 }
 
-class ReviewsTab extends StatelessWidget {
+class ReviewsTab extends StatefulWidget {
   final UserModel userData;
   const ReviewsTab({super.key, required this.userData});
 
   @override
+  State<ReviewsTab> createState() => _ReviewsTabState();
+}
+
+class _ReviewsTabState extends State<ReviewsTab> {
+  String selectedIssue = '';
+  @override
   Widget build(BuildContext context) {
     final UserController userController = Provider.of<UserController>(context);
-
-    return ListView.builder(
-        itemCount: userData.ratings.length,
-        shrinkWrap: true,
-        // physics: const Ne(),
-        padding: const EdgeInsets.only(
-          top: 5,
-          bottom: 50,
+    final filteredRatings = selectedIssue.isEmpty
+        ? widget.userData.ratings
+        : widget.userData.ratings
+            .where((rating) => rating['service'] == selectedIssue)
+            .toList();
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
         ),
-        itemBuilder: (context, inde) {
-          // print(userData.ratings[inde]['id']);
-          return StreamBuilder<UserModel>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userData.ratings[inde]['id'])
-                  .snapshots()
-                  .map((event) => UserModel.fromJson(event)),
-              builder: (context, AsyncSnapshot<UserModel> snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox(
-                    height: 100,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color:
-                            userController.isDark ? Colors.white : primaryColor,
-                      ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Text(
+                'Filter reviews by service',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Container(
+          height: 60,
+          // color: Colors.red,
+          child: ListView.builder(
+              itemCount: getServices().length,
+              padding: const EdgeInsets.only(
+                left: 10,
+                right: 10,
+              ),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                Service service = getServices()[index];
+                return Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: InkWell(
+                    onTap: () {
+                      if (selectedIssue == service.name) {
+                        setState(() {
+                          selectedIssue = '';
+                        });
+                      } else {
+                        setState(() {
+                          selectedIssue = service.name;
+                        });
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        SvgPicture.asset(
+                          service.image,
+                          color: userController.isDark
+                              ? Colors.white
+                              : primaryColor,
+                          height: 50,
+                          width: 50,
+                        ),
+                        if (selectedIssue == service.name)
+                          Positioned(
+                            right: 2,
+                            top: 3,
+                            child: Container(
+                              height: 20,
+                              width: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(200),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                  );
-                }
-                UserModel commenterData = snapshot.data!;
+                  ),
+                );
+              }),
+        ),
+        if (selectedIssue.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Chip(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)),
+                  label: Text(
+                    selectedIssue,
+                  ),
+                  labelStyle: TextStyle(
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                  deleteIcon: Icon(Icons.close),
+                  deleteIconColor:
+                      userController.isDark ? primaryColor : Colors.white,
+                  onDeleted: () {
+                    setState(() {
+                      selectedIssue = ''; // Reset to default
+                      // _sortAndFilterOffers();
+                    });
+                  },
+                  backgroundColor:
+                      userController.isDark ? Colors.white : primaryColor,
+                ),
+              ],
+            ),
+          ),
+        Expanded(
+          child: filteredRatings.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.reviews, // A relevant icon
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "No reviews found",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      // Text(
+                      //   "Be the first to leave a review for this service!",
+                      //   style: TextStyle(fontSize: 14, color: Colors.grey),
+                      // ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: filteredRatings.length,
+                  shrinkWrap: true,
+                  // physics: const Ne(),
+                  padding: const EdgeInsets.only(
+                    top: 5,
+                    bottom: 50,
+                  ),
+                  itemBuilder: (context, inde) {
+                    String issue = filteredRatings[inde]['service'];
+                    return StreamBuilder<UserModel>(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(filteredRatings[inde]['id'])
+                            .snapshots()
+                            .map((event) => UserModel.fromJson(event)),
+                        builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                          if (!snapshot.hasData) {
+                            return SizedBox(
+                              height: 100,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: userController.isDark
+                                      ? Colors.white
+                                      : primaryColor,
+                                ),
+                              ),
+                            );
+                          }
+                          UserModel commenterData = snapshot.data!;
 
-                return CommentWidget(
-                    commenterData: commenterData, data: userData, inde: inde);
-              });
-        });
+                          return CommentWidget(
+                              commenterData: commenterData,
+                              data: widget.userData,
+                              inde: inde);
+                        });
+                  }),
+        ),
+      ],
+    );
   }
 }
 
@@ -886,38 +1055,31 @@ class SecondUserHeaderWidget extends StatelessWidget {
                 const SizedBox(
                   height: 8,
                 ),
-                InkWell(
-                  onTap: () {
-                    // Get.to(()=>Rat);
-                  },
-                  child: Row(
-                    children: [
-                      RatingBarIndicator(
-                        rating: profile.rating,
-                        itemBuilder: (context, index) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        itemCount: 5,
-                        itemSize: 20.0,
-                        direction: Axis.horizontal,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RatingBarIndicator(
+                      rating: profile.rating,
+                      itemBuilder: (context, index) => const Icon(
+                        Icons.star,
+                        color: Colors.amber,
                       ),
-                      const SizedBox(
-                        width: 8,
+                      itemCount: 5,
+                      itemSize: 20.0,
+                      direction: Axis.horizontal,
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    Text(
+                      ' (${profile.ratings.length} Happy Customers)',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
                       ),
-                      Text(
-                        '(${profile.ratings.length.toString()})',
-                        style: TextStyle(
-                          color: userController.isDark
-                              ? Colors.white
-                              : primaryColor,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+                    ),
+                  ],
+                ),
               ],
             ),
           ],

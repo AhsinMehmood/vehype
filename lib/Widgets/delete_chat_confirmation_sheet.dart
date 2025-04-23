@@ -26,6 +26,7 @@ class DeleteChatConfirmationSheet extends StatelessWidget {
               'Delete Chat',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
+       
                 fontSize: 18,
               ),
             ),

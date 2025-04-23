@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_build_context_synchronously
-
+// Dev01@@@
+// A male doesn’t have to be handsome. A male needs to be a man. A real man
+// spoils his lady with attention, affection, respect, honesty, loyalty and love
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -7,7 +9,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:map_location_picker/map_location_picker.dart';
+// import 'package:map_location_picker/map_location_picker.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -15,15 +17,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/Auth/login_page.dart';
 
-import 'package:vehype/Pages/choose_account_type.dart';
+// import 'package:vehype/Pages/choose_account_type.dart';
 import 'package:vehype/Pages/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
+import 'package:vehype/providers/garage_provider.dart';
 
 import '../Controllers/mix_panel_controller.dart';
 import '../const.dart';
 import 'select_account_type_page.dart';
 import 'package:http/http.dart' as http;
+
+import 'service_set_opening_hours.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -65,7 +71,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 500)).then((value) async {
+    Future.delayed(const Duration(seconds: 0)).then((value) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
 
@@ -82,7 +88,7 @@ class _SplashPageState extends State<SplashPage> {
       if (userId == null) {
         // sharedPreferences.setBool('newUpdate', true);
         mixPanelController.trackEvent(eventName: 'Open Login Page', data: {});
-        Get.offAll(() => ChooseAccountTypePage());
+        Get.offAll(() => LoginPage());
       } else {
         // sharedPreferences.setBool('newUpdate', true);
 
@@ -143,6 +149,10 @@ class _SplashPageState extends State<SplashPage> {
                 offersProvider.startListeningOffers(
                     UserModel.fromJson(accountTypeUserSnap).userId);
               } else {
+                GarageProvider garageProvider =
+                    Provider.of<GarageProvider>(context, listen: false);
+                garageProvider.fetchGarages(
+                    UserModel.fromJson(accountTypeUserSnap).userId);
                 offersProvider.startListeningOwnerOffers(
                     UserModel.fromJson(accountTypeUserSnap).userId);
               }
@@ -178,9 +188,19 @@ class _SplashPageState extends State<SplashPage> {
                 if (UserModel.fromJson(accountTypeUserSnap).accountType ==
                     'provider') {
                   if (UserModel.fromJson(accountTypeUserSnap).isBusinessSetup) {
-                    Get.offAll(() => const TabsPage());
+                    if (UserModel.fromJson(accountTypeUserSnap)
+                            .isSetOpeningHours ==
+                        false) {
+                      Get.offAll(() => ServiceSetOpeningHours(
+                            shopHours: {},
+                          ));
+                    } else {
+                      Get.offAll(() => TabsPage());
+                    }
                   } else {
-                    Get.offAll(() => const SetupBusinessProvider());
+                    Get.offAll(() => const SetupBusinessProvider(
+                          placeDetails: null,
+                        ));
                   }
                 } else {
                   Get.offAll(() => const TabsPage());
@@ -259,6 +279,7 @@ class _SplashPageState extends State<SplashPage> {
                   );
                 });
               } else {
+                setState(() {});
                 mixPanelController
                     .trackEvent(eventName: 'Open Tabs Page', data: {});
 

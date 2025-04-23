@@ -14,7 +14,7 @@ import '../Controllers/offers_controller.dart';
 import '../Models/chat_model.dart';
 import '../Models/offers_model.dart';
 import '../Models/user_model.dart';
-import '../Pages/choose_account_type.dart';
+// import '../Pages/choose_account_type.dart';
 import '../Pages/message_page.dart';
 import '../const.dart';
 import 'loading_dialog.dart';
@@ -176,7 +176,8 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                                 offersModel,
                                 'New Message',
                                 '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                                'chat');
+                                'chat',
+                                garageModel);
                             ChatModel? newchat = await ChatController().getChat(
                               userController.userModel!.userId,
                               offersModel.ownerId,
@@ -233,7 +234,7 @@ class ServiceNewRequestPageButtonWidget extends StatelessWidget {
                             offersModel,
                             'New Message',
                             '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                            'chat');
+                            'chat', garageModel);
                         ChatModel? newchat = await ChatController().getChat(
                           userController.userModel!.userId,
                           offersModel.ownerId,
@@ -501,7 +502,8 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                           offersModel,
                           'New Message',
                           '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                          'chat');
+                          'chat',
+                          garageModel);
                       ChatModel? newchat = await ChatController().getChat(
                         userController.userModel!.userId,
                         offersModel.ownerId,
@@ -558,7 +560,8 @@ class ServiceNewRequestButtonWidget extends StatelessWidget {
                       offersModel,
                       'New Message',
                       '${userController.userModel!.name} started a chat for ${offersModel.vehicleId}',
-                      'chat');
+                      'chat',
+                      garageModel);
                   ChatModel? newchat = await ChatController().getChat(
                     userController.userModel!.userId,
                     offersModel.ownerId,

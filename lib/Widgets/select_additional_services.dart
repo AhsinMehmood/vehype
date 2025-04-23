@@ -21,6 +21,7 @@ class SelectAdditionalServices extends StatelessWidget {
             child: Text(
               'Select Additional Services',
               style: TextStyle(
+         
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
               ),

@@ -218,36 +218,41 @@ class _ProviderShortWidget extends State<ProviderShortWidget> {
                             const SizedBox(
                               height: 8,
                             ),
-                            InkWell(
-                              onTap: () {
-                                // Get.to(()=>Rat);
-                              },
-                              child: Row(
-                                children: [
-                                  RatingBarIndicator(
-                                    rating: widget.profile.rating,
-                                    itemBuilder: (context, index) => Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                    ),
-                                    itemCount: 5,
-                                    itemSize: 20.0,
-                                    direction: Axis.horizontal,
+                            Row(
+                              children: [
+                                RatingBarIndicator(
+                                  rating: widget.profile.rating,
+                                  itemBuilder: (context, index) => Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
                                   ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    '(${widget.profile.ratings.length.toString()})',
-                                    style: TextStyle(
-                                      color: userController.isDark
-                                          ? Colors.white
-                                          : primaryColor,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
+                                  itemCount: 5,
+                                  itemSize: 20.0,
+                                  direction: Axis.horizontal,
+                                ),
+                                // const SizedBox(
+                                //   width: 8,
+                                // ),
+                                // Text(
+                                //   '(${widget.profile.ratings.length.toString()})',
+                                //   style: TextStyle(
+                                //     color: userController.isDark
+                                //         ? Colors.white
+                                //         : primaryColor,
+                                //     fontSize: 13,
+                                //     fontWeight: FontWeight.w400,
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            Text(
+                              ' (${widget.profile.ratings.length} Happy Customers)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],

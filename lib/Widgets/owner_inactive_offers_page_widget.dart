@@ -70,6 +70,7 @@ class OwnerInactiveOffersPageWidget extends StatelessWidget {
                             return OwnerRequestWidget(
                               offersModel: inActiveOffers[index],
                               garageModel: GarageModel(
+                                  createdAt: DateTime.now().toIso8601String(),
                                   ownerId: 'ownerId',
                                   submodel: 'submodel',
                                   isCustomModel: false,
@@ -105,6 +106,7 @@ class OwnerInactiveOffersPageWidget extends StatelessWidget {
                       return OwnerRequestWidget(
                         offersModel: inActiveOffers[index],
                         garageModel: GarageModel(
+                            createdAt: DateTime.now().toIso8601String(),
                             isCustomMake: false,
                             ownerId: 'ownerId',
                             submodel: 'submodel',

@@ -14,3 +14,4 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+

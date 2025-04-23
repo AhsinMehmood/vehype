@@ -118,6 +118,7 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
     //     .map((serviceType) => normalizeTitle(serviceType.title))
     //     .toList();
 
+
     // List<String> normalizedVehicleTitles = vehicleOwnersList
     //     .map((vehicleType) => normalizeTitle(vehicleType.title))
     //     .toList();

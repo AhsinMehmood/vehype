@@ -9,13 +9,11 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
-// int currentVersion = 104;
-String openAiApiKey =
-    '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';
-// Color cardColor = Color.fromARGB(255, 22, 32, 44);
-// Color backColor = changeColor(color: '1B1C1E');
-String togetherAIKey =
-    '58f129ab3e39d90f0c3dcc9d015a779bdc33c727481f2ee2a5871adfb5601569';
+String debugOneSignalApiKey = 'd2e6efea-3e5f-42f9-85ab-9815924277a0';
+String prodOneSignalApiKey = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
+bool isDebug = false;
+
+
 getImageFileFromAssets(String path) async {
   final byteData = await rootBundle.load('assets/$path');
 

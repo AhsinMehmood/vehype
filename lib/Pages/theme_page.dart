@@ -25,6 +25,7 @@ class ThemePage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
+    
               Get.back();
             },
             icon: Icon(Icons.arrow_back_ios_new)),

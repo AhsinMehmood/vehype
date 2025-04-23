@@ -18,6 +18,7 @@ class ManagePrefs extends StatelessWidget {
         elevation: 0.0,
         centerTitle: true,
         title: Text(
+       
           'Manage Prefrences',
           style: TextStyle(
             fontSize: 17,

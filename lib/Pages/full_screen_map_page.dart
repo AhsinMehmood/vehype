@@ -23,6 +23,7 @@ class _FullScreenMapPageState extends State<FullScreenMapPage> {
         },
         initialCameraPosition: CameraPosition(
           target: LatLng(widget.lat, widget.long),
+   
           zoom: 16.0,
         ),
       ),

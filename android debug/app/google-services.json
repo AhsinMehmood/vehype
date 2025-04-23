@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "595427669329",
+    "firebase_url": "https://vehype-98f5e-default-rtdb.firebaseio.com",
+    "project_id": "vehype-98f5e",
+    "storage_bucket": "vehype-98f5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595427669329:android:362c8b6549a1e63467cf70",
+        "android_client_info": {
+          "package_name": "com.nomadllc.vehype.beta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595427669329-cslgf9kjf3iu4ra30d5bchh7s9ns9tak.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjTQwQ3b74CucTIL2gE1cHXcZ5pZmVKrs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595427669329-cslgf9kjf3iu4ra30d5bchh7s9ns9tak.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "595427669329-pc3le0goo38khdt6clb7r5qgkc2cjbq7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nomadllc.vehype"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

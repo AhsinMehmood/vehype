@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>595427669329-rjmcj7quh0ct1jps6nl0kms706ffndlc.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.595427669329-rjmcj7quh0ct1jps6nl0kms706ffndlc</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>595427669329-ae83qkekslrjemhtvqc9vkd3bpdb14er.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyA8c2j0xocvV-mhOHvBFcwe7LCEVzFj2EQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>595427669329</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.nomadllc.vehype.beta</string>
+	<key>PROJECT_ID</key>
+	<string>vehype-98f5e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vehype-98f5e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:595427669329:ios:40d8a0e4445416ea67cf70</string>
+	<key>DATABASE_URL</key>
+	<string>https://vehype-98f5e-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

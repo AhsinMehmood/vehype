@@ -153,7 +153,8 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                     }
                     OffersReceivedModel? offersReceivedModel;
 
-                    if (offersReceivedSnap.data != null && offersReceivedSnap.data!.exists) {
+                    if (offersReceivedSnap.data != null &&
+                        offersReceivedSnap.data!.exists) {
                       // print('object');
                       offersReceivedModel = OffersReceivedModel.fromJson(
                           offersReceivedSnap.data!);
@@ -169,6 +170,7 @@ class _ServiceRequestDetailsState extends State<ServiceRequestDetails> {
                           GarageModel garageModel = snapshot.data ??
                               GarageModel(
                                   isCustomModel: false,
+                                  createdAt: DateTime.now().toIso8601String(),
                                   ownerId: 'ownerId',
                                   isCustomMake: false,
                                   submodel: '',

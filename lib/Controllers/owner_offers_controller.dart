@@ -29,6 +29,7 @@ class OwnerOffersController {
         .update({
       'status': 'inactive',
     });
+    
     //TODO Send Offer Cancelled By Owner Notification
     // sendNotification(
     //     offersReceivedModel.offerBy,

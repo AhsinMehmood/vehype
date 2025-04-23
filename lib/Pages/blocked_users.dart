@@ -22,6 +22,7 @@ class BlockedUsers extends StatelessWidget {
         title: Text(
           'Blocked Users',
           style: TextStyle(
+     
             color: userController.isDark ? Colors.white : primaryColor,
             fontSize: 17,
             fontWeight: FontWeight.w600,
