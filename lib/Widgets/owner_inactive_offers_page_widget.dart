@@ -10,17 +10,13 @@ import '../Controllers/offers_provider.dart';
 import '../Models/garage_model.dart';
 
 class OwnerInactiveOffersPageWidget extends StatelessWidget {
-  const OwnerInactiveOffersPageWidget({super.key});
+  final List<OffersModel> inActiveOffers;
+  const OwnerInactiveOffersPageWidget(
+      {super.key, required this.inActiveOffers});
 
   @override
   Widget build(BuildContext context) {
-    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
     final UserController userController = Provider.of<UserController>(context);
-
-    final List<OffersModel> inActiveOffers = offersProvider.ownerOffers
-        .where((offer) => offer.status == 'inactive')
-        .toList();
-    inActiveOffers.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     if (inActiveOffers.isEmpty) {
       return Center(

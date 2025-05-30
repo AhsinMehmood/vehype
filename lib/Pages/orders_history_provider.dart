@@ -118,7 +118,6 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
     //     .map((serviceType) => normalizeTitle(serviceType.title))
     //     .toList();
 
-
     // List<String> normalizedVehicleTitles = vehicleOwnersList
     //     .map((vehicleType) => normalizeTitle(vehicleType.title))
     //     .toList();
@@ -216,10 +215,6 @@ class _OrdersHistoryProviderState extends State<OrdersHistoryProvider> {
           backgroundColor: userController.isDark ? primaryColor : Colors.white,
           centerTitle: true,
           title: InkWell(
-            onTap: () async {
-              Get.bottomSheet(
-                  LocationPermissionSheet(userController: userController));
-            },
             child: Text(
               'Requests',
               style: TextStyle(

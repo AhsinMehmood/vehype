@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vehype/bad_words.dart';
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:math';
@@ -9,10 +9,19 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 
+import 'Models/vehicle_model.dart';
+
 String debugOneSignalApiKey = 'd2e6efea-3e5f-42f9-85ab-9815924277a0';
 String prodOneSignalApiKey = 'e236663f-f5c0-4a40-a2df-81e62c7d411f';
 bool isDebug = false;
-
+int maxVehiclesFree = 1;
+int maxVehiclesPro = 5;
+int maxRequestsFree = 1;
+int maxRequestsPro = 5;
+int maxQuestionsFree = 2;
+int maxQuestionsPro = 8;
+Duration requestsDuration = Duration(days: 7);
+Duration aiQuestionsDuration = Duration(days: 1);
 
 getImageFileFromAssets(String path) async {
   final byteData = await rootBundle.load('assets/$path');
@@ -181,13 +190,7 @@ const String icTransmission = 'assets/transmission_Icon_Dark_4-01.svg';
 
 List<String> checkBadWords(String inputText) {
   List<String> detectedBadWords = [];
-  String lowerCaseInput = inputText.toLowerCase();
 
-  for (String word in badWords) {
-    if (lowerCaseInput.contains(word)) {
-      detectedBadWords.add(word);
-    }
-  }
   // print(detectedBadWords.length);
   return detectedBadWords;
 }
@@ -287,5 +290,49 @@ Future<String> getAddressFromLatLng(double latitude, double longitude) async {
   } catch (e) {
     print(e);
     return 'Failed to fetch address';
+  }
+}
+
+List<VehicleType> vehicleTypeList = [
+  VehicleType(
+      title: "Passenger vehicles", icon: 'assets/passenger_vehicle.svg'),
+  VehicleType(title: "Pickup Trucks", icon: 'assets/pickup_truck_light.svg'),
+  VehicleType(title: "Motorcycles", icon: 'assets/motorcycle.svg'),
+  VehicleType(title: "Bus/Van", icon: 'assets/bus.svg'),
+  VehicleType(title: "Semi-trucks", icon: 'assets/truck.svg'),
+  VehicleType(title: "Trailers", icon: 'assets/trailer.svg'),
+  VehicleType(
+      title: "Incomplete Vehicles", icon: 'assets/incomplete_vehicle.svg'),
+  VehicleType(
+      title: "Low-speed vehicles", icon: 'assets/low_speed_vehicle.svg'),
+  VehicleType(title: "Off-road vehicles", icon: 'assets/off_road_vehicle.svg'),
+];
+// Function to map vehicle type from VIN API response
+VehicleType? mapVehicleType(String? apiVehicleType) {
+  if (apiVehicleType == null) return null;
+
+  apiVehicleType = apiVehicleType.toUpperCase();
+
+  if (apiVehicleType.contains("PASSENGER")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Passenger vehicles");
+  } else if (apiVehicleType.contains("PICKUP") ||
+      apiVehicleType.contains("MPV")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Pickup Trucks");
+  } else if (apiVehicleType.contains("MOTORCYCLE")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Motorcycles");
+  } else if (apiVehicleType.contains("BUS") || apiVehicleType.contains("VAN")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Bus/Van");
+  } else if (apiVehicleType.contains("TRUCK")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Semi-trucks");
+  } else if (apiVehicleType.contains("TRAILER")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Trailers");
+  } else if (apiVehicleType.contains("INCOMPLETE")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Incomplete Vehicles");
+  } else if (apiVehicleType.contains("LOW SPEED")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Low-speed vehicles");
+  } else if (apiVehicleType.contains("OFF ROAD")) {
+    return vehicleTypeList.firstWhere((v) => v.title == "Off-road vehicles");
+  } else {
+    return null;
   }
 }

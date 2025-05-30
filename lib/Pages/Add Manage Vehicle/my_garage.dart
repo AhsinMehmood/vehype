@@ -13,17 +13,17 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Pages/Repair%20History/vehicle_based_repair_history_page.dart';
-import 'package:vehype/Pages/add_vehicle.dart';
-import 'package:vehype/Pages/add_vehicle_new.dart';
+import 'package:vehype/Pages/Add%20Manage%20Vehicle/add_vehicle.dart';
+import 'package:vehype/Pages/Add%20Manage%20Vehicle/add_vehicle_new.dart';
 import 'package:vehype/Pages/vehicle_request_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 import 'package:vehype/providers/garage_provider.dart';
 // import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../Models/user_model.dart';
+import '../../Models/user_model.dart';
 // import 'choose_account_type.dart';
-import 'create_request_page.dart';
+import '../create_request_page.dart';
 // import 'select_service_crv.dart';
 
 class MyGarage extends StatelessWidget {
@@ -56,9 +56,7 @@ class MyGarage extends StatelessWidget {
         ),
         floatingActionButton: InkWell(
           onTap: () {
-            Get.to(() => AddVehicle(
-                  garageModel: null,
-                ));
+            Get.to(() => AddVehiclePage());
           },
           child: Container(
             height: 55,
@@ -67,11 +65,26 @@ class MyGarage extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               color: userController.isDark ? Colors.white : primaryColor,
             ),
-            child: Center(
-              child: Icon(
-                Icons.add,
-                color: userController.isDark ? primaryColor : Colors.white,
-              ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/garage.png',
+                    height: 24,
+                    width: 24,
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                ),
+                Positioned(
+                  right: 5,
+                  top: 10,
+                  child: Icon(
+                    Icons.add_box,
+                    size: 16, // Slightly smaller for badge effect
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

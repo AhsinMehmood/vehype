@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +14,26 @@ import 'package:vehype/Pages/service_set_opening_hours.dart';
 import 'package:vehype/const.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+import '../../Controllers/offers_provider.dart';
+
 class OtpPage extends StatefulWidget {
   final String phoneNumber;
-  const OtpPage({super.key, required this.phoneNumber});
+  // final PlaceDetails? placeDetails;
+  final String businessInfo;
+  final String profilePhotoUrl;
+  final String name;
+  final double lat;
+  final double long;
+  final bool isVerified;
+  const OtpPage(
+      {super.key,
+      required this.phoneNumber,
+      required this.name,
+      required this.lat,
+      required this.long,
+      required this.profilePhotoUrl,
+      required this.isVerified,
+      required this.businessInfo});
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -33,6 +51,7 @@ class _OtpPageState extends State<OtpPage> {
   @override
   void initState() {
     super.initState();
+
     sendOtp(widget.phoneNumber);
   }
 
@@ -99,37 +118,30 @@ class _OtpPageState extends State<OtpPage> {
     User? user = _auth.currentUser;
     final UserController userController =
         Provider.of<UserController>(context, listen: false);
-
+    OffersProvider offersProvider =
+        Provider.of<OffersProvider>(context, listen: false);
     if (user == null) {
+      userController.logout(userController.userModel!, context);
       Get.snackbar("Error", "No authenticated user found.",
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
     try {
-      // Try linking phone number
       await user.linkWithCredential(credential);
       user.unlink('phone');
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userController.userModel!.userId)
-          .update({'isBusinessSetup': true, 'contactInfo': widget.phoneNumber});
-
+      userController.setAsProvider(widget.isVerified, offersProvider,
+          widget.phoneNumber, widget.businessInfo, widget.profilePhotoUrl,
+          lat: widget.lat, long: widget.long, name: widget.name);
       Get.offAll(() => ServiceSetOpeningHours(shopHours: {}));
       Get.snackbar("Success", "Phone number linked successfully",
           backgroundColor: Colors.green, colorText: Colors.white);
     } on FirebaseAuthException catch (e) {
-      user.unlink('phone');
-
       if (e.code == 'provider-already-linked') {
         // ✅ Already linked → just update Firestore and continue
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userController.userModel!.userId)
-            .update({
-          'isBusinessSetup': true,
-          'contactInfo': widget.phoneNumber,
-        });
+        userController.setAsProvider(widget.isVerified, offersProvider,
+            widget.phoneNumber, widget.businessInfo, widget.profilePhotoUrl,
+            lat: widget.lat, long: widget.long, name: widget.name);
 
         Get.offAll(() => ServiceSetOpeningHours(shopHours: {}));
         Get.snackbar("Success", "Phone number linked successfully",
@@ -138,18 +150,9 @@ class _OtpPageState extends State<OtpPage> {
       }
 
       if (e.code == 'credential-already-in-use') {
-        // 📌 Someone else has this phone number → sign in with it
-        final UserCredential phoneUserCredential =
-            await _auth.signInWithCredential(credential);
-        final User phoneUser = phoneUserCredential.user!;
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(phoneUser.uid)
-            .update({
-          'isBusinessSetup': true,
-          'contactInfo': widget.phoneNumber,
-        });
+        userController.setAsProvider(widget.isVerified, offersProvider,
+            widget.phoneNumber, widget.businessInfo, widget.profilePhotoUrl,
+            lat: widget.lat, long: widget.long, name: widget.name);
 
         Get.offAll(() => ServiceSetOpeningHours(shopHours: {}));
         Get.snackbar("Success", "Signed in with linked phone number",

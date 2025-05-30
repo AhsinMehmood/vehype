@@ -20,13 +20,13 @@ import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/Auth/login_page.dart';
 
 // import 'package:vehype/Pages/choose_account_type.dart';
-import 'package:vehype/Pages/setup_business_provider.dart';
+import 'package:vehype/Pages/Provider%20Verification/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/providers/garage_provider.dart';
 
 import '../Controllers/mix_panel_controller.dart';
 import '../const.dart';
-import 'select_account_type_page.dart';
+
 import 'package:http/http.dart' as http;
 
 import 'service_set_opening_hours.dart';
@@ -82,6 +82,7 @@ class _SplashPageState extends State<SplashPage> {
       OffersProvider offersProvider =
           Provider.of<OffersProvider>(context, listen: false);
       userController.getCustomMarkers();
+
       // Get..
       final mixPanelController = Get.find<MixPanelController>();
 
@@ -101,14 +102,13 @@ class _SplashPageState extends State<SplashPage> {
 
         UserModel userModel = UserModel.fromJson(snapshot);
         userController.checkIsAdmin(userModel.email);
+        userController.checkIfHaveProvider(userId);
 
         if (userModel.accountType == '') {
           mixPanelController
               .trackEvent(eventName: 'Open Select Account Type Page', data: {});
 
-          Get.offAll(() => SelectAccountType(
-                userModelAccount: userModel,
-              ));
+          userController.setAsUser(offersProvider);
         } else {
           if (userModel.adminStatus == 'blocked') {
             mixPanelController
@@ -159,52 +159,28 @@ class _SplashPageState extends State<SplashPage> {
               // await OneSignal.Notifications.requestPermission(true);
               // log(userSnapss.data()!['lat'].toString());
 
-              if (userSnapss.data()!['lat'] == null ||
-                  userSnapss.data()!['lat'] == 0.0) {
-                Future.delayed(const Duration(seconds: 0)).then((s) {
-                  mixPanelController.trackEvent(
-                      eventName: 'Asked For Location Permission', data: {});
-                  Get.bottomSheet(
-                    LocationPermissionSheet(
-                      userController: userController,
-                      isProvider: userModel.accountType == 'provider',
-                    ),
-                    backgroundColor:
-                        userController.isDark ? primaryColor : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(6),
-                        topRight: Radius.circular(6),
-                      ),
-                    ),
-                    isDismissible: false,
-                    // enableDrag: false,
-                  );
-                });
-              } else {
-                mixPanelController
-                    .trackEvent(eventName: 'Open Tabs Page', data: {});
-                getAddressFromLatLng(UserModel.fromJson(accountTypeUserSnap));
-                if (UserModel.fromJson(accountTypeUserSnap).accountType ==
-                    'provider') {
-                  if (UserModel.fromJson(accountTypeUserSnap).isBusinessSetup) {
-                    if (UserModel.fromJson(accountTypeUserSnap)
-                            .isSetOpeningHours ==
-                        false) {
-                      Get.offAll(() => ServiceSetOpeningHours(
-                            shopHours: {},
-                          ));
-                    } else {
-                      Get.offAll(() => TabsPage());
-                    }
-                  } else {
-                    Get.offAll(() => const SetupBusinessProvider(
-                          placeDetails: null,
+              mixPanelController
+                  .trackEvent(eventName: 'Open Tabs Page', data: {});
+              getAddressFromLatLng(UserModel.fromJson(accountTypeUserSnap));
+              if (UserModel.fromJson(accountTypeUserSnap).accountType ==
+                  'provider') {
+                if (UserModel.fromJson(accountTypeUserSnap).isBusinessSetup) {
+                  if (UserModel.fromJson(accountTypeUserSnap)
+                          .isSetOpeningHours ==
+                      false) {
+                    Get.offAll(() => ServiceSetOpeningHours(
+                          shopHours: {},
                         ));
+                  } else {
+                    Get.offAll(() => TabsPage());
                   }
                 } else {
-                  Get.offAll(() => const TabsPage());
+                  Get.offAll(() => const SetupBusinessProvider(
+                        placeDetails: null,
+                      ));
                 }
+              } else {
+                Get.offAll(() => const TabsPage());
               }
             } else {
               await FirebaseFirestore.instance
@@ -256,35 +232,11 @@ class _SplashPageState extends State<SplashPage> {
               // await Future.delayed(Duration(milliseconds: 600));
               // await OneSignal.Notifications.requestPermission(true);
 
-              if (userSnapss.data()!['lat'] == null ||
-                  userSnapss.data()!['lat'] == 0.0) {
-                Future.delayed(const Duration(seconds: 0)).then((s) {
-                  mixPanelController.trackEvent(
-                      eventName: 'Asked For Location Permission', data: {});
-                  Get.bottomSheet(
-                    LocationPermissionSheet(
-                      userController: userController,
-                      isProvider: userModel.accountType == 'provider',
-                    ),
-                    backgroundColor:
-                        userController.isDark ? primaryColor : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(6),
-                        topRight: Radius.circular(6),
-                      ),
-                    ),
-                    isDismissible: false,
-                    // enableDrag: false,
-                  );
-                });
-              } else {
-                setState(() {});
-                mixPanelController
-                    .trackEvent(eventName: 'Open Tabs Page', data: {});
+              setState(() {});
+              mixPanelController
+                  .trackEvent(eventName: 'Open Tabs Page', data: {});
 
-                Get.offAll(() => const TabsPage());
-              }
+              Get.offAll(() => const TabsPage());
             }
           }
         }

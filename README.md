@@ -145,6 +145,11 @@ Google My Business Promotional Page: 1 hour 15 minutes + 1 hour 3 minutes
 
 
 
+Subscriptions: 
+More vehicles, subscription
+As well, let's limit them to 3 requests per week or one request per week
+AI assistant limit to 3 questions per day
+More, subscription
 
 
 
@@ -156,3 +161,13 @@ Google My Business Promotional Page: 1 hour 15 minutes + 1 hour 3 minutes
 
 
 
+
+
+
+
+
+
+
+
+
+WDC0G5EB8KF619958

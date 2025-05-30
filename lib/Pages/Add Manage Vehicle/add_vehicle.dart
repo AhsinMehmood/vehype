@@ -24,6 +24,7 @@ import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/user_model.dart';
+import 'package:vehype/Pages/In%20App%20Purchase%20/in_app_purchase_page.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/delete_vehicle_confirmation.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
@@ -31,11 +32,11 @@ import 'package:vehype/const.dart';
 import 'package:vehype/providers/firebase_storage_provider.dart';
 import 'package:vehype/providers/garage_provider.dart';
 
-import '../Controllers/user_controller.dart';
-import '../Controllers/vehicle_data.dart';
-import '../Models/vehicle_model.dart';
-import '../Widgets/loading_dialog.dart';
-import '../providers/generate_photo_provider.dart';
+import '../../Controllers/user_controller.dart';
+import '../../Controllers/vehicle_data.dart';
+import '../../Models/vehicle_model.dart';
+import '../../Widgets/loading_dialog.dart';
+import '../../providers/generate_photo_provider.dart';
 
 class AddVehicle extends StatefulWidget {
   final GarageModel? garageModel;
@@ -79,7 +80,7 @@ class _AddVehicleState extends State<AddVehicle> {
           text: garageController.selectedVehicleModel!.title);
       customModel = garageController.selectedVehicleModel!.title;
     }
-    vehicleImage();
+    // vehicleImage();
     setState(() {});
   }
 
@@ -911,6 +912,28 @@ class _AddVehicleState extends State<AddVehicle> {
                           );
                           return;
                         }
+
+                        if (userModel.plan == 'free' &&
+                            garageProvider.garages
+                                .where((test) => test.ownerId != '')
+                                .toList()
+                                .isNotEmpty) {
+                          Get.to(() => SubscriptionPlansPage(
+                                title: "Select a Plan to\nPark More Vehicles",
+                              ));
+                          return;
+                        }
+                        if (userModel.plan == 'pro' &&
+                            garageProvider.garages
+                                    .where((test) => test.ownerId != '')
+                                    .toList()
+                                    .length >=
+                                5) {
+                          Get.to(() => SubscriptionPlansPage(
+                                title: "Select a Plan to\nPark More Vehicles",
+                              ));
+                          return;
+                        }
                         Get.dialog(const LoadingDialog(),
                             barrierDismissible: false);
 
@@ -940,7 +963,7 @@ class _AddVehicleState extends State<AddVehicle> {
                         if (widget.garageModel == null) {
                           await garageProvider.addGarage(
                               garageModel, userModel.userId);
-                          Get.close(2);
+                          Get.close(3);
                         } else {
                           await garageProvider.updateGarage(userModel.userId,
                               garageModel, widget.garageModel!.garageId);

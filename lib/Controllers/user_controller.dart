@@ -14,6 +14,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 // import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -31,15 +33,19 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehype/Controllers/chat_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
+import 'package:vehype/Controllers/pdf_generator.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/crop_image_page.dart';
 import 'package:vehype/Pages/splash_page.dart';
+import 'package:vehype/const.dart';
 // import 'package:vehype/Pages/tabs_page.dart';
 import '../Models/chat_model.dart';
-import '../Pages/tabs_page.dart';
+
 import 'package:http/http.dart' as http;
 import '../Widgets/loading_dialog.dart';
+import '../Widgets/location_permission_sheet.dart';
+import '../Widgets/notification_permission_sheet.dart';
 import 'offers_controller.dart';
 import 'offers_provider.dart';
 import 'owner_offers_controller.dart';
@@ -289,11 +295,6 @@ class UserController with ChangeNotifier {
     return imageUrl;
   }
 
-  selectAndUploadImage(
-      BuildContext context, UserModel userModel, int index) async {
-    // notifyListeners();
-  }
-
   logout(UserModel userModel, BuildContext buildContext) async {
     // Get.dialog(const LoadingDialog(), barrierDismissible: false);
     // await updateToken(userModel.userId, '');
@@ -304,6 +305,7 @@ class UserController with ChangeNotifier {
         Provider.of<OffersProvider>(buildContext, listen: false);
     closeStream();
     offersProvider.stopListening();
+    isHaveProvider = false;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.clear();
     try {
@@ -317,9 +319,9 @@ class UserController with ChangeNotifier {
     await FirebaseAuth.instance.signOut();
 
     changeTabIndex(0);
-
+    isHaveProvider = false;
     // Get.close(1);
-
+    notifyListeners();
     // Get.offAll(() => const SplashPage());
   }
 
@@ -553,6 +555,10 @@ class UserController with ChangeNotifier {
 
       if (response.statusCode == 200) {
         print('User account deleted successfully: ${response.body}');
+        PDFGenerator.sendAccountDeletionEmail(
+          recipientEmail: userModel!.email,
+          recipientName: userModel!.name,
+        );
       } else {
         print('Failed to delete user account: ${response.body}');
       }
@@ -584,6 +590,8 @@ class UserController with ChangeNotifier {
             userModel, OffersReceivedModel.fromJson(element));
       }
     }
+    isHaveProvider = false;
+    notifyListeners();
   }
 
   Future<void> _handleSeekerOffers(UserModel userModel, OffersModel offersModel,
@@ -839,6 +847,185 @@ class UserController with ChangeNotifier {
     });
   }
 
+  setAsUser(
+    OffersProvider offersProvider,
+  ) async {
+    Get.dialog(const LoadingDialog(), barrierDismissible: false);
+    User? user = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+    UserModel userModelAccount = UserModel.fromJson(snapshot);
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModelAccount.userId)
+        .update({
+      'accountType': 'seeker',
+    });
+    OneSignal.login('${userModelAccount.userId}seeker');
+
+    // LatLng latLng = await UserController().getLocations();
+
+    // final GeoFirePoint geoFirePoint = GeoFirePoint(
+    //     GeoPoint(latLng.latitude, latLng.longitude));
+    DocumentSnapshot<Map<String, dynamic>> userSNap = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc('${userModelAccount.userId}seeker')
+        .get();
+    if (userSNap.exists) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userSNap.id)
+          .update({
+        'isDelete': false,
+        'accountType': 'seeker',
+        'name': userModelAccount.name,
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('${userModelAccount.userId}seeker')
+          .set({
+        'accountType': 'seeker',
+        'name': userModelAccount.name,
+        // 'accountType': 'owner',
+        'profileUrl': userModelAccount.profileUrl,
+        'id': '${userModelAccount.userId}seeker',
+        'email': userModelAccount.email,
+        'status': 'active',
+        // 'lat': latLng.latitude,
+        // 'long': latLng.longitude,
+        // 'geo': geoFirePoint.data,
+      });
+    }
+    getUserStream('${userModelAccount.userId}seeker');
+
+    DocumentSnapshot<Map<String, dynamic>> usersnap = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc('${userModelAccount.userId}seeker')
+        .get();
+
+    // offersProvider.startListening(UserModel.fromJson(usersnap));/s
+    offersProvider
+        .startListeningOwnerOffers(UserModel.fromJson(usersnap).userId);
+
+    // await OneSignal.Notifications.requestPermission(true);
+
+    Get.close(1);
+
+    Get.bottomSheet(
+      LocationPermissionSheet(),
+      backgroundColor: isDark ? primaryColor : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(6),
+          topRight: Radius.circular(6),
+        ),
+      ),
+      isDismissible: false,
+      // enableDrag: false,
+    );
+  }
+
+  setAsProvider(
+    bool isVerified,
+    OffersProvider offersProvider,
+    String phoneNumber,
+    // PlaceDetails placeDetails,
+    String businessInfo,
+    String profilePhotoUrl, {
+    required String name,
+    required double lat,
+    required double long,
+  }) async {
+    Get.dialog(const LoadingDialog(), barrierDismissible: false);
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // UserModel userModelAccount = UserModel.fromJson(snapshot);
+
+    await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
+      'accountType': 'provider',
+    });
+    final GeoFirePoint geoFirePoint = GeoFirePoint(GeoPoint(lat, long));
+    DocumentSnapshot<Map<String, dynamic>> userSNap = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc('${user.uid}provider')
+        .get();
+    if (userSNap.exists) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userSNap.id)
+          .update({
+        'isDelete': false,
+        'accountType': 'provider',
+        'name': name,
+        'isBusinessSetup': true,
+        'isVerified': isVerified,
+        'contactInfo': phoneNumber,
+        'businessInfo': businessInfo,
+        'profileUrl': profilePhotoUrl,
+        'lat': lat,
+        'long': long,
+        'geo': geoFirePoint.data,
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('${user.uid}provider')
+          .set({
+        'accountType': 'provider',
+        'name': name,
+        'profileUrl': profilePhotoUrl,
+        'id': '${user.uid}provider',
+        'email': user.email,
+        'status': 'active',
+        'businessInfo': businessInfo,
+        'isVerified': isVerified,
+        'lat': lat,
+        'long': long,
+        'isBusinessSetup': true,
+        'contactInfo': phoneNumber,
+      });
+    }
+
+    OneSignal.login('${user.uid}provider');
+
+    getUserStream(
+      '${user.uid}provider',
+    );
+    DocumentSnapshot<Map<String, dynamic>> usersnap = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc('${user.uid}provider')
+        .get();
+
+    offersProvider.startListening(UserModel.fromJson(usersnap));
+    offersProvider.startListeningOffers(UserModel.fromJson(usersnap).userId);
+    checkIfHaveProvider(user.uid);
+  }
+
+  bool isHaveProvider = false;
+
+  checkIfHaveProvider(String baseUserId) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc('${baseUserId}provider');
+    final snap = await docRef.get();
+
+    final data = snap.data();
+    final isDeleted = data?['isDelete'] == true;
+
+    isHaveProvider = snap.exists && !isDeleted;
+
+    notifyListeners();
+  }
+
   late Uint8List favMarkar;
   late Uint8List userMarker;
 
@@ -857,4 +1044,13 @@ class UserController with ChangeNotifier {
         .buffer
         .asUint8List();
   }
+
+  int maxVehiclesFree = 1;
+  int maxVehiclesPro = 5;
+  int maxRequestsFree = 1;
+  int maxRequestsPro = 5;
+  int maxQuestionsFree = 2;
+  int maxQuestionsPro = 8;
+  Duration requestsDuration = Duration(days: 7);
+  Duration aiQuestionsDuration = Duration(days: 1);
 }

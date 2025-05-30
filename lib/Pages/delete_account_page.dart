@@ -27,7 +27,6 @@ String removeSuffix(String userId) {
   return userId; // Return the original ID if no suffix is found
 }
 
-
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
 

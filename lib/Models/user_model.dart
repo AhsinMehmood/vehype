@@ -44,6 +44,10 @@ class UserModel {
   final bool isBusinessSetup;
   final bool isSetOpeningHours;
   final Map<String, dynamic> workingHours;
+  final bool isVerified;
+  final String plan;
+  final List aiQuestions;
+  final String productId;
 
   UserModel(
     this.id,
@@ -86,6 +90,10 @@ class UserModel {
     this.isBusinessSetup,
     this.isSetOpeningHours,
     this.workingHours,
+    this.isVerified,
+    this.plan,
+    this.aiQuestions,
+    this.productId,
   );
 
   factory UserModel.fromJson(DocumentSnapshot<Map<String, dynamic>> snapshot) {
@@ -151,6 +159,10 @@ class UserModel {
       data['isBusinessSetup'] ?? false,
       data['isSetOpeningHours'] ?? false,
       data['workingHours'] ?? {},
+      data['isVerified'] ?? false,
+      data['plan'] ?? 'free',
+      data['aiQuestion'] ?? [],
+      data['productId'] ?? '',
     );
   }
 

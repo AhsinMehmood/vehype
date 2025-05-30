@@ -20,7 +20,6 @@ class AdminHomePage extends StatefulWidget {
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
-
 class _AdminHomePageState extends State<AdminHomePage> {
   @override
   Widget build(BuildContext context) {
@@ -62,7 +61,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
           title: Text('Manage Users',
               style: TextStyle(
                   color: userController.isDark ? Colors.white : primaryColor,
-                  fontFamily: 'Avenir',
+                  // fontFamily: 'Avenir',
                   fontSize: 18,
                   fontWeight: FontWeight.w600)),
           bottom: TabBar(
@@ -227,15 +226,22 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                           const SizedBox(
                                             height: 8,
                                           ),
-                                          Text(
-                                            reportToUserModel.email,
-                                            style: TextStyle(
-                                              color: userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                reportToUserModel.email,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: userController.isDark
+                                                      ? Colors.white
+                                                      : primaryColor,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              const SizedBox.shrink(),
+                                            ],
                                           ),
                                           const SizedBox(
                                             height: 8,

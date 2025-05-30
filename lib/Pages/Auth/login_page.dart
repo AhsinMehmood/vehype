@@ -9,14 +9,14 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehype/Controllers/user_controller.dart';
-import 'package:vehype/Models/user_model.dart';
+
 import 'package:vehype/Pages/Auth/forgor_password_page.dart';
 import 'package:vehype/Pages/Auth/signup_page.dart';
 import 'package:vehype/const.dart';
 
 import '../../Controllers/login_controller.dart';
+import '../../Controllers/offers_provider.dart';
 import '../../Widgets/loading_dialog.dart';
-import '../select_account_type_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -399,17 +399,10 @@ class _LoginPageState extends State<LoginPage> {
                       userController.changeTabIndex(0);
                       // userController.getUserStream(user.uid);
 
-                      DocumentSnapshot<Map<String, dynamic>> snapshot =
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(user.uid)
-                              .get();
-                      UserModel userModel = UserModel.fromJson(snapshot);
-
+                      final offersProvider =
+                          Provider.of<OffersProvider>(context, listen: false);
                       Get.close(1);
-                      Get.offAll(() => SelectAccountType(
-                            userModelAccount: userModel,
-                          ));
+                      userController.setAsUser(offersProvider);
                     } catch (e) {
                       Get.close(1);
                       print(e);

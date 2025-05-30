@@ -15,7 +15,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+// import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Widgets/select_date_and_price.dart';
@@ -323,7 +323,7 @@ class PDFGenerator {
         snackPosition: SnackPosition.TOP,
       ));
     } catch (e) {
-      Sentry.captureMessage(e.toString());
+      // Sentry.captureMessage(e.toString());
       // print("🔥 Error calling sendPDFEmail: $e");
       Get.showSnackbar(GetSnackBar(
         message: '❌ Failed to send email',
@@ -351,7 +351,7 @@ class PDFGenerator {
       final smtpServer = gmail(username, password);
       PackageInfo appInfo = await PackageManager.getPackageInfo();
       final equivalentMessage = Message()
-        ..from = Address(username, 'VEHYPE (Beta)')
+        ..from = Address(username, 'VEHYPE')
         ..recipients.addAll(
           userController.adminsEmails.map((email) => Address(email)),
         )
@@ -386,7 +386,7 @@ ${const JsonEncoder.withIndent('  ').convert(appInfo.toJson())}
 
 
 
-*This is an automated message from the VEHYPE beta system*
+*This is an automated message from the VEHYPE system*
 ''';
       await send(equivalentMessage, smtpServer);
       // sendReport2.
@@ -398,7 +398,7 @@ ${const JsonEncoder.withIndent('  ').convert(appInfo.toJson())}
         snackPosition: SnackPosition.TOP,
       ));
     } catch (e) {
-      Sentry.captureMessage(e.toString());
+      // Sentry.captureMessage(e.toString());
       // print("🔥 Error calling sendPDFEmail: $e");
       // Get.showSnackbar(GetSnackBar(
       //   message: '❌ Failed to send email',
@@ -408,5 +408,71 @@ ${const JsonEncoder.withIndent('  ').convert(appInfo.toJson())}
       // print("❌ Failed to send email:");
     }
   }
-}
 
+  static Future<void> sendWelcomeEmail({
+    required String recipientEmail,
+    required String recipientName,
+  }) async {
+    try {
+      // Step 1: Your SMTP credentials
+      String username = 'developera574@gmail.com';
+      String password = 'ozcriypjmnmmslox'; // App password
+      final smtpServer = SmtpServer(
+        'smtp.gmail.com',
+        port: 465,
+        ssl: true,
+        username: username,
+        password: password,
+      );
+
+      // Step 2: Load HTML from asset
+      String htmlContent =
+          await rootBundle.loadString('assets/welcome_email.html');
+      htmlContent = htmlContent.replaceAll('[First Name]', recipientName);
+
+      // Step 3: Create the message
+      final message = Message()
+        ..from = Address(username, 'VEHYPE')
+        ..recipients.add(recipientEmail)
+        ..subject = 'Welcome to VEHYPE!'
+        ..html = htmlContent;
+
+      // Step 4: Send the email
+      await send(message, smtpServer);
+
+      print("✅ Welcome email sent to $recipientEmail");
+    } catch (e, stackTrace) {
+      print("❌ Failed to send welcome email: $e");
+      // Optional: Sentry.captureException(e, stackTrace: stackTrace);
+    }
+  }
+
+  static Future<void> sendAccountDeletionEmail({
+    required String recipientEmail,
+    required String recipientName,
+  }) async {
+    try {
+      final smtpServer = SmtpServer(
+        'smtp.gmail.com',
+        port: 465,
+        ssl: true,
+        username: 'developera574@gmail.com',
+        password: 'ozcriypjmnmmslox',
+      );
+      String htmlContent =
+          await rootBundle.loadString('assets/account_deletion_email.html');
+      htmlContent = htmlContent.replaceAll('[First Name]', recipientName);
+
+      final message = Message()
+        ..from = Address('developera574@gmail.com', 'VEHYPE')
+        ..recipients.add(recipientEmail)
+        ..subject = 'Your VEHYPE Account Has Been Deleted'
+        ..html = htmlContent;
+
+      await send(message, smtpServer);
+      print('✅ Account deletion email sent to $recipientEmail');
+    } catch (e) {
+      print('❌ Failed to send account deletion email: $e');
+    }
+  }
+}

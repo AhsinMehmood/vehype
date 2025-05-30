@@ -13,16 +13,18 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:vehype/Controllers/offers_provider.dart';
+import 'package:vehype/Controllers/pdf_generator.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/select_account_type_page.dart';
-import 'package:vehype/Pages/setup_business_provider.dart';
+
+import 'package:vehype/Pages/Provider%20Verification/setup_business_provider.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 
 import '../Pages/service_set_opening_hours.dart';
 
 import '../Pages/splash_page.dart';
+import '../Widgets/location_permission_sheet.dart';
 import '../const.dart';
 import '../providers/garage_provider.dart';
 
@@ -167,8 +169,11 @@ class LoginController {
       // print('is New User after get user model');
 
       // Get.close(1);
-
-      _navigateToSelectAccountType(userModel);
+      final userController =
+          Provider.of<UserController>(context, listen: false);
+      final offersProvider =
+          Provider.of<OffersProvider>(context, listen: false);
+      _navigateToSelectAccountType(userModel, userController, offersProvider);
     } else {
       final userModel = await _getUserModel(userId);
 
@@ -185,6 +190,9 @@ class LoginController {
       'id': user.uid,
       'email': user.email,
     });
+    // PDFGenerator.sendWelcomeEmail(
+    //     recipientEmail: user.email!,
+    //     recipientName: fullName.isEmpty ? user.displayName! : fullName);
   }
 
   static Future<UserModel> _getUserModel(String userId) async {
@@ -193,17 +201,19 @@ class LoginController {
     return UserModel.fromJson(snapshot);
   }
 
-  static void _navigateToSelectAccountType(UserModel userModel) {
+  static void _navigateToSelectAccountType(UserModel userModel,
+      UserController userController, OffersProvider offersController) {
     Get.close(1);
-    Get.offAll(() => SelectAccountType(userModelAccount: userModel));
+    userController.setAsUser(offersController);
   }
 
   static Future<void> _handleExistingUser(
       BuildContext context, UserModel userModel, String userId) async {
     final userController = Provider.of<UserController>(context, listen: false);
+    final offersProvider = Provider.of<OffersProvider>(context, listen: false);
 
     if (userModel.accountType.isEmpty) {
-      _navigateToSelectAccountType(userModel);
+      _navigateToSelectAccountType(userModel, userController, offersProvider);
       return;
     }
 
@@ -224,7 +234,6 @@ class LoginController {
     userController.getUserStream(accountId, onDataReceived: (_) {});
     OneSignal.login(accountId);
 
-    final offersProvider = Provider.of<OffersProvider>(context, listen: false);
     final garageProvider = Provider.of<GarageProvider>(context, listen: false);
 
     if (userModel.accountType == 'provider') {
@@ -251,7 +260,6 @@ class LoginController {
       Future.delayed(Duration.zero).then((_) {
         Get.bottomSheet(
           LocationPermissionSheet(
-            userController: userController,
             isProvider: accountType == 'provider',
           ),
           backgroundColor: userController.isDark ? primaryColor : Colors.white,

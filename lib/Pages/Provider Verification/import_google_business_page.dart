@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
+
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
 import '../../Controllers/user_controller.dart';
-import '../setup_business_provider.dart';
+import 'setup_business_provider.dart';
 // import 'package:google_maps_webservice/places.dart';
 
 class ImportGoogleBusinessPage extends StatefulWidget {
@@ -55,7 +55,7 @@ class _ImportGoogleBusinessPageState extends State<ImportGoogleBusinessPage> {
           icon: Icon(Icons.arrow_back_ios_new_outlined),
         ),
         title: Text('Import My Business',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
         centerTitle: true,
         elevation: 0.0,
         backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -119,67 +119,6 @@ class _ImportGoogleBusinessPageState extends State<ImportGoogleBusinessPage> {
                             );
                           },
                         ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BusinessDetailPage extends StatelessWidget {
-  final PlaceDetails place;
-
-  const BusinessDetailPage({super.key, required this.place});
-
-  @override
-  Widget build(BuildContext context) {
-    final UserController userController = Provider.of<UserController>(context);
-    return Scaffold(
-      backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Icon(
-            Icons.arrow_back_ios_new_outlined,
-          ),
-        ),
-        title: Text(
-          'Import My Business',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: userController.isDark ? primaryColor : Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Name: ${place.name}", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text("Address: ${place.formattedAddress ?? ''}"),
-            SizedBox(height: 8),
-            Text("Phone: ${place.formattedPhoneNumber ?? 'N/A'}"),
-            SizedBox(height: 8),
-            Text("Website: ${place.website ?? 'N/A'}"),
-            SizedBox(height: 8),
-            Text(
-                "Phone with Country: ${place.internationalPhoneNumber ?? 'N/A'}"),
-            SizedBox(height: 8),
-            Text("Business Hours: ${place.openingHours!.weekdayText.toList()}"),
-            SizedBox(height: 20),
-            ElevatedButton(
-              child: Text("Use this Business"),
-              onPressed: () {
-                // Save to Firestore or go to verification
-              },
             ),
           ],
         ),

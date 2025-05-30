@@ -170,24 +170,6 @@ class SendRequestInvitePage extends StatelessWidget {
                                         ),
                                         Row(
                                           children: [
-                                            SvgPicture.asset(
-                                              getVehicleType()
-                                                  .firstWhere((test) =>
-                                                      test.title ==
-                                                      garageModels.bodyStyle
-                                                          .split(',')
-                                                          .first
-                                                          .trim())
-                                                  .icon,
-                                              height: 20,
-                                              width: 20,
-                                              color: userController.isDark
-                                                  ? Colors.white
-                                                  : primaryColor,
-                                            ),
-                                            const SizedBox(
-                                              width: 8,
-                                            ),
                                             Text(
                                               garageModels.bodyStyle,
                                               style: TextStyle(
@@ -283,7 +265,7 @@ class SendRequestInvitePage extends StatelessWidget {
                                       backgroundColor: userController.isDark
                                           ? Colors.white
                                           : primaryColor,
-                                      minimumSize: Size(Get.width * 0.8, 50),
+                                      minimumSize: Size(Get.width * 0.9, 50),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(6))),

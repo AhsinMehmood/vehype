@@ -1020,22 +1020,52 @@ class SecondUserHeaderWidget extends StatelessWidget {
               onTap: () {
                 Get.to(() => FullImagePageView(urls: [profile.profileUrl]));
               },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(200),
-                child: CachedNetworkImage(
-                  placeholder: (context, url) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                  errorWidget: (context, url, error) => const SizedBox.shrink(),
-                  imageUrl: profile.profileUrl,
-                  width: 55,
-                  height: 55,
-                  fit: BoxFit.fill,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(200),
+                    child: CachedNetworkImage(
+                      placeholder: (context, url) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      errorWidget: (context, url, error) =>
+                          const SizedBox.shrink(),
+                      imageUrl: profile.profileUrl,
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.fill,
 
-                  //cancelToken: cancellationToken,
-                ),
+                      //cancelToken: cancellationToken,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: profile.isVerified ? 20 : null,
+                      // width: 30,
+                      decoration: BoxDecoration(
+                          color: profile.isVerified
+                              ? Colors.green.withOpacity(0.9)
+                              : Colors.red.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: Center(
+                        child: Text(
+                          profile.isVerified ? 'VERIFIED' : 'NON\nVERIFIED',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: profile.isVerified ? 12 : 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(

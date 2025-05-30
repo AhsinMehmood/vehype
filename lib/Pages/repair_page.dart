@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,27 +11,69 @@ import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
 import 'package:vehype/Pages/create_request_page.dart';
-import 'package:vehype/Pages/service_repair_info_fill.dart';
 
 import 'package:vehype/Widgets/owner_active_offers.dart';
 import 'package:vehype/Widgets/owner_inactive_offers_page_widget.dart';
 import 'package:vehype/Widgets/owner_inprogress_page_widget.dart';
 import 'package:vehype/const.dart';
-import 'package:vehype/providers/assistance_guide_ai_service.dart';
-import 'package:vehype/providers/copy_vehicle_data.dart';
 
 import '../Controllers/mix_panel_controller.dart';
-import 'Personal Assistance /assistance_guide_ui.dart';
-import 'Personal Assistance /assitance_chat_ui.dart';
+import '../Widgets/short_prefs_widget.dart';
 // import 'choose_account_type.dart';
 
+import 'Personal Assistance /assitance_chat_ui.dart';
 import 'owner_notifications_page.dart';
-import 'service_set_opening_hours.dart';
 
 final mixPanelController = Get.find<MixPanelController>();
 
-class RepairPage extends StatelessWidget {
+class RepairPage extends StatefulWidget {
   const RepairPage({super.key});
+
+  @override
+  State<RepairPage> createState() => _RepairPageState();
+}
+
+class _RepairPageState extends State<RepairPage> {
+  OverlayEntry? _overlayEntry;
+
+  void _showPopup() {
+    final overlay = Overlay.of(context);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Detect taps outside the popup to close it
+          GestureDetector(
+            onTap: _hidePopup,
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              color: Colors.transparent, // Transparent background
+            ),
+          ),
+          Positioned(
+            top: kToolbarHeight + 35,
+            right: 60.0,
+            child: ShortPrefsWidget(onPressed: _hidePopup),
+          ),
+        ],
+      ),
+    );
+
+    overlay.insert(_overlayEntry!);
+    setState(() {});
+  }
+
+  void _hidePopup() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    // _hidePopup(); // Ensure the popup is removed when the widget is disposed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +85,84 @@ class RepairPage extends StatelessWidget {
         .where((offer) => offer.checkByList
             .any((check) => check.checkById == userModel.userId))
         .toList();
+    List<OffersModel> offersPosted = offersProvider.ownerOffers
+        .where((offer) => offer.status == 'active')
+        .toList();
+    offersPosted.sort((a, b) {
+      // Primary sort by createdAt
+      final dateA = DateTime.parse(a.createdAt).toLocal();
+      final dateB = DateTime.parse(b.createdAt).toLocal();
 
+      int timeComparison = userController.sortByTime == 1
+          ? dateA.compareTo(dateB) // Ascending order by time
+          : dateB.compareTo(dateA); // Descending order by time
+
+      if (timeComparison != 1) {
+        return timeComparison;
+      }
+
+      // Secondary sort by distance (only if dates are equal)
+      double distanceA =
+          calculateDistance(userModel.lat, userModel.long, a.lat, a.long);
+      double distanceB =
+          calculateDistance(userModel.lat, userModel.long, b.lat, b.long);
+
+      return userController.sortByDistance == 0
+          ? distanceA.compareTo(distanceB) // Ascending order by distance
+          : distanceB.compareTo(distanceA); // Descending order by distance
+    });
+    final List<OffersModel> inProgressOffers = offersProvider.ownerOffers
+        .where((offer) => offer.status == 'inProgress')
+        .toList();
+    inProgressOffers.sort((a, b) {
+      // Primary sort by createdAt
+      final dateA = DateTime.parse(a.createdAt).toLocal();
+      final dateB = DateTime.parse(b.createdAt).toLocal();
+
+      int timeComparison = userController.sortByTime == 1
+          ? dateA.compareTo(dateB) // Ascending order by time
+          : dateB.compareTo(dateA); // Descending order by time
+
+      if (timeComparison != 1) {
+        return timeComparison;
+      }
+
+      // Secondary sort by distance (only if dates are equal)
+      double distanceA =
+          calculateDistance(userModel.lat, userModel.long, a.lat, a.long);
+      double distanceB =
+          calculateDistance(userModel.lat, userModel.long, b.lat, b.long);
+
+      return userController.sortByDistance == 0
+          ? distanceA.compareTo(distanceB) // Ascending order by distance
+          : distanceB.compareTo(distanceA); // Descending order by distance
+    });
+    final List<OffersModel> inActiveOffers = offersProvider.ownerOffers
+        .where((offer) => offer.status == 'inactive')
+        .toList();
+    inActiveOffers.sort((a, b) {
+      // Primary sort by createdAt
+      final dateA = DateTime.parse(a.createdAt).toLocal();
+      final dateB = DateTime.parse(b.createdAt).toLocal();
+
+      int timeComparison = userController.sortByTime == 1
+          ? dateA.compareTo(dateB) // Ascending order by time
+          : dateB.compareTo(dateA); // Descending order by time
+
+      if (timeComparison != 1) {
+        return timeComparison;
+      }
+
+      // Secondary sort by distance (only if dates are equal)
+      double distanceA =
+          calculateDistance(userModel.lat, userModel.long, a.lat, a.long);
+      double distanceB =
+          calculateDistance(userModel.lat, userModel.long, b.lat, b.long);
+
+      return userController.sortByDistance == 0
+          ? distanceA.compareTo(distanceB) // Ascending order by distance
+          : distanceB.compareTo(distanceA); // Descending order by distance
+    });
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -66,11 +186,26 @@ class RepairPage extends StatelessWidget {
                     offersModel: null,
                   ));
             },
-            child: Center(
-              child: Icon(
-                Icons.add,
-                color: userController.isDark ? primaryColor : Colors.white,
-              ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/repair.png',
+                    height: 24,
+                    width: 24,
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                ),
+                Positioned(
+                  right: 5,
+                  top: 10,
+                  child: Icon(
+                    Icons.add_box,
+                    size: 16, // Slightly smaller for badge effect
+                    color: userController.isDark ? primaryColor : Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -133,7 +268,7 @@ class RepairPage extends StatelessWidget {
                         )
                     ],
                   ),
-                ))
+                )),
           ],
           bottom: TabBar(
             // isScrollable: true,
@@ -214,9 +349,15 @@ class RepairPage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            OwnerActiveOffers(),
-            OwnerInprogressPageWidget(),
-            OwnerInactiveOffersPageWidget(),
+            OwnerActiveOffers(
+              postedOffers: offersPosted,
+            ),
+            OwnerInprogressPageWidget(
+              inProgressOffers: inProgressOffers,
+            ),
+            OwnerInactiveOffersPageWidget(
+              inActiveOffers: inActiveOffers,
+            ),
           ],
         ),
       ),

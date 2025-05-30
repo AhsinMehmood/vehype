@@ -51,21 +51,21 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-  // String _darkMapStyle = '';
+  String _darkMapStyle = '';
   @override
   void initState() {
     super.initState();
-    // _loadMapStyles();
+    _loadMapStyles();
   }
 
-  // Future _loadMapStyles() async {
-  //   _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
-  // }
+  Future _loadMapStyles() async {
+    _darkMapStyle = await rootBundle.loadString('assets/dark_mode_map.json');
+  }
 
   FocusNode searchnode = FocusNode();
 
   // GoogleMapController? mapController;
-  // String _mapStyle = '';
+  String _mapStyle = '';
   double lat = 0.0;
   double long = 0.0;
   bool focus = false;
@@ -79,20 +79,25 @@ class _ExplorePageState extends State<ExplorePage> {
       FirebaseFirestore.instance.collection('users');
 
   UserModel? selectedMarker;
-  Map<MarkerId, WidgetMarker> addMarkers(
+  Map<MarkerId, Marker> addMarkers(
       List<UserModel> nearbyProviders, UserController userController) {
     final UserModel userModel = userController.userModel!;
     lat = userModel.lat;
     long = userModel.long;
-    Map<MarkerId, WidgetMarker> markers = {};
+    Map<MarkerId, Marker> markers = {
+      MarkerId(userModel.userId): Marker(
+          markerId: MarkerId(userModel.userId), position: LatLng(lat, long)),
+    };
 
     for (UserModel element in nearbyProviders) {
       if (element.email != 'No email set' &&
           element.userId != userController.userModel!.userId) {
         final markerId = MarkerId(element.userId);
-        markers[markerId] = WidgetMarker(
-          markerId: markerId.value,
+        markers[markerId] = Marker(
+          markerId: markerId,
           position: LatLng(element.lat, element.long),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
           onTap: () async {
             GoogleMapController mapController =
                 await userController.mapController.future;
@@ -108,36 +113,36 @@ class _ExplorePageState extends State<ExplorePage> {
               selectedMarker = element;
             });
           },
-          widget: SizedBox(
-            height: 45,
-            width: 45,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/user.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    margin: const EdgeInsets.only(top: 1),
-                    height: 32,
-                    width: 32,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                        imageUrl: element.profileUrl,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // widget: SizedBox(
+          //   height: 45,
+          //   width: 45,
+          //   child: Stack(
+          //     children: [
+          //       Positioned.fill(
+          //         child: Image.asset(
+          //           'assets/user.png',
+          //           fit: BoxFit.cover,
+          //         ),
+          //       ),
+          //       Align(
+          //         alignment: Alignment.topCenter,
+          //         child: Container(
+          //           padding: const EdgeInsets.all(4),
+          //           margin: const EdgeInsets.only(top: 1),
+          //           height: 32,
+          //           width: 32,
+          //           child: ClipRRect(
+          //             borderRadius: BorderRadius.circular(16),
+          //             child: CachedNetworkImage(
+          //               imageUrl: element.profileUrl,
+          //               fit: BoxFit.cover,
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         );
       }
     }
@@ -174,9 +179,9 @@ class _ExplorePageState extends State<ExplorePage> {
     final GarageController garageController =
         Provider.of<GarageController>(context);
     GeoPoint tokyoStation = GeoPoint(userModel.lat, userModel.long);
-//  rootBundle.loadString('assets/dark_mode_map.json').then((style) {
-//       _mapStyle = style;
-//     });
+    rootBundle.loadString('assets/dark_mode_map.json').then((style) {
+      _mapStyle = style;
+    });
     final GeoFirePoint center = GeoFirePoint(tokyoStation);
 // Function to get GeoPoint instance from Cloud Firestore document data.
     GeoPoint geopointFrom(Map<String, dynamic> data) =>
@@ -242,20 +247,13 @@ class _ExplorePageState extends State<ExplorePage> {
                         : filterProvidersByServices(nearbyProvidersStream,
                             userController.selectedServicesFilter);
 
-                Map<MarkerId, WidgetMarker> markers =
+                Map<MarkerId, Marker> markers =
                     addMarkers(filterByService, userController);
 
                 return Stack(
                   children: [
-                    WidgetMarkerGoogleMap(
-                      markers: <MarkerId, Marker>{
-                        const MarkerId('default_marker'): Marker(
-                          position: LatLng(userModel.lat, userModel.long),
-                          infoWindow: InfoWindow(title: 'Your Location'),
-                          markerId: const MarkerId('default_marker'),
-                        ),
-                      },
-                      // widgetMarkers: markers,
+                    GoogleMap(
+                      markers: markers.values.toSet(),
                       liteModeEnabled: false,
                       compassEnabled: false,
                       myLocationEnabled: false,
@@ -284,7 +282,7 @@ class _ExplorePageState extends State<ExplorePage> {
                           userController.mapController.complete(controller);
                         }
                         if (userController.isDark) {
-                          // controller.setMapStyle(_darkMapStyle);
+                          controller.setMapStyle(_darkMapStyle);
                         }
                         setState(() {});
                       },

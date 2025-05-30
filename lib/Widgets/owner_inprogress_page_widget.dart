@@ -7,21 +7,16 @@ import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Widgets/owner_request_widget.dart';
 import 'package:vehype/const.dart';
 
-import '../Controllers/offers_provider.dart';
 import '../Models/garage_model.dart';
 
 class OwnerInprogressPageWidget extends StatelessWidget {
-  const OwnerInprogressPageWidget({super.key});
+  final List<OffersModel> inProgressOffers;
+  const OwnerInprogressPageWidget({super.key, required this.inProgressOffers});
 
   @override
   Widget build(BuildContext context) {
-    final OffersProvider offersProvider = Provider.of<OffersProvider>(context);
     final UserController userController = Provider.of<UserController>(context);
 
-    final List<OffersModel> inProgressOffers = offersProvider.ownerOffers
-        .where((offer) => offer.status == 'inProgress')
-        .toList();
-    inProgressOffers.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     if (inProgressOffers.isEmpty) {
       return Center(
         child: Text(

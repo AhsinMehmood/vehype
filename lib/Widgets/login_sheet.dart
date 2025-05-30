@@ -17,10 +17,9 @@ import 'package:vehype/Widgets/loading_dialog.dart';
 import 'package:vehype/const.dart';
 
 import '../Models/user_model.dart';
-import '../Pages/select_account_type_page.dart';
+
 import '../Pages/splash_page.dart';
 import '../Pages/tabs_page.dart';
-
 
 class LoginSheet extends StatelessWidget {
   final Function onSuccess;

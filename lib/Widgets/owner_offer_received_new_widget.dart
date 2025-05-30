@@ -385,13 +385,15 @@ class OwnerOfferReceivedNewWidget extends StatelessWidget {
               ),
               InkWell(
                 onTap: () async {
-                  Get.bottomSheet(OwnerAcceptOfferConfirmation(
-                      offersReceivedModel: offersReceivedModel,
-                      offersModel: offersModel,
-                      userModel: userModel,
-                      chatId: chatId,
-                      garageModel: garageModel,
-                      userController: userController));
+                  Get.bottomSheet(
+                      OwnerAcceptOfferConfirmation(
+                          offersReceivedModel: offersReceivedModel,
+                          offersModel: offersModel,
+                          userModel: userModel,
+                          chatId: chatId,
+                          garageModel: garageModel,
+                          userController: userController),
+                      isScrollControlled: true, );
                 },
                 child: Container(
                   height: 50,

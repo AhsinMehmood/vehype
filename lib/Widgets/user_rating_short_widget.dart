@@ -22,20 +22,49 @@ class UserRatingShortWidget extends StatelessWidget {
       },
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(200),
-            child: CachedNetworkImage(
-              placeholder: (context, url) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              },
-              errorWidget: (context, url, error) => const SizedBox.shrink(),
-              imageUrl: secondUser.profileUrl,
-              height: 65,
-              width: 65,
-              fit: BoxFit.cover,
-            ),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(200),
+                child: CachedNetworkImage(
+                  placeholder: (context, url) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorWidget: (context, url, error) => const SizedBox.shrink(),
+                  imageUrl: secondUser.profileUrl,
+                  height: 65,
+                  width: 65,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: secondUser.isVerified ? 20 : null,
+                  // width: 30,
+                  decoration: BoxDecoration(
+                      color: secondUser.isVerified
+                          ? Colors.green.withOpacity(0.9)
+                          : Colors.red.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(6)),
+                  child: Center(
+                    child: Text(
+                      secondUser.isVerified ? 'VERIFIED' : 'NON\nVERIFIED',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: secondUser.isVerified ? 12 : 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(
             width: 10,

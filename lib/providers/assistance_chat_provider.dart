@@ -28,6 +28,7 @@ import '../Models/offers_model.dart';
 import '../Models/vehicle_model.dart';
 import '../const.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:http/http.dart' as http;
 
 class AssistanceChatProvider with ChangeNotifier {
   List<AiChatModel> _aiChats = [];
@@ -354,6 +355,17 @@ Respond in a conversational tone.
     String? imageUrl = await firebaseStorageProvider.uploadMedia(file, false);
     // generativeModel.makeRequest(task, params, parse);
     final imagePart = InlineDataPart('image/jpeg', compressBytes);
+    List userQueries = userModel.aiQuestions;
+    userQueries.add({
+      'question': imageUrl,
+      'sentAt': DateTime.now().toUtc().toIso8601String(),
+    });
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModel.userId)
+        .update({
+      'aiQuestion': userQueries,
+    });
     final prompt = TextPart(
         " ${userPrompt('also attatch this url as imageUrl $imageUrl', garageProvider, userModel, offersProvider)}");
 
@@ -396,6 +408,259 @@ Respond in a conversational tone.
   }
 
   List<VehicleModel> subModels = [];
+
+  Future<String?> _fetchVehicleData(String vin) async {
+    final url =
+        'https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/$vin?format=json';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<dynamic> results = data['Results'];
+
+        String make = results.firstWhere((e) => e['Variable'] == 'Make',
+                orElse: () => null)?['Value'] ??
+            'Unknown';
+        String model = results.firstWhere((e) => e['Variable'] == 'Model',
+                orElse: () => null)?['Value'] ??
+            'Unknown';
+        String year = results.firstWhere((e) => e['Variable'] == 'Model Year',
+                orElse: () => null)?['Value'] ??
+            'Unknown';
+
+        String vehicleType = results.firstWhere(
+                (e) => e['Variable'] == 'Vehicle Type',
+                orElse: () => null)?['Value'] ??
+            'Unknown';
+        VehicleType? mappedType = mapVehicleType(vehicleType);
+        // Fetch trims from Car API
+        String carApiUrl =
+            'https://carapi.app/api/trims?year=$year&make=$make&model=$model';
+        String jwtToken = await getJwtToken(); // Replace with your token
+
+        final carApiResponse = await http.get(Uri.parse(carApiUrl), headers: {
+          'Content-type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        });
+
+        String trims = 'No trims found';
+        log(carApiResponse.body.toString());
+
+        if (carApiResponse.statusCode == 200) {
+          final carApiData = json.decode(carApiResponse.body);
+          List<dynamic> trimsList = carApiData['data'] ?? [];
+          if (trimsList.isNotEmpty) {
+            trims = trimsList.first['description'];
+          }
+        } else {
+          print('Failed to fetch trims: ${carApiResponse.statusCode}');
+        }
+
+        String vehicleInfo =
+            'Make: $make\nModel: $model\nYear: $year\nVehicle Type: ${mappedType?.title ?? "Unknown"}\nTrims: $trims';
+        return vehicleInfo;
+      } else {
+        // throw Exception('Failed to load vehicle data');
+      }
+    } catch (e) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Error: $e')),
+      // );
+    }
+    return null;
+  }
+
+  sendVINMessage(
+    String vin,
+    String? userText,
+    GarageProvider garageController,
+    UserModel userModel,
+    OffersProvider offersProvider,
+  ) async {
+    _addUserMessage('Scanned VIN: $vin', null);
+    scrollToBottom();
+    isSending = true;
+    notifyListeners();
+    _addBotMessage(
+      'Decoding VIN....',
+      'add_vehicle',
+    );
+    String decodedVINData = await _fetchVehicleData(vin) ?? '';
+
+    if (decodedVINData == '') {
+      isSending = false;
+      _addBotMessage(
+        'Unable to find your vehicle. Please check the VIN or try again later.',
+        'unknown',
+      );
+      notifyListeners();
+      return;
+    }
+
+    String prompt = userPrompt(
+        'Here is the VIN detected vehicle details ask the user if something is missing: $decodedVINData',
+        garageController,
+        userModel,
+        offersProvider);
+    try {
+      List userQueries = userModel.aiQuestions;
+      userQueries.add({
+        'question': decodedVINData,
+        'sentAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(userModel.userId)
+          .update({
+        'aiQuestion': userQueries,
+      });
+
+      GenerateContentResponse response =
+          await _chatSession!.sendMessage(Content.text(prompt));
+
+      var textResponse = response.text;
+
+      final Map<String, dynamic> chatResponse = jsonDecode(textResponse ?? '');
+
+      // Accessing the guide properties directly
+      var guide = chatResponse['response'];
+      logResponseFields(guide);
+      String garageId = guide['vehicleId'];
+      final mixPanelController = Get.find<MixPanelController>();
+      mixPanelController.trackEvent(
+          eventName: 'userPrompt ', data: {'prompt': decodedVINData});
+
+      mixPanelController.trackEvent(eventName: 'aiResponse ', data: guide);
+      final intent = guide['intent'];
+      final status = guide['status'];
+      final vehicleType = guide['vehicleType'];
+      final vehicleModel = guide['vehicleModel'];
+      final vehicleYear = guide['vehicleYear'];
+      final vehicleMake = guide['vehicleMake'];
+      final selectedSubmodel = guide['selected_submodel'] ?? '';
+
+      final service = guide['service'] ?? '';
+      final showServices = guide['show_services'] == true;
+      final message = guide['message'];
+      final offerId = guide['offerId'];
+      final imageUrl = guide['imageUrl'];
+      final repairGuide = guide['repairGuide'];
+      final showGuide = guide['show_guide'] ?? false;
+
+// Handle trim fetching
+      final isAddVehicleIntent = intent == 'add_vehicle';
+      final hasRequiredVehicleInfo = (vehicleModel?.isNotEmpty == true &&
+              vehicleYear?.isNotEmpty == true &&
+              vehicleMake?.isNotEmpty == true) &&
+          (vehicleType == 'Passenger vehicles' ||
+              vehicleType == 'Pickup Trucks');
+
+      if (isAddVehicleIntent && hasRequiredVehicleInfo) {
+        final jwtToken = await getJwtToken();
+        subModels = await getTrims(
+            vehicleMake, vehicleYear, vehicleType, vehicleModel, jwtToken);
+        notifyListeners();
+      }
+
+// Add vehicle to garage
+      if (isAddVehicleIntent && status == 'complete') {
+        String garage = await garageController.addGarage(
+          GarageModel(
+            ownerId: userModel.userId,
+            isCustomModel: selectedSubmodel.isEmpty,
+            isCustomMake: selectedSubmodel.isEmpty,
+            submodel: selectedSubmodel,
+            title: '',
+            imageUrl: imageUrl,
+            bodyStyle: vehicleType,
+            make: vehicleMake,
+            year: vehicleYear,
+            model: vehicleModel,
+            vin: '',
+            garageId: '',
+            createdAt: DateTime.now().toUtc().toIso8601String(),
+          ),
+          userModel.userId,
+        );
+        _addBotMessage(
+          message,
+          intent,
+          showVehicle: true,
+          garageId: garage,
+        );
+      } else
+
+// Delete vehicle
+      if (intent == 'delete_vehicle' &&
+          status == 'complete' &&
+          garageId.isNotEmpty &&
+          garageId != 'string') {
+        deleteVehicle(userModel, garageController, garageId);
+        _addBotMessage(
+          message,
+          intent,
+        );
+      } else
+
+// Create a service request
+      if (intent == 'create_a_request' &&
+          status == 'complete' &&
+          garageId.isNotEmpty &&
+          garageId != 'string' &&
+          service.isNotEmpty &&
+          service != 'unknown') {
+        String requestId =
+            await createRequest(garageId, '', service, userModel);
+        _addBotMessage(
+          message,
+          intent,
+          offerId: requestId,
+        );
+      } else
+
+// Find nearby services
+      if (intent == 'find_nearby_services' &&
+          showServices &&
+          service != 'unknown') {
+        await getProviders(service, userModel);
+        _addBotMessage(
+          message,
+          intent,
+          showServices: true,
+          offerId: offerId,
+          garageId: garageId,
+          service: service,
+        );
+      } else
+
+// Repair guide
+      if (intent == 'repair_guide' && repairGuide != null && showGuide) {
+        _addBotMessage(
+          message,
+          intent,
+          showServices: false,
+          repairGuide: Map<String, dynamic>.from(repairGuide),
+          showGuide: true,
+        );
+      } else {
+        _addBotMessage(message, intent, showServices: false);
+      }
+      _aiChats.removeWhere((test) => test.response == 'Decoding VIN....');
+    } catch (e) {
+      log(e.toString());
+      isSending = false;
+
+      _addBotMessage(
+          'ClientException with SocketException: Failed host lookup \'vehypeai.cloud\'.....',
+          'unknown');
+    } finally {
+      scrollToBottom();
+
+      isSending = false;
+      notifyListeners();
+    }
+  }
+
   sendMessage(
       String text,
       GarageProvider garageController,
@@ -411,6 +676,18 @@ Respond in a conversational tone.
     notifyListeners();
 
     try {
+      List userQueries = userModel.aiQuestions;
+      userQueries.add({
+        'question': text,
+        'sentAt': DateTime.now().toUtc().toIso8601String(),
+      });
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(userModel.userId)
+          .update({
+        'aiQuestion': userQueries,
+      });
+
       GenerateContentResponse response =
           await _chatSession!.sendMessage(Content.text(prompt));
 
@@ -1003,12 +1280,6 @@ Respond in a conversational tone.
 
 ### 🚗 SAVED VEHICLES:
 $garagesList
-
----
-
-### 📍 USER LOCATION:
-Latitude: $lat  
-Longitude: $long
 
 ---
 

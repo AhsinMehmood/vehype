@@ -17,10 +17,11 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:vehype/Controllers/garage_controller.dart';
 import 'package:vehype/Controllers/notification_controller.dart';
+import 'package:vehype/Controllers/offers_provider.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
-import 'package:vehype/Pages/add_vehicle_new.dart';
+import 'package:vehype/Pages/Add%20Manage%20Vehicle/add_vehicle_new.dart';
 import 'package:vehype/Widgets/choose_gallery_camera.dart';
 import 'package:vehype/Widgets/login_sheet.dart';
 
@@ -31,7 +32,8 @@ import '../Widgets/loading_dialog.dart';
 import '../const.dart';
 import '../google_maps_place_picker.dart';
 import '../providers/firebase_storage_provider.dart';
-import 'add_vehicle.dart';
+import 'Add Manage Vehicle/add_vehicle.dart';
+import 'In App Purchase /in_app_purchase_page.dart';
 import 'full_image_view_page.dart';
 
 final mixPanelController = Get.find<MixPanelController>();
@@ -915,9 +917,9 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         }
                       }));
                     } else {
-                      Get.dialog(const LoadingDialog(),
-                          barrierDismissible: false);
                       if (widget.offersModel != null) {
+                        Get.dialog(const LoadingDialog(),
+                            barrierDismissible: false);
                         await garageController.saveRequest(
                             _descriptionController.text,
                             LatLng(lat, long),
@@ -932,6 +934,48 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                         Get.back();
                         Get.back();
                       } else {
+                        OffersProvider offersProvider =
+                            Provider.of<OffersProvider>(context, listen: false);
+
+// Get only active requests
+                        List<OffersModel> activeRequests = offersProvider
+                            .ownerOffers
+                            .where((offer) => offer.status == 'active')
+                            .toList();
+
+                        if (userModel.plan == 'free' &&
+                            activeRequests.isNotEmpty) {
+                          // Free user limit: 1 active request total
+                          Get.to(() => SubscriptionPlansPage(
+                                title:
+                                    "Select a plan to\ncreate more requests.",
+                              ));
+                          return;
+                        } else if (userModel.plan == 'pro') {
+                          // Group active requests by vehicle ID
+                          Map<String, int> activeCountPerVehicle = {};
+                          for (var offer in activeRequests) {
+                            activeCountPerVehicle.update(
+                              offer.garageId,
+                              (counts) => counts + 1,
+                              ifAbsent: () => 1,
+                            );
+                          }
+
+                          final currentVehicleId = garageController
+                              .garageId; // or however you're selecting the vehicle
+
+                          if ((activeCountPerVehicle[currentVehicleId] ?? 0) >=
+                              3) {
+                            Get.to(() => SubscriptionPlansPage(
+                                  title: "Upgrade to\ncreate more requests",
+                                ));
+                            return;
+                          }
+                        }
+
+                        Get.dialog(const LoadingDialog(),
+                            barrierDismissible: false);
                         QuerySnapshot<
                             Map<String,
                                 dynamic>> snapshot = await FirebaseFirestore
@@ -944,6 +988,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                             // .where('issue',
                             //     isEqualTo: garageController.selectedIssue)
                             .get();
+
                         List<OffersModel> offers = [];
                         for (QueryDocumentSnapshot<
                                 Map<String, dynamic>> documentsnap
@@ -1728,9 +1773,9 @@ class SelectVehicle extends StatelessWidget {
               onTap: () {
                 mixPanelController.trackEvent(
                     eventName: 'Tapped on Add New Vehicle', data: {});
-                Get.to(() => AddVehicle(
-                      garageModel: null,
-                      // addService: true,
+                Get.to(() => AddVehiclePage(
+                    // garageModel: null,
+                    // addService: true,
                     ));
               },
               child: Align(

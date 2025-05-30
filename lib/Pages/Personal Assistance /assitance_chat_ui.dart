@@ -1,23 +1,25 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+// import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:vehype/Controllers/user_controller.dart';
 import 'package:vehype/Controllers/vehicle_data.dart';
 import 'package:vehype/Models/ai_chat_model.dart';
 import 'package:vehype/Models/garage_model.dart';
 import 'package:vehype/Models/offers_model.dart';
 import 'package:vehype/Models/user_model.dart';
-import 'package:vehype/Pages/orders_history_provider.dart';
+import 'package:vehype/Pages/In%20App%20Purchase%20/in_app_purchase_page.dart';
+
 // import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:vehype/Pages/owner_active_request_details.dart';
 
@@ -32,7 +34,8 @@ import '../../Models/chat_model.dart';
 import '../../Widgets/choose_gallery_camera.dart';
 import '../../Widgets/loading_dialog.dart';
 import '../../providers/assistance_chat_provider.dart';
-import '../add_vehicle.dart';
+import '../Add Manage Vehicle/add_vehicle.dart';
+import '../Add Manage Vehicle/scan_vin.dart';
 import '../full_image_view_page.dart';
 import '../message_page.dart';
 import '../second_user_profile.dart';
@@ -130,6 +133,80 @@ class _AssistanceChatUIState extends State<AssistanceChatUI> {
     }
   }
 
+  void _handleVINScan(
+      AssistanceChatProvider chatProvider,
+      GarageProvider garageProvider,
+      UserModel userModel,
+      firebaseStorageProvider,
+      OffersProvider offersProvider) async {
+    // log(chatProvider.uiIntentDataForVehicle.toString());
+
+    final now = DateTime.now();
+    final oneDayAgo = now.subtract(aiQuestionsDuration);
+    List userQueries = userModel.aiQuestions;
+    List aiAskedInPast7Days = userQueries
+        .where((offer) => DateTime.parse(offer['sentAt']).isAfter(oneDayAgo))
+        .toList();
+    if (userModel.plan == 'free' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsFree) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
+    if (userModel.plan == 'pro' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsPro) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
+
+    // String? scannedVin = await Get.to(() => VinScannerPage(
+    //       fromAi: true,
+    //     ));
+    final scannedVin = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+          builder: (_) => const ExtractVINFromImageAndCameraUsingAI(
+                imageSource: ImageSource.camera,
+              )),
+    );
+
+// await FlutterBarcodeScanner.scanBarcode(
+//         '#FF2F53', 'Cancel', true, ScanMode.DEFAULT)
+    if (scannedVin != null) {
+      isVinValid = scannedVin.length == 17;
+      setState(() {});
+      if (isVinValid) {
+        await chatProvider.sendVINMessage(
+            scannedVin, null, garageProvider, userModel, offersProvider);
+      }
+    } else {
+      //  setState(() {
+
+      //   if (isVinValid) {
+      //     vinController.text = scannedVin;
+      //   } else {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text('No VIN found in the barcode')),
+      //     );
+      //   }
+      // });
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('No VIN found in the barcode')),
+      // );
+    }
+  }
+
+  bool isVinValid = false;
+  bool _isValidVin(String vin) {
+    final vinRegex = RegExp(r'^[A-HJ-NPR-Z0-9]{17}$', caseSensitive: false);
+    return vinRegex.hasMatch(vin);
+  }
+
   void _handleSubmitted(
       String text,
       AssistanceChatProvider chatProvider,
@@ -142,16 +219,44 @@ class _AssistanceChatUIState extends State<AssistanceChatUI> {
       // Get.snackbar("Error", "Please enter a message.");
       return;
     }
+
+    final vinRegex = RegExp(r'\b[A-HJ-NPR-Z0-9]{17}\b', caseSensitive: false);
+
+    final vinMatch = vinRegex.firstMatch(text);
+
+    final now = DateTime.now();
+    final oneDayAgo = now.subtract(aiQuestionsDuration);
+    List userQueries = userModel.aiQuestions;
+    List aiAskedInPast7Days = userQueries
+        .where((offer) => DateTime.parse(offer['sentAt']).isAfter(oneDayAgo))
+        .toList();
+    if (userModel.plan == 'free' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsFree) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
+    if (userModel.plan == 'pro' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsPro) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
+    // if (vinMatch != null) {
+    //   final detectedVin = vinMatch.group(0);
+    //   // Proceed to fetch vehicle data for VIN
+    //   await chatProvider.sendVINMessage(
+    //       detectedVin!, text.trim(), garageProvider, userModel, offersProvider);
+    // } else {
+
+    // }
     _textController.clear();
     await chatProvider.sendMessage(text.trim(), garageProvider, userModel,
         firebaseStorageProvider, offersProvider);
-    // try {
-
-    // } catch (e) {
-    //   log(e.toString());
-    // } finally {
-    //   chatProvider.changeIsLoading(false);
-    // }
   }
 
   _handleImageMessage(
@@ -162,6 +267,28 @@ class _AssistanceChatUIState extends State<AssistanceChatUI> {
       File file,
       Uint8List bytes,
       OffersProvider offersProvider) async {
+    final now = DateTime.now();
+    final oneDayAgo = now.subtract(aiQuestionsDuration);
+    List userQueries = userModel.aiQuestions;
+    List aiAskedInPast7Days = userQueries
+        .where((offer) => DateTime.parse(offer['sentAt']).isAfter(oneDayAgo))
+        .toList();
+    if (userModel.plan == 'free' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsFree) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
+    if (userModel.plan == 'pro' &&
+        aiAskedInPast7Days.isNotEmpty &&
+        aiAskedInPast7Days.length >= maxQuestionsPro) {
+      Get.to(() => SubscriptionPlansPage(
+            title: "Select a Plan to\nAsk More Questions",
+          ));
+      return;
+    }
     await chatProvider.sendImageMessage('', bytes, garageProvider, file,
         firebaseStorageProvider, userModel, offersProvider);
   }
@@ -397,8 +524,16 @@ class _AssistanceChatUIState extends State<AssistanceChatUI> {
                   onPressed: chatProvider.isSending
                       ? null
                       : () async {
-                          Get.bottomSheet(
-                              ChooseGalleryCamera(onTapCamera: () async {
+                          Get.bottomSheet(ChooseGalleryCamera(onTapVINScan: () {
+                            Get.close(1);
+
+                            _handleVINScan(
+                                chatProvider,
+                                garageProvider,
+                                userModel,
+                                firebaseStorageProvider,
+                                offersProvider);
+                          }, onTapCamera: () async {
                             // Get.close(1);
                             Get.close(1);
                             XFile? xFile = await ImagePicker()
@@ -437,6 +572,9 @@ class _AssistanceChatUIState extends State<AssistanceChatUI> {
               Expanded(
                 child: TextField(
                   controller: _textController,
+                  onTapOutside: (s) {
+                    FocusScope.of(context).unfocus();
+                  },
                   maxLines: null,
                   maxLength: 200,
                   onSubmitted: chatProvider.isSending
@@ -816,6 +954,9 @@ class ChatMessage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                             child: CachedNetworkImage(
                               imageUrl: garageModel.imageUrl,
+                              errorWidget: (context, url, error) {
+                                return Container();
+                              },
                               height: 60,
                               width: 60,
                               fit: BoxFit.cover,

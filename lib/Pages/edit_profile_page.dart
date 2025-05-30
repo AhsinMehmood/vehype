@@ -692,6 +692,7 @@ class _EditProfileTabState extends State<EditProfileTab> {
                       FocusScope.of(context).requestFocus(FocusNode());
                     },
                     // controller: _vinController,
+                    enabled: userModel.accountType == 'seeker',
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -904,228 +905,27 @@ class _EditProfileTabState extends State<EditProfileTab> {
                   width: Get.width,
                   color: changeColor(color: 'D9D9D9'),
                 ),
-              const SizedBox(
-                height: 20,
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Account Type',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
+              // const SizedBox(
+              //   height: 20,
+              // ),
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: const Text(
+              //     'Account Type',
+              //     style: TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.w700,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(
+              //   height: 20,
+              // ),
               Align(
                 alignment: Alignment.center,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(200),
-                      onTap: () async {
-                        try {
-                          UserModel userModel = userController.userModel!;
-                          Get.dialog(const LoadingDialog(),
-                              barrierDismissible: false);
-                          // User user = FirebaseAuth.instance.currentUser;
-                          SharedPreferences sharedPreferences =
-                              await SharedPreferences.getInstance();
-                          String realUserId =
-                              sharedPreferences.getString('userId') ?? '';
-                          OffersProvider offersProvider =
-                              Provider.of<OffersProvider>(context,
-                                  listen: false);
-                          offersProvider.stopListening();
-                          OneSignal.logout();
-                          userController.changeTabIndex(0);
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(realUserId)
-                              .update({
-                            'accountType': 'provider',
-                          });
-                          userController.closeStream();
-
-                          Get.close(1);
-                          Get.offAll(() => SplashPage());
-                        } catch (e) {
-                          Get.close(1);
-                        }
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Container(
-                          height: 50,
-                          padding: const EdgeInsets.only(
-                            top: 5,
-                            bottom: 5,
-                          ),
-                          width: Get.width * 0.9,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: Colors.white,
-                              border: Border.all(
-                                color: Colors.black,
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                height: 22,
-                                width: 22,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  // color: Colors.green,
-                                ),
-                              ),
-                              Text(
-                                'I\'m Service Owner',
-                                style: TextStyle(
-                                  fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: Colors.black.withOpacity(0.8),
-                                ),
-                              ),
-                              Container(
-                                height: 22,
-                                width: 22,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  color:
-                                      userController.userModel!.accountType ==
-                                              'provider'
-                                          ? Colors.green
-                                          : Colors.transparent,
-                                ),
-                                child: Icon(
-                                  Icons.done,
-                                  color:
-                                      userController.userModel!.accountType ==
-                                              'provider'
-                                          ? Colors.white
-                                          : Colors.transparent,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(200),
-                      onTap: () async {
-                        try {
-                          Get.dialog(const LoadingDialog(),
-                              barrierDismissible: false);
-                          // User user = FirebaseAuth.instance.currentUser;
-                          SharedPreferences sharedPreferences =
-                              await SharedPreferences.getInstance();
-                          String realUserId =
-                              sharedPreferences.getString('userId') ?? '';
-                          UserModel userModel = userController.userModel!;
-                          OneSignal.logout();
-                          OffersProvider offersProvider =
-                              Provider.of<OffersProvider>(context,
-                                  listen: false);
-                          offersProvider.stopListening();
-                          // offersProvider.stopListening();
-                          // offersProvider.stopListening();
-
-                          userController.changeTabIndex(0);
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(realUserId)
-                              .update({
-                            'accountType': 'seeker',
-                          });
-                          userController.closeStream();
-                          // userController.getUserStream(userId)/
-                          Get.close(1);
-                          Get.offAll(() => SplashPage());
-                        } catch (e) {
-                          Get.close(1);
-                        }
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Container(
-                          height: 50,
-                          padding: const EdgeInsets.only(
-                            top: 5,
-                            bottom: 5,
-                            left: 0,
-                            right: 0,
-                          ),
-                          width: Get.width,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: Color.fromARGB(255, 3, 0, 10),
-                              border: Border.all(
-                                color: Color.fromARGB(255, 3, 0, 10),
-                              )),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                height: 22,
-                                width: 22,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  // color: Colors.green,
-                                ),
-                              ),
-                              Text(
-                                'I\'m Vehicle Owner',
-                                style: TextStyle(
-                                  // fontFamily: 'Avenir',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Container(
-                                height: 22,
-                                width: 22,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(200),
-                                  color:
-                                      userController.userModel!.accountType ==
-                                              'seeker'
-                                          ? Colors.green
-                                          : Colors.transparent,
-                                ),
-                                child: Icon(
-                                  Icons.done,
-                                  color:
-                                      userController.userModel!.accountType ==
-                                              'seeker'
-                                          ? Colors.white
-                                          : Colors.transparent,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -1157,72 +957,80 @@ class _EditProfileTabState extends State<EditProfileTab> {
                                           _controller.complete(contr);
                                         },
                                         onTap: (s) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => PlacePicker(
-                                                apiKey:
-                                                    'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                                selectText: 'Pick This Place',
-                                                onTapBack: () {
-                                                  Get.close(1);
-                                                },
-                                                onPlacePicked: (result) async {
-                                                  try {
-                                                    LatLng latLng = LatLng(
-                                                        result.geometry!
-                                                            .location.lat,
-                                                        result.geometry!
-                                                            .location.lng);
-
-                                                    lat = latLng.latitude;
-                                                    long = latLng.longitude;
-                                                    print('dddsd');
-                                                    userController
-                                                        .changeLocation(latLng);
-                                                    // setState(() {});
-
-                                                    final GeoFirePoint
-                                                        geoFirePoint =
-                                                        GeoFirePoint(GeoPoint(
-                                                            lat, long));
-
-                                                    FirebaseFirestore.instance
-                                                        .collection('users')
-                                                        .doc(userController
-                                                            .userModel!.userId)
-                                                        .update({
-                                                      'lat': lat,
-                                                      'geo': geoFirePoint.data,
-                                                      'long': long,
-                                                    });
-                                                    final GoogleMapController
-                                                        controller =
-                                                        await _controller
-                                                            .future;
-                                                    await controller.animateCamera(
-                                                        CameraUpdate
-                                                            .newCameraPosition(
-                                                                CameraPosition(
-                                                      target: LatLng(lat, long),
-                                                      zoom: 16.0,
-                                                    )));
-
+                                          if (userModel.isVerified == false) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PlacePicker(
+                                                  apiKey:
+                                                      'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                                  selectText: 'Pick This Place',
+                                                  onTapBack: () {
                                                     Get.close(1);
-                                                  } catch (e) {
-                                                    // Get.close(1);
-                                                  }
-                                                },
+                                                  },
+                                                  onPlacePicked:
+                                                      (result) async {
+                                                    try {
+                                                      LatLng latLng = LatLng(
+                                                          result.geometry!
+                                                              .location.lat,
+                                                          result.geometry!
+                                                              .location.lng);
 
-                                                initialPosition:
-                                                    LatLng(lat, long),
-                                                // useCurrentLocation: true,
-                                                selectInitialPosition: true,
-                                                resizeToAvoidBottomInset:
-                                                    false, // only works in page mode, less flickery, remove if wrong offsets
+                                                      lat = latLng.latitude;
+                                                      long = latLng.longitude;
+                                                      print('dddsd');
+                                                      userController
+                                                          .changeLocation(
+                                                              latLng);
+                                                      // setState(() {});
+
+                                                      final GeoFirePoint
+                                                          geoFirePoint =
+                                                          GeoFirePoint(GeoPoint(
+                                                              lat, long));
+
+                                                      FirebaseFirestore.instance
+                                                          .collection('users')
+                                                          .doc(userController
+                                                              .userModel!
+                                                              .userId)
+                                                          .update({
+                                                        'lat': lat,
+                                                        'geo':
+                                                            geoFirePoint.data,
+                                                        'long': long,
+                                                      });
+                                                      final GoogleMapController
+                                                          controller =
+                                                          await _controller
+                                                              .future;
+                                                      await controller.animateCamera(
+                                                          CameraUpdate
+                                                              .newCameraPosition(
+                                                                  CameraPosition(
+                                                        target:
+                                                            LatLng(lat, long),
+                                                        zoom: 16.0,
+                                                      )));
+
+                                                      Get.close(1);
+                                                    } catch (e) {
+                                                      // Get.close(1);
+                                                    }
+                                                  },
+
+                                                  initialPosition:
+                                                      LatLng(lat, long),
+                                                  // useCurrentLocation: true,
+                                                  selectInitialPosition: true,
+                                                  resizeToAvoidBottomInset:
+                                                      false, // only works in page mode, less flickery, remove if wrong offsets
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                          }
                                         },
                                         markers: {
                                           Marker(
@@ -1245,86 +1053,90 @@ class _EditProfileTabState extends State<EditProfileTab> {
                               height: 15,
                             ),
                             // if (userController.userModel!.accountType ==
-                            //     'provider')
-                            Align(
-                              alignment: Alignment.center,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PlacePicker(
-                                          apiKey:
-                                              'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                                          selectText: 'Pick This Place',
-                                          onTapBack: () {
-                                            Get.close(1);
-                                          },
-                                          onPlacePicked: (result) async {
-                                            // Get.dialog(LoadingDialog(),
-                                            //     barrierDismissible: false);
-                                            LatLng latLng = LatLng(
-                                                result.geometry!.location.lat,
-                                                result.geometry!.location.lng);
-                                            lat = latLng.latitude;
-                                            long = latLng.longitude;
-                                            userController
-                                                .changeLocation(latLng);
-                                            setState(() {});
+                            //
+                            //   'provider')
+                            if (userModel.isVerified == false)
+                              Align(
+                                alignment: Alignment.center,
+                                child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlacePicker(
+                                            apiKey:
+                                                'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
+                                            selectText: 'Pick This Place',
+                                            onTapBack: () {
+                                              Get.close(1);
+                                            },
+                                            onPlacePicked: (result) async {
+                                              // Get.dialog(LoadingDialog(),
+                                              //     barrierDismissible: false);
+                                              LatLng latLng = LatLng(
+                                                  result.geometry!.location.lat,
+                                                  result
+                                                      .geometry!.location.lng);
+                                              lat = latLng.latitude;
+                                              long = latLng.longitude;
+                                              userController
+                                                  .changeLocation(latLng);
+                                              setState(() {});
 
-                                            final GeoFirePoint geoFirePoint =
-                                                GeoFirePoint(
-                                                    GeoPoint(lat, long));
+                                              final GeoFirePoint geoFirePoint =
+                                                  GeoFirePoint(
+                                                      GeoPoint(lat, long));
 
-                                            FirebaseFirestore.instance
-                                                .collection('users')
-                                                .doc(userController
-                                                    .userModel!.userId)
-                                                .update({
-                                              'lat': lat,
-                                              'geo': geoFirePoint.data,
-                                              'long': long,
-                                            });
-                                            final GoogleMapController
-                                                controller =
-                                                await _controller.future;
-                                            await controller.animateCamera(
-                                                CameraUpdate.newCameraPosition(
-                                                    CameraPosition(
-                                              target: LatLng(lat, long),
-                                              zoom: 16.0,
-                                            )));
-                                            Get.close(1);
-                                          },
-                                          initialPosition: LatLng(lat, long),
-                                          // useCurrentLocation: true,
-                                          selectInitialPosition: true,
-                                          resizeToAvoidBottomInset:
-                                              false, // only works in page mode, less flickery, remove if wrong offsets
+                                              FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(userController
+                                                      .userModel!.userId)
+                                                  .update({
+                                                'lat': lat,
+                                                'geo': geoFirePoint.data,
+                                                'long': long,
+                                              });
+                                              final GoogleMapController
+                                                  controller =
+                                                  await _controller.future;
+                                              await controller.animateCamera(
+                                                  CameraUpdate
+                                                      .newCameraPosition(
+                                                          CameraPosition(
+                                                target: LatLng(lat, long),
+                                                zoom: 16.0,
+                                              )));
+                                              Get.close(1);
+                                            },
+                                            initialPosition: LatLng(lat, long),
+                                            // useCurrentLocation: true,
+                                            selectInitialPosition: true,
+                                            resizeToAvoidBottomInset:
+                                                false, // only works in page mode, less flickery, remove if wrong offsets
+                                          ),
                                         ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: userController.isDark
+                                          ? Colors.white
+                                          : primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: userController.isDark
-                                        ? Colors.white
-                                        : primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                      minimumSize: Size(Get.width * 0.9, 50),
                                     ),
-                                    minimumSize: Size(Get.width * 0.9, 50),
-                                  ),
-                                  child: Text(
-                                    'Change Location',
-                                    style: TextStyle(
-                                      color: userController.isDark
-                                          ? primaryColor
-                                          : Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  )),
-                            ),
+                                    child: Text(
+                                      'Change Location',
+                                      style: TextStyle(
+                                        color: userController.isDark
+                                            ? primaryColor
+                                            : Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )),
+                              ),
                             // if (userController.userModel!.accountType ==
                             //     'provider')
                             const SizedBox(

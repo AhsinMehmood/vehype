@@ -6,20 +6,20 @@
     "configurations": [
 
 
-        // {
-        //   "name": "IOS Simulator",
-        //   "request": "launch",
-        //   "type": "dart",
-        //   "program": "lib/main.dart",
-        //   // "toolArgs": ["--flavor", "prod"],
-        //   "deviceId": "A43E4F02-224B-453F-9A09-5EB8A3E9B785"
-        // },
-        // {
-        //   "name": "Android XIAOI",
-        //   "request": "launch",
-        //   "type": "dart",
-        //   "program": "lib/main.dart",
-        //   "deviceId": "917eed00"
-        // }
+        {
+          "name": "Wife's Phone Android",
+          "request": "launch",
+          "type": "dart",
+          "program": "lib/main.dart",
+          // "toolArgs": ["--flavor", "prod"],
+          "deviceId": "2A171FDH200EH9"
+        },
+        {
+          "name": "Pixel 7 pro",
+          "request": "launch",
+          "type": "dart",
+          "program": "lib/main.dart",
+          "deviceId": "29281FDH2008LA"
+        }
       ]
 }

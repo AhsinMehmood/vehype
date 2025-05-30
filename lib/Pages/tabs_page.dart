@@ -1,29 +1,24 @@
 // ignore_for_file: sort_child_properties_last
 
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
-/**
- * 
- * 
- * کبھی کبھی تمہاری اس قدر ضرورت محسوس ہوتی ہے ، کہ
-دل چاہتا ہے 
-دنیا کی ہر عیش و عشرت ٹھکڑا دوں ، 
-اور صرف تمہاری پہلو میں آ کے خود کو فنا کر لوں ! 
- */
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:floating_chat_button/floating_chat_button.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
-import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 // import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vehype/Pages/vehicle_based_request_history.dart';
+import 'package:vehype/Pages/Provider%20Verification/become_a_provider.dart';
+import 'package:vehype/Widgets/notification_permission_sheet.dart';
+import 'package:vehype/providers/in_app_purchases_provider.dart';
 import '../Controllers/chat_controller.dart';
 import '../Controllers/offers_provider.dart';
 import '../Controllers/user_controller.dart';
@@ -31,22 +26,17 @@ import '../Models/chat_model.dart';
 import '../Models/user_model.dart';
 import '../Pages/chat_page.dart';
 import '../Pages/explore_page.dart';
-import '../Pages/my_garage.dart';
+import 'Add Manage Vehicle/my_garage.dart';
 import '../Pages/orders_history_provider.dart';
 import '../Pages/profile_page.dart';
 import '../Pages/repair_page.dart';
 import '../Pages/second_user_profile.dart';
 import '../const.dart';
 
-import '../Controllers/garage_controller.dart';
 import '../Controllers/mix_panel_controller.dart';
 import '../Controllers/notification_controller.dart';
 import '../Models/offers_model.dart';
-import '../Widgets/loading_dialog.dart';
-import '../google_maps_place_picker.dart';
 import 'Personal Assistance /assitance_chat_ui.dart';
-import 'service_set_opening_hours.dart';
-import 'setup_business_provider.dart';
 
 class TabsPage extends StatefulWidget {
   const TabsPage({super.key});
@@ -71,7 +61,7 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
     ProfilePage(),
   ];
   PackageInfo _packageInfo = PackageInfo();
-
+  bool isAiTitle = true;
   @override
   void initState() {
     super.initState();
@@ -133,7 +123,44 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
     Future.delayed(const Duration(seconds: 0)).then((s) {
       getNotificationSetting();
       userController.initTheme();
+      notificationPermission();
+      showPermotionalDialoge();
     });
+  }
+
+  showPermotionalDialoge() async {
+    final UserController userController =
+        Provider.of<UserController>(context, listen: false);
+    await InAppPurchaseProvider.checkSubscriptionStatus(
+        userController.userModel!);
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    isAiTitle = sharedPreferences.getBool('isAiTitle') ?? true;
+    bool isLater = sharedPreferences.getBool('isLater') ?? false;
+    setState(() {});
+    if (userController.userModel!.accountType == 'seeker' &&
+        userController.isHaveProvider == false &&
+        !isLater) {
+      await Future.delayed(Duration(seconds: 3));
+
+      Get.dialog(Dialog(
+        insetPadding: EdgeInsets.only(left: 15, right: 15, top: 40, bottom: 40),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        elevation: 0.0,
+        child: BecomeAProvider(
+          isDialog: true,
+        ),
+      ));
+      sharedPreferences.setBool('isLater', true);
+    }
+  }
+
+  notificationPermission() async {
+    bool havePermission = OneSignal.Notifications.permission;
+    if (!havePermission) {
+      Get.bottomSheet(NotificationSheet());
+    }
   }
 
   @override
@@ -195,8 +222,6 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
       if (appUpdateInfo.updateAvailability ==
           UpdateAvailability.developerTriggeredUpdateInProgress) {
         //If an in-app update is already running, resume the update.
-        String? message =
-            await manager.startAnUpdate(type: AppUpdateType.immediate);
       } else if (appUpdateInfo.updateAvailability ==
           UpdateAvailability.updateAvailable) {
         showModalBottomSheet(
@@ -222,11 +247,11 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
     } else {
       _packageInfo = await PackageManager.getPackageInfo();
 
-      VersionInfo? _versionInfo = await UpgradeVersion.getiOSStoreVersion(
+      VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(
           packageInfo: _packageInfo, regionCode: "US");
 
-      if (double.tryParse(_versionInfo.localVersion)! <
-          double.tryParse(_versionInfo.storeVersion)!) {
+      if (double.tryParse(versionInfo.localVersion)! <
+          double.tryParse(versionInfo.storeVersion)!) {
         showModalBottomSheet(
             context: context,
             backgroundColor:
@@ -292,61 +317,54 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
                     ? bottomNavigationBarSeeker()
                     : bottomNavigationBarProvider())
             : FloatingChatButton(
-                onTap: (s) {
-                  // Get.bottomSheet(
-                  //     BottomSheet(
-                  //         onClosing: () {},
-                  //         constraints: BoxConstraints(
-                  //           maxHeight: Get.height * 0.95,
-                  //           minHeight: Get.height * 0.95,
-                  //         ),
-                  //         builder: (co) {
-                  //           return AssistanceChatUI(
-                  //               // shopHours: {},
-                  //               );
-                  //         }),
-                  //     isScrollControlled: true);
-                  Get.to(() => AssistanceChatUI(
-                      // shopHours: {},
-                      ));
+                onTap: (s) async {
+                  // // ziZhu5-riwpoq
+
+                  SharedPreferences sharedPreferences =
+                      await SharedPreferences.getInstance();
+
+                  sharedPreferences.setBool('isAiTitle', false);
+                  Get.to(() => AssistanceChatUI());
                 },
-                chatIconHorizontalOffset: 30,
-                chatIconVerticalOffset: 80,
-                messageText: "AI Assistant",
+                chatIconHorizontalOffset: 10,
+                // showMessageParameters: ShowMessageParameters(),
+                chatIconVerticalOffset: Platform.isIOS ? 160 : 140,
+                messageText: isAiTitle ? "AI Assistant" : null,
                 shouldPutWidgetInCircle: true,
-                // chatIconSize: 24,
-                // chatIconWidgetHeight: 45,
-                // chatIconBorderWidth: 45,
+                chatIconSize: 24,
+                chatIconWidgetHeight: 55,
+                chatIconBorderWidth: 55,
+
                 chatIconBackgroundColor:
                     userController.isDark ? Colors.white : primaryColor,
                 chatIconColor:
                     userController.isDark ? primaryColor : Colors.white,
                 messageTextStyle: TextStyle(
-                  fontSize: 15,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: userController.isDark ? primaryColor : Colors.white,
                 ),
                 messageBackgroundColor:
                     userController.isDark ? Colors.white : primaryColor,
                 background: Scaffold(
-                    body: IndexedStack(
-                      index: userModel.accountType == 'seeker'
-                          ? userController.tabIndex
-                          : userController.tabIndex,
-                      children:
-                          userModel.accountType == 'seeker' ? _body : _body2,
-                    ),
-                    backgroundColor:
-                        userController.isDark ? primaryColor : Colors.white,
-                    bottomNavigationBar: userModel.accountType == 'seeker'
-                        ? bottomNavigationBarSeeker()
-                        : bottomNavigationBarProvider()),
+                  body: IndexedStack(
+                    index: userModel.accountType == 'seeker'
+                        ? userController.tabIndex
+                        : userController.tabIndex,
+                    children:
+                        userModel.accountType == 'seeker' ? _body : _body2,
+                  ),
+                  backgroundColor:
+                      userController.isDark ? primaryColor : Colors.white,
+                  bottomNavigationBar: userModel.accountType == 'seeker'
+                      ? bottomNavigationBarSeeker()
+                      : bottomNavigationBarProvider(),
+                ),
               );
   }
 
   BottomNavigationBar bottomNavigationBarProvider() {
     final UserController userController = Provider.of<UserController>(context);
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -376,7 +394,6 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
 
   BottomNavigationBar bottomNavigationBarSeeker() {
     final UserController userController = Provider.of<UserController>(context);
-    final UserModel userModel = Provider.of<UserController>(context).userModel!;
 
     return BottomNavigationBar(
       backgroundColor: userController.isDark ? primaryColor : Colors.white,
@@ -742,244 +759,6 @@ class _TabsPageState extends State<TabsPage> with WidgetsBindingObserver {
 String notificationsCount = '0';
 final mixPanelController = Get.find<MixPanelController>();
 
-class LocationPermissionSheet extends StatelessWidget {
-  const LocationPermissionSheet({
-    super.key,
-    required this.userController,
-    this.isProvider = false,
-  });
-
-  final UserController userController;
-  final bool isProvider;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: Get.width,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(6),
-          topRight: Radius.circular(6),
-        ),
-        color: userController.isDark ? primaryColor : Colors.white,
-      ),
-      // height: 280,
-      padding: const EdgeInsets.all(15),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Text(
-              'Your location allows VEHYPE to provide accurate maps and find services near you.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            // Text(
-            //   userController.userModel!.accountType == 'Provider'
-            //       ? 'Grant access to connect with nearby customers.'
-            //       : 'Grant access to find service providers near you.',
-            //   textAlign: TextAlign.center,
-            //   style: TextStyle(
-            //     color: userController.isDark ? Colors.white : primaryColor,
-            //     fontSize: 16,
-            //     fontWeight: FontWeight.w500,
-            //   ),
-            // ),
-            const SizedBox(
-              height: 40,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                bool serviceEnabled;
-                LocationPermission permission =
-                    await Geolocator.requestPermission();
-
-                serviceEnabled = await Geolocator.isLocationServiceEnabled();
-                if (!serviceEnabled) {
-                  Get.showSnackbar(GetSnackBar(
-                    message: 'Location is disabled. Tap to open Settings.',
-                    onTap: (d) {
-                      Geolocator.openLocationSettings();
-                    },
-                    duration: Duration(seconds: 3),
-                  ));
-                  mixPanelController
-                      .trackEvent(eventName: 'Location is disabled', data: {});
-                } else {
-                  // permission = await Geolocator.checkPermission();
-                  // permission = await Geolocator.checkPermission();
-                  if (permission == LocationPermission.denied ||
-                      permission == LocationPermission.deniedForever ||
-                      permission == LocationPermission.unableToDetermine) {
-                    Get.showSnackbar(GetSnackBar(
-                      message: 'Location is disabled. Tap to open Settings.',
-                      onTap: (d) {
-                        Geolocator.openAppSettings();
-                      },
-                      duration: Duration(seconds: 3),
-                    ));
-                    mixPanelController
-                        .trackEvent(eventName: 'Location is denied', data: {});
-                  } else {
-                    Get.dialog(const LoadingDialog(),
-                        barrierDismissible: false);
-                    mixPanelController
-                        .trackEvent(eventName: 'Asked for location', data: {});
-                    Position position = await Geolocator.getCurrentPosition();
-                    if (isProvider) {
-                      Get.close(1);
-                      Get.offAll(
-                        () => PlacePicker(
-                          apiKey: 'AIzaSyCGAY89N5yfdqLWM_-Y7g_8A0cRdURYf9E',
-                          selectText: 'Pick This Place',
-                          onTapBack: null,
-                          onPlacePicked: (result) async {
-                            Get.dialog(LoadingDialog(),
-                                barrierDismissible: false);
-                            LatLng latLng = LatLng(
-                                result.geometry!.location.lat,
-                                result.geometry!.location.lng);
-                            // if(userController.userModel != null && userController.userModel!)
-
-                            sendNotification(latLng);
-
-                            // userController.changeLocation(latLng);
-                            // setState(() {});
-
-                            final GeoFirePoint geoFirePoint = GeoFirePoint(
-                                GeoPoint(latLng.latitude, latLng.longitude));
-
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(userController.userModel!.userId)
-                                .update({
-                              'lat': latLng.latitude,
-                              'geo': geoFirePoint.data,
-                              'long': latLng.longitude,
-                            });
-
-                            Get.close(1);
-                            if (userController.userModel!.isGuest) {
-                              Get.offAll(() => TabsPage());
-                            } else {
-                              if (userController.userModel!.isBusinessSetup) {
-                                if (userController
-                                        .userModel!.isSetOpeningHours ==
-                                    false) {
-                                  Get.offAll(() => ServiceSetOpeningHours(
-                                        shopHours: {},
-                                      ));
-                                } else {
-                                  Get.offAll(() => TabsPage());
-                                }
-                              } else {
-                                Get.offAll(() => SetupBusinessProvider(
-                                      placeDetails: null,
-                                    ));
-                              }
-                            }
-                          },
-                          initialPosition:
-                              LatLng(position.latitude, position.longitude),
-                          // useCurrentLocation: true,
-                          selectInitialPosition: true,
-                          resizeToAvoidBottomInset: false,
-                        ),
-                      );
-                    } else {
-                      final GeoFirePoint geoFirePoint = GeoFirePoint(
-                          GeoPoint(position.latitude, position.longitude));
-
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userController.userModel!.userId)
-                          .update({
-                        'lat': position.latitude,
-                        'long': position.longitude,
-                        'geo': geoFirePoint.data,
-                      });
-                      mixPanelController.trackEvent(
-                          eventName: 'Location is updated', data: {});
-                      // userController.changeLocation(
-                      //     LatLng(position.latitude, position.longitude));
-                      // userController
-                      //     .pushTokenUpdate(userController.userModel!.userId);
-                      await Future.delayed(Duration(seconds: 1));
-                      Get.close(2);
-                      mixPanelController
-                          .trackEvent(eventName: 'Opended tabs page', data: {});
-                      Get.offAll(() => const TabsPage());
-                    }
-
-                    // Get.close(1);
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  minimumSize: Size(Get.width * 0.8, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  )),
-              child: Text(
-                'Continue',
-                style: TextStyle(
-                  color: userController.isDark ? primaryColor : Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  sendNotification(LatLng latLng) async {
-    List<UserModel> providers = [];
-
-    QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .where('accountType', isEqualTo: 'seeker')
-            // .where('services', arrayContains: issue)
-            // .where('status', isEqualTo: 'active')
-            .get();
-
-    for (QueryDocumentSnapshot<Map<String, dynamic>> element in snapshot.docs) {
-      providers.add(UserModel.fromJson(element));
-    }
-    List<UserModel> filterProviders = userController.filterProviders(providers,
-        latLng.latitude, latLng.longitude, userController.radiusMiles);
-    List<String> userIds = [];
-    for (var element in filterProviders) {
-      userIds.add(element.userId);
-    }
-
-    NotificationController().sendNotificationNewProvider(
-        userIds: userIds,
-        providerId: userController.userModel!.userId,
-        requestId: '',
-        title: 'New Service 👨🏻‍🔧',
-        subtitle:
-            'Hi, new service just registered in your area. Check it out!!!');
-  }
-}
-
 class UpdateSheet extends StatelessWidget {
   const UpdateSheet({
     super.key,
@@ -1098,113 +877,6 @@ class UpdateSheet extends StatelessWidget {
             ),
             const SizedBox(
               height: 20,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class NotificationSheet extends StatelessWidget {
-  const NotificationSheet({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final UserController userController = Provider.of<UserController>(context);
-    mixPanelController
-        .trackEvent(eventName: 'Asked for notification permission', data: {});
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(6),
-          topRight: Radius.circular(6),
-        ),
-        color: userController.isDark ? primaryColor : Colors.white,
-      ),
-      // height: 300,
-      width: Get.width,
-      padding: const EdgeInsets.all(15),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Text(
-              'Get Important Updates',
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Text(
-              'We will notify you about updates to Requests, new Offers, and Messages.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: userController.isDark ? Colors.white : primaryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await OneSignal.Notifications.requestPermission(true);
-                // await OneSignal.Notifications.
-                mixPanelController
-                    .trackEvent(eventName: 'Notification Allowed', data: {});
-
-                OneSignal.login(userController.userModel!.userId);
-                Get.close(1);
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      userController.isDark ? Colors.white : primaryColor,
-                  minimumSize: Size(Get.width * 0.8, 45),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  )),
-              child: Text(
-                'Yes, notify me',
-                style: TextStyle(
-                  color: userController.isDark ? primaryColor : Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            InkWell(
-              onTap: () {
-                mixPanelController
-                    .trackEvent(eventName: 'Maybe later', data: {});
-
-                Get.close(1);
-              },
-              child: Text(
-                'Maybe later',
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  color: userController.isDark
-                      ? Colors.white.withOpacity(0.7)
-                      : primaryColor,
-                ),
-              ),
             ),
             const SizedBox(
               height: 20,

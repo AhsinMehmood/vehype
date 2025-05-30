@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:vehype/Controllers/notification_controller.dart';
 import 'package:vehype/Pages/tabs_page.dart';
 import 'package:vehype/const.dart';
 
@@ -136,9 +137,16 @@ class _ServiceSetOpeningHoursState extends State<ServiceSetOpeningHours> {
       'workingHours': orderedShopHours,
       'isSetOpeningHours': true,
     });
+    // NotificationController().sendNotificationNewProvider(
+    //     providerId: userController.userModel!.userId,
+    //     requestId: '',
+    //     title: 'New ',
+    //     subtitle: subtitle,
+    //     userIds: userIds);
     if (widget.isFroPage) {
       Get.back();
     } else {
+      userController.changeTabIndex(0);
       Get.offAll(() => TabsPage());
     }
   }
@@ -189,15 +197,21 @@ class _ServiceSetOpeningHoursState extends State<ServiceSetOpeningHours> {
                       Text(
                         day,
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      Switch(
-                        value: is24Hours[day]!,
-                        onChanged: (value) {
-                          setState(() {
-                            is24Hours[day] = value;
-                          });
-                        },
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: 25,
+                          maxWidth: 35,
+                        ),
+                        child: Switch(
+                          value: is24Hours[day]!,
+                          onChanged: (value) {
+                            setState(() {
+                              is24Hours[day] = value;
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -218,7 +232,7 @@ class _ServiceSetOpeningHoursState extends State<ServiceSetOpeningHours> {
                           child: Text(
                             'Open: ${openingTimes[day]!.format(context)}',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               color: userController.isDark
                                   ? primaryColor
                                   : Colors.white,
@@ -235,7 +249,7 @@ class _ServiceSetOpeningHoursState extends State<ServiceSetOpeningHours> {
                           child: Text(
                             'Close: ${closingTimes[day]!.format(context)}',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               color: userController.isDark
                                   ? primaryColor
                                   : Colors.white,

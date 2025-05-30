@@ -293,22 +293,54 @@ class CommentWidget extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(200),
-                    child: CachedNetworkImage(
-                      placeholder: (context, url) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      },
-                      errorWidget: (context, url, error) =>
-                          const SizedBox.shrink(),
-                      imageUrl: commenterData.profileUrl,
-                      height: 45,
-                      // shape: BoxShape.circle,
-                      // borderRadius: Border,
-                      width: 45,
-                    ),
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(200),
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorWidget: (context, url, error) =>
+                              const SizedBox.shrink(),
+                          imageUrl: commenterData.profileUrl,
+                          height: 55,
+                          // shape: BoxShape.circle,
+                          // borderRadius: Border,
+                          width: 55,
+                        ),
+                      ),
+                      if (commenterData.accountType == 'provider')
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: commenterData.isVerified ? 20 : null,
+                            // width: 30,
+                            decoration: BoxDecoration(
+                                color: commenterData.isVerified
+                                    ? Colors.green.withOpacity(0.9)
+                                    : Colors.red.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(6)),
+                            child: Center(
+                              child: Text(
+                                commenterData.isVerified
+                                    ? 'VERIFIED'
+                                    : 'NON\nVERIFIED',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: commenterData.isVerified ? 12 : 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(
                     width: 8,

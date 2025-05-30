@@ -9,15 +9,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import 'package:provider/provider.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vehype/providers/assistance_chat_provider.dart';
-import 'package:vehype/providers/firebase_storage_provider.dart';
+import '/providers/assistance_chat_provider.dart';
+import '/providers/firebase_storage_provider.dart';
 
 import '/Controllers/chat_controller.dart';
 import '/Controllers/garage_controller.dart';
@@ -29,39 +27,20 @@ import '/Controllers/user_controller.dart';
 import '/Pages/splash_page.dart';
 
 import '/const.dart';
+import 'Controllers/auth_controller.dart';
 import 'providers/copy_vehicle_data.dart';
 import 'providers/garage_provider.dart';
-
-class AuthController extends GetxController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  @override
-  void onInit() {
-    super.onInit();
-    _auth.authStateChanges().listen((User? user) async {
-      if (user == null) {
-        await _handleLogout();
-      } else {}
-    });
-  }
-
-  Future<void> _handleLogout() async {
-    await OneSignal.logout();
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    try {
-      await GoogleSignIn().disconnect();
-    } catch (e) {}
-
-    Get.offAll(() => SplashPage());
-  }
-}
+import 'providers/in_app_purchases_provider.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.playIntegrity,
+    appleProvider: AppleProvider.debug,
+  );
   FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true, cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED);
   FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -71,16 +50,6 @@ void main() async {
   OneSignal.Debug.setLogLevel(OSLogLevel.error);
 
   OneSignal.initialize(isDebug ? debugOneSignalApiKey : prodOneSignalApiKey);
-
-  // await SentryFlutter.init((options) {
-  //   options.dsn =
-  //       'https://db34bb55769b55480e81f75aca7cf9d8@o4507883907186688.ingest.us.sentry.io/4507883909677056';
-
-  //   options.tracesSampleRate = 1.0;
-
-  //   options.profilesSampleRate = 1.0;
-  // },
-  //     appRunner: () => );
   runApp(
     MultiProvider(
       providers: [
@@ -100,6 +69,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => FirebaseStorageProvider()),
         ChangeNotifierProvider(create: (_) => VehicleDataProvider()),
         ChangeNotifierProvider(create: (context) => AssistanceChatProvider()),
+        ChangeNotifierProvider(create: (_) => InAppPurchaseProvider()),
       ],
       child: MyApp(),
     ),
